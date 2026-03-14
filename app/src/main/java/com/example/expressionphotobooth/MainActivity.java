@@ -1,6 +1,7 @@
 package com.example.expressionphotobooth;
 
 import android.Manifest;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.content.pm.PackageManager;
@@ -180,6 +181,10 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, getString(R.string.photo_saved_path, jpegFile.getAbsolutePath()), Toast.LENGTH_LONG).show();
                 }
+                
+                // Sau khi chụp xong, chuyển sang màn hình chọn ảnh
+                Intent intent = new Intent(MainActivity.this, PhotoSelectionActivity.class);
+                startActivity(intent);
             }
 
             @Override
