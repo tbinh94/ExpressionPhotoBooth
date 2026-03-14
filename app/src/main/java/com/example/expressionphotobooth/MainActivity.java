@@ -12,6 +12,7 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -32,7 +33,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
+        CardView btnStartCamera = findViewById(R.id.btnStartCamera);
+        btnStartCamera.setOnClickListener(v -> {
+                    Toast.makeText(this, "Starting Camera...", Toast.LENGTH_SHORT).show();
+                    startCamera();
+                }
+        );
         viewFinder = findViewById(R.id.viewFinder);
 
         if (findViewById(R.id.main) != null) {
