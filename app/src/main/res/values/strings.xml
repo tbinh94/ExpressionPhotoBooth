@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">ExpressionPhotoBooth</string>
     <string name="author">Trọng Đức</string>
+    <string name="capture_photo">Capture</string>
+    <string name="ratio_square">1:1</string>
+    <string name="ratio_wide">16:9</string>
+    <string name="camera_not_ready">Camera is not ready yet</string>
+    <string name="failed_create_folder">Cannot create photo folder</string>
+    <string name="capture_failed">Capture failed</string>
+    <string name="camera_permission_granted">Camera permission granted</string>
+    <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="photo_saved_path">Saved: %1$s</string>
 </resources>
