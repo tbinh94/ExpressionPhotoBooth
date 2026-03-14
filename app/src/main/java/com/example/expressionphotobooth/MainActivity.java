@@ -54,7 +54,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
+        CardView btnStartCamera = findViewById(R.id.btnStartCamera);
+        btnStartCamera.setOnClickListener(v -> {
+                    Toast.makeText(this, "Starting Camera...", Toast.LENGTH_SHORT).show();
+                    startCamera();
+                }
+        );
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
         Button captureButton = findViewById(R.id.btnCapture);
