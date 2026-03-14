@@ -2,139 +2,154 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#D6EAF8"> <!-- Màu xanh nhạt nền -->
+    android:background="#F4F7F9"> <!-- Màu nền xám xanh rất nhạt, sang trọng -->
 
-    <!-- Title: Photobooth+ -->
-    <TextView
-        android:id="@+id/tvTitle"
+    <!-- Header Area -->
+    <LinearLayout
+        android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="Photobooth+"
-        android:textColor="#5D8AA8"
-        android:textSize="36sp"
-        android:textStyle="bold"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/tvSubTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="✨ Capture Kawaii Memories ✨"
-        android:textColor="#85929E"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Photobooth+"
+            android:textColor="#2C3E50"
+            android:textSize="32sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05" />
 
-    <!-- Camera Preview -->
-    <androidx.camera.view.PreviewView
-        android:id="@+id/viewFinder"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Elegant Capture Experience"
+            android:textColor="#7F8C8D"
+            android:textSize="14sp"
+            android:letterSpacing="0.1" />
+    </LinearLayout>
+
+    <!-- Khung Camera chính -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/previewCard"
         android:layout_width="0dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSubTitle" />
+        app:layout_constraintTop_toBottomOf="@id/header">
 
-    <!-- Character Image (Hình nhân vật ở giữa) - Hidden when camera is on if needed, but for now we keep it below or remove it -->
-    <ImageView
-        android:id="@+id/imgCharacter"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="10dp"
-        android:src="@mipmap/ic_launcher"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/viewFinder" />
+        <androidx.camera.view.PreviewView
+            android:id="@+id/viewFinder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#DCDFE2" />
+    </androidx.cardview.widget.CardView>
 
-    <!-- Button Start Camera (Dùng CardView để bo góc cực đại) -->
+    <!-- Nút Start Camera -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnStartCamera"
-        android:layout_width="0dp"
-        android:layout_height="80dp"
-        android:layout_marginHorizontal="40dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:clickable="true"
+        android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
-        app:cardBackgroundColor="#85C1E9"
-        app:cardCornerRadius="40dp"
-        app:cardElevation="4dp"
+        app:cardBackgroundColor="#34495E"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/viewFinder">
+        app:layout_constraintTop_toBottomOf="@id/previewCard">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp">
 
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:src="@android:drawable/ic_menu_camera"
                 app:tint="@android:color/white" />
 
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Start"
-                    android:textColor="@android:color/white"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Camera"
-                    android:textColor="@android:color/white"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                android:layout_marginStart="12dp"
+                android:text="INITIALIZE CAMERA"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:letterSpacing="0.1"
+                android:fontFamily="sans-serif-black" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Label: Choose a Frame -->
-    <TextView
-        android:id="@+id/tvChooseFrame"
+    <!-- Nút chọn tỉ lệ -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/ratioContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Choose a Frame 💖"
-        android:textColor="#5D8AA8"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:layout_marginTop="32dp"
+        app:singleSelection="true"
+        app:checkedButton="@+id/btnRatioSquare"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnStartCamera" />
+        app:layout_constraintTop_toBottomOf="@id/btnStartCamera">
 
-    <!-- Horizontal Frame Selection (Sử dụng LinearLayout hoặc RecyclerView) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/tvChooseFrame">
+        <Button
+            android:id="@+id/btnRatioSquare"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1:1"
+            android:textColor="#2C3E50"
+            app:strokeColor="#BDC3C7" />
 
-        <!-- Frame Item: Cherry -->
-        <include layout="@layout/item_frame" />
-        <!-- Bạn cần tạo thêm file item_frame.xml bên dưới -->
+        <Button
+            android:id="@+id/btnRatioWide"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="16:9"
+            android:textColor="#2C3E50"
+            app:strokeColor="#BDC3C7" />
 
-    </LinearLayout>
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <!-- Nút Lưu ảnh (Chụp ảnh) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCapture"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginHorizontal="48dp"
+        android:layout_marginBottom="40dp"
+        android:text="CAPTURE &amp; SAVE"
+        android:textSize="14sp"
+        android:letterSpacing="0.15"
+        android:fontFamily="sans-serif-black"
+        app:backgroundTint="#2C3E50"
+        app:cornerRadius="0dp"
+        app:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
