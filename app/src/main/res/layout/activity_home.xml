@@ -2,99 +2,65 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#F4F7F9">
+    android:layout_height="match_parent">
 
-    <!-- Camera icon card -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/iconCard"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        app:cardCornerRadius="26dp"
-        app:cardElevation="6dp"
-        app:cardBackgroundColor="#FFFFFF"
-        app:layout_constraintBottom_toTopOf="@id/header"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="center"
-            android:src="@android:drawable/ic_menu_camera"
-            android:contentDescription="@string/app_name" />
-
-    </androidx.cardview.widget.CardView>
-
-    <!-- Title block -->
-    <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/iconCard"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/btnStart">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Photobooth ✿"
-            android:fontFamily="sans-serif-black"
-            android:textSize="38sp"
-            android:textColor="#2E6DA4"
-            android:letterSpacing="0.02" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ELEGANT CAPTURE"
-            android:fontFamily="sans-serif-medium"
-            android:textSize="12sp"
-            android:textColor="#7AADD4"
-            android:letterSpacing="0.15"
-            android:layout_marginTop="6dp" />
-
-    </LinearLayout>
-
-    <!-- START button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnStart"
-        android:layout_width="220dp"
-        android:layout_height="56dp"
-        android:text="✦  START  ✦"
-        android:fontFamily="sans-serif-black"
-        android:textSize="15sp"
-        android:letterSpacing="0.15"
-        android:textColor="#FFFFFF"
-        app:backgroundTint="#2E6DA4"
-        app:cornerRadius="32dp"
-        app:elevation="6dp"
-        android:layout_marginBottom="12dp"
-        app:layout_constraintBottom_toTopOf="@id/tvHint"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header" />
-
-    <!-- Hint below button -->
-    <TextView
-        android:id="@+id/tvHint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tap to begin your session"
-        android:fontFamily="sans-serif-medium"
-        android:textSize="12sp"
-        android:textColor="#9BC3E0"
-        android:layout_marginBottom="64dp"
+    <!-- Background -->
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/photo_banner"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Dark overlay để chữ nổi -->
+
+    <!-- Main content -->
+
+    <LinearLayout
+        android:id="@+id/mainContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.831">
+
+        <!-- Camera icon -->
+
+        <!-- Title -->
+
+
+        <!-- Button card để nổi -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="260dp"
+            android:layout_height="72dp"
+            android:layout_marginTop="36dp"
+            app:cardBackgroundColor="#AAFFFFFF"
+            app:cardCornerRadius="40dp"
+            app:cardElevation="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="✦ START ✦"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:backgroundTint="#ff99be"
+                app:cornerRadius="40dp" />
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
