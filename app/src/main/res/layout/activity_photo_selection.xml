@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F4F7F9"
@@ -17,23 +18,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tvSelectionCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Selected: 0/4"
-        android:textColor="#7F8C8D"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSelectTitle" />
-
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCapturedPhotos"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:id="@+id/rvPhotos"
+        android:layout_width="389dp"
+        android:layout_height="565dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@id/btnNextToEdit"
-        app:layout_constraintTop_toBottomOf="@id/tvSelectionCount" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnNextToEdit"

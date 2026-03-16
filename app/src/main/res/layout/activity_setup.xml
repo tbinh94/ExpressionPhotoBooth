@@ -1,88 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7F9"
-    android:padding="24dp">
+    android:background="#F0F7FF"> <!-- Màu nền xanh cực nhạt -->
 
+    <!-- Header Title -->
     <TextView
-        android:id="@+id/tvTitle"
+        android:id="@+id/tvHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:text="Customize Your Session"
-        android:textColor="#2C3E50"
+        android:layout_marginTop="50dp"
+        android:text="Customize your session"
+        android:textColor="#5D8AA8"
         android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/labelFrame"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Choose Frame"
-        android:textColor="#7F8C8D"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
-
-    <!-- Placeholder for frame selection (e.g., RecyclerView) -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvFrames"
+    <!-- Section 1: Quantity Selection -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardQuantity"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/labelFrame" />
-
-    <TextView
-        android:id="@+id/labelQuantity"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Number of Photos"
-        android:textColor="#7F8C8D"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rvFrames" />
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="30dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/tvHeader">
 
-    <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/toggleGroupQuantity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:checkedButton="@+id/btn4"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/labelQuantity"
-        app:singleSelection="true">
-
-        <Button
-            android:id="@+id/btn1"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="121dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1" />
+            android:orientation="vertical"
+            android:padding="20dp">
 
-        <Button
-            android:id="@+id/btn2"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="How many photos? 📸"
+                android:textColor="#85929E"
+                android:textSize="16sp"
+                android:layout_marginBottom="15dp" />
 
-        <Button
-            android:id="@+id/btn4"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="143dp"
-            android:layout_height="wrap_content"
-            android:text="4" />
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleGroupQuantity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:checkedButton="@+id/btn4">
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn1"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:text="1"
+                    app:cornerRadius="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn2"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:text="2" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn4"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:text="4"
+                    app:cornerRadius="12dp" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Section 2: Frame Selection Placeholder (KHOẢNG TRỐNG CHO FRAME) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardFrames"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginVertical="20dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/btnNext"
+        app:layout_constraintTop_toBottomOf="@id/cardQuantity">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Choose your Frame ✨"
+                android:textColor="#85929E"
+                android:textSize="16sp" />
+
+            <!-- Chừa trống để bạn thêm Frame sau này -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:alpha="0.3"
+                android:text="(Frames coming soon...)"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Nút CONTINUE TO CAMERA -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnNext"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="CONTINUE TO CAMERA"
-        app:backgroundTint="#34495E"
+        android:layout_height="70dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="30dp"
+        android:text="CONTINUE TO CAMERA ➜"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:backgroundTint="#85C1E9"
+        app:cornerRadius="35dp"
+        app:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

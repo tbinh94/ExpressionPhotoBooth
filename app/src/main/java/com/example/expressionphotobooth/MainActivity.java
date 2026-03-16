@@ -5,11 +5,15 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.content.pm.PackageManager;
-import android.os.Environment;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler; // THÊM DÒNG NÀY
+import android.os.Looper;  // THÊM DÒNG NÀY
 import android.util.Log;
 import android.util.Size;
+import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -28,15 +32,15 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List; // THÊM DÒNG NÀY
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
@@ -46,67 +50,72 @@ public class MainActivity extends AppCompatActivity {
     private PreviewView viewFinder;
     private CardView previewCard;
     private ImageCapture imageCapture;
+    private int maxPhotos;
+    private int capturedCount = 0;
+    private List<Uri> savedImageUris = new ArrayList<>(); // Đã hết đỏ nhờ import List
     private ProcessCameraProvider cameraProvider;
     private final CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
     private boolean isSquareRatio = true;
+    private LinearLayout layoutResult;
+    private RecyclerView rvPhotos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        CardView btnStartCamera = findViewById(R.id.btnStartCamera);
-        btnStartCamera.setOnClickListener(v -> {
-                    Toast.makeText(this, "Starting Camera...", Toast.LENGTH_SHORT).show();
-                    startCamera();
-                }
-        );
+
+        // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
         Button captureButton = findViewById(R.id.btnCapture);
         Button squareButton = findViewById(R.id.btnRatioSquare);
         Button wideButton = findViewById(R.id.btnRatioWide);
 
-        captureButton.setOnClickListener(v -> takePhoto());
+        // Nhận số lượng ảnh từ trang trước (PHOTO_COUNT)
+        maxPhotos = getIntent().getIntExtra("PHOTO_COUNT", 4);
+        captureButton.setOnClickListener(v -> takePhotoSequence());
+        layoutResult = findViewById(R.id.layoutResult);
+        rvPhotos = findViewById(R.id.rvPhotos);
         squareButton.setOnClickListener(v -> {
             if (!isSquareRatio) {
                 isSquareRatio = true;
                 applyPreviewRatio();
-                if (cameraProvider != null) {
-                    bindCameraUseCases();
-                }
+                if (cameraProvider != null) bindCameraUseCases();
             }
         });
+
         wideButton.setOnClickListener(v -> {
             if (isSquareRatio) {
                 isSquareRatio = false;
                 applyPreviewRatio();
-                if (cameraProvider != null) {
-                    bindCameraUseCases();
-                }
+                if (cameraProvider != null) bindCameraUseCases();
             }
         });
+
         applyPreviewRatio();
 
-        if (findViewById(R.id.main) != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // Xử lý hệ thống Insets (Tràn viền)
+        View mainView = findViewById(R.id.main);
+        if (mainView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
                 Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
                 v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
                 return insets;
             });
         }
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
-        {
+        // Kiểm tra quyền
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera();
-        }
-        else {
+        } else {
             checkPermission(CAMERA_PERMISSION_CODE, Manifest.permission.CAMERA);
         }
     }
+
     private void checkPermission(int requestCode, String permission) {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
         } else {
             startCamera();
         }
@@ -118,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
             try {
                 cameraProvider = cameraProviderFuture.get();
                 bindCameraUseCases();
-
             } catch (ExecutionException | InterruptedException e) {
                 Log.e(TAG, "Failed to start camera", e);
             }
@@ -126,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void bindCameraUseCases() {
+        if (cameraProvider == null) return;
+
         Preview preview = new Preview.Builder().build();
         imageCapture = buildImageCaptureUseCase();
         preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
@@ -152,63 +162,59 @@ public class MainActivity extends AppCompatActivity {
         previewCard.setLayoutParams(params);
     }
 
-    private void takePhoto() {
-        if (imageCapture == null) {
-            Toast.makeText(this, R.string.camera_not_ready, Toast.LENGTH_SHORT).show();
+    private void takePhotoSequence() {
+        if (capturedCount >= maxPhotos) {
+            goToSelectionPage();
             return;
         }
 
-        File outputDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "photobooth");
-        if (!outputDir.exists() && !outputDir.mkdirs()) {
-            Toast.makeText(this, R.string.failed_create_folder, Toast.LENGTH_SHORT).show();
-            return;
-        }
+        File photoFile = new File(getExternalFilesDir(null), "photo_" + System.currentTimeMillis() + ".jpg");
+        ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        File jpegFile = new File(outputDir, "PB_" + timestamp + ".jpg");
-        ImageCapture.OutputFileOptions options = new ImageCapture.OutputFileOptions.Builder(jpegFile).build();
+        imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(this),
+                new ImageCapture.OnImageSavedCallback() {
+                    @Override
+                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                        capturedCount++;
+                        savedImageUris.add(Uri.fromFile(photoFile));
 
-        imageCapture.takePicture(options, ContextCompat.getMainExecutor(this), new ImageCapture.OnImageSavedCallback() {
-            @Override
-            public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                File pngFile = new File(outputDir, "PB_" + timestamp + ".png");
-                boolean converted = convertJpegToPng(jpegFile, pngFile);
-                if (converted) {
-                    if (!jpegFile.delete()) {
-                        Log.w(TAG, "Temporary JPEG could not be deleted: " + jpegFile.getAbsolutePath());
+                        // SỬA LỖI TÊN LỚP Ở ĐÂY (MainActivity thay vì CaptureActivity)
+                        Toast.makeText(MainActivity.this, "Captured " + capturedCount + "/" + maxPhotos, Toast.LENGTH_SHORT).show();
+
+                        // Chụp tấm tiếp theo sau 1.5s
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            takePhotoSequence();
+                        }, 1500);
                     }
-                    Toast.makeText(MainActivity.this, getString(R.string.photo_saved_path, pngFile.getAbsolutePath()), Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(MainActivity.this, getString(R.string.photo_saved_path, jpegFile.getAbsolutePath()), Toast.LENGTH_LONG).show();
-                }
-                
-                // Sau khi chụp xong, chuyển sang màn hình chọn ảnh
-                Intent intent = new Intent(MainActivity.this, PhotoSelectionActivity.class);
-                startActivity(intent);
-            }
 
-            @Override
-            public void onError(@NonNull ImageCaptureException exception) {
-                Log.e(TAG, "Photo capture failed", exception);
-                Toast.makeText(MainActivity.this, R.string.capture_failed, Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+                        Log.e(TAG, "Capture failed: " + exception.getMessage());
+                    }
+                });
     }
 
-    private boolean convertJpegToPng(File jpegFile, File pngFile) {
-        Bitmap bitmap = BitmapFactory.decodeFile(jpegFile.getAbsolutePath());
-        if (bitmap == null) {
-            return false;
+    private void goToSelectionPage() {
+        // 1. Tắt camera để giải phóng bộ nhớ
+        if (cameraProvider != null) {
+            cameraProvider.unbindAll();
         }
 
-        try (FileOutputStream outputStream = new FileOutputStream(pngFile)) {
-            return bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-        } catch (IOException e) {
-            Log.e(TAG, "PNG conversion failed", e);
-            return false;
-        } finally {
-            bitmap.recycle();
+        // 2. CHÚ Ý: Chuyển đến PhotoSelectionActivity (không phải SetupActivity)
+        Intent intent = new Intent(MainActivity.this, PhotoSelectionActivity.class);
+
+        // 3. Đóng gói danh sách ảnh để gửi đi
+        ArrayList<String> uriStrings = new ArrayList<>();
+        for (Uri uri : savedImageUris) {
+            uriStrings.add(uri.toString());
         }
+        intent.putStringArrayListExtra("captured_images", uriStrings);
+
+        // 4. Bắt đầu chuyển trang
+        startActivity(intent);
+
+        // 5. Đóng MainActivity để không bị quay lại màn hình camera khi bấm Back
+        finish();
     }
 
     @Override
@@ -216,10 +222,9 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, R.string.camera_permission_granted, Toast.LENGTH_SHORT).show();
                 startCamera();
             } else {
-                Toast.makeText(this, R.string.camera_permission_denied, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
