@@ -10,4 +10,22 @@
     <string name="camera_permission_granted">Camera permission granted</string>
     <string name="camera_permission_denied">Camera permission denied</string>
     <string name="photo_saved_path">Saved: %1$s</string>
+    <string name="no_photo_to_continue">No photos captured</string>
+    <string name="no_photo_to_edit">No photo selected for editing</string>
+    <string name="failed_open_photo">Cannot open selected photo</string>
+    <string name="failed_save_temp_result">Cannot create edited preview</string>
+    <string name="no_result_to_show">No result image to display</string>
+    <string name="no_result_to_save">No result image to save</string>
+    <string name="failed_save_result">Failed to save image</string>
+    <string name="saved_to_gallery">Saved to gallery: %1$s</string>
+    <string name="no_images_for_video">No captured images to create video</string>
+    <string name="exporting_video">Exporting timelapse video...</string>
+    <string name="failed_save_video">Failed to export video</string>
+    <string name="video_saved_to_gallery">Video saved to gallery: %1$s</string>
+    <string name="back">Back</string>
+    <string name="title_setup">Customize Session</string>
+    <string name="title_camera">Camera</string>
+    <string name="title_selection">Choose Best Shot</string>
+    <string name="title_edit">Edit Photo</string>
+    <string name="title_result">Result</string>
 </resources>

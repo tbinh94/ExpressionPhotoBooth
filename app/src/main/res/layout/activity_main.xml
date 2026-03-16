@@ -8,6 +8,19 @@
     android:layout_height="match_parent"
     android:background="#F4F7F9"> <!-- Màu nền xám xanh rất nhạt, sang trọng -->
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:navigationIconTint="#2C3E50"
+        app:title="@string/title_camera"
+        app:titleCentered="true"
+        app:titleTextColor="#2C3E50"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- Header Area -->
     <LinearLayout
         android:id="@+id/header"
@@ -18,7 +31,7 @@
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/topAppBar">
 
         <TextView
             android:layout_width="wrap_content"

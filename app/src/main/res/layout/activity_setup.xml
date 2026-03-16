@@ -6,16 +6,15 @@
     android:layout_height="match_parent"
     android:background="#F0F7FF"> <!-- Màu nền xanh cực nhạt -->
 
-    <!-- Header Title -->
-    <TextView
-        android:id="@+id/tvHeader"
-        android:layout_width="wrap_content"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Customize your session"
-        android:textColor="#5D8AA8"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:background="@android:color/transparent"
+        app:navigationIconTint="#2C3E50"
+        app:title="@string/title_setup"
+        app:titleCentered="true"
+        app:titleTextColor="#2C3E50"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,7 +29,7 @@
         app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
         app:cardBackgroundColor="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@id/tvHeader">
+        app:layout_constraintTop_toBottomOf="@id/topAppBar">
 
         <LinearLayout
             android:layout_width="match_parent"

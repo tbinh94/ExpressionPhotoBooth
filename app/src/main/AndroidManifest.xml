@@ -9,6 +9,7 @@
     <uses-feature android:name="android.hardware.camera" android:required="true" />
 
     <application
+        android:name=".AppContainer"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -29,7 +30,6 @@
 
         <activity android:name=".SetupActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
-        <activity android:name=".CaptureActivity" android:exported="false" />
         <activity android:name=".PhotoSelectionActivity" android:exported="false" />
         <activity android:name=".EditPhotoActivity" android:exported="false" />
         <activity android:name=".ResultActivity" android:exported="false" />
