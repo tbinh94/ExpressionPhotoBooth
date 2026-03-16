@@ -28,4 +28,6 @@
     <string name="title_selection">Choose Best Shot</string>
     <string name="title_edit">Edit Photo</string>
     <string name="title_result">Result</string>
+    <string name="btn_edit">EDIT</string>
+    <string name="btn_result">RESULT</string>
 </resources>

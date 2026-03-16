@@ -3,39 +3,93 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7F9"
-    android:padding="16dp">
+    android:background="#F8FAFB">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         app:navigationIconTint="#2C3E50"
         app:title="@string/title_selection"
         app:titleCentered="true"
         app:titleTextColor="#2C3E50"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvPhotos"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@id/btnNextToEdit"
+    <TextView
+        android:id="@+id/tvSelectionInstruction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Choose a photo to enhance or proceed to result"
+        android:textColor="#7F8C8D"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topAppBar" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnNextToEdit"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPhotos"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="CONTINUE TO EDIT"
-        app:backgroundTint="#34495E"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSelectionInstruction" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/actionCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
+        android:layout_marginBottom="-20dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:paddingBottom="44dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnNextToEdit"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/btn_edit"
+                    android:textAllCaps="true"
+                    android:textStyle="bold"
+                    app:backgroundTint="#34495E"
+                    app:cornerRadius="12dp"
+                    app:icon="@android:drawable/ic_menu_edit" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDirectToResult"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/btn_result"
+                    android:textAllCaps="true"
+                    android:textStyle="bold"
+                    app:backgroundTint="#27AE60"
+                    app:cornerRadius="12dp"
+                    app:icon="@android:drawable/ic_menu_gallery" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

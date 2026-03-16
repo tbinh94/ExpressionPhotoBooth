@@ -2,6 +2,7 @@ package com.example.expressionphotobooth;
 
 import android.net.Uri;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,8 +39,10 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
         holder.tvIndex.setText(String.valueOf(position + 1));
 
         boolean isSelected = position == selectedPosition;
-        holder.selectionOverlay.setAlpha(isSelected ? 0.45f : 0f);
-        holder.tvSelected.setAlpha(isSelected ? 1f : 0f);
+        holder.selectionOverlay.setAlpha(isSelected ? 1f : 0f);
+        if (holder.cvSelectedBadge != null) {
+            holder.cvSelectedBadge.setVisibility(isSelected ? View.VISIBLE : View.GONE);
+        }
 
         holder.itemView.setOnClickListener(v -> {
             int previous = selectedPosition;
@@ -73,15 +76,15 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
 
     public static final class PhotoViewHolder extends RecyclerView.ViewHolder {
         final ImageView imageView;
-        final ViewGroup selectionOverlay;
-        final TextView tvSelected;
+        final View selectionOverlay;
+        final View cvSelectedBadge;
         final TextView tvIndex;
 
-        public PhotoViewHolder(android.view.View itemView) {
+        public PhotoViewHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.ivPhoto);
             selectionOverlay = itemView.findViewById(R.id.selectionOverlay);
-            tvSelected = itemView.findViewById(R.id.tvSelected);
+            cvSelectedBadge = itemView.findViewById(R.id.cvSelectedBadge);
             tvIndex = itemView.findViewById(R.id.tvIndex);
         }
     }

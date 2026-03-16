@@ -11,6 +11,7 @@ import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private PreviewView viewFinder;
     private CardView previewCard;
     private Button captureButton;
+    private TextView tvCountdown;
     private ImageCapture imageCapture;
     private int maxPhotos;
     private int capturedCount = 0;
@@ -62,7 +64,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
+        
+        AppContainer appContainer = (AppContainer) getApplication();
+        sessionRepository = appContainer.getSessionRepository();
         sessionState = sessionRepository.getSession();
         setupToolbar();
 
@@ -70,16 +74,18 @@ public class MainActivity extends AppCompatActivity {
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
         captureButton = findViewById(R.id.btnCapture);
+        tvCountdown = findViewById(R.id.tvCountdown);
         Button squareButton = findViewById(R.id.btnRatioSquare);
         Button wideButton = findViewById(R.id.btnRatioWide);
 
-        // Nhận số lượng ảnh từ trang trước (PHOTO_COUNT)
-        // Uu tien du lieu moi tu Intent, neu khong co thi phuc hoi tu repository.
+        // Nhận số lượng ảnh từ trang trước
         maxPhotos = getIntent().getIntExtra(IntentKeys.EXTRA_PHOTO_COUNT, sessionState.getPhotoCount());
         sessionState.setPhotoCount(maxPhotos);
         sessionRepository.saveSession(sessionState);
+
         captureButton.setEnabled(false);
         captureButton.setOnClickListener(v -> startPhotoSequence());
+        
         squareButton.setOnClickListener(v -> {
             if (!isSquareRatio) {
                 isSquareRatio = true;
@@ -98,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
 
         applyPreviewRatio();
 
-        // Xử lý hệ thống Insets (Tràn viền)
         View mainView = findViewById(R.id.main);
         if (mainView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
@@ -108,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        // Kiểm tra quyền
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera();
         } else {
@@ -163,39 +167,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startPhotoSequence() {
-        if (isCapturingSequence) {
-            Toast.makeText(this, "Photo sequence is running", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (imageCapture == null) {
-            Toast.makeText(this, R.string.camera_not_ready, Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (isCapturingSequence) return;
 
         capturedCount = 0;
         savedImageUris.clear();
-        // Xoa du lieu ket qua cu khi bat dau chup moi.
-        sessionState.setSelectedImageUri(null);
-        sessionState.setResultImageUri(null);
-        sessionState.setCapturedImageUris(new ArrayList<>());
-        sessionRepository.saveSession(sessionState);
         isCapturingSequence = true;
         captureButton.setEnabled(false);
-        takePhotoSequence();
+        
+        // Bắt đầu chuỗi chụp với đếm ngược
+        startCountdownAndCapture();
     }
 
-    private void takePhotoSequence() {
+    private void startCountdownAndCapture() {
         if (capturedCount >= maxPhotos) {
             isCapturingSequence = false;
             goToSelectionPage();
             return;
         }
 
+        tvCountdown.setVisibility(View.VISIBLE);
+        runCountdown(3); // Bắt đầu đếm từ 3
+    }
+
+    private void runCountdown(int seconds) {
+        if (seconds > 0) {
+            tvCountdown.setText(String.valueOf(seconds));
+            new Handler(Looper.getMainLooper()).postDelayed(() -> runCountdown(seconds - 1), 1000);
+        } else {
+            tvCountdown.setVisibility(View.GONE);
+            takePhoto();
+        }
+    }
+
+    private void takePhoto() {
         if (imageCapture == null) {
             isCapturingSequence = false;
             captureButton.setEnabled(true);
-            Toast.makeText(this, R.string.camera_not_ready, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -208,73 +215,47 @@ public class MainActivity extends AppCompatActivity {
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         capturedCount++;
                         savedImageUris.add(Uri.fromFile(photoFile));
-
-                        Toast.makeText(MainActivity.this, "Captured " + capturedCount + "/" + maxPhotos, Toast.LENGTH_SHORT).show();
-
-                        new Handler(Looper.getMainLooper()).postDelayed(MainActivity.this::takePhotoSequence, 1500);
+                        
+                        // Sau khi chụp xong 1 tấm, đợi 1 chút rồi đếm ngược cho tấm tiếp theo
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> startCountdownAndCapture(), 1000);
                     }
 
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
                         isCapturingSequence = false;
                         captureButton.setEnabled(true);
-                        Log.e(TAG, "Capture failed: " + exception.getMessage());
-                        Toast.makeText(MainActivity.this, R.string.capture_failed, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Capture failed", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     private void goToSelectionPage() {
-        // 1) Tat camera de giai phong bo nho.
-        if (cameraProvider != null) {
-            cameraProvider.unbindAll();
-        }
+        if (cameraProvider != null) cameraProvider.unbindAll();
 
-        // 2) Luu danh sach uri vao session de phong truong hop app bi recreate.
         ArrayList<String> uriStrings = new ArrayList<>();
-        for (Uri uri : savedImageUris) {
-            uriStrings.add(uri.toString());
-        }
+        for (Uri uri : savedImageUris) uriStrings.add(uri.toString());
+        
         sessionState.setCapturedImageUris(uriStrings);
         sessionRepository.saveSession(sessionState);
 
-        // 3) Van gui qua Intent de giu tuong thich nguoc flow cu.
         Intent intent = new Intent(MainActivity.this, PhotoSelectionActivity.class);
         intent.putStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES, uriStrings);
-
-        // 4) Bat dau chuyen trang.
         startActivity(intent);
-
-        // 5) Dong MainActivity de khong quay lai camera khi bam Back.
         finish();
+    }
+
+    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startCamera();
-            } else {
-                captureButton.setEnabled(false);
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
-            }
+        if (requestCode == CAMERA_PERMISSION_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startCamera();
         }
-    }
-
-    // Cau hinh toolbar chuan de nguoi dung co the quay lai Setup nhanh.
-    private void setupToolbar() {
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        getOnBackPressedDispatcher().onBackPressed();
-        return true;
     }
 }

@@ -12,9 +12,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-// Lưu session vào SharedPreferences giúp app vẫn khôi phục được state khi bị rotate/kill process.
 public class SharedPrefsSessionRepository implements SessionRepository {
     private static final String PREF_NAME = "photobooth_session";
     private static final String KEY_SESSION_JSON = "session_json";
@@ -62,15 +63,19 @@ public class SharedPrefsSessionRepository implements SessionRepository {
             }
             json.put("capturedImageUris", captured);
 
+            JSONObject edited = new JSONObject();
+            for (Map.Entry<String, String> entry : state.getEditedImageUris().entrySet()) {
+                edited.put(entry.getKey(), entry.getValue());
+            }
+            json.put("editedImageUris", edited);
+
             EditState editState = state.getEditState();
             JSONObject editJson = new JSONObject();
             editJson.put("filterStyle", editState.getFilterStyle().name());
             editJson.put("frameStyle", editState.getFrameStyle().name());
             editJson.put("stickerStyle", editState.getStickerStyle().name());
             json.put("editState", editJson);
-        } catch (JSONException ignored) {
-            // Không ném lỗi để tránh crash UI, repository sẽ trả default state ở lần đọc sau.
-        }
+        } catch (JSONException ignored) {}
         return json;
     }
 
@@ -89,24 +94,21 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         }
         state.setCapturedImageUris(uriList);
 
+        JSONObject editedJsonObj = json.optJSONObject("editedImageUris");
+        if (editedJsonObj != null) {
+            Iterator<String> keys = editedJsonObj.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                state.getEditedImageUris().put(key, editedJsonObj.optString(key));
+            }
+        }
+
         JSONObject editJson = json.optJSONObject("editState");
         EditState editState = new EditState();
         if (editJson != null) {
-            editState.setFilterStyle(parseEnum(
-                    EditState.FilterStyle.class,
-                    editJson.optString("filterStyle"),
-                    EditState.FilterStyle.NONE
-            ));
-            editState.setFrameStyle(parseEnum(
-                    EditState.FrameStyle.class,
-                    editJson.optString("frameStyle"),
-                    EditState.FrameStyle.NONE
-            ));
-            editState.setStickerStyle(parseEnum(
-                    EditState.StickerStyle.class,
-                    editJson.optString("stickerStyle"),
-                    EditState.StickerStyle.NONE
-            ));
+            editState.setFilterStyle(parseEnum(EditState.FilterStyle.class, editJson.optString("filterStyle"), EditState.FilterStyle.NONE));
+            editState.setFrameStyle(parseEnum(EditState.FrameStyle.class, editJson.optString("frameStyle"), EditState.FrameStyle.NONE));
+            editState.setStickerStyle(parseEnum(EditState.StickerStyle.class, editJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
         }
         state.setEditState(editState);
         return state;
@@ -120,4 +122,3 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         }
     }
 }
-
