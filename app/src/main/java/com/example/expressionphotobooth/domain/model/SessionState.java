@@ -1,12 +1,14 @@
 package com.example.expressionphotobooth.domain.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-// SessionState gom dữ liệu chạy xuyên suốt 1 lần photobooth (setup -> capture -> select -> edit -> result).
 public class SessionState {
     private int photoCount = 4;
     private final List<String> capturedImageUris = new ArrayList<>();
+    private final Map<String, String> editedImageUris = new HashMap<>();
     private String selectedImageUri;
     private String resultImageUri;
     private EditState editState = new EditState();
@@ -28,6 +30,10 @@ public class SessionState {
         if (uris != null) {
             capturedImageUris.addAll(uris);
         }
+    }
+
+    public Map<String, String> getEditedImageUris() {
+        return editedImageUris;
     }
 
     public String getSelectedImageUri() {
@@ -57,4 +63,3 @@ public class SessionState {
         this.editState = editState == null ? new EditState() : editState;
     }
 }
-
