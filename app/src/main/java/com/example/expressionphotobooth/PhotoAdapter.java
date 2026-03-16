@@ -1,38 +1,62 @@
 package com.example.expressionphotobooth;
 
-import android.content.Context;
 import android.net.Uri;
-import android.view.View;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
 
-public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> {
-    private List<Uri> uris;
-    private Context context;
+public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder> {
+    public interface OnPhotoSelectedListener {
+        void onPhotoSelected(Uri uri, int position);
+    }
 
-    public PhotoAdapter(Context context, List<Uri> uris) {
-        this.context = context;
+    private final List<Uri> uris;
+    private final OnPhotoSelectedListener onPhotoSelectedListener;
+    private int selectedPosition = RecyclerView.NO_POSITION;
+
+    public PhotoAdapter(List<Uri> uris, OnPhotoSelectedListener onPhotoSelectedListener) {
         this.uris = uris;
+        this.onPhotoSelectedListener = onPhotoSelectedListener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ImageView imageView = new ImageView(context);
-        // Chỉnh kích thước ô ảnh cho đẹp
-        int size = parent.getWidth() / 2 - 40;
-        imageView.setLayoutParams(new ViewGroup.LayoutParams(size, size));
-        imageView.setPadding(10, 10, 10, 10);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        return new ViewHolder(imageView);
+    public PhotoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new PhotoViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_photo, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.imageView.setImageURI(uris.get(position));
+    public void onBindViewHolder(@NonNull PhotoViewHolder holder, int position) {
+        Uri uri = uris.get(position);
+        holder.imageView.setImageURI(uri);
+        holder.tvIndex.setText(String.valueOf(position + 1));
+
+        boolean isSelected = position == selectedPosition;
+        holder.selectionOverlay.setAlpha(isSelected ? 0.45f : 0f);
+        holder.tvSelected.setAlpha(isSelected ? 1f : 0f);
+
+        holder.itemView.setOnClickListener(v -> {
+            int previous = selectedPosition;
+            selectedPosition = holder.getBindingAdapterPosition();
+            if (selectedPosition == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            if (previous != RecyclerView.NO_POSITION) {
+                notifyItemChanged(previous);
+            }
+            notifyItemChanged(selectedPosition);
+
+            if (onPhotoSelectedListener != null) {
+                onPhotoSelectedListener.onPhotoSelected(uris.get(selectedPosition), selectedPosition);
+            }
+        });
     }
 
     @Override
@@ -40,11 +64,25 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
         return uris.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageView;
-        ViewHolder(View itemView) {
+    public Uri getSelectedUri() {
+        if (selectedPosition >= 0 && selectedPosition < uris.size()) {
+            return uris.get(selectedPosition);
+        }
+        return null;
+    }
+
+    public static final class PhotoViewHolder extends RecyclerView.ViewHolder {
+        final ImageView imageView;
+        final ViewGroup selectionOverlay;
+        final TextView tvSelected;
+        final TextView tvIndex;
+
+        public PhotoViewHolder(android.view.View itemView) {
             super(itemView);
-            imageView = (ImageView) itemView;
+            imageView = itemView.findViewById(R.id.ivPhoto);
+            selectionOverlay = itemView.findViewById(R.id.selectionOverlay);
+            tvSelected = itemView.findViewById(R.id.tvSelected);
+            tvIndex = itemView.findViewById(R.id.tvIndex);
         }
     }
 }

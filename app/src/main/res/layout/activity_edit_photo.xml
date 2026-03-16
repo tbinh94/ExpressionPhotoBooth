@@ -5,6 +5,19 @@
     android:layout_height="match_parent"
     android:background="#F4F7F9">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:navigationIconTint="#2C3E50"
+        app:title="@string/title_edit"
+        app:titleCentered="true"
+        app:titleTextColor="#2C3E50"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/resultPreviewCard"
         android:layout_width="0dp"
@@ -14,7 +27,7 @@
         app:layout_constraintBottom_toTopOf="@id/filterScroll"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/topAppBar">
 
         <ImageView
             android:id="@+id/ivEditingPhoto"
@@ -29,7 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/stickerScroll">
+        app:layout_constraintBottom_toTopOf="@id/frameScroll">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -60,6 +73,49 @@
     </HorizontalScrollView>
 
     <HorizontalScrollView
+        android:id="@+id/frameScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/stickerScroll">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnFrameNone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Frame None" />
+
+            <Button
+                android:id="@+id/btnFrameCortis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Cortis" />
+
+            <Button
+                android:id="@+id/btnFrameT1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="T1" />
+
+            <Button
+                android:id="@+id/btnFrameAespa"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Aespa" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <HorizontalScrollView
         android:id="@+id/stickerScroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -71,12 +127,34 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-            <!-- Stickers placeholders -->
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_margin="8dp"
-                android:src="@android:drawable/ic_menu_add" />
+
+            <Button
+                android:id="@+id/btnStickerNone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Sticker None" />
+
+            <Button
+                android:id="@+id/btnStickerStar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Star" />
+
+            <Button
+                android:id="@+id/btnStickerFlash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Flash" />
+
+            <Button
+                android:id="@+id/btnStickerCamera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Camera" />
         </LinearLayout>
     </HorizontalScrollView>
 

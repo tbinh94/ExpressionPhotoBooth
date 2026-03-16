@@ -2,18 +2,15 @@ package com.example.expressionphotobooth;
 
 import android.Manifest;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler; // THÊM DÒNG NÀY
-import android.os.Looper;  // THÊM DÒNG NÀY
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -27,20 +24,19 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.expressionphotobooth.domain.model.SessionState;
+import com.example.expressionphotobooth.domain.repository.SessionRepository;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List; // THÊM DÒNG NÀY
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,34 +45,41 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "CameraX";
     private PreviewView viewFinder;
     private CardView previewCard;
+    private Button captureButton;
     private ImageCapture imageCapture;
     private int maxPhotos;
     private int capturedCount = 0;
-    private List<Uri> savedImageUris = new ArrayList<>(); // Đã hết đỏ nhờ import List
+    private final List<Uri> savedImageUris = new ArrayList<>();
     private ProcessCameraProvider cameraProvider;
     private final CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
     private boolean isSquareRatio = true;
-    private LinearLayout layoutResult;
-    private RecyclerView rvPhotos;
+    private boolean isCapturingSequence = false;
+    private SessionRepository sessionRepository;
+    private SessionState sessionState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
+        sessionState = sessionRepository.getSession();
+        setupToolbar();
 
         // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
-        Button captureButton = findViewById(R.id.btnCapture);
+        captureButton = findViewById(R.id.btnCapture);
         Button squareButton = findViewById(R.id.btnRatioSquare);
         Button wideButton = findViewById(R.id.btnRatioWide);
 
         // Nhận số lượng ảnh từ trang trước (PHOTO_COUNT)
-        maxPhotos = getIntent().getIntExtra("PHOTO_COUNT", 4);
-        captureButton.setOnClickListener(v -> takePhotoSequence());
-        layoutResult = findViewById(R.id.layoutResult);
-        rvPhotos = findViewById(R.id.rvPhotos);
+        // Uu tien du lieu moi tu Intent, neu khong co thi phuc hoi tu repository.
+        maxPhotos = getIntent().getIntExtra(IntentKeys.EXTRA_PHOTO_COUNT, sessionState.getPhotoCount());
+        sessionState.setPhotoCount(maxPhotos);
+        sessionRepository.saveSession(sessionState);
+        captureButton.setEnabled(false);
+        captureButton.setOnClickListener(v -> startPhotoSequence());
         squareButton.setOnClickListener(v -> {
             if (!isSquareRatio) {
                 isSquareRatio = true;
@@ -109,16 +112,12 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera();
         } else {
-            checkPermission(CAMERA_PERMISSION_CODE, Manifest.permission.CAMERA);
+            requestCameraPermission();
         }
     }
 
-    private void checkPermission(int requestCode, String permission) {
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
-        } else {
-            startCamera();
-        }
+    private void requestCameraPermission() {
+        requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
     }
 
     private void startCamera() {
@@ -142,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
 
         cameraProvider.unbindAll();
         cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
+        captureButton.setEnabled(true);
     }
 
     private ImageCapture buildImageCaptureUseCase() {
@@ -162,9 +162,40 @@ public class MainActivity extends AppCompatActivity {
         previewCard.setLayoutParams(params);
     }
 
+    private void startPhotoSequence() {
+        if (isCapturingSequence) {
+            Toast.makeText(this, "Photo sequence is running", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (imageCapture == null) {
+            Toast.makeText(this, R.string.camera_not_ready, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        capturedCount = 0;
+        savedImageUris.clear();
+        // Xoa du lieu ket qua cu khi bat dau chup moi.
+        sessionState.setSelectedImageUri(null);
+        sessionState.setResultImageUri(null);
+        sessionState.setCapturedImageUris(new ArrayList<>());
+        sessionRepository.saveSession(sessionState);
+        isCapturingSequence = true;
+        captureButton.setEnabled(false);
+        takePhotoSequence();
+    }
+
     private void takePhotoSequence() {
         if (capturedCount >= maxPhotos) {
+            isCapturingSequence = false;
             goToSelectionPage();
+            return;
+        }
+
+        if (imageCapture == null) {
+            isCapturingSequence = false;
+            captureButton.setEnabled(true);
+            Toast.makeText(this, R.string.camera_not_ready, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -178,42 +209,43 @@ public class MainActivity extends AppCompatActivity {
                         capturedCount++;
                         savedImageUris.add(Uri.fromFile(photoFile));
 
-                        // SỬA LỖI TÊN LỚP Ở ĐÂY (MainActivity thay vì CaptureActivity)
                         Toast.makeText(MainActivity.this, "Captured " + capturedCount + "/" + maxPhotos, Toast.LENGTH_SHORT).show();
 
-                        // Chụp tấm tiếp theo sau 1.5s
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            takePhotoSequence();
-                        }, 1500);
+                        new Handler(Looper.getMainLooper()).postDelayed(MainActivity.this::takePhotoSequence, 1500);
                     }
 
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
+                        isCapturingSequence = false;
+                        captureButton.setEnabled(true);
                         Log.e(TAG, "Capture failed: " + exception.getMessage());
+                        Toast.makeText(MainActivity.this, R.string.capture_failed, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     private void goToSelectionPage() {
-        // 1. Tắt camera để giải phóng bộ nhớ
+        // 1) Tat camera de giai phong bo nho.
         if (cameraProvider != null) {
             cameraProvider.unbindAll();
         }
 
-        // 2. CHÚ Ý: Chuyển đến PhotoSelectionActivity (không phải SetupActivity)
-        Intent intent = new Intent(MainActivity.this, PhotoSelectionActivity.class);
-
-        // 3. Đóng gói danh sách ảnh để gửi đi
+        // 2) Luu danh sach uri vao session de phong truong hop app bi recreate.
         ArrayList<String> uriStrings = new ArrayList<>();
         for (Uri uri : savedImageUris) {
             uriStrings.add(uri.toString());
         }
-        intent.putStringArrayListExtra("captured_images", uriStrings);
+        sessionState.setCapturedImageUris(uriStrings);
+        sessionRepository.saveSession(sessionState);
 
-        // 4. Bắt đầu chuyển trang
+        // 3) Van gui qua Intent de giu tuong thich nguoc flow cu.
+        Intent intent = new Intent(MainActivity.this, PhotoSelectionActivity.class);
+        intent.putStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES, uriStrings);
+
+        // 4) Bat dau chuyen trang.
         startActivity(intent);
 
-        // 5. Đóng MainActivity để không bị quay lại màn hình camera khi bấm Back
+        // 5) Dong MainActivity de khong quay lai camera khi bam Back.
         finish();
     }
 
@@ -224,8 +256,25 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startCamera();
             } else {
+                captureButton.setEnabled(false);
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    // Cau hinh toolbar chuan de nguoi dung co the quay lai Setup nhanh.
+    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        getOnBackPressedDispatcher().onBackPressed();
+        return true;
     }
 }

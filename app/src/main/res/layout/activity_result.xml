@@ -6,14 +6,15 @@
     android:background="#F4F7F9"
     android:padding="24dp">
 
-    <TextView
-        android:id="@+id/tvResultTitle"
-        android:layout_width="wrap_content"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:text="Your Masterpiece"
-        android:textColor="#2C3E50"
-        android:textSize="28sp"
+        android:background="@android:color/transparent"
+        app:navigationIconTint="#2C3E50"
+        app:title="@string/title_result"
+        app:titleCentered="true"
+        app:titleTextColor="#2C3E50"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -27,7 +28,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnSavePng"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvResultTitle">
+        app:layout_constraintTop_toBottomOf="@id/topAppBar">
 
         <ImageView
             android:id="@+id/ivFinalResult"
