@@ -3,6 +3,7 @@ package com.example.expressionphotobooth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,9 +42,10 @@ public class SetupActivity extends AppCompatActivity {
         // Khởi tạo Repository để lưu dữ liệu phiên chụp
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
 
-        // 1. ÁNH XẠ: Tìm các View từ bản thiết kế XML
+        // 1. ÁNH XẠ: Tìm các thành phần từ bản thiết kế XML
         btnNext = findViewById(R.id.btnNext);
         rvConcepts = findViewById(R.id.rvConcepts);
+        ImageButton btnBack = findViewById(R.id.btnBack);
 
         // 2. CÀI ĐẶT RECYCLERVIEW: Đổ dữ liệu vào danh sách
         setupRecyclerView();
@@ -55,7 +57,10 @@ public class SetupActivity extends AppCompatActivity {
             return insets;
         });
 
-        // 4. GIAO NHIỆM VỤ: Lắng nghe sự kiện click nút NEXT
+        // Lắng nghe sự kiện click: Khi bấm vào thì quay lại màn hình trước đó
+        btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        // GIAO NHIỆM VỤ: Lắng nghe sự kiện click nút NEXT
         btnNext.setOnClickListener(v -> {
 
             // GHI CHÚ: Vì giao diện mới đã bỏ nút chọn số lượng ảnh,
@@ -88,15 +93,15 @@ public class SetupActivity extends AppCompatActivity {
     private List<Concept> createMockData() {
         List<Concept> concepts = new ArrayList<>();
 
-        List<Frame> princessFrames = new ArrayList<>();
-        princessFrames.add(new Frame(1, R.drawable.ic_launcher_background));
-        princessFrames.add(new Frame(2, R.drawable.ic_launcher_background));
-        princessFrames.add(new Frame(3, R.drawable.ic_launcher_background));
-        concepts.add(new Concept("1 Princess Concept", princessFrames));
+        List<Frame> summerFrames = new ArrayList<>();
+        summerFrames.add(new Frame(1, R.drawable.sample_frame));
+        summerFrames.add(new Frame(2, R.drawable.sample_frame));
+        summerFrames.add(new Frame(3, R.drawable.sample_frame));
+        concepts.add(new Concept("1 Summer Concept", summerFrames));
 
         List<Frame> cortisFrames = new ArrayList<>();
-        cortisFrames.add(new Frame(4, R.drawable.ic_launcher_background));
-        cortisFrames.add(new Frame(5, R.drawable.ic_launcher_background));
+        cortisFrames.add(new Frame(4, R.drawable.sample_frame));
+        cortisFrames.add(new Frame(5, R.drawable.sample_frame));
         concepts.add(new Concept("2 Cortis Concept", cortisFrames));
 
         return concepts;
