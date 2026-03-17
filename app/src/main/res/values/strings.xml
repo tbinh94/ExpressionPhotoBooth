@@ -23,7 +23,7 @@
     <string name="failed_save_video">Failed to export video</string>
     <string name="video_saved_to_gallery">Video saved to gallery: %1$s</string>
     <string name="back">Back</string>
-    <string name="title_setup">Customize Session</string>
+    <string name="title_setup">CHOOSE YOUR FRAME</string>
     <string name="title_camera">Camera</string>
     <string name="title_selection">Choose Best Shot</string>
     <string name="title_edit">Edit Photo</string>
