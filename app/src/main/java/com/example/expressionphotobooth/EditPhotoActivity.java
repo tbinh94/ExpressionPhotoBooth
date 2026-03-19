@@ -1,5 +1,7 @@
 package com.example.expressionphotobooth;
 
+import static org.jcodec.common.dct.SparseIDCT.finish;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
