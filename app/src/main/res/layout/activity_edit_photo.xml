@@ -13,7 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
         app:navigationIconTint="#FFFFFF"
         app:title="Edit Photo"
         app:titleCentered="true"
@@ -103,17 +103,16 @@
                 android:id="@+id/filtersContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gap="8dp">
+                android:orientation="horizontal">
 
                 <!-- Filter: None -->
                 <LinearLayout
-                    android:id="@+id/filterNone"
+                    android:id="@+id/btnFilterNone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:gap="6dp">
+                    android:layout_marginEnd="8dp">
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
@@ -126,6 +125,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
                         android:text="None"
                         android:textColor="#C9A96E"
                         android:textSize="10sp"
@@ -134,12 +134,12 @@
 
                 <!-- Filter: Soft -->
                 <LinearLayout
-                    android:id="@+id/filterSoft"
+                    android:id="@+id/btnFilterSoft"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:gap="6dp">
+                    android:layout_marginEnd="8dp">
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
@@ -152,6 +152,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
                         android:text="Soft"
                         android:textColor="#9A9288"
                         android:textSize="10sp"
@@ -160,12 +161,12 @@
 
                 <!-- Filter: B/W -->
                 <LinearLayout
-                    android:id="@+id/filterBW"
+                    android:id="@+id/btnFilterBW"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:gap="6dp">
+                    android:layout_marginEnd="8dp">
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
@@ -178,6 +179,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
                         android:text="B/W"
                         android:textColor="#9A9288"
                         android:textSize="10sp"
@@ -186,12 +188,11 @@
 
                 <!-- Filter: Fade -->
                 <LinearLayout
-                    android:id="@+id/filterFade"
+                    android:id="@+id/btnFilterFade"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center"
-                    android:gap="6dp">
+                    android:gravity="center">
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
@@ -204,6 +205,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
                         android:text="Fade"
                         android:textColor="#9A9288"
                         android:textSize="10sp"
@@ -252,14 +254,14 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gap="10dp">
+                android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnFrameNone"
                     style="@style/Widget.EditPhoto.FrameButton.Active"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
+                    android:layout_marginEnd="10dp"
                     android:text="None" />
 
                 <com.google.android.material.button.MaterialButton
@@ -267,6 +269,7 @@
                     style="@style/Widget.EditPhoto.FrameButton"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
+                    android:layout_marginEnd="10dp"
                     android:text="Cortis" />
 
                 <com.google.android.material.button.MaterialButton
@@ -274,6 +277,7 @@
                     style="@style/Widget.EditPhoto.FrameButton"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
+                    android:layout_marginEnd="10dp"
                     android:text="T1" />
 
                 <com.google.android.material.button.MaterialButton
