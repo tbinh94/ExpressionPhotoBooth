@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7F9">
+    android:background="#1A1814">
 
+    <!-- Top App Bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:navigationIconTint="#2C3E50"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIconTint="#FFFFFF"
         app:title="Edit Photo"
         app:titleCentered="true"
-        app:titleTextColor="#2C3E50"
+        app:titleTextAppearance="@style/TextAppearance.EditPhoto.Title"
+        app:titleTextColor="#FFFFFF"
+        app:menu="@menu/menu_edit_photo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,10 +29,14 @@
         android:id="@+id/resultPreviewCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="24dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
-        app:layout_constraintBottom_toTopOf="@id/editControlsCard"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="0dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#2A2720"
+        app:layout_constraintBottom_toTopOf="@id/bottomSheet"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topAppBar">
@@ -36,137 +45,267 @@
             android:id="@+id/ivEditingPhoto"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#DCDFE2"
-            android:scaleType="centerInside" />
+            android:scaleType="centerCrop" />
+
     </androidx.cardview.widget.CardView>
 
-    <!-- Controls Area -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/editControlsCard"
+    <!-- Bottom Sheet Controls -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent"
-        android:layout_marginBottom="-24dp"
-        app:layout_constraintBottom_toTopOf="@id/btnFinishEdit">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="40dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:letterSpacing="0.1"
-                android:text="Filters"
-                android:textColor="#7F8C8D"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btnFilterNone"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="None" />
-
-                    <Button
-                        android:id="@+id/btnFilterSoft"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Soft" />
-
-                    <Button
-                        android:id="@+id/btnFilterBW"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="B/W" />
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:letterSpacing="0.1"
-                android:text="Frames"
-                android:textColor="#7F8C8D"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btnFrameNone"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="None" />
-
-                    <Button
-                        android:id="@+id/btnFrameCortis"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Cortis" />
-
-                    <Button
-                        android:id="@+id/btnFrameT1"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="T1" />
-
-                    <Button
-                        android:id="@+id/btnFrameAespa"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Aespa" />
-                </LinearLayout>
-            </HorizontalScrollView>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnFinishEdit"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_margin="24dp"
-        android:layout_marginBottom="16dp"
-        android:fontFamily="sans-serif-black"
-        android:letterSpacing="0.1"
-        android:text="SAVE &amp; RETURN"
-        app:backgroundTint="#2C3E50"
-        app:cornerRadius="0dp"
+        android:background="@drawable/bg_bottom_sheet"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="24dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Handle bar -->
+        <View
+            android:id="@+id/handleBar"
+            android:layout_width="36dp"
+            android:layout_height="3dp"
+            android:background="@drawable/bg_handle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Filters Label -->
+        <TextView
+            android:id="@+id/labelFilters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="FILTERS"
+            android:textColor="#9A9288"
+            android:textSize="10sp"
+            android:textStyle="normal"
+            android:letterSpacing="0.18"
+            android:fontFamily="sans-serif-light"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/handleBar" />
+
+        <!-- Filters Scroll -->
+        <HorizontalScrollView
+            android:id="@+id/filtersScrollView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:scrollbars="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelFilters">
+
+            <LinearLayout
+                android:id="@+id/filtersContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gap="8dp">
+
+                <!-- Filter: None -->
+                <LinearLayout
+                    android:id="@+id/filterNone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:gap="6dp">
+                    <FrameLayout
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/bg_filter_swatch_active">
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/swatch_none" />
+                    </FrameLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="None"
+                        android:textColor="#C9A96E"
+                        android:textSize="10sp"
+                        android:letterSpacing="0.06" />
+                </LinearLayout>
+
+                <!-- Filter: Soft -->
+                <LinearLayout
+                    android:id="@+id/filterSoft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:gap="6dp">
+                    <FrameLayout
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/bg_filter_swatch">
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/swatch_soft" />
+                    </FrameLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Soft"
+                        android:textColor="#9A9288"
+                        android:textSize="10sp"
+                        android:letterSpacing="0.06" />
+                </LinearLayout>
+
+                <!-- Filter: B/W -->
+                <LinearLayout
+                    android:id="@+id/filterBW"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:gap="6dp">
+                    <FrameLayout
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/bg_filter_swatch">
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/swatch_bw" />
+                    </FrameLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="B/W"
+                        android:textColor="#9A9288"
+                        android:textSize="10sp"
+                        android:letterSpacing="0.06" />
+                </LinearLayout>
+
+                <!-- Filter: Fade -->
+                <LinearLayout
+                    android:id="@+id/filterFade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:gap="6dp">
+                    <FrameLayout
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/bg_filter_swatch">
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/swatch_fade" />
+                    </FrameLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Fade"
+                        android:textColor="#9A9288"
+                        android:textSize="10sp"
+                        android:letterSpacing="0.06" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Divider -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:background="#EEE8E1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/filtersScrollView" />
+
+        <!-- Frames Label -->
+        <TextView
+            android:id="@+id/labelFrames"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="FRAMES"
+            android:textColor="#9A9288"
+            android:textSize="10sp"
+            android:letterSpacing="0.18"
+            android:fontFamily="sans-serif-light"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider" />
+
+        <!-- Frames Scroll -->
+        <HorizontalScrollView
+            android:id="@+id/framesScrollView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:scrollbars="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelFrames">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gap="10dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFrameNone"
+                    style="@style/Widget.EditPhoto.FrameButton.Active"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="None" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFrameCortis"
+                    style="@style/Widget.EditPhoto.FrameButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Cortis" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFrameT1"
+                    style="@style/Widget.EditPhoto.FrameButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="T1" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFrameAespa"
+                    style="@style/Widget.EditPhoto.FrameButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Aespa" />
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Save Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFinishEdit"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="28dp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.2"
+            android:text="SAVE &amp; RETURN"
+            android:textSize="12sp"
+            app:backgroundTint="#1A1814"
+            app:cornerRadius="14dp"
+            app:icon="@drawable/ic_accent_bar"
+            app:iconGravity="textStart"
+            app:iconTint="#C9A96E"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/framesScrollView" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
