@@ -299,6 +299,7 @@
             android:fontFamily="sans-serif-medium"
             android:letterSpacing="0.2"
             android:text="SAVE &amp; RETURN"
+            android:textColor="#FFFF"
             android:textSize="12sp"
             app:backgroundTint="#1A1814"
             app:cornerRadius="14dp"
