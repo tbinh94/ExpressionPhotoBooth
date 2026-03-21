@@ -9,14 +9,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.expressionphotobooth.R;
 import com.example.expressionphotobooth.domain.model.Concept;
+import com.example.expressionphotobooth.domain.model.Frame;
 import java.util.List;
 
 public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptViewHolder> {
 
     private List<Concept> conceptList;
+    private FrameAdapter.OnFrameClickListener frameClickListener;
 
-    public ConceptAdapter(List<Concept> conceptList) {
+    public ConceptAdapter(List<Concept> conceptList, FrameAdapter.OnFrameClickListener listener) {
         this.conceptList = conceptList;
+        this.frameClickListener = listener;
     }
 
     @NonNull
@@ -31,7 +34,8 @@ public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptV
         Concept concept = conceptList.get(position);
         holder.tvConceptName.setText(concept.getConceptName());
 
-        FrameAdapter frameAdapter = new FrameAdapter(concept.getFrames());
+        // Truyền listener xuống FrameAdapter
+        FrameAdapter frameAdapter = new FrameAdapter(concept.getFrames(), frameClickListener);
         LinearLayoutManager layoutManager = new LinearLayoutManager(holder.itemView.getContext(), RecyclerView.HORIZONTAL, false);
         holder.rvFrames.setLayoutManager(layoutManager);
         holder.rvFrames.setAdapter(frameAdapter);

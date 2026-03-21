@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -13,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -45,13 +46,13 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_photo_selection);
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
         sessionState = sessionRepository.getSession();
-        setupToolbar();
 
         RecyclerView rvPhotos = findViewById(R.id.rvPhotos);
-        MaterialButton btnContinueToEdit = findViewById(R.id.btnNextToEdit);
+        MaterialButton btnBack = findViewById(R.id.btnBack);
+        MaterialButton btnNextToEdit = findViewById(R.id.btnNextToEdit);
         MaterialButton btnDirectToResult = findViewById(R.id.btnDirectToResult);
         
-        btnContinueToEdit.setEnabled(false);
+        btnNextToEdit.setEnabled(false);
         btnDirectToResult.setEnabled(true);
 
         ArrayList<String> imageUriStrings = getIntent().getStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES);
@@ -64,41 +65,58 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         rvPhotos.setHasFixedSize(true);
 
         adapter = new PhotoAdapter(new ArrayList<>(), (uri, position) -> {
-            btnContinueToEdit.setEnabled(true);
+            btnNextToEdit.setEnabled(true);
             btnDirectToResult.setEnabled(true);
         });
         rvPhotos.setAdapter(adapter);
         updateAdapterUris();
 
-        btnContinueToEdit.setOnClickListener(v -> {
-            Uri selectedUri = getSelectedOriginalUri();
-            if (selectedUri == null) return;
+        btnNextToEdit.setOnClickListener(v -> {
+            Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
+            btnNextToEdit.startAnimation(press);
+            press.setAnimationListener(new Animation.AnimationListener() {
+                @Override public void onAnimationStart(Animation animation) {}
+                @Override public void onAnimationRepeat(Animation animation) {}
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    Uri selectedUri = getSelectedOriginalUri();
+                    if (selectedUri == null) return;
 
-            sessionState.setSelectedImageUri(selectedUri.toString());
-            sessionRepository.saveSession(sessionState);
+                    sessionState.setSelectedImageUri(selectedUri.toString());
+                    sessionRepository.saveSession(sessionState);
 
-            Intent intent = new Intent(PhotoSelectionActivity.this, EditPhotoActivity.class);
-            intent.putExtra(IntentKeys.EXTRA_SELECTED_IMAGE, selectedUri.toString());
-            editActivityResultLauncher.launch(intent);
+                    Intent intent = new Intent(PhotoSelectionActivity.this, EditPhotoActivity.class);
+                    intent.putExtra(IntentKeys.EXTRA_SELECTED_IMAGE, selectedUri.toString());
+                    editActivityResultLauncher.launch(intent);
+                }
+            });
         });
 
         btnDirectToResult.setOnClickListener(v -> {
-            // 1. Tạo danh sách tất cả ảnh cuối cùng (ưu tiên ảnh đã edit)
-            ArrayList<String> finalImagesToStitch = new ArrayList<>();
+            Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
+            btnDirectToResult.startAnimation(press);
+            press.setAnimationListener(new Animation.AnimationListener() {
+                @Override public void onAnimationStart(Animation animation) {}
+                @Override public void onAnimationRepeat(Animation animation) {}
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    Intent intent = new Intent(PhotoSelectionActivity.this, ResultActivity.class);
+                    startActivity(intent);
+                }
+            });
+        });
 
-            for (String originalUriStr : sessionState.getCapturedImageUris()) {
-                String editedUriStr = sessionState.getEditedImageUris().get(originalUriStr);
-                // Nếu đã edit thì lấy bản edit, chưa edit thì lấy bản gốc
-                finalImagesToStitch.add(editedUriStr != null ? editedUriStr : originalUriStr);
-            }
-
-            if (finalImagesToStitch.isEmpty()) return;
-
-            // 2. Lưu trạng thái nếu cần (tùy thuộc vào logic ResultActivity của bạn)
-            // Ở đây ta truyền toàn bộ list ảnh vào intent
-            Intent intent = new Intent(PhotoSelectionActivity.this, ResultActivity.class);
-
-            startActivity(intent);
+        btnBack.setOnClickListener(v -> {
+            Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
+            btnBack.startAnimation(press);
+            press.setAnimationListener(new Animation.AnimationListener() {
+                @Override public void onAnimationStart(Animation animation) {}
+                @Override public void onAnimationRepeat(Animation animation) {}
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    finish();
+                }
+            });
         });
     }
 
@@ -109,9 +127,6 @@ public class PhotoSelectionActivity extends AppCompatActivity {
             displayUris.add(Uri.parse(editedUriStr != null ? editedUriStr : originalUriStr));
         }
         
-        // Cập nhật list trong adapter (Cần thêm method setUris vào PhotoAdapter hoặc tạo mới)
-        // Ở đây tôi sẽ tạo adapter mới để đơn giản hóa việc refresh UI
-        int selectedPos = -1; // Reset selection hoặc giữ lại nếu cần
         adapter = new PhotoAdapter(displayUris, (uri, position) -> {
             findViewById(R.id.btnNextToEdit).setEnabled(true);
             findViewById(R.id.btnDirectToResult).setEnabled(true);
@@ -120,35 +135,16 @@ public class PhotoSelectionActivity extends AppCompatActivity {
     }
 
     private Uri getSelectedOriginalUri() {
-        int pos = -1;
-        // Mocking logic to get position since PhotoAdapter doesn't expose it easily
-        // In real app, better to have adapter.getSelectedPosition()
         Uri currentDisplayUri = adapter.getSelectedUri();
         if (currentDisplayUri == null) return null;
 
         List<String> captured = sessionState.getCapturedImageUris();
-        for (int i = 0; i < captured.size(); i++) {
-            String orig = captured.get(i);
+        for (String orig : captured) {
             String edit = sessionState.getEditedImageUris().get(orig);
             if (currentDisplayUri.toString().equals(orig) || currentDisplayUri.toString().equals(edit)) {
                 return Uri.parse(orig);
             }
         }
         return null;
-    }
-
-    private void setupToolbar() {
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        getOnBackPressedDispatcher().onBackPressed();
-        return true;
     }
 }

@@ -13,9 +13,16 @@ import java.util.List;
 public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.FrameViewHolder> {
 
     private List<Frame> frameList;
+    private int selectedPosition = -1;
+    private OnFrameClickListener listener;
 
-    public FrameAdapter(List<Frame> frameList) {
+    public interface OnFrameClickListener {
+        void onFrameClick(Frame frame);
+    }
+
+    public FrameAdapter(List<Frame> frameList, OnFrameClickListener listener) {
         this.frameList = frameList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -29,6 +36,24 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.FrameViewHol
     public void onBindViewHolder(@NonNull FrameViewHolder holder, int position) {
         Frame frame = frameList.get(position);
         holder.imgFrame.setImageResource(frame.getImageResId());
+
+        // Hiển thị trạng thái được chọn
+        if (selectedPosition == position) {
+            holder.itemView.setBackgroundResource(R.drawable.bg_frame_selected);
+        } else {
+            holder.itemView.setBackgroundResource(0);
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            int previousPosition = selectedPosition;
+            selectedPosition = holder.getAdapterPosition();
+            notifyItemChanged(previousPosition);
+            notifyItemChanged(selectedPosition);
+
+            if (listener != null) {
+                listener.onFrameClick(frame);
+            }
+        });
     }
 
     @Override
