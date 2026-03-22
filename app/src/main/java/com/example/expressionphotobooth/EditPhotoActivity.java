@@ -68,6 +68,11 @@ public class EditPhotoActivity extends AppCompatActivity {
         findViewById(R.id.btnFrameT1).setOnClickListener(v -> updateFrame(EditState.FrameStyle.T1));
         findViewById(R.id.btnFrameAespa).setOnClickListener(v -> updateFrame(EditState.FrameStyle.AESPA));
 
+        findViewById(R.id.btnStickerNone).setOnClickListener(v -> updateSticker(EditState.StickerStyle.NONE));
+        findViewById(R.id.btnStickerStar).setOnClickListener(v -> updateSticker(EditState.StickerStyle.STAR));
+        findViewById(R.id.btnStickerFlash).setOnClickListener(v -> updateSticker(EditState.StickerStyle.FLASH));
+        findViewById(R.id.btnStickerCamera).setOnClickListener(v -> updateSticker(EditState.StickerStyle.CAMERA));
+
         originalBitmap = decodeBitmapFromUri(currentPhotoUri);
         if (originalBitmap == null) {
             Toast.makeText(this, "Failed to load photo", Toast.LENGTH_SHORT).show();
@@ -101,6 +106,11 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     private void updateFrame(EditState.FrameStyle style) {
         sessionState.getEditState().setFrameStyle(style);
+        applyCurrentEditState();
+    }
+
+    private void updateSticker(EditState.StickerStyle style) {
+        sessionState.getEditState().setStickerStyle(style);
         applyCurrentEditState();
     }
 
