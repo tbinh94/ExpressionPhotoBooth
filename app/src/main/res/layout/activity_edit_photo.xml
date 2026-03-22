@@ -290,6 +290,81 @@
             </LinearLayout>
         </HorizontalScrollView>
 
+        <!-- Divider 2 -->
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:background="#EEE8E1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/framesScrollView" />
+
+        <!-- Stickers Label -->
+        <TextView
+            android:id="@+id/labelStickers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="STICKERS"
+            android:textColor="#9A9288"
+            android:textSize="10sp"
+            android:letterSpacing="0.18"
+            android:fontFamily="sans-serif-light"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider2" />
+
+        <!-- Stickers Scroll -->
+        <HorizontalScrollView
+            android:id="@+id/stickersScrollView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:scrollbars="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelStickers">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStickerNone"
+                    style="@style/Widget.EditPhoto.FrameButton.Active"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="10dp"
+                    android:text="None" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStickerStar"
+                    style="@style/Widget.EditPhoto.FrameButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="10dp"
+                    android:text="Star" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStickerFlash"
+                    style="@style/Widget.EditPhoto.FrameButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="10dp"
+                    android:text="Flash" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStickerCamera"
+                    style="@style/Widget.EditPhoto.FrameButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Camera" />
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
         <!-- Save Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnFinishEdit"
@@ -309,7 +384,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/framesScrollView" />
+            app:layout_constraintTop_toBottomOf="@id/stickersScrollView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
