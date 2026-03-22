@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7F9">
+    android:background="@drawable/bg_gradient">
 
     <!-- ═══════════════════════════════════════
          TOP APP BAR
@@ -16,10 +16,10 @@
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:background="@android:color/transparent"
-        app:navigationIconTint="#2C3E50"
+        app:navigationIconTint="#2A5298"
         app:title="@string/title_camera"
         app:titleCentered="true"
-        app:titleTextColor="#2C3E50"
+        app:titleTextColor="#2A5298"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -41,20 +41,22 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.04"
+            android:fontFamily="@font/pacifico_regular"
+            android:shadowColor="#FFFFFF"
+            android:shadowRadius="8"
             android:text="Memories"
-            android:textColor="#2C3E50"
-            android:textSize="26sp" />
+            android:textColor="#2A5298"
+            android:textSize="32sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Elegant Capture Experience"
-            android:textColor="#95A5A6"
-            android:textSize="11sp"
-            android:letterSpacing="0.12" />
+            android:textColor="#1F618D"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08" />
     </LinearLayout>
 
     <!-- ═══════════════════════════════════════
@@ -78,10 +80,10 @@
             android:layout_height="36dp"
             android:text="1:1"
             android:textSize="12sp"
-            android:textColor="#2C3E50"
+            android:textColor="#2A5298"
             android:paddingStart="0dp"
             android:paddingEnd="0dp"
-            app:strokeColor="#BDC3C7" />
+            app:strokeColor="#80FFFFFF" />
 
         <Button
             android:id="@+id/btnRatioStandard"
@@ -90,10 +92,10 @@
             android:layout_height="36dp"
             android:text="4:3"
             android:textSize="12sp"
-            android:textColor="#2C3E50"
+            android:textColor="#2A5298"
             android:paddingStart="0dp"
             android:paddingEnd="0dp"
-            app:strokeColor="#BDC3C7" />
+            app:strokeColor="#80FFFFFF" />
 
         <Button
             android:id="@+id/btnRatioWide"
@@ -102,10 +104,10 @@
             android:layout_height="36dp"
             android:text="16:9"
             android:textSize="12sp"
-            android:textColor="#2C3E50"
+            android:textColor="#2A5298"
             android:paddingStart="0dp"
             android:paddingEnd="0dp"
-            app:strokeColor="#BDC3C7" />
+            app:strokeColor="#80FFFFFF" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -163,26 +165,51 @@
     </androidx.cardview.widget.CardView>
 
     <!-- ═══════════════════════════════════════
-         CAPTURE BUTTON — anchored to bottom
+         BOTTOM CONTROLS (CAPTURE & SWITCH & THUMBNAIL)
     ═══════════════════════════════════════ -->
-    <com.google.android.material.button.MaterialButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnCapture"
-        android:layout_width="0dp"
-        android:layout_height="54dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginBottom="36dp"
-        android:fontFamily="sans-serif-medium"
-        android:letterSpacing="0.12"
-        android:text="START CAPTURING"
-        android:textSize="13sp"
-        android:textColor="#FFFF"
-        app:backgroundTint="@color/design_default_color_primary_variant"
-        app:cornerRadius="12dp"
-        app:elevation="4dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/selector_camera_btn"
+        android:elevation="6dp"
+        android:stateListAnimator="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvThumbnail"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="40dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#E0E0E0"
+        app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+        app:layout_constraintEnd_toStartOf="@id/btnCapture"
+        app:layout_constraintTop_toTopOf="@id/btnCapture">
+
+        <ImageView
+            android:id="@+id/ivThumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </androidx.cardview.widget.CardView>
+
+    <ImageButton
+        android:id="@+id/btnSwitchCamera"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="40dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="Switch Camera"
+        android:src="@android:drawable/ic_popup_sync"
+        app:tint="#2C3E50"
+        app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+        app:layout_constraintStart_toEndOf="@id/btnCapture"
+        app:layout_constraintTop_toTopOf="@id/btnCapture" />
 
     <!-- ═══════════════════════════════════════
          RESULT OVERLAY (hidden by default)
@@ -191,7 +218,7 @@
         android:id="@+id/layoutResult"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F4F7F9"
+        android:background="#D9FFFFFF"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
@@ -204,10 +231,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Select your best shot"
-            android:textSize="22sp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="#2C3E50"
-            android:layout_marginBottom="8dp" />
+            android:textSize="26sp"
+            android:fontFamily="@font/pacifico_regular"
+            android:textColor="#2A5298"
+            android:layout_marginBottom="4dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -234,9 +261,10 @@
             android:fontFamily="sans-serif-medium"
             android:letterSpacing="0.10"
             android:text="Next to Edit"
-            android:textSize="13sp"
-            app:backgroundTint="#2C3E50"
-            app:cornerRadius="12dp" />
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="#2A5298"
+            app:cornerRadius="27dp" />
 
     </LinearLayout>
 

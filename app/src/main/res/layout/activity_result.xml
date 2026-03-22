@@ -70,22 +70,25 @@
     <!-- Nội dung chính -->
     <androidx.cardview.widget.CardView
         android:id="@+id/finalImageCard"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         app:cardCornerRadius="24dp"
         app:cardElevation="12dp"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toTopOf="@id/btnSavePng"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
         <ImageView
             android:id="@+id/ivFinalResult"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:scaleType="centerInside" />
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter" />
     </androidx.cardview.widget.CardView>
 
     <!-- Các nút thao tác -->

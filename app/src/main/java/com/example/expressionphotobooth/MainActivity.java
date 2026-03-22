@@ -11,6 +11,8 @@ import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,13 +50,15 @@ public class MainActivity extends AppCompatActivity {
     private PreviewView viewFinder;
     private CardView previewCard;
     private Button captureButton;
+    private ImageButton btnSwitchCamera;
+    private ImageView ivThumbnail;
     private TextView tvCountdown;
     private ImageCapture imageCapture;
     private int maxPhotos;
     private int capturedCount = 0;
     private final List<Uri> savedImageUris = new ArrayList<>();
     private ProcessCameraProvider cameraProvider;
-    private final CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
+    private CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
 
     // 0: 1:1, 1: 4:3, 2: 16:9
     private int currentRatio = 1;
@@ -80,7 +84,20 @@ public class MainActivity extends AppCompatActivity {
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
         captureButton = findViewById(R.id.btnCapture);
+        btnSwitchCamera = findViewById(R.id.btnSwitchCamera);
+        ivThumbnail = findViewById(R.id.ivThumbnail);
         tvCountdown = findViewById(R.id.tvCountdown);
+
+        if (btnSwitchCamera != null) {
+            btnSwitchCamera.setOnClickListener(v -> {
+                cameraSelector = (cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA)
+                        ? CameraSelector.DEFAULT_BACK_CAMERA
+                        : CameraSelector.DEFAULT_FRONT_CAMERA;
+                if (cameraProvider != null) {
+                    bindCameraUseCases();
+                }
+            });
+        }
 
         Button squareButton = findViewById(R.id.btnRatioSquare);
         Button standardButton = findViewById(R.id.btnRatioStandard);
@@ -208,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
         savedImageUris.clear();
         isCapturingSequence = true;
         captureButton.setEnabled(false);
+        if (btnSwitchCamera != null) btnSwitchCamera.setEnabled(false);
         startCountdownAndCapture();
     }
 
@@ -239,13 +257,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 capturedCount++;
-                savedImageUris.add(Uri.fromFile(photoFile));
+                Uri savedUri = Uri.fromFile(photoFile);
+                savedImageUris.add(savedUri);
+                
+                if (ivThumbnail != null) {
+                    ivThumbnail.setImageURI(savedUri);
+                }
+
                 new Handler(Looper.getMainLooper()).postDelayed(() -> startCountdownAndCapture(), 1000);
             }
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
                 isCapturingSequence = false;
                 captureButton.setEnabled(true);
+                if (btnSwitchCamera != null) btnSwitchCamera.setEnabled(true);
             }
         });
     }

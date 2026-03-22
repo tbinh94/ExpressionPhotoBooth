@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Trạng thái khi được bấm -->
+    <item android:state_pressed="true">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <stroke android:width="6dp" android:color="#E0E0E0" />
+                    <solid android:color="#33FFFFFF" />
+                </shape>
+            </item>
+            <item android:top="14dp" android:bottom="14dp" android:left="14dp" android:right="14dp">
+                <shape android:shape="oval">
+                    <solid android:color="#E0E0E0" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    
+    <!-- Trạng thái không vô hiệu hóa -->
+    <item android:state_enabled="false">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <stroke android:width="5dp" android:color="#80FFFFFF" />
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item android:top="8dp" android:bottom="8dp" android:left="8dp" android:right="8dp">
+                <shape android:shape="oval">
+                    <solid android:color="#80FFFFFF" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Trạng thái mặc định -->
+    <item>
+        <layer-list>
+            <!-- Vòng tròn ngoài (viền) -->
+            <item>
+                <shape android:shape="oval">
+                    <!-- Viền dày, màu trắng -->
+                    <stroke android:width="5dp" android:color="#FFFFFF" />
+                    <!-- Phần bên trong viền rỗng (hoặc nền mờ nhẹ) -->
+                    <solid android:color="#20FFFFFF" />
+                </shape>
+            </item>
+            <!-- Nút tròn đặc bên trong (cách viền ngoài 8dp) -->
+            <item android:top="8dp" android:bottom="8dp" android:left="8dp" android:right="8dp">
+                <shape android:shape="oval">
+                    <solid android:color="#FFFFFF" /> <!-- Màu trắng tinh -->
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>
