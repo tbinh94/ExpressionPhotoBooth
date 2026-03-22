@@ -54,7 +54,6 @@ public class SetupActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Animation cho nút Back
         btnBack.setOnClickListener(v -> {
             Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
             btnBack.startAnimation(press);
@@ -63,12 +62,11 @@ public class SetupActivity extends AppCompatActivity {
                 @Override public void onAnimationRepeat(Animation animation) {}
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    getOnBackPressedDispatcher().onBackPressed();
+                    finish();
                 }
             });
         });
 
-        // Animation cho nút Next
         btnNext.setOnClickListener(v -> {
             if (selectedFrameResId == -1) {
                 Toast.makeText(this, "Please select a frame first!", Toast.LENGTH_SHORT).show();
@@ -83,12 +81,16 @@ public class SetupActivity extends AppCompatActivity {
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     int photoCount = 4;
-                    SessionState session = new SessionState();
+                    
+                    // Lấy session hiện tại hoặc tạo mới
+                    SessionState session = sessionRepository.getSession();
+                    if (session == null) session = new SessionState();
+                    
                     session.setPhotoCount(photoCount);
                     session.setSelectedFrameResId(selectedFrameResId);
                     session.setEditState(new EditState());
                     sessionRepository.saveSession(session);
-
+                    
                     Intent intent = new Intent(SetupActivity.this, MainActivity.class);
                     intent.putExtra(IntentKeys.EXTRA_PHOTO_COUNT, photoCount);
                     startActivity(intent);
@@ -109,6 +111,7 @@ public class SetupActivity extends AppCompatActivity {
     private List<Concept> createMockData() {
         List<Concept> concepts = new ArrayList<>();
         List<Frame> summerFrames = new ArrayList<>();
+        // Đảm bảo R.drawable.sample_frame là hợp lệ (có file sample_frame.jpg/png)
         summerFrames.add(new Frame(1, R.drawable.sample_frame));
         summerFrames.add(new Frame(2, R.drawable.sample_frame));
         summerFrames.add(new Frame(3, R.drawable.sample_frame));

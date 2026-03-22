@@ -11,6 +11,8 @@ import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +36,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
@@ -47,14 +50,17 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "CameraX";
     private PreviewView viewFinder;
     private CardView previewCard;
-    private Button captureButton;
+    private View captureButton;
+    private ImageButton btnSwitchCamera;
+    private ShapeableImageView btnRecentPreview;
+    private ImageView ivRecentThumbnail;
     private TextView tvCountdown;
     private ImageCapture imageCapture;
     private int maxPhotos;
     private int capturedCount = 0;
     private final List<Uri> savedImageUris = new ArrayList<>();
     private ProcessCameraProvider cameraProvider;
-    private final CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
+    private CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
 
     // 0: 1:1, 1: 4:3, 2: 16:9
     private int currentRatio = 1;
@@ -66,27 +72,37 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        // FIX: Đảm bảo layout được nạp đúng
         setContentView(R.layout.activity_main);
 
-        // Khởi tạo Dependency
         AppContainer appContainer = (AppContainer) getApplication();
         sessionRepository = appContainer.getSessionRepository();
         sessionState = sessionRepository.getSession();
 
+        int photoCountFromIntent = getIntent().getIntExtra("EXTRA_PHOTO_COUNT", 4);
+
+        if (sessionState == null) {
+            sessionState = new SessionState();
+        }
+
+        sessionState.setPhotoCount(photoCountFromIntent);
+        maxPhotos = photoCountFromIntent;
+
+        sessionRepository.saveSession(sessionState);
+
         setupToolbar();
 
-        // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
         captureButton = findViewById(R.id.btnCapture);
         tvCountdown = findViewById(R.id.tvCountdown);
+        btnSwitchCamera = findViewById(R.id.btnSwitchCamera);
+        btnRecentPreview = findViewById(R.id.btnRecentPreview);
+        ivRecentThumbnail = findViewById(R.id.ivRecentThumbnail);
 
         Button squareButton = findViewById(R.id.btnRatioSquare);
         Button standardButton = findViewById(R.id.btnRatioStandard);
         Button wideButton = findViewById(R.id.btnRatioWide);
 
-        // Cấu hình dữ liệu session
         maxPhotos = getIntent().getIntExtra("EXTRA_PHOTO_COUNT", sessionState.getPhotoCount());
         sessionState.setPhotoCount(maxPhotos);
         sessionRepository.saveSession(sessionState);
@@ -94,15 +110,24 @@ public class MainActivity extends AppCompatActivity {
         captureButton.setEnabled(false);
         captureButton.setOnClickListener(v -> startPhotoSequence());
 
-        // Lắng nghe sự kiện đổi tỉ lệ
         if (squareButton != null) squareButton.setOnClickListener(v -> updateRatio(0));
         if (standardButton != null) standardButton.setOnClickListener(v -> updateRatio(1));
         if (wideButton != null) wideButton.setOnClickListener(v -> updateRatio(2));
 
-        // Áp dụng tỉ lệ mặc định ban đầu
+        if (btnSwitchCamera != null) {
+            btnSwitchCamera.setOnClickListener(v -> switchCamera());
+        }
+
+        if (btnRecentPreview != null) {
+            btnRecentPreview.setOnClickListener(v -> {
+                if (!savedImageUris.isEmpty()) {
+                    // Logic to open preview of recent photos if needed
+                }
+            });
+        }
+
         applyPreviewRatio();
 
-        // Xử lý System Bar Insets để không bị lẹm vào phần đục lỗ màn hình
         View mainView = findViewById(R.id.main);
         if (mainView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
@@ -119,20 +144,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void switchCamera() {
+        if (cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) {
+            cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+        } else {
+            cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
+        }
+        if (cameraProvider != null) {
+            bindCameraUseCases();
+        }
+    }
+
     private void updateRatio(int ratio) {
         if (currentRatio != ratio) {
             currentRatio = ratio;
-            applyPreviewRatio(); // Cập nhật khung UI
+            applyPreviewRatio();
             if (cameraProvider != null) {
-                bindCameraUseCases(); // Khởi động lại luồng camera để khớp tỉ lệ mới
+                bindCameraUseCases();
             }
         }
     }
 
     private void applyPreviewRatio() {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) previewCard.getLayoutParams();
-
-        // FIX: Ép kiểu lại để đảm bảo không bị lỗi giao diện che khuất
         switch (currentRatio) {
             case 0: // 1:1
                 params.dimensionRatio = "1:1";
@@ -144,12 +178,6 @@ public class MainActivity extends AppCompatActivity {
                 params.dimensionRatio = "9:16";
                 break;
         }
-
-        // Để fix lỗi che nút Capture, bạn CẦN đảm bảo trong activity_main.xml:
-        // 1. previewCard có layout_height="0dp"
-        // 2. previewCard có app:layout_constraintBottom_toTopOf="@+id/bottomControlLayout" (hoặc nút capture)
-        // 3. previewCard có app:layout_constrainedHeight="true"
-
         previewCard.setLayoutParams(params);
     }
 
@@ -157,8 +185,6 @@ public class MainActivity extends AppCompatActivity {
         if (cameraProvider == null) return;
 
         Preview.Builder previewBuilder = new Preview.Builder();
-
-        // Áp dụng tỉ lệ luồng ảnh
         if (currentRatio == 2) {
             previewBuilder.setTargetAspectRatio(AspectRatio.RATIO_16_9);
         } else {
@@ -200,20 +226,20 @@ public class MainActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    // --- Các hàm phụ trợ (giữ nguyên logic của bạn) ---
-
     private void startPhotoSequence() {
         if (isCapturingSequence) return;
         capturedCount = 0;
         savedImageUris.clear();
         isCapturingSequence = true;
         captureButton.setEnabled(false);
+        if (btnSwitchCamera != null) btnSwitchCamera.setEnabled(false);
         startCountdownAndCapture();
     }
 
     private void startCountdownAndCapture() {
         if (capturedCount >= maxPhotos) {
             isCapturingSequence = false;
+            if (btnSwitchCamera != null) btnSwitchCamera.setEnabled(true);
             goToSelectionPage();
             return;
         }
@@ -239,13 +265,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 capturedCount++;
-                savedImageUris.add(Uri.fromFile(photoFile));
+                Uri savedUri = Uri.fromFile(photoFile);
+                savedImageUris.add(savedUri);
+
+                // Cập nhật thumbnail preview
+                runOnUiThread(() -> {
+                    ivRecentThumbnail.setPadding(0, 0, 0, 0);
+                    ivRecentThumbnail.setColorFilter(null);
+                    ivRecentThumbnail.setImageURI(savedUri);
+                });
+
                 new Handler(Looper.getMainLooper()).postDelayed(() -> startCountdownAndCapture(), 1000);
             }
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
                 isCapturingSequence = false;
                 captureButton.setEnabled(true);
+                if (btnSwitchCamera != null) btnSwitchCamera.setEnabled(true);
             }
         });
     }
@@ -263,9 +299,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        }
     }
 
     private void requestCameraPermission() {

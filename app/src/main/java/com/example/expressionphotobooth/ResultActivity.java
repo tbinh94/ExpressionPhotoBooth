@@ -70,6 +70,7 @@ public class ResultActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (collageWithFrame != null) {
                     resultUri = saveBitmapToCache(collageWithFrame);
+                    ivFinalResult.setAdjustViewBounds(true);
                     ivFinalResult.setImageBitmap(collageWithFrame);
                     sessionState.setResultImageUri(resultUri.toString());
                     sessionRepository.saveSession(sessionState);
@@ -91,7 +92,7 @@ public class ResultActivity extends AppCompatActivity {
                 @Override public void onAnimationRepeat(Animation animation) {}
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    exportTimelapseVideo();
+                    exportTimelapseVideoAndFinish();
                 }
             });
         });
@@ -123,30 +124,48 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
-    private void exportTimelapseVideo() {
+    private void exportTimelapseVideoAndFinish() {
         List<String> sourceUris = sessionState.getTimelapseImageUris();
+        
+        // Nếu không có timelapseImageUris, thử dùng capturedImageUris làm fallback để tránh lỗi quay về home mà không làm gì
         if (sourceUris == null || sourceUris.isEmpty()) {
-            Toast.makeText(this, "Không có dữ liệu video!", Toast.LENGTH_SHORT).show();
+            sourceUris = sessionState.getCapturedImageUris();
+        }
+
+        if (sourceUris == null || sourceUris.isEmpty()) {
+            Toast.makeText(this, "Không có dữ liệu ảnh để tạo video!", Toast.LENGTH_SHORT).show();
+            navigateToHome();
             return;
         }
 
         btnNext.setEnabled(false);
         Toast.makeText(this, "Đang tạo video timelapse...", Toast.LENGTH_SHORT).show();
 
+        List<String> finalSourceUris = sourceUris;
         new Thread(() -> {
             try {
-                Uri videoUri = createTimelapseVideoUseCase.execute(this, sourceUris, 10);
+                Uri videoUri = createTimelapseVideoUseCase.execute(this, finalSourceUris, 10);
                 runOnUiThread(() -> {
                     btnNext.setEnabled(true);
                     Toast.makeText(this, "Video đã lưu vào thư viện!", Toast.LENGTH_LONG).show();
+                    navigateToHome();
                 });
             } catch (IOException e) {
                 runOnUiThread(() -> {
                     btnNext.setEnabled(true);
                     Toast.makeText(this, "Lỗi khi lưu video", Toast.LENGTH_SHORT).show();
+                    navigateToHome(); // Vẫn quay về home dù lỗi lưu video
                 });
             }
         }).start();
+    }
+
+    private void navigateToHome() {
+        sessionRepository.clearSession();
+        Intent intent = new Intent(ResultActivity.this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void saveCurrentResultAsPng() {
