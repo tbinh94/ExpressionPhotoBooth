@@ -10,7 +10,7 @@
         android:id="@+id/tvConceptName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1 Concept Name"
+        android:text="@string/item_concept_placeholder"
         android:textColor="#1A5276"
         android:textSize="16sp"
         android:textStyle="bold"

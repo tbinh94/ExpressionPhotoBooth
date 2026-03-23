@@ -21,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Choose a photo to enhance or proceed to result"
+        android:text="@string/selection_instruction"
         android:textColor="#7F8C8D"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"

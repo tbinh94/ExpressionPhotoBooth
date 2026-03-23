@@ -36,7 +36,7 @@
             android:maxLines="1"
             android:paddingHorizontal="6dp"
             android:paddingVertical="4dp"
-            android:text="Frame"
+            android:text="@string/item_frame_placeholder"
             android:textColor="@android:color/white"
             android:textSize="12sp" />
     </FrameLayout>

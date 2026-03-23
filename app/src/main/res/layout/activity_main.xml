@@ -38,14 +38,14 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:letterSpacing="0.05"
-            android:text="Memories"
+            android:text="@string/camera_header_title"
             android:textColor="#2C3E50"
             android:textSize="28sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Elegant Capture Experience"
+            android:text="@string/camera_header_subtitle"
             android:textColor="#7F8C8D"
             android:textSize="12sp"
             android:letterSpacing="0.1" />
@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:fontFamily="sans-serif-black"
-                android:text="3"
+                android:text="@string/capture_countdown_default"
                 android:textColor="@android:color/white"
                 android:textSize="100sp"
                 android:visibility="gone"
@@ -91,25 +91,6 @@
                 android:shadowDx="2"
                 android:shadowDy="2"
                 android:shadowRadius="10"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardLastCapture"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:layout_gravity="top|end"
-                android:layout_margin="12dp"
-                android:visibility="gone"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:strokeColor="#CCFFFFFF"
-                app:strokeWidth="1dp">
-
-                <ImageView
-                    android:id="@+id/ivLastCapturePreview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop" />
-            </com.google.android.material.card.MaterialCardView>
 
             <View
                 android:id="@+id/captureFlashOverlay"
@@ -121,24 +102,45 @@
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Thumbnail da chup, dat ngoai khung camera de khong che preview -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardLastCapture"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="@id/previewCard"
+        app:layout_constraintTop_toBottomOf="@id/previewCard"
+        app:strokeColor="#CCFFFFFF"
+        app:strokeWidth="1dp">
+
+        <ImageView
+            android:id="@+id/ivLastCapturePreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </com.google.android.material.card.MaterialCardView>
+
     <!-- Nút chọn tỉ lệ -->
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/ratioContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         app:singleSelection="true"
         app:checkedButton="@+id/btnRatioSquare"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/previewCard">
+        app:layout_constraintTop_toBottomOf="@id/cardLastCapture">
 
         <Button
             android:id="@+id/btnRatioSquare"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1:1"
+            android:text="@string/ratio_square"
             android:textColor="#2C3E50"
             app:strokeColor="#BDC3C7" />
 
@@ -147,7 +149,7 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="16:9"
+            android:text="@string/ratio_wide"
             android:textColor="#2C3E50"
             app:strokeColor="#BDC3C7" />
 
@@ -201,7 +203,7 @@
         android:layout_marginBottom="40dp"
         android:fontFamily="sans-serif-black"
         android:letterSpacing="0.15"
-        android:text="START CAPTURING"
+        android:text="@string/btn_start_capturing"
         android:textSize="14sp"
         app:backgroundTint="#2C3E50"
         app:cornerRadius="0dp"
@@ -225,7 +227,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select your best shot"
+            android:text="@string/camera_result_overlay_title"
             android:textSize="24sp"
             android:fontFamily="sans-serif-medium"
             android:textColor="#2C3E50"
@@ -241,7 +243,7 @@
             android:id="@+id/btnNextToEdit"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="Next to Edit"
+            android:text="@string/btn_next_to_edit"
             app:backgroundTint="#2C3E50"
             app:cornerRadius="0dp"
             android:layout_marginTop="20dp"/>

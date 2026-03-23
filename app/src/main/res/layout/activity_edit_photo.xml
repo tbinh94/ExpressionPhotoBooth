@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F4F7F9">
@@ -11,62 +10,151 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:navigationIconTint="#2C3E50"
-        app:title="Edit Photo"
-        app:titleCentered="true"
-        app:titleTextColor="#2C3E50"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIconTint="#2C3E50"
+        app:title="@string/title_edit"
+        app:titleCentered="true"
+        app:titleTextColor="#2C3E50" />
 
     <!-- Preview Area -->
     <androidx.cardview.widget.CardView
         android:id="@+id/resultPreviewCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="24dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
-        app:layout_constraintBottom_toTopOf="@id/editControlsCard"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="20dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toTopOf="@id/editSummaryCard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar">
+        app:layout_constraintTop_toBottomOf="@id/topAppBar"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintDimensionRatio="3:4">
 
         <ImageView
             android:id="@+id/ivEditingPhoto"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#DCDFE2"
-            android:scaleType="centerInside" />
+            android:scaleType="fitCenter" />
     </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/editSummaryCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        app:cardCornerRadius="14dp"
+        app:cardElevation="1dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/resultPreviewCard">
+
+        <TextView
+            android:id="@+id/tvEditSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="10dp"
+            android:text="@string/edit_summary_default"
+            android:textColor="#4C5A67"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- Controls Area -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/editControlsCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_bottom_sheet"
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent"
-        android:layout_marginBottom="-24dp"
-        app:layout_constraintBottom_toTopOf="@id/btnFinishEdit">
+        app:layout_constraintBottom_toTopOf="@id/btnFinishEdit"
+        app:layout_constraintTop_toBottomOf="@id/editSummaryCard">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="40dp">
+            android:paddingTop="10dp"
+            android:paddingBottom="14dp">
+
+            <View
+                android:layout_width="42dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_handle" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:drawableStart="@android:drawable/ic_menu_slideshow"
+                android:drawablePadding="6dp"
+                android:drawableTint="#7F8C8D"
                 android:letterSpacing="0.1"
-                android:text="Filters"
+                android:text="@string/edit_section_presets"
                 android:textColor="#7F8C8D"
-                android:textSize="12sp"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetCute"
+                        style="@style/Widget.EditPhoto.PresetButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/edit_preset_cute" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetKpop"
+                        style="@style/Widget.EditPhoto.PresetButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/edit_preset_kpop" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetClassic"
+                        style="@style/Widget.EditPhoto.PresetButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/edit_preset_classic" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:drawableStart="@android:drawable/ic_menu_gallery"
+                android:drawablePadding="6dp"
+                android:drawableTint="#7F8C8D"
+                android:letterSpacing="0.1"
+                android:text="@string/edit_section_filters"
+                android:textColor="#7F8C8D"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <HorizontalScrollView
@@ -79,26 +167,26 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFilterNone"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="None" />
+                        android:text="@string/edit_option_none" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFilterSoft"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Soft" />
+                        android:text="@string/edit_filter_soft" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFilterBW"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="B/W" />
+                        android:text="@string/edit_filter_bw" />
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -107,10 +195,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:drawableStart="@android:drawable/ic_menu_crop"
+                android:drawablePadding="6dp"
+                android:drawableTint="#7F8C8D"
                 android:letterSpacing="0.1"
-                android:text="Frames"
+                android:text="@string/edit_section_frames"
                 android:textColor="#7F8C8D"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <HorizontalScrollView
@@ -123,33 +214,33 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFrameNone"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="None" />
+                        android:text="@string/edit_option_none" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFrameCortis"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cortis" />
+                        android:text="@string/edit_frame_cortis" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFrameT1"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="T1" />
+                        android:text="@string/edit_frame_t1" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFrameAespa"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Aespa" />
+                        android:text="@string/edit_frame_aespa" />
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -158,10 +249,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:drawableStart="@android:drawable/ic_menu_camera"
+                android:drawablePadding="6dp"
+                android:drawableTint="#7F8C8D"
                 android:letterSpacing="0.1"
-                android:text="Stickers"
+                android:text="@string/edit_section_stickers"
                 android:textColor="#7F8C8D"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <HorizontalScrollView
@@ -174,33 +268,33 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnStickerNone"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="None" />
+                        android:text="@string/edit_option_none" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnStickerStar"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Star" />
+                        android:text="@string/edit_sticker_star" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnStickerFlash"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Flash" />
+                        android:text="@string/edit_sticker_flash" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnStickerCamera"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.EditPhoto.OptionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Camera" />
+                        android:text="@string/edit_sticker_camera" />
                 </LinearLayout>
             </HorizontalScrollView>
         </LinearLayout>
@@ -210,14 +304,17 @@
         android:id="@+id/btnFinishEdit"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_margin="24dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
         android:fontFamily="sans-serif-black"
         android:letterSpacing="0.1"
-        android:text="SAVE &amp; RETURN"
+        android:text="@string/btn_save_return"
         app:backgroundTint="#2C3E50"
-        app:cornerRadius="0dp"
+        app:cornerRadius="14dp"
+        app:elevation="3dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="24dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,7 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -35,6 +37,22 @@ public class EditPhotoActivity extends AppCompatActivity {
     private EditState currentEditState;
     private RenderEditedBitmapUseCase renderEditedBitmapUseCase;
     private Uri currentPhotoUri;
+    private TextView tvEditSummary;
+
+    private MaterialButton btnFilterNone;
+    private MaterialButton btnFilterSoft;
+    private MaterialButton btnFilterBW;
+    private MaterialButton btnFrameNone;
+    private MaterialButton btnFrameCortis;
+    private MaterialButton btnFrameT1;
+    private MaterialButton btnFrameAespa;
+    private MaterialButton btnStickerNone;
+    private MaterialButton btnStickerStar;
+    private MaterialButton btnStickerFlash;
+    private MaterialButton btnStickerCamera;
+    private MaterialButton btnPresetCute;
+    private MaterialButton btnPresetKpop;
+    private MaterialButton btnPresetClassic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,21 +74,83 @@ public class EditPhotoActivity extends AppCompatActivity {
         currentEditState = sessionState.getPhotoEditState(currentPhotoUri.toString()).copy();
 
         ivEditingPhoto = findViewById(R.id.ivEditingPhoto);
+        tvEditSummary = findViewById(R.id.tvEditSummary);
+
+        btnFilterNone = findViewById(R.id.btnFilterNone);
+        btnFilterSoft = findViewById(R.id.btnFilterSoft);
+        btnFilterBW = findViewById(R.id.btnFilterBW);
+        btnFrameNone = findViewById(R.id.btnFrameNone);
+        btnFrameCortis = findViewById(R.id.btnFrameCortis);
+        btnFrameT1 = findViewById(R.id.btnFrameT1);
+        btnFrameAespa = findViewById(R.id.btnFrameAespa);
+        btnStickerNone = findViewById(R.id.btnStickerNone);
+        btnStickerStar = findViewById(R.id.btnStickerStar);
+        btnStickerFlash = findViewById(R.id.btnStickerFlash);
+        btnStickerCamera = findViewById(R.id.btnStickerCamera);
+        btnPresetCute = findViewById(R.id.btnPresetCute);
+        btnPresetKpop = findViewById(R.id.btnPresetKpop);
+        btnPresetClassic = findViewById(R.id.btnPresetClassic);
         
         // Buttons mapping
-        findViewById(R.id.btnFilterNone).setOnClickListener(v -> updateFilter(EditState.FilterStyle.NONE));
-        findViewById(R.id.btnFilterSoft).setOnClickListener(v -> updateFilter(EditState.FilterStyle.SOFT));
-        findViewById(R.id.btnFilterBW).setOnClickListener(v -> updateFilter(EditState.FilterStyle.BW));
+        btnFilterNone.setOnClickListener(v -> {
+            updateFilter(EditState.FilterStyle.NONE);
+            animateButtonTap(v);
+        });
+        btnFilterSoft.setOnClickListener(v -> {
+            updateFilter(EditState.FilterStyle.SOFT);
+            animateButtonTap(v);
+        });
+        btnFilterBW.setOnClickListener(v -> {
+            updateFilter(EditState.FilterStyle.BW);
+            animateButtonTap(v);
+        });
 
-        findViewById(R.id.btnFrameNone).setOnClickListener(v -> updateFrame(EditState.FrameStyle.NONE));
-        findViewById(R.id.btnFrameCortis).setOnClickListener(v -> updateFrame(EditState.FrameStyle.CORTIS));
-        findViewById(R.id.btnFrameT1).setOnClickListener(v -> updateFrame(EditState.FrameStyle.T1));
-        findViewById(R.id.btnFrameAespa).setOnClickListener(v -> updateFrame(EditState.FrameStyle.AESPA));
+        btnFrameNone.setOnClickListener(v -> {
+            updateFrame(EditState.FrameStyle.NONE);
+            animateButtonTap(v);
+        });
+        btnFrameCortis.setOnClickListener(v -> {
+            updateFrame(EditState.FrameStyle.CORTIS);
+            animateButtonTap(v);
+        });
+        btnFrameT1.setOnClickListener(v -> {
+            updateFrame(EditState.FrameStyle.T1);
+            animateButtonTap(v);
+        });
+        btnFrameAespa.setOnClickListener(v -> {
+            updateFrame(EditState.FrameStyle.AESPA);
+            animateButtonTap(v);
+        });
 
-        findViewById(R.id.btnStickerNone).setOnClickListener(v -> updateSticker(EditState.StickerStyle.NONE));
-        findViewById(R.id.btnStickerStar).setOnClickListener(v -> updateSticker(EditState.StickerStyle.STAR));
-        findViewById(R.id.btnStickerFlash).setOnClickListener(v -> updateSticker(EditState.StickerStyle.FLASH));
-        findViewById(R.id.btnStickerCamera).setOnClickListener(v -> updateSticker(EditState.StickerStyle.CAMERA));
+        btnStickerNone.setOnClickListener(v -> {
+            updateSticker(EditState.StickerStyle.NONE);
+            animateButtonTap(v);
+        });
+        btnStickerStar.setOnClickListener(v -> {
+            updateSticker(EditState.StickerStyle.STAR);
+            animateButtonTap(v);
+        });
+        btnStickerFlash.setOnClickListener(v -> {
+            updateSticker(EditState.StickerStyle.FLASH);
+            animateButtonTap(v);
+        });
+        btnStickerCamera.setOnClickListener(v -> {
+            updateSticker(EditState.StickerStyle.CAMERA);
+            animateButtonTap(v);
+        });
+
+        btnPresetCute.setOnClickListener(v -> {
+            applyPreset(EditState.FilterStyle.SOFT, EditState.FrameStyle.AESPA, EditState.StickerStyle.STAR);
+            animateButtonTap(v);
+        });
+        btnPresetKpop.setOnClickListener(v -> {
+            applyPreset(EditState.FilterStyle.NONE, EditState.FrameStyle.T1, EditState.StickerStyle.FLASH);
+            animateButtonTap(v);
+        });
+        btnPresetClassic.setOnClickListener(v -> {
+            applyPreset(EditState.FilterStyle.BW, EditState.FrameStyle.NONE, EditState.StickerStyle.NONE);
+            animateButtonTap(v);
+        });
 
         originalBitmap = decodeBitmapFromUri(currentPhotoUri);
         if (originalBitmap == null) {
@@ -80,6 +160,8 @@ public class EditPhotoActivity extends AppCompatActivity {
         }
 
         applyCurrentEditState();
+        refreshSelectionUi();
+        updateEditSummary();
 
         MaterialButton btnFinish = findViewById(R.id.btnFinishEdit);
         btnFinish.setOnClickListener(v -> {
@@ -102,18 +184,149 @@ public class EditPhotoActivity extends AppCompatActivity {
         currentEditState.setFilterStyle(style);
         persistCurrentPhotoEditState();
         applyCurrentEditState();
+        refreshSelectionUi();
+        updateEditSummary();
+        animatePreviewPulse();
     }
 
     private void updateFrame(EditState.FrameStyle style) {
         currentEditState.setFrameStyle(style);
         persistCurrentPhotoEditState();
         applyCurrentEditState();
+        refreshSelectionUi();
+        updateEditSummary();
+        animatePreviewPulse();
     }
 
     private void updateSticker(EditState.StickerStyle style) {
         currentEditState.setStickerStyle(style);
         persistCurrentPhotoEditState();
         applyCurrentEditState();
+        refreshSelectionUi();
+        updateEditSummary();
+        animatePreviewPulse();
+    }
+
+    // Preset cho phep ap dung nhanh mot bo style trong 1 lan cham.
+    private void applyPreset(EditState.FilterStyle filterStyle,
+                             EditState.FrameStyle frameStyle,
+                             EditState.StickerStyle stickerStyle) {
+        currentEditState.setFilterStyle(filterStyle);
+        currentEditState.setFrameStyle(frameStyle);
+        currentEditState.setStickerStyle(stickerStyle);
+        persistCurrentPhotoEditState();
+        applyCurrentEditState();
+        refreshSelectionUi();
+        updateEditSummary();
+        animatePreviewPulse();
+    }
+
+    private void refreshSelectionUi() {
+        setSelectedState(btnFilterNone, currentEditState.getFilterStyle() == EditState.FilterStyle.NONE);
+        setSelectedState(btnFilterSoft, currentEditState.getFilterStyle() == EditState.FilterStyle.SOFT);
+        setSelectedState(btnFilterBW, currentEditState.getFilterStyle() == EditState.FilterStyle.BW);
+
+        setSelectedState(btnFrameNone, currentEditState.getFrameStyle() == EditState.FrameStyle.NONE);
+        setSelectedState(btnFrameCortis, currentEditState.getFrameStyle() == EditState.FrameStyle.CORTIS);
+        setSelectedState(btnFrameT1, currentEditState.getFrameStyle() == EditState.FrameStyle.T1);
+        setSelectedState(btnFrameAespa, currentEditState.getFrameStyle() == EditState.FrameStyle.AESPA);
+
+        setSelectedState(btnStickerNone, currentEditState.getStickerStyle() == EditState.StickerStyle.NONE);
+        setSelectedState(btnStickerStar, currentEditState.getStickerStyle() == EditState.StickerStyle.STAR);
+        setSelectedState(btnStickerFlash, currentEditState.getStickerStyle() == EditState.StickerStyle.FLASH);
+        setSelectedState(btnStickerCamera, currentEditState.getStickerStyle() == EditState.StickerStyle.CAMERA);
+    }
+
+    private void setSelectedState(MaterialButton button, boolean selected) {
+        if (button == null) {
+            return;
+        }
+        button.setSelected(selected);
+        button.setPressed(false);
+    }
+
+    private void updateEditSummary() {
+        if (tvEditSummary == null) {
+            return;
+        }
+        tvEditSummary.setText(getString(
+                R.string.edit_summary_format,
+                getFilterLabel(currentEditState.getFilterStyle()),
+                getFrameLabel(currentEditState.getFrameStyle()),
+                getStickerLabel(currentEditState.getStickerStyle())
+        ));
+    }
+
+    private void animatePreviewPulse() {
+        if (ivEditingPhoto == null) {
+            return;
+        }
+        ivEditingPhoto.animate().cancel();
+        ivEditingPhoto.animate()
+                .scaleX(1.02f)
+                .scaleY(1.02f)
+                .setDuration(90)
+                .withEndAction(() -> ivEditingPhoto.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(120)
+                        .start())
+                .start();
+    }
+
+    private void animateButtonTap(View target) {
+        if (target == null) {
+            return;
+        }
+        target.animate().cancel();
+        target.animate()
+                .alpha(0.82f)
+                .setDuration(70)
+                .withEndAction(() -> target.animate()
+                        .alpha(1f)
+                        .setDuration(110)
+                        .start())
+                .start();
+    }
+
+    private String getFilterLabel(EditState.FilterStyle style) {
+        switch (style) {
+            case SOFT:
+                return getString(R.string.edit_filter_soft);
+            case BW:
+                return getString(R.string.edit_filter_bw);
+            case NONE:
+            default:
+                return getString(R.string.edit_option_none);
+        }
+    }
+
+    private String getFrameLabel(EditState.FrameStyle style) {
+        switch (style) {
+            case CORTIS:
+                return getString(R.string.edit_frame_cortis);
+            case T1:
+                return getString(R.string.edit_frame_t1);
+            case AESPA:
+                return getString(R.string.edit_frame_aespa);
+            case NONE:
+            default:
+                return getString(R.string.edit_option_none);
+        }
+    }
+
+    private String getStickerLabel(EditState.StickerStyle style) {
+        switch (style) {
+            case STAR:
+                return getString(R.string.edit_sticker_star);
+            case FLASH:
+                return getString(R.string.edit_sticker_flash);
+            case CAMERA:
+                return getString(R.string.edit_sticker_camera);
+            case NONE:
+            default:
+                return getString(R.string.edit_option_none);
+        }
     }
 
     private void applyCurrentEditState() {
