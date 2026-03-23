@@ -42,7 +42,7 @@ public class CreateVerticalCollageUseCase {
             int left = (maxWidth - bmp.getWidth()) / 2;
             canvas.drawBitmap(bmp, left, currentY, null);
             currentY += bmp.getHeight();
-            // Không recycle ở đây vì có thể là ảnh gốc đang dùng ở chỗ khác, 
+            // Không recycle ở đây vì có thể là ảnh gốc đang dùng ở chỗ khác,
             // nhưng trong case này thường là các bitmap temp được decode ra.
         }
 

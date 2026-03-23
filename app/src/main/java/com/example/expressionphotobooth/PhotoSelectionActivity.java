@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expressionphotobooth.domain.model.SessionState;
@@ -17,23 +20,60 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class PhotoSelectionActivity extends AppCompatActivity {
     private PhotoAdapter adapter;
     private SessionRepository sessionRepository;
     private SessionState sessionState;
+    private MaterialButton btnContinueToEdit;
+    private MaterialButton btnDirectToResult;
+    private TextView tvSelectionStatus;
+    private TextView tvClearSelection;
+    private SelectedPhotoPreviewAdapter selectedPhotoPreviewAdapter;
+    private final ArrayDeque<String> pendingEditOriginalUris = new ArrayDeque<>();
+    private boolean isBatchEditing = false;
 
     private final ActivityResultLauncher<Intent> editActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
+                boolean editSaved = false;
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     String originalUri = result.getData().getStringExtra(IntentKeys.EXTRA_ORIGINAL_URI);
                     String editedUri = result.getData().getStringExtra(IntentKeys.EXTRA_EDITED_URI);
                     if (originalUri != null && editedUri != null) {
                         sessionState.getEditedImageUris().put(originalUri, editedUri);
                         sessionRepository.saveSession(sessionState);
-                        updateAdapterUris();
+                        editSaved = true;
+                    }
+                }
+
+                if (isBatchEditing && !editSaved) {
+                    // User backed out/canceled; stop queue gracefully without false success toast.
+                    isBatchEditing = false;
+                    pendingEditOriginalUris.clear();
+                    updateAdapterUris();
+                    Toast.makeText(this, R.string.batch_edit_cancelled, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (isBatchEditing && !pendingEditOriginalUris.isEmpty()) {
+                    launchNextEditInQueue();
+                } else {
+                    isBatchEditing = false;
+                    pendingEditOriginalUris.clear();
+                    updateAdapterUris();
+                    if (adapter != null) {
+                        adapter.clearSelection();
+                    }
+                    updateSelectionStatus(0);
+                    updateSelectedPreviewStrip(new ArrayList<>());
+                    btnContinueToEdit.setEnabled(false);
+                    btnContinueToEdit.setText(R.string.btn_edit);
+                    if (editSaved) {
+                        Toast.makeText(this, R.string.batch_edit_completed, Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -48,11 +88,18 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         setupToolbar();
 
         RecyclerView rvPhotos = findViewById(R.id.rvPhotos);
-        MaterialButton btnContinueToEdit = findViewById(R.id.btnNextToEdit);
-        MaterialButton btnDirectToResult = findViewById(R.id.btnDirectToResult);
+        btnContinueToEdit = findViewById(R.id.btnNextToEdit);
+        btnDirectToResult = findViewById(R.id.btnDirectToResult);
+        tvSelectionStatus = findViewById(R.id.tvSelectionStatus);
+        tvClearSelection = findViewById(R.id.tvClearSelection);
+        RecyclerView rvSelectedPhotos = findViewById(R.id.rvSelectedPhotos);
+
+        selectedPhotoPreviewAdapter = new SelectedPhotoPreviewAdapter();
+        rvSelectedPhotos.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
+        rvSelectedPhotos.setAdapter(selectedPhotoPreviewAdapter);
         
         btnContinueToEdit.setEnabled(false);
-        btnDirectToResult.setEnabled(true);
+        btnDirectToResult.setEnabled(false);
 
         ArrayList<String> imageUriStrings = getIntent().getStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES);
         if (imageUriStrings != null && !imageUriStrings.isEmpty()) {
@@ -63,40 +110,91 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         rvPhotos.setLayoutManager(new GridLayoutManager(this, 2));
         rvPhotos.setHasFixedSize(true);
 
-        adapter = new PhotoAdapter(new ArrayList<>(), (uri, position) -> {
-            btnContinueToEdit.setEnabled(true);
-            btnDirectToResult.setEnabled(true);
+        adapter = new PhotoAdapter(new ArrayList<>(), (selectedUris, selectedCount) -> {
+            btnContinueToEdit.setEnabled(selectedCount > 0);
+            updateSelectionStatus(selectedCount);
+            updateResultButtonState(selectedCount);
+            updateSelectedPreviewStrip(selectedUris);
+            tvClearSelection.setEnabled(selectedCount > 0);
+            tvClearSelection.setAlpha(selectedCount > 0 ? 1f : 0.45f);
         });
         rvPhotos.setAdapter(adapter);
         updateAdapterUris();
 
+        tvClearSelection.setOnClickListener(v -> {
+            if (adapter == null) {
+                return;
+            }
+            adapter.clearSelection();
+            updateSelectionStatus(0);
+            updateSelectedPreviewStrip(new ArrayList<>());
+            btnContinueToEdit.setEnabled(false);
+            btnContinueToEdit.setText(R.string.btn_edit);
+            updateResultButtonState(0);
+            tvClearSelection.setEnabled(false);
+            tvClearSelection.setAlpha(0.45f);
+        });
+        tvClearSelection.setEnabled(false);
+        tvClearSelection.setAlpha(0.45f);
+
         btnContinueToEdit.setOnClickListener(v -> {
-            Uri selectedUri = getSelectedOriginalUri();
-            if (selectedUri == null) return;
+            List<Uri> selectedDisplayUris = adapter.getSelectedUris();
+            if (selectedDisplayUris.isEmpty()) {
+                return;
+            }
 
-            sessionState.setSelectedImageUri(selectedUri.toString());
-            sessionRepository.saveSession(sessionState);
+            pendingEditOriginalUris.clear();
+            for (Uri selectedDisplayUri : selectedDisplayUris) {
+                Uri originalUri = getSelectedOriginalUri(selectedDisplayUri);
+                if (originalUri != null) {
+                    pendingEditOriginalUris.add(originalUri.toString());
+                }
+            }
 
-            Intent intent = new Intent(PhotoSelectionActivity.this, EditPhotoActivity.class);
-            intent.putExtra(IntentKeys.EXTRA_SELECTED_IMAGE, selectedUri.toString());
-            editActivityResultLauncher.launch(intent);
+            if (pendingEditOriginalUris.isEmpty()) {
+                return;
+            }
+
+            isBatchEditing = true;
+            if (pendingEditOriginalUris.size() > 1) {
+                Toast.makeText(this, getString(R.string.batch_edit_start, pendingEditOriginalUris.size()), Toast.LENGTH_SHORT).show();
+            }
+            launchNextEditInQueue();
         });
 
         btnDirectToResult.setOnClickListener(v -> {
-            // 1. Tạo danh sách tất cả ảnh cuối cùng (ưu tiên ảnh đã edit)
+            int requiredCount = getRequiredSelectionCount();
+            List<Uri> selectedDisplayUris = adapter.getSelectedUris();
+            if (selectedDisplayUris.size() != requiredCount) {
+                Toast.makeText(this, getString(R.string.select_enough_for_result, requiredCount), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            LinkedHashSet<String> selectedOriginalUris = new LinkedHashSet<>();
+            for (Uri selectedDisplayUri : selectedDisplayUris) {
+                Uri originalUri = getSelectedOriginalUri(selectedDisplayUri);
+                if (originalUri != null) {
+                    selectedOriginalUris.add(originalUri.toString());
+                }
+            }
+
+            if (selectedOriginalUris.size() != requiredCount) {
+                Toast.makeText(this, getString(R.string.select_enough_for_result, requiredCount), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Chi lay nhom da chon de tao ket qua cuoi.
             ArrayList<String> finalImagesToStitch = new ArrayList<>();
 
-            for (String originalUriStr : sessionState.getCapturedImageUris()) {
+            for (String originalUriStr : selectedOriginalUris) {
                 String editedUriStr = sessionState.getEditedImageUris().get(originalUriStr);
-                // Nếu đã edit thì lấy bản edit, chưa edit thì lấy bản gốc
                 finalImagesToStitch.add(editedUriStr != null ? editedUriStr : originalUriStr);
             }
 
             if (finalImagesToStitch.isEmpty()) return;
 
-            // 2. Lưu trạng thái nếu cần (tùy thuộc vào logic ResultActivity của bạn)
-            // Ở đây ta truyền toàn bộ list ảnh vào intent
             Intent intent = new Intent(PhotoSelectionActivity.this, ResultActivity.class);
+            intent.putStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES, finalImagesToStitch);
 
             startActivity(intent);
         });
@@ -108,23 +206,47 @@ public class PhotoSelectionActivity extends AppCompatActivity {
             String editedUriStr = sessionState.getEditedImageUris().get(originalUriStr);
             displayUris.add(Uri.parse(editedUriStr != null ? editedUriStr : originalUriStr));
         }
-        
-        // Cập nhật list trong adapter (Cần thêm method setUris vào PhotoAdapter hoặc tạo mới)
-        // Ở đây tôi sẽ tạo adapter mới để đơn giản hóa việc refresh UI
-        int selectedPos = -1; // Reset selection hoặc giữ lại nếu cần
-        adapter = new PhotoAdapter(displayUris, (uri, position) -> {
-            findViewById(R.id.btnNextToEdit).setEnabled(true);
-            findViewById(R.id.btnDirectToResult).setEnabled(true);
-        });
-        ((RecyclerView)findViewById(R.id.rvPhotos)).setAdapter(adapter);
+
+        if (adapter != null) {
+            adapter.setUris(displayUris);
+        }
+        btnContinueToEdit.setEnabled(false);
+        updateSelectionStatus(0);
+        updateResultButtonState(0);
+        updateSelectedPreviewStrip(new ArrayList<>());
     }
 
-    private Uri getSelectedOriginalUri() {
-        int pos = -1;
-        // Mocking logic to get position since PhotoAdapter doesn't expose it easily
-        // In real app, better to have adapter.getSelectedPosition()
-        Uri currentDisplayUri = adapter.getSelectedUri();
-        if (currentDisplayUri == null) return null;
+    private void updateSelectionStatus(int selectedCount) {
+        int required = getRequiredSelectionCount();
+        if (selectedCount <= 0) {
+            tvSelectionStatus.setText(getString(R.string.selection_status_none, required));
+            btnContinueToEdit.setText(R.string.btn_edit);
+        } else {
+            tvSelectionStatus.setText(getString(R.string.selection_status_selected, selectedCount, required));
+            btnContinueToEdit.setText(getString(R.string.btn_edit_with_count, selectedCount));
+        }
+    }
+
+    private void updateResultButtonState(int selectedCount) {
+        int required = getRequiredSelectionCount();
+        boolean canExport = required > 0 && selectedCount == required;
+        btnDirectToResult.setEnabled(canExport);
+        btnDirectToResult.setText(getString(R.string.btn_result_with_count, selectedCount, required));
+    }
+
+    private int getRequiredSelectionCount() {
+        int capturedCount = sessionState.getCapturedImageUris().size();
+        if (capturedCount <= 0) {
+            return 0;
+        }
+        int configuredCount = sessionState.getPhotoCount();
+        return configuredCount > 0 ? Math.min(configuredCount, capturedCount) : capturedCount;
+    }
+
+    private Uri getSelectedOriginalUri(Uri currentDisplayUri) {
+        if (currentDisplayUri == null) {
+            return null;
+        }
 
         List<String> captured = sessionState.getCapturedImageUris();
         for (int i = 0; i < captured.size(); i++) {
@@ -137,12 +259,33 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         return null;
     }
 
+    private void launchNextEditInQueue() {
+        String nextOriginalUri = pendingEditOriginalUris.pollFirst();
+        if (nextOriginalUri == null) {
+            isBatchEditing = false;
+            updateAdapterUris();
+            return;
+        }
+
+        sessionState.setSelectedImageUri(nextOriginalUri);
+        sessionRepository.saveSession(sessionState);
+
+        Intent intent = new Intent(PhotoSelectionActivity.this, EditPhotoActivity.class);
+        intent.putExtra(IntentKeys.EXTRA_SELECTED_IMAGE, nextOriginalUri);
+        editActivityResultLauncher.launch(intent);
+    }
+
+    private void updateSelectedPreviewStrip(List<Uri> selectedUris) {
+        selectedPhotoPreviewAdapter.setSelectedUris(selectedUris);
+    }
+
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24);
         toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 

@@ -9,6 +9,7 @@ public class SessionState {
     private int photoCount = 4;
     private final List<String> capturedImageUris = new ArrayList<>();
     private final Map<String, String> editedImageUris = new HashMap<>();
+    private final Map<String, EditState> photoEditStates = new HashMap<>();
     private String selectedImageUri;
     private String resultImageUri;
     private EditState editState = new EditState();
@@ -34,6 +35,29 @@ public class SessionState {
 
     public Map<String, String> getEditedImageUris() {
         return editedImageUris;
+    }
+
+    public Map<String, EditState> getPhotoEditStates() {
+        return photoEditStates;
+    }
+
+    public EditState getPhotoEditState(String originalUri) {
+        if (originalUri == null || originalUri.isEmpty()) {
+            return getEditState();
+        }
+        EditState photoState = photoEditStates.get(originalUri);
+        if (photoState == null) {
+            photoState = getEditState().copy();
+            photoEditStates.put(originalUri, photoState);
+        }
+        return photoState;
+    }
+
+    public void setPhotoEditState(String originalUri, EditState state) {
+        if (originalUri == null || originalUri.isEmpty()) {
+            return;
+        }
+        photoEditStates.put(originalUri, state == null ? new EditState() : state.copy());
     }
 
     public String getSelectedImageUri() {

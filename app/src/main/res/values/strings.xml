@@ -9,6 +9,7 @@
     <string name="capture_failed">Capture failed</string>
     <string name="camera_permission_granted">Camera permission granted</string>
     <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="camera_permission_required">Camera permission is required</string>
     <string name="photo_saved_path">Saved: %1$s</string>
     <string name="no_photo_to_continue">No photos captured</string>
     <string name="no_photo_to_edit">No photo selected for editing</string>
@@ -22,6 +23,8 @@
     <string name="exporting_video">Exporting timelapse video...</string>
     <string name="failed_save_video">Failed to export video</string>
     <string name="video_saved_to_gallery">Video saved to gallery: %1$s</string>
+    <string name="video_saved_success">Video da luu vao thu vien!</string>
+    <string name="processing_collage">Dang xu ly anh ghep...</string>
     <string name="back">Back</string>
     <string name="title_setup">CHOOSE YOUR FRAME</string>
     <string name="title_camera">Camera</string>
@@ -29,5 +32,24 @@
     <string name="title_edit">Edit Photo</string>
     <string name="title_result">Result</string>
     <string name="btn_edit">EDIT</string>
+    <string name="btn_edit_with_count">EDIT (%1$d)</string>
     <string name="btn_result">RESULT</string>
+    <string name="btn_result_with_count">RESULT (%1$d/%2$d)</string>
+    <string name="select_enough_for_result">Hay chon du %1$d anh de xuat ket qua</string>
+    <string name="select_one_photo_for_edit">Vui long chon 1 anh de chinh sua</string>
+    <string name="batch_edit_start">Dang chinh sua %1$d anh da chon</string>
+    <string name="batch_edit_completed">Da hoan thanh chinh sua anh da chon</string>
+    <string name="batch_edit_cancelled">Da dung chinh sua hang loat</string>
+    <string name="selected_strip_title">Selected photos</string>
+    <string name="clear_selection">Clear</string>
+    <string name="selection_status_initial">Selected: 0/0</string>
+    <string name="selection_status_none">Selected: 0/%1$d</string>
+    <string name="selection_status_selected">Selected: %1$d/%2$d</string>
+    <string name="capture_status_ready">Ready to capture</string>
+    <string name="capture_status_starting">Starting capture sequence (%1$d photos)</string>
+    <string name="capture_status_next">Prepare for photo %1$d/%2$d</string>
+    <string name="capture_status_countdown">Photo %1$d/%2$d in %3$ds</string>
+    <string name="capture_status_captured">Captured %1$d/%2$d photos</string>
+    <string name="capture_status_done">Done! %1$d photos captured</string>
+    <string name="capture_status_error">Capture interrupted. Please try again.</string>
 </resources>

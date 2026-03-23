@@ -37,6 +37,7 @@ public class ResultActivity extends AppCompatActivity {
     private CreateTimelapseVideoUseCase createTimelapseVideoUseCase;
     private CreateVerticalCollageUseCase createVerticalCollageUseCase;
     private MaterialButton btnSaveVideo;
+    private List<String> sourceOriginalUris;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,16 +48,17 @@ public class ResultActivity extends AppCompatActivity {
         sessionState = sessionRepository.getSession();
         createTimelapseVideoUseCase = new CreateTimelapseVideoUseCase(new TimelapseVideoEncoder());
         createVerticalCollageUseCase = new CreateVerticalCollageUseCase();
+        sourceOriginalUris = resolveSourceOriginalUris();
         setupToolbar();
 
         ImageView ivFinalResult = findViewById(R.id.ivFinalResult);
 
-        Toast.makeText(this, "Đang xử lý ảnh ghép...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.processing_collage, Toast.LENGTH_SHORT).show();
 
         // Chạy ngầm để không bị lag máy
         new Thread(() -> {
             List<String> imageUrisToCollage = new ArrayList<>();
-            for (String originalUri : sessionState.getCapturedImageUris()) {
+            for (String originalUri : sourceOriginalUris) {
                 String editedUri = sessionState.getEditedImageUris().get(originalUri);
                 imageUrisToCollage.add(editedUri != null ? editedUri : originalUri);
             }
@@ -102,9 +104,8 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void exportTimelapseVideo() {
-        // Sửa lại chỗ này: Lấy danh sách ảnh đã xử lý (giống như lúc ghép ảnh)
         List<String> sourceUris = new ArrayList<>();
-        for (String originalUri : sessionState.getCapturedImageUris()) {
+        for (String originalUri : sourceOriginalUris) {
             String editedUri = sessionState.getEditedImageUris().get(originalUri);
             sourceUris.add(editedUri != null ? editedUri : originalUri);
         }
@@ -123,7 +124,7 @@ public class ResultActivity extends AppCompatActivity {
                 Uri videoUri = createTimelapseVideoUseCase.execute(this, sourceUris, 2);
                 runOnUiThread(() -> {
                     btnSaveVideo.setEnabled(true);
-                    Toast.makeText(this, "Video đã lưu vào thư viện!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.video_saved_success, Toast.LENGTH_LONG).show();
                 });
             } catch (IOException e) {
                 runOnUiThread(() -> {
@@ -186,6 +187,7 @@ public class ResultActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24);
         toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
@@ -193,5 +195,13 @@ public class ResultActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         getOnBackPressedDispatcher().onBackPressed();
         return true;
+    }
+
+    private List<String> resolveSourceOriginalUris() {
+        ArrayList<String> fromIntent = getIntent().getStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES);
+        if (fromIntent != null && !fromIntent.isEmpty()) {
+            return fromIntent;
+        }
+        return new ArrayList<>(sessionState.getCapturedImageUris());
     }
 }
