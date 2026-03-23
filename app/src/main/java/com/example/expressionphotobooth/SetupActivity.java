@@ -3,7 +3,6 @@ package com.example.expressionphotobooth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,7 +46,7 @@ public class SetupActivity extends AppCompatActivity {
         // 1. ÁNH XẠ: Tìm các thành phần từ bản thiết kế XML
         btnNext = findViewById(R.id.btnNext);
         rvConcepts = findViewById(R.id.rvConcepts);
-        ImageButton btnBack = findViewById(R.id.btnBack);
+        MaterialButton btnBack = findViewById(R.id.btnBack);
         MaterialButtonToggleGroup togglePhotoCount = findViewById(R.id.togglePhotoCount);
         btnNext.setEnabled(false);
 
