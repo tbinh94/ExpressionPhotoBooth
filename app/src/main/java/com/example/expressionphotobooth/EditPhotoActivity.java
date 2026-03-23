@@ -1,7 +1,5 @@
 package com.example.expressionphotobooth;
 
-import static org.jcodec.common.dct.SparseIDCT.finish;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -115,11 +113,6 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void updateSticker(EditState.StickerStyle style) {
         currentEditState.setStickerStyle(style);
         persistCurrentPhotoEditState();
-        applyCurrentEditState();
-    }
-
-    private void updateSticker(EditState.StickerStyle style) {
-        sessionState.getEditState().setStickerStyle(style);
         applyCurrentEditState();
     }
 

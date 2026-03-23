@@ -80,12 +80,12 @@ public class ResultActivity extends AppCompatActivity {
         }).start();
 
         MaterialButton btnSavePng = findViewById(R.id.btnSavePng);
-        btnSaveVideo = findViewById(R.id.btnSaveVideo);
+        btnSaveVideo = findViewById(R.id.btnNext);
         btnSavePng.setOnClickListener(v -> saveCurrentResultAsPng());
         btnSaveVideo.setOnClickListener(v -> exportTimelapseVideo());
 
-        MaterialButton btnHome = findViewById(R.id.btnHome);
-        btnHome.setOnClickListener(v -> {
+        MaterialButton btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
             sessionRepository.clearSession();
             Intent intent = new Intent(ResultActivity.this, HomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
