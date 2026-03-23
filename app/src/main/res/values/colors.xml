@@ -4,4 +4,33 @@
     <color name="white">#FFFFFFFF</color>
     <color name="launcher_splash_bg">#FFF8F2FF</color>
     <color name="launcher_icon_bg">#FF8A6DDE</color>
+    <color name="edit_bg">#121212</color>
+
+    <!-- Thêm vào res/values/colors.xml -->
+
+    <!-- Edit UI -->
+    <color name="edit_accent">#2A5298</color>
+    <color name="edit_label">#88000000</color>
+
+    <!-- None / default -->
+    <color name="thumb_none">#DCDFE6</color>
+
+    <!-- Presets -->
+    <color name="thumb_preset_cute">#F9C4D4</color>   <!-- hồng pastel -->
+    <color name="thumb_preset_kpop">#A8C4F0</color>   <!-- xanh dương nhạt -->
+    <color name="thumb_preset_classic">#C8B89A</color> <!-- nâu vintage -->
+
+    <!-- Filters -->
+    <color name="thumb_filter_soft">#EDD5C8</color>   <!-- cam đào mờ -->
+    <color name="thumb_filter_bw">#7A7A7A</color>     <!-- xám trung -->
+
+    <!-- Frames -->
+    <color name="thumb_frame_cortis">#FFFFFF</color>  <!-- trắng — viền trắng kiểu Polaroid -->
+    <color name="thumb_frame_t1">#1A3A7A</color>      <!-- xanh đậm T1 -->
+    <color name="thumb_frame_aespa">#D070A0</color>   <!-- hồng tím Aespa -->
+
+    <!-- Stickers -->
+    <color name="thumb_sticker_star">#FFF0A0</color>  <!-- vàng sao -->
+    <color name="thumb_sticker_flash">#FFE066</color> <!-- vàng sét -->
+    <color name="thumb_sticker_camera">#C8DCF4</color><!-- xanh nhạt camera -->
 </resources>

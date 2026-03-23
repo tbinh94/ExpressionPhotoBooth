@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -84,13 +85,15 @@ public class ResultActivity extends AppCompatActivity {
         btnSavePng.setOnClickListener(v -> saveCurrentResultAsPng());
         btnSaveVideo.setOnClickListener(v -> exportTimelapseVideo());
 
-        MaterialButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> {
-            sessionRepository.clearSession();
-            Intent intent = new Intent(ResultActivity.this, HomeActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intent);
-        });
+        View btnBack = findViewById(R.id.btnBack);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> {
+                sessionRepository.clearSession();
+                Intent intent = new Intent(ResultActivity.this, HomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            });
+        }
     }
 
     private Uri saveBitmapToCache(Bitmap bitmap) {
@@ -182,13 +185,19 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
+        // No MaterialToolbar in layout (it has a custom btnBack)
+        // If you want to use setSupportActionBar, you need a Toolbar with id topAppBar
+        /*
         MaterialToolbar toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24);
+            toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         }
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24);
-        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        */
     }
 
     @Override

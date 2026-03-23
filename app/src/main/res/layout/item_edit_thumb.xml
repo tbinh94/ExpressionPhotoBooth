@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/item_edit_thumb.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="72dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_marginEnd="8dp"
+    android:paddingBottom="4dp">
+
+    <!-- Ring border (shown when selected) -->
+    <FrameLayout
+        android:layout_width="66dp"
+        android:layout_height="80dp">
+
+        <!-- Selection ring -->
+        <View
+            android:id="@+id/vThumbRing"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:background="@drawable/bg_thumb_ring"
+            android:visibility="invisible" />
+
+        <!-- Preview image/color -->
+        <ImageView
+            android:id="@+id/ivThumbPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="3dp"
+            android:scaleType="centerCrop"
+            android:background="#E0E6F0"
+            android:clipToOutline="true" />
+
+    </FrameLayout>
+
+    <!-- Label -->
+    <TextView
+        android:id="@+id/tvThumbLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="@color/edit_label" />
+
+</LinearLayout>

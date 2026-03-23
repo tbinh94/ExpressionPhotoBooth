@@ -6,13 +6,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expressionphotobooth.data.graphics.BitmapEditRenderer;
 import com.example.expressionphotobooth.domain.model.EditState;
@@ -21,15 +27,32 @@ import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.RenderEditedBitmapUseCase;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.tabs.TabLayout;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 public class EditPhotoActivity extends AppCompatActivity {
+
     private static final int MAX_EDIT_BITMAP_SIZE = 1600;
+
+    // Views
     private ImageView ivEditingPhoto;
+    private Chip chipActiveEdit;
+    private TextView tvEditSummary;
+    private TabLayout editTabLayout;
+    private LinearLayout panelPresets, panelFilters, panelFrames, panelStickers;
+    private LinearLayout filterIntensityRow;
+    private SeekBar seekFilterIntensity;
+    private TextView tvIntensityValue;
+
+    // RecyclerViews
+    private RecyclerView rvPresets, rvFilters, rvFrames, rvStickers;
+
+    // State
     private Bitmap originalBitmap;
     private Bitmap editedBitmap;
     private SessionRepository sessionRepository;
@@ -37,33 +60,126 @@ public class EditPhotoActivity extends AppCompatActivity {
     private EditState currentEditState;
     private RenderEditedBitmapUseCase renderEditedBitmapUseCase;
     private Uri currentPhotoUri;
-    private TextView tvEditSummary;
 
-    private MaterialButton btnFilterNone;
-    private MaterialButton btnFilterSoft;
-    private MaterialButton btnFilterBW;
-    private MaterialButton btnFrameNone;
-    private MaterialButton btnFrameCortis;
-    private MaterialButton btnFrameT1;
-    private MaterialButton btnFrameAespa;
-    private MaterialButton btnStickerNone;
-    private MaterialButton btnStickerStar;
-    private MaterialButton btnStickerFlash;
-    private MaterialButton btnStickerCamera;
-    private MaterialButton btnPresetCute;
-    private MaterialButton btnPresetKpop;
-    private MaterialButton btnPresetClassic;
+    // ── Thumbnail item model ──────────────────────────────────────────────────
+
+    static class ThumbItem {
+        final String label;
+        final int drawableRes;   // preview drawable (small cropped sample); 0 = use colorRes
+        final int colorRes;      // fallback solid color for preview swatch
+        final Object value;      // EditState.FilterStyle / FrameStyle / StickerStyle
+
+        ThumbItem(String label, int drawableRes, int colorRes, Object value) {
+            this.label = label;
+            this.drawableRes = drawableRes;
+            this.colorRes = colorRes;
+            this.value = value;
+        }
+    }
+
+    // ── Generic thumbnail RecyclerView adapter ────────────────────────────────
+
+    interface OnThumbSelectedListener {
+        void onSelected(ThumbItem item);
+    }
+
+    class ThumbAdapter extends RecyclerView.Adapter<ThumbAdapter.VH> {
+
+        private final List<ThumbItem> items;
+        private int selectedPos = 0;
+        private final OnThumbSelectedListener listener;
+
+        ThumbAdapter(List<ThumbItem> items, OnThumbSelectedListener listener) {
+            this.items = items;
+            this.listener = listener;
+        }
+
+        void setSelectedByValue(Object value) {
+            for (int i = 0; i < items.size(); i++) {
+                if (items.get(i).value == value) {
+                    int old = selectedPos;
+                    selectedPos = i;
+                    notifyItemChanged(old);
+                    notifyItemChanged(i);
+                    return;
+                }
+            }
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_edit_thumb, parent, false);
+            return new VH(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH h, int position) {
+            ThumbItem item = items.get(position);
+            boolean selected = (position == selectedPos);
+
+            h.label.setText(item.label);
+
+            if (item.drawableRes != 0) {
+                h.preview.setImageResource(item.drawableRes);
+            } else {
+                h.preview.setImageDrawable(null);
+                h.preview.setBackgroundResource(item.colorRes);
+            }
+
+            // Selected ring
+            h.ring.setVisibility(selected ? View.VISIBLE : View.INVISIBLE);
+            h.label.setTextColor(selected
+                    ? getColor(R.color.edit_accent)
+                    : getColor(R.color.edit_label));
+
+            h.itemView.setOnClickListener(v -> {
+                int old = selectedPos;
+                selectedPos = h.getAdapterPosition();
+                notifyItemChanged(old);
+                notifyItemChanged(selectedPos);
+                listener.onSelected(items.get(selectedPos));
+            });
+        }
+
+        @Override
+        public int getItemCount() { return items.size(); }
+
+        class VH extends RecyclerView.ViewHolder {
+            ImageView preview;
+            View ring;
+            TextView label;
+
+            VH(@NonNull View itemView) {
+                super(itemView);
+                preview = itemView.findViewById(R.id.ivThumbPreview);
+                ring    = itemView.findViewById(R.id.vThumbRing);
+                label   = itemView.findViewById(R.id.tvThumbLabel);
+            }
+        }
+    }
+
+    // ── Adapters ──────────────────────────────────────────────────────────────
+
+    private ThumbAdapter presetsAdapter;
+    private ThumbAdapter filtersAdapter;
+    private ThumbAdapter framesAdapter;
+    private ThumbAdapter stickersAdapter;
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_edit_photo);
+
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
         sessionState = sessionRepository.getSession();
         renderEditedBitmapUseCase = new RenderEditedBitmapUseCase(new BitmapEditRenderer());
-        setupToolbar();
 
+        // URI
         String selectedUriString = getIntent().getStringExtra(IntentKeys.EXTRA_SELECTED_IMAGE);
         if (selectedUriString == null || selectedUriString.isEmpty()) {
             Toast.makeText(this, R.string.no_photo_to_edit, Toast.LENGTH_SHORT).show();
@@ -73,84 +189,12 @@ public class EditPhotoActivity extends AppCompatActivity {
         currentPhotoUri = Uri.parse(selectedUriString);
         currentEditState = sessionState.getPhotoEditState(currentPhotoUri.toString()).copy();
 
-        ivEditingPhoto = findViewById(R.id.ivEditingPhoto);
-        tvEditSummary = findViewById(R.id.tvEditSummary);
-
-        btnFilterNone = findViewById(R.id.btnFilterNone);
-        btnFilterSoft = findViewById(R.id.btnFilterSoft);
-        btnFilterBW = findViewById(R.id.btnFilterBW);
-        btnFrameNone = findViewById(R.id.btnFrameNone);
-        btnFrameCortis = findViewById(R.id.btnFrameCortis);
-        btnFrameT1 = findViewById(R.id.btnFrameT1);
-        btnFrameAespa = findViewById(R.id.btnFrameAespa);
-        btnStickerNone = findViewById(R.id.btnStickerNone);
-        btnStickerStar = findViewById(R.id.btnStickerStar);
-        btnStickerFlash = findViewById(R.id.btnStickerFlash);
-        btnStickerCamera = findViewById(R.id.btnStickerCamera);
-        btnPresetCute = findViewById(R.id.btnPresetCute);
-        btnPresetKpop = findViewById(R.id.btnPresetKpop);
-        btnPresetClassic = findViewById(R.id.btnPresetClassic);
-        
-        // Buttons mapping
-        btnFilterNone.setOnClickListener(v -> {
-            updateFilter(EditState.FilterStyle.NONE);
-            animateButtonTap(v);
-        });
-        btnFilterSoft.setOnClickListener(v -> {
-            updateFilter(EditState.FilterStyle.SOFT);
-            animateButtonTap(v);
-        });
-        btnFilterBW.setOnClickListener(v -> {
-            updateFilter(EditState.FilterStyle.BW);
-            animateButtonTap(v);
-        });
-
-        btnFrameNone.setOnClickListener(v -> {
-            updateFrame(EditState.FrameStyle.NONE);
-            animateButtonTap(v);
-        });
-        btnFrameCortis.setOnClickListener(v -> {
-            updateFrame(EditState.FrameStyle.CORTIS);
-            animateButtonTap(v);
-        });
-        btnFrameT1.setOnClickListener(v -> {
-            updateFrame(EditState.FrameStyle.T1);
-            animateButtonTap(v);
-        });
-        btnFrameAespa.setOnClickListener(v -> {
-            updateFrame(EditState.FrameStyle.AESPA);
-            animateButtonTap(v);
-        });
-
-        btnStickerNone.setOnClickListener(v -> {
-            updateSticker(EditState.StickerStyle.NONE);
-            animateButtonTap(v);
-        });
-        btnStickerStar.setOnClickListener(v -> {
-            updateSticker(EditState.StickerStyle.STAR);
-            animateButtonTap(v);
-        });
-        btnStickerFlash.setOnClickListener(v -> {
-            updateSticker(EditState.StickerStyle.FLASH);
-            animateButtonTap(v);
-        });
-        btnStickerCamera.setOnClickListener(v -> {
-            updateSticker(EditState.StickerStyle.CAMERA);
-            animateButtonTap(v);
-        });
-
-        btnPresetCute.setOnClickListener(v -> {
-            applyPreset(EditState.FilterStyle.SOFT, EditState.FrameStyle.AESPA, EditState.StickerStyle.STAR);
-            animateButtonTap(v);
-        });
-        btnPresetKpop.setOnClickListener(v -> {
-            applyPreset(EditState.FilterStyle.NONE, EditState.FrameStyle.T1, EditState.StickerStyle.FLASH);
-            animateButtonTap(v);
-        });
-        btnPresetClassic.setOnClickListener(v -> {
-            applyPreset(EditState.FilterStyle.BW, EditState.FrameStyle.NONE, EditState.StickerStyle.NONE);
-            animateButtonTap(v);
-        });
+        bindViews();
+        setupToolbar();
+        setupTabs();
+        setupAdapters();
+        setupIntensitySlider();
+        setupActionButtons();
 
         originalBitmap = decodeBitmapFromUri(currentPhotoUri);
         if (originalBitmap == null) {
@@ -160,253 +204,223 @@ public class EditPhotoActivity extends AppCompatActivity {
         }
 
         applyCurrentEditState();
-        refreshSelectionUi();
+        syncSelectionsToAdapters();
         updateEditSummary();
+    }
 
-        MaterialButton btnFinish = findViewById(R.id.btnFinishEdit);
-        btnFinish.setOnClickListener(v -> {
-            Uri resultUri = saveEditedBitmapToCache();
-            if (resultUri == null) {
-                Toast.makeText(this, R.string.failed_save_temp_result, Toast.LENGTH_SHORT).show();
-                return;
+    private void bindViews() {
+        ivEditingPhoto    = findViewById(R.id.ivEditingPhoto);
+        chipActiveEdit    = findViewById(R.id.chipActiveEdit);
+        tvEditSummary     = findViewById(R.id.tvEditSummary);
+        editTabLayout     = findViewById(R.id.editTabLayout);
+        panelPresets      = findViewById(R.id.panelPresets);
+        panelFilters      = findViewById(R.id.panelFilters);
+        panelFrames       = findViewById(R.id.panelFrames);
+        panelStickers     = findViewById(R.id.panelStickers);
+        filterIntensityRow = findViewById(R.id.filterIntensityRow);
+        seekFilterIntensity = findViewById(R.id.seekFilterIntensity);
+        tvIntensityValue  = findViewById(R.id.tvIntensityValue);
+        rvPresets         = findViewById(R.id.rvPresets);
+        rvFilters         = findViewById(R.id.rvFilters);
+        rvFrames          = findViewById(R.id.rvFrames);
+        rvStickers        = findViewById(R.id.rvStickers);
+    }
+
+    // ── Tab setup ─────────────────────────────────────────────────────────────
+
+    private void setupTabs() {
+        editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_presets)));
+        editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_filters)));
+        editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_frames)));
+        editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_stickers)));
+
+        editTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                showPanel(tab.getPosition());
             }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
 
-            // Gửi kết quả về PhotoSelectionActivity
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra(IntentKeys.EXTRA_ORIGINAL_URI, currentPhotoUri.toString());
-            resultIntent.putExtra(IntentKeys.EXTRA_EDITED_URI, resultUri.toString());
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish(); // Quay lại trang PhotoSelection
+        showPanel(0); // start on Presets
+    }
+
+    private void showPanel(int index) {
+        panelPresets.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
+        panelFilters.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        panelFrames .setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        panelStickers.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+    }
+
+    // ── Adapters setup ────────────────────────────────────────────────────────
+
+    private void setupAdapters() {
+
+        // PRESETS
+        List<ThumbItem> presetItems = Arrays.asList(
+                new ThumbItem(getString(R.string.edit_preset_cute),    0, R.color.thumb_preset_cute,    "cute"),
+                new ThumbItem(getString(R.string.edit_preset_kpop),    0, R.color.thumb_preset_kpop,    "kpop"),
+                new ThumbItem(getString(R.string.edit_preset_classic), 0, R.color.thumb_preset_classic, "classic")
+        );
+        presetsAdapter = new ThumbAdapter(presetItems, item -> {
+            switch ((String) item.value) {
+                case "cute":    applyPreset(EditState.FilterStyle.SOFT, EditState.FrameStyle.AESPA, EditState.StickerStyle.STAR);    break;
+                case "kpop":    applyPreset(EditState.FilterStyle.NONE, EditState.FrameStyle.T1,    EditState.StickerStyle.FLASH);   break;
+                case "classic": applyPreset(EditState.FilterStyle.BW,   EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE);   break;
+            }
+        });
+        rvPresets.setAdapter(presetsAdapter);
+
+        // FILTERS
+        List<ThumbItem> filterItems = Arrays.asList(
+                new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none,        EditState.FilterStyle.NONE),
+                new ThumbItem(getString(R.string.edit_filter_soft), 0, R.color.thumb_filter_soft, EditState.FilterStyle.SOFT),
+                new ThumbItem(getString(R.string.edit_filter_bw),   0, R.color.thumb_filter_bw,   EditState.FilterStyle.BW)
+        );
+        filtersAdapter = new ThumbAdapter(filterItems, item -> {
+            updateFilter((EditState.FilterStyle) item.value);
+        });
+        rvFilters.setAdapter(filtersAdapter);
+
+        // FRAMES
+        List<ThumbItem> frameItems = Arrays.asList(
+                new ThumbItem(getString(R.string.edit_option_none),    0, R.color.thumb_none,         EditState.FrameStyle.NONE),
+                new ThumbItem(getString(R.string.edit_frame_cortis),   0, R.color.thumb_frame_cortis, EditState.FrameStyle.CORTIS),
+                new ThumbItem(getString(R.string.edit_frame_aespa),    0, R.color.thumb_frame_aespa,  EditState.FrameStyle.AESPA),
+                new ThumbItem(getString(R.string.edit_frame_t1),       0, R.color.thumb_frame_t1,     EditState.FrameStyle.T1)
+        );
+        framesAdapter = new ThumbAdapter(frameItems, item -> {
+            updateFrame((EditState.FrameStyle) item.value);
+        });
+        rvFrames.setAdapter(framesAdapter);
+
+        // STICKERS
+        List<ThumbItem> stickerItems = Arrays.asList(
+                new ThumbItem(getString(R.string.edit_option_none),     0, R.color.thumb_none,             EditState.StickerStyle.NONE),
+                new ThumbItem(getString(R.string.edit_sticker_star),    0, R.color.thumb_sticker_star,     EditState.StickerStyle.STAR),
+                new ThumbItem(getString(R.string.edit_sticker_camera),  0, R.color.thumb_sticker_camera,   EditState.StickerStyle.CAMERA),
+                new ThumbItem(getString(R.string.edit_sticker_flash),   0, R.color.thumb_sticker_flash,    EditState.StickerStyle.FLASH)
+        );
+        stickersAdapter = new ThumbAdapter(stickerItems, item -> {
+            updateSticker((EditState.StickerStyle) item.value);
+        });
+        rvStickers.setAdapter(stickersAdapter);
+    }
+
+    private void setupIntensitySlider() {
+        seekFilterIntensity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    currentEditState.setFilterIntensity(progress / 100f);
+                    tvIntensityValue.setText(String.valueOf(progress));
+                    applyCurrentEditState();
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
 
-    private void updateFilter(EditState.FilterStyle style) {
-        currentEditState.setFilterStyle(style);
-        persistCurrentPhotoEditState();
+    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.topBar);
+        toolbar.setNavigationOnClickListener(v -> finish());
+        
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+    }
+
+    private void setupActionButtons() {
+        MaterialButton btnFinish = findViewById(R.id.btnFinishEdit);
+        btnFinish.setOnClickListener(v -> saveAndFinish());
+    }
+
+    // ── Logic ─────────────────────────────────────────────────────────────────
+
+    private void applyPreset(EditState.FilterStyle filter, EditState.FrameStyle frame, EditState.StickerStyle sticker) {
+        currentEditState.setFilterStyle(filter);
+        currentEditState.setFrameStyle(frame);
+        currentEditState.setStickerStyle(sticker);
         applyCurrentEditState();
-        refreshSelectionUi();
+        syncSelectionsToAdapters();
         updateEditSummary();
-        animatePreviewPulse();
     }
 
-    private void updateFrame(EditState.FrameStyle style) {
-        currentEditState.setFrameStyle(style);
-        persistCurrentPhotoEditState();
+    private void updateFilter(EditState.FilterStyle filter) {
+        currentEditState.setFilterStyle(filter);
         applyCurrentEditState();
-        refreshSelectionUi();
         updateEditSummary();
-        animatePreviewPulse();
+        filterIntensityRow.setVisibility(filter == EditState.FilterStyle.NONE ? View.GONE : View.VISIBLE);
+        seekFilterIntensity.setProgress((int)(currentEditState.getFilterIntensity() * 100));
+        tvIntensityValue.setText(String.valueOf((int)(currentEditState.getFilterIntensity() * 100)));
     }
 
-    private void updateSticker(EditState.StickerStyle style) {
-        currentEditState.setStickerStyle(style);
-        persistCurrentPhotoEditState();
+    private void updateFrame(EditState.FrameStyle frame) {
+        currentEditState.setFrameStyle(frame);
         applyCurrentEditState();
-        refreshSelectionUi();
         updateEditSummary();
-        animatePreviewPulse();
     }
 
-    // Preset cho phep ap dung nhanh mot bo style trong 1 lan cham.
-    private void applyPreset(EditState.FilterStyle filterStyle,
-                             EditState.FrameStyle frameStyle,
-                             EditState.StickerStyle stickerStyle) {
-        currentEditState.setFilterStyle(filterStyle);
-        currentEditState.setFrameStyle(frameStyle);
-        currentEditState.setStickerStyle(stickerStyle);
-        persistCurrentPhotoEditState();
+    private void updateSticker(EditState.StickerStyle sticker) {
+        currentEditState.setStickerStyle(sticker);
         applyCurrentEditState();
-        refreshSelectionUi();
         updateEditSummary();
-        animatePreviewPulse();
-    }
-
-    private void refreshSelectionUi() {
-        setSelectedState(btnFilterNone, currentEditState.getFilterStyle() == EditState.FilterStyle.NONE);
-        setSelectedState(btnFilterSoft, currentEditState.getFilterStyle() == EditState.FilterStyle.SOFT);
-        setSelectedState(btnFilterBW, currentEditState.getFilterStyle() == EditState.FilterStyle.BW);
-
-        setSelectedState(btnFrameNone, currentEditState.getFrameStyle() == EditState.FrameStyle.NONE);
-        setSelectedState(btnFrameCortis, currentEditState.getFrameStyle() == EditState.FrameStyle.CORTIS);
-        setSelectedState(btnFrameT1, currentEditState.getFrameStyle() == EditState.FrameStyle.T1);
-        setSelectedState(btnFrameAespa, currentEditState.getFrameStyle() == EditState.FrameStyle.AESPA);
-
-        setSelectedState(btnStickerNone, currentEditState.getStickerStyle() == EditState.StickerStyle.NONE);
-        setSelectedState(btnStickerStar, currentEditState.getStickerStyle() == EditState.StickerStyle.STAR);
-        setSelectedState(btnStickerFlash, currentEditState.getStickerStyle() == EditState.StickerStyle.FLASH);
-        setSelectedState(btnStickerCamera, currentEditState.getStickerStyle() == EditState.StickerStyle.CAMERA);
-    }
-
-    private void setSelectedState(MaterialButton button, boolean selected) {
-        if (button == null) {
-            return;
-        }
-        button.setSelected(selected);
-        button.setPressed(false);
-    }
-
-    private void updateEditSummary() {
-        if (tvEditSummary == null) {
-            return;
-        }
-        tvEditSummary.setText(getString(
-                R.string.edit_summary_format,
-                getFilterLabel(currentEditState.getFilterStyle()),
-                getFrameLabel(currentEditState.getFrameStyle()),
-                getStickerLabel(currentEditState.getStickerStyle())
-        ));
-    }
-
-    private void animatePreviewPulse() {
-        if (ivEditingPhoto == null) {
-            return;
-        }
-        ivEditingPhoto.animate().cancel();
-        ivEditingPhoto.animate()
-                .scaleX(1.02f)
-                .scaleY(1.02f)
-                .setDuration(90)
-                .withEndAction(() -> ivEditingPhoto.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(120)
-                        .start())
-                .start();
-    }
-
-    private void animateButtonTap(View target) {
-        if (target == null) {
-            return;
-        }
-        target.animate().cancel();
-        target.animate()
-                .alpha(0.82f)
-                .setDuration(70)
-                .withEndAction(() -> target.animate()
-                        .alpha(1f)
-                        .setDuration(110)
-                        .start())
-                .start();
-    }
-
-    private String getFilterLabel(EditState.FilterStyle style) {
-        switch (style) {
-            case SOFT:
-                return getString(R.string.edit_filter_soft);
-            case BW:
-                return getString(R.string.edit_filter_bw);
-            case NONE:
-            default:
-                return getString(R.string.edit_option_none);
-        }
-    }
-
-    private String getFrameLabel(EditState.FrameStyle style) {
-        switch (style) {
-            case CORTIS:
-                return getString(R.string.edit_frame_cortis);
-            case T1:
-                return getString(R.string.edit_frame_t1);
-            case AESPA:
-                return getString(R.string.edit_frame_aespa);
-            case NONE:
-            default:
-                return getString(R.string.edit_option_none);
-        }
-    }
-
-    private String getStickerLabel(EditState.StickerStyle style) {
-        switch (style) {
-            case STAR:
-                return getString(R.string.edit_sticker_star);
-            case FLASH:
-                return getString(R.string.edit_sticker_flash);
-            case CAMERA:
-                return getString(R.string.edit_sticker_camera);
-            case NONE:
-            default:
-                return getString(R.string.edit_option_none);
-        }
     }
 
     private void applyCurrentEditState() {
-        Bitmap target = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState);
-        if (editedBitmap != null && editedBitmap != originalBitmap && !editedBitmap.isRecycled()) {
-            editedBitmap.recycle();
-        }
-        editedBitmap = target;
+        if (originalBitmap == null) return;
+        editedBitmap = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState);
         ivEditingPhoto.setImageBitmap(editedBitmap);
     }
 
-    private void persistCurrentPhotoEditState() {
+    private void syncSelectionsToAdapters() {
+        presetsAdapter.setSelectedByValue(null);
+        filtersAdapter.setSelectedByValue(currentEditState.getFilterStyle());
+        framesAdapter.setSelectedByValue(currentEditState.getFrameStyle());
+        stickersAdapter.setSelectedByValue(currentEditState.getStickerStyle());
+    }
+
+    private void updateEditSummary() {
+        String filter = currentEditState.getFilterStyle().name();
+        String frame  = currentEditState.getFrameStyle().name();
+        String sticker = currentEditState.getStickerStyle().name();
+        tvEditSummary.setText(String.format("Filter: %s | Frame: %s | Sticker: %s", filter, frame, sticker));
+        chipActiveEdit.setVisibility(
+                (currentEditState.getFilterStyle() != EditState.FilterStyle.NONE ||
+                 currentEditState.getFrameStyle() != EditState.FrameStyle.NONE ||
+                 currentEditState.getStickerStyle() != EditState.StickerStyle.NONE)
+                ? View.VISIBLE : View.GONE
+        );
+    }
+
+    private void saveAndFinish() {
         sessionState.setPhotoEditState(currentPhotoUri.toString(), currentEditState);
         sessionRepository.saveSession(sessionState);
+        setResult(Activity.RESULT_OK);
+        finish();
     }
 
     private Bitmap decodeBitmapFromUri(Uri uri) {
-        BitmapFactory.Options bounds = new BitmapFactory.Options();
-        bounds.inJustDecodeBounds = true;
+        try (InputStream is = getContentResolver().openInputStream(uri)) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(is, null, options);
 
-        try (InputStream boundsStream = getContentResolver().openInputStream(uri)) {
-            if (boundsStream == null) {
-                return null;
+            int width = options.outWidth;
+            int height = options.outHeight;
+            int scale = 1;
+            while (width / scale / 2 >= MAX_EDIT_BITMAP_SIZE && height / scale / 2 >= MAX_EDIT_BITMAP_SIZE) {
+                scale *= 2;
             }
-            BitmapFactory.decodeStream(boundsStream, null, bounds);
-        } catch (IOException e) {
-            return null;
-        }
 
-        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
-        decodeOptions.inSampleSize = calculateInSampleSize(bounds, MAX_EDIT_BITMAP_SIZE, MAX_EDIT_BITMAP_SIZE);
-
-        try (InputStream decodeStream = getContentResolver().openInputStream(uri)) {
-            if (decodeStream == null) {
-                return null;
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = scale;
+            try (InputStream is2 = getContentResolver().openInputStream(uri)) {
+                return BitmapFactory.decodeStream(is2, null, options);
             }
-            return BitmapFactory.decodeStream(decodeStream, null, decodeOptions);
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
-        }
-    }
-
-    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        int height = options.outHeight;
-        int width = options.outWidth;
-        int inSampleSize = 1;
-
-        while ((height / inSampleSize) > reqHeight || (width / inSampleSize) > reqWidth) {
-            inSampleSize *= 2;
-        }
-        return Math.max(inSampleSize, 1);
-    }
-
-    private Uri saveEditedBitmapToCache() {
-        if (editedBitmap == null) return null;
-        File file = new File(getCacheDir(), "edited_" + System.currentTimeMillis() + ".png");
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
-            editedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-            return Uri.fromFile(file);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    private void setupToolbar() {
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24);
-        toolbar.setNavigationOnClickListener(v -> finish());
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (editedBitmap != null && editedBitmap != originalBitmap && !editedBitmap.isRecycled()) {
-            editedBitmap.recycle();
-        }
-        if (originalBitmap != null && !originalBitmap.isRecycled()) {
-            originalBitmap.recycle();
         }
     }
 }
