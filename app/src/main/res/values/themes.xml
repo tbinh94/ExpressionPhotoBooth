@@ -7,4 +7,23 @@
     </style>
 
     <style name="Theme.ExpressionPhotoBooth" parent="Base.Theme.ExpressionPhotoBooth" />
+
+    <style name="TextAppearance.EditPhoto.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Widget.EditPhoto.FrameButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">#9A9288</item>
+        <item name="backgroundTint">#FDF8F2</item>
+        <item name="cornerRadius">10dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.EditPhoto.FrameButton.Active">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="backgroundTint">#1A1814</item>
+    </style>
 </resources>

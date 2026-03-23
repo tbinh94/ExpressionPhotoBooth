@@ -17,10 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Dark overlay để chữ nổi -->
-
     <!-- Main content -->
-
     <LinearLayout
         android:id="@+id/mainContent"
         android:layout_width="wrap_content"
@@ -29,37 +26,22 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.882">
 
-        <!-- Camera icon -->
-
-        <!-- Title -->
-
-
-        <!-- Button card để nổi -->
-        <androidx.cardview.widget.CardView
+        <!-- Button Start - Đã bỏ CardView nền trắng -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStart"
             android:layout_width="260dp"
             android:layout_height="72dp"
-            android:layout_marginTop="36dp"
-            app:cardBackgroundColor="#AAFFFFFF"
-            app:cardCornerRadius="40dp"
-            app:cardElevation="16dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnStart"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="✦ START ✦"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:backgroundTint="#ff99be"
-                app:cornerRadius="40dp" />
-
-        </androidx.cardview.widget.CardView>
+            android:text="✦ START ✦"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:backgroundTint="#ff99be"
+            app:cornerRadius="40dp"
+            app:elevation="8dp" />
 
     </LinearLayout>
 
