@@ -26,6 +26,22 @@ public class EditState {
     private FrameStyle frameStyle = FrameStyle.NONE;
     private StickerStyle stickerStyle = StickerStyle.NONE;
 
+    public EditState() {
+    }
+
+    public EditState(EditState other) {
+        if (other == null) {
+            return;
+        }
+        this.filterStyle = other.filterStyle;
+        this.frameStyle = other.frameStyle;
+        this.stickerStyle = other.stickerStyle;
+    }
+
+    public EditState copy() {
+        return new EditState(this);
+    }
+
     public FilterStyle getFilterStyle() {
         return filterStyle;
     }

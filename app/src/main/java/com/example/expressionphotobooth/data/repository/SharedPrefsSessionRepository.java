@@ -75,6 +75,17 @@ public class SharedPrefsSessionRepository implements SessionRepository {
             editJson.put("frameStyle", editState.getFrameStyle().name());
             editJson.put("stickerStyle", editState.getStickerStyle().name());
             json.put("editState", editJson);
+
+            JSONObject photoEditsJson = new JSONObject();
+            for (Map.Entry<String, EditState> entry : state.getPhotoEditStates().entrySet()) {
+                EditState photoEdit = entry.getValue();
+                JSONObject onePhotoJson = new JSONObject();
+                onePhotoJson.put("filterStyle", photoEdit.getFilterStyle().name());
+                onePhotoJson.put("frameStyle", photoEdit.getFrameStyle().name());
+                onePhotoJson.put("stickerStyle", photoEdit.getStickerStyle().name());
+                photoEditsJson.put(entry.getKey(), onePhotoJson);
+            }
+            json.put("photoEditStates", photoEditsJson);
         } catch (JSONException ignored) {}
         return json;
     }
@@ -111,6 +122,23 @@ public class SharedPrefsSessionRepository implements SessionRepository {
             editState.setStickerStyle(parseEnum(EditState.StickerStyle.class, editJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
         }
         state.setEditState(editState);
+
+        JSONObject photoEditsJson = json.optJSONObject("photoEditStates");
+        if (photoEditsJson != null) {
+            Iterator<String> photoKeys = photoEditsJson.keys();
+            while (photoKeys.hasNext()) {
+                String originalUri = photoKeys.next();
+                JSONObject onePhotoJson = photoEditsJson.optJSONObject(originalUri);
+                if (onePhotoJson == null) {
+                    continue;
+                }
+                EditState onePhotoState = new EditState();
+                onePhotoState.setFilterStyle(parseEnum(EditState.FilterStyle.class, onePhotoJson.optString("filterStyle"), EditState.FilterStyle.NONE));
+                onePhotoState.setFrameStyle(parseEnum(EditState.FrameStyle.class, onePhotoJson.optString("frameStyle"), EditState.FrameStyle.NONE));
+                onePhotoState.setStickerStyle(parseEnum(EditState.StickerStyle.class, onePhotoJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
+                state.setPhotoEditState(originalUri, onePhotoState);
+            }
+        }
         return state;
     }
 

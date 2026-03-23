@@ -4,25 +4,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.expressionphotobooth.R;
 import com.example.expressionphotobooth.domain.model.Frame;
+
 import java.util.List;
 
 public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.FrameViewHolder> {
 
-    private List<Frame> frameList;
-    private int selectedPosition = -1;
-    private OnFrameClickListener listener;
-
-    public interface OnFrameClickListener {
-        void onFrameClick(Frame frame);
+    public interface OnFrameSelectedListener {
+        void onFrameSelected(Frame frame);
     }
 
-    public FrameAdapter(List<Frame> frameList, OnFrameClickListener listener) {
+    private final List<Frame> frameList;
+    private final OnFrameSelectedListener onFrameSelectedListener;
+    private int selectedFrameId;
+
+    public FrameAdapter(List<Frame> frameList, int selectedFrameId, OnFrameSelectedListener onFrameSelectedListener) {
         this.frameList = frameList;
-        this.listener = listener;
+        this.selectedFrameId = selectedFrameId;
+        this.onFrameSelectedListener = onFrameSelectedListener;
     }
 
     @NonNull
@@ -36,22 +41,17 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.FrameViewHol
     public void onBindViewHolder(@NonNull FrameViewHolder holder, int position) {
         Frame frame = frameList.get(position);
         holder.imgFrame.setImageResource(frame.getImageResId());
+        holder.tvFrameName.setText(frame.getLabel());
 
-        // Hiển thị trạng thái được chọn
-        if (selectedPosition == position) {
-            holder.itemView.setBackgroundResource(R.drawable.bg_frame_selected);
-        } else {
-            holder.itemView.setBackgroundResource(0);
-        }
+        boolean isSelected = frame.getId() == selectedFrameId;
+        holder.itemView.setSelected(isSelected);
+        holder.selectionOverlay.setVisibility(isSelected ? View.VISIBLE : View.GONE);
 
         holder.itemView.setOnClickListener(v -> {
-            int previousPosition = selectedPosition;
-            selectedPosition = holder.getAdapterPosition();
-            notifyItemChanged(previousPosition);
-            notifyItemChanged(selectedPosition);
-
-            if (listener != null) {
-                listener.onFrameClick(frame);
+            selectedFrameId = frame.getId();
+            notifyDataSetChanged();
+            if (onFrameSelectedListener != null) {
+                onFrameSelectedListener.onFrameSelected(frame);
             }
         });
     }
@@ -63,9 +63,14 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.FrameViewHol
 
     static class FrameViewHolder extends RecyclerView.ViewHolder {
         ImageView imgFrame;
+        TextView tvFrameName;
+        View selectionOverlay;
+
         public FrameViewHolder(@NonNull View itemView) {
             super(itemView);
             imgFrame = itemView.findViewById(R.id.imgFrame);
+            tvFrameName = itemView.findViewById(R.id.tvFrameName);
+            selectionOverlay = itemView.findViewById(R.id.selectionOverlay);
         }
     }
 }

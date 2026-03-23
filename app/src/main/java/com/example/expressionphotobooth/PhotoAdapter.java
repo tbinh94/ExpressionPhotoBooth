@@ -10,19 +10,26 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder> {
     public interface OnPhotoSelectedListener {
-        void onPhotoSelected(Uri uri, int position);
+        void onSelectionChanged(List<Uri> selectedUris, int selectedCount);
     }
 
     private final List<Uri> uris;
     private final OnPhotoSelectedListener onPhotoSelectedListener;
-    private int selectedPosition = RecyclerView.NO_POSITION;
+    private final Set<Integer> selectedPositions = new LinkedHashSet<>();
 
     public PhotoAdapter(List<Uri> uris, OnPhotoSelectedListener onPhotoSelectedListener) {
-        this.uris = uris;
+        this.uris = new ArrayList<>(uris);
         this.onPhotoSelectedListener = onPhotoSelectedListener;
     }
 
@@ -35,29 +42,38 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
     @Override
     public void onBindViewHolder(@NonNull PhotoViewHolder holder, int position) {
         Uri uri = uris.get(position);
-        holder.imageView.setImageURI(uri);
+        // Glide handles file/content URI decoding better than setImageURI in RecyclerView.
+        Glide.with(holder.imageView)
+                .load(uri)
+                .centerCrop()
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .placeholder(android.R.color.darker_gray)
+                .error(android.R.drawable.ic_menu_report_image)
+                .into(holder.imageView);
         holder.tvIndex.setText(String.valueOf(position + 1));
 
-        boolean isSelected = position == selectedPosition;
+        boolean isSelected = selectedPositions.contains(position);
         holder.selectionOverlay.setAlpha(isSelected ? 1f : 0f);
         if (holder.cvSelectedBadge != null) {
             holder.cvSelectedBadge.setVisibility(isSelected ? View.VISIBLE : View.GONE);
         }
 
         holder.itemView.setOnClickListener(v -> {
-            int previous = selectedPosition;
-            selectedPosition = holder.getBindingAdapterPosition();
-            if (selectedPosition == RecyclerView.NO_POSITION) {
+            int current = holder.getBindingAdapterPosition();
+            if (current == RecyclerView.NO_POSITION) {
                 return;
             }
 
-            if (previous != RecyclerView.NO_POSITION) {
-                notifyItemChanged(previous);
+            if (selectedPositions.contains(current)) {
+                selectedPositions.remove(current);
+            } else {
+                selectedPositions.add(current);
             }
-            notifyItemChanged(selectedPosition);
+            notifyItemChanged(current);
 
             if (onPhotoSelectedListener != null) {
-                onPhotoSelectedListener.onPhotoSelected(uris.get(selectedPosition), selectedPosition);
+                List<Uri> selectedUris = getSelectedUris();
+                onPhotoSelectedListener.onSelectionChanged(selectedUris, selectedUris.size());
             }
         });
     }
@@ -68,10 +84,44 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
     }
 
     public Uri getSelectedUri() {
-        if (selectedPosition >= 0 && selectedPosition < uris.size()) {
-            return uris.get(selectedPosition);
+        List<Uri> selectedUris = getSelectedUris();
+        return selectedUris.isEmpty() ? null : selectedUris.get(0);
+    }
+
+    public List<Uri> getSelectedUris() {
+        List<Uri> result = new ArrayList<>();
+        for (Integer selectedPosition : selectedPositions) {
+            if (selectedPosition != null && selectedPosition >= 0 && selectedPosition < uris.size()) {
+                result.add(uris.get(selectedPosition));
+            }
         }
-        return null;
+        return result;
+    }
+
+    public void setUris(List<Uri> newUris) {
+        Set<String> keepSelected = new HashSet<>();
+        for (Uri selected : getSelectedUris()) {
+            keepSelected.add(selected.toString());
+        }
+
+        uris.clear();
+        uris.addAll(newUris);
+        selectedPositions.clear();
+
+        for (int i = 0; i < uris.size(); i++) {
+            if (keepSelected.contains(uris.get(i).toString())) {
+                selectedPositions.add(i);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void clearSelection() {
+        if (selectedPositions.isEmpty()) {
+            return;
+        }
+        selectedPositions.clear();
+        notifyDataSetChanged();
     }
 
     public static final class PhotoViewHolder extends RecyclerView.ViewHolder {

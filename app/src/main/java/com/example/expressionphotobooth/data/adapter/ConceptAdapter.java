@@ -7,19 +7,27 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.expressionphotobooth.R;
 import com.example.expressionphotobooth.domain.model.Concept;
 import com.example.expressionphotobooth.domain.model.Frame;
+
 import java.util.List;
 
 public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptViewHolder> {
 
-    private List<Concept> conceptList;
-    private FrameAdapter.OnFrameClickListener frameClickListener;
+    public interface OnFrameSelectedListener {
+        void onFrameSelected(Frame frame);
+    }
 
-    public ConceptAdapter(List<Concept> conceptList, FrameAdapter.OnFrameClickListener listener) {
+    private final List<Concept> conceptList;
+    private final OnFrameSelectedListener onFrameSelectedListener;
+    private int selectedFrameId;
+
+    public ConceptAdapter(List<Concept> conceptList, int selectedFrameId, OnFrameSelectedListener onFrameSelectedListener) {
         this.conceptList = conceptList;
-        this.frameClickListener = listener;
+        this.selectedFrameId = selectedFrameId;
+        this.onFrameSelectedListener = onFrameSelectedListener;
     }
 
     @NonNull
@@ -34,8 +42,13 @@ public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptV
         Concept concept = conceptList.get(position);
         holder.tvConceptName.setText(concept.getConceptName());
 
-        // Truyền listener xuống FrameAdapter
-        FrameAdapter frameAdapter = new FrameAdapter(concept.getFrames(), frameClickListener);
+        FrameAdapter frameAdapter = new FrameAdapter(concept.getFrames(), selectedFrameId, frame -> {
+            selectedFrameId = frame.getId();
+            notifyDataSetChanged();
+            if (onFrameSelectedListener != null) {
+                onFrameSelectedListener.onFrameSelected(frame);
+            }
+        });
         LinearLayoutManager layoutManager = new LinearLayoutManager(holder.itemView.getContext(), RecyclerView.HORIZONTAL, false);
         holder.rvFrames.setLayoutManager(layoutManager);
         holder.rvFrames.setAdapter(frameAdapter);

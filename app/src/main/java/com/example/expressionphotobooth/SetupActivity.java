@@ -2,9 +2,7 @@ package com.example.expressionphotobooth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.Toast;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +19,7 @@ import com.example.expressionphotobooth.domain.model.EditState;
 import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,8 @@ public class SetupActivity extends AppCompatActivity {
 
     private RecyclerView rvConcepts;
     private ConceptAdapter conceptAdapter;
-    private int selectedFrameResId = -1;
+    private Frame selectedFrame;
+    private int selectedPhotoCount = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,84 +40,82 @@ public class SetupActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_setup);
 
+        // Khởi tạo Repository để lưu dữ liệu phiên chụp
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
 
+        // 1. ÁNH XẠ: Tìm các thành phần từ bản thiết kế XML
         btnNext = findViewById(R.id.btnNext);
         rvConcepts = findViewById(R.id.rvConcepts);
         MaterialButton btnBack = findViewById(R.id.btnBack);
+        MaterialButtonToggleGroup togglePhotoCount = findViewById(R.id.togglePhotoCount);
+        btnNext.setEnabled(false);
 
+        // 2. CÀI ĐẶT RECYCLERVIEW: Đổ dữ liệu vào danh sách
         setupRecyclerView();
 
+        // 3. XỬ LÝ GIAO DIỆN TRÀN VIỀN (System Bars)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Animation cho nút Back
-        btnBack.setOnClickListener(v -> {
-            Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
-            btnBack.startAnimation(press);
-            press.setAnimationListener(new Animation.AnimationListener() {
-                @Override public void onAnimationStart(Animation animation) {}
-                @Override public void onAnimationRepeat(Animation animation) {}
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    getOnBackPressedDispatcher().onBackPressed();
-                }
-            });
+        // Lắng nghe sự kiện click: Khi bấm vào thì quay lại màn hình trước đó
+        btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        togglePhotoCount.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            selectedPhotoCount = checkedId == R.id.btnCount6 ? 6 : 4;
         });
 
-        // Animation cho nút Next
+        // GIAO NHIỆM VỤ: Lắng nghe sự kiện click nút NEXT
         btnNext.setOnClickListener(v -> {
-            if (selectedFrameResId == -1) {
-                Toast.makeText(this, "Please select a frame first!", Toast.LENGTH_SHORT).show();
+            if (selectedFrame == null) {
                 return;
             }
 
-            Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
-            btnNext.startAnimation(press);
-            press.setAnimationListener(new Animation.AnimationListener() {
-                @Override public void onAnimationStart(Animation animation) {}
-                @Override public void onAnimationRepeat(Animation animation) {}
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    int photoCount = 4;
-                    SessionState session = new SessionState();
-                    session.setPhotoCount(photoCount);
-                    session.setSelectedFrameResId(selectedFrameResId);
-                    session.setEditState(new EditState());
-                    sessionRepository.saveSession(session);
+            // Tạo session mới để tránh dính dữ liệu cũ
+            SessionState session = new SessionState();
+            session.setPhotoCount(selectedPhotoCount);
+            EditState editState = new EditState();
+            editState.setFrameStyle(selectedFrame.getFrameStyle());
+            session.setEditState(editState);
+            sessionRepository.saveSession(session);
 
-                    Intent intent = new Intent(SetupActivity.this, MainActivity.class);
-                    intent.putExtra(IntentKeys.EXTRA_PHOTO_COUNT, photoCount);
-                    startActivity(intent);
-                }
-            });
+            // Chuyển sang MainActivity
+            Intent intent = new Intent(SetupActivity.this, MainActivity.class);
+            intent.putExtra(IntentKeys.EXTRA_PHOTO_COUNT, selectedPhotoCount);
+            startActivity(intent);
         });
     }
 
+    // Hàm cài đặt RecyclerView
     private void setupRecyclerView() {
         rvConcepts.setLayoutManager(new LinearLayoutManager(this));
-        List<Concept> mockData = createMockData();
-        conceptAdapter = new ConceptAdapter(mockData, frame -> {
-            selectedFrameResId = frame.getImageResId();
+        List<Concept> conceptData = createConceptData();
+        conceptAdapter = new ConceptAdapter(conceptData, selectedFrame == null ? -1 : selectedFrame.getId(), frame -> {
+            selectedFrame = frame;
+            btnNext.setEnabled(true);
         });
         rvConcepts.setAdapter(conceptAdapter);
     }
 
-    private List<Concept> createMockData() {
+    private List<Concept> createConceptData() {
         List<Concept> concepts = new ArrayList<>();
+
         List<Frame> summerFrames = new ArrayList<>();
-        summerFrames.add(new Frame(1, R.drawable.sample_frame));
-        summerFrames.add(new Frame(2, R.drawable.sample_frame));
-        summerFrames.add(new Frame(3, R.drawable.sample_frame));
-        concepts.add(new Concept("1 Summer Concept", summerFrames));
+        summerFrames.add(new Frame(1, R.drawable.sample_frame, "Color", EditState.FrameStyle.NONE));
+        summerFrames.add(new Frame(2, R.drawable.sample_frame, "Cortis", EditState.FrameStyle.CORTIS));
+        summerFrames.add(new Frame(3, R.drawable.sample_frame, "T1", EditState.FrameStyle.T1));
+        concepts.add(new Concept("Summer Concept", summerFrames));
 
         List<Frame> cortisFrames = new ArrayList<>();
-        cortisFrames.add(new Frame(4, R.drawable.sample_frame));
-        cortisFrames.add(new Frame(5, R.drawable.sample_frame));
-        concepts.add(new Concept("2 Cortis Concept", cortisFrames));
+        cortisFrames.add(new Frame(4, R.drawable.sample_frame, "Aespa", EditState.FrameStyle.AESPA));
+        cortisFrames.add(new Frame(5, R.drawable.sample_frame, "Basic", EditState.FrameStyle.NONE));
+        concepts.add(new Concept("Idol Concept", cortisFrames));
+
         return concepts;
     }
 }

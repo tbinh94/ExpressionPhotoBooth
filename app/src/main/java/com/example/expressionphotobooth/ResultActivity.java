@@ -8,10 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -22,6 +19,7 @@ import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.CreateTimelapseVideoUseCase;
 import com.example.expressionphotobooth.domain.usecase.CreateVerticalCollageUseCase;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
 import java.io.File;
@@ -38,7 +36,8 @@ public class ResultActivity extends AppCompatActivity {
     private SessionState sessionState;
     private CreateTimelapseVideoUseCase createTimelapseVideoUseCase;
     private CreateVerticalCollageUseCase createVerticalCollageUseCase;
-    private MaterialButton btnNext; // Chính là btnSaveVideo
+    private MaterialButton btnSaveVideo;
+    private List<String> sourceOriginalUris;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,67 +48,48 @@ public class ResultActivity extends AppCompatActivity {
         sessionState = sessionRepository.getSession();
         createTimelapseVideoUseCase = new CreateTimelapseVideoUseCase(new TimelapseVideoEncoder());
         createVerticalCollageUseCase = new CreateVerticalCollageUseCase();
+        sourceOriginalUris = resolveSourceOriginalUris();
+        setupToolbar();
 
         ImageView ivFinalResult = findViewById(R.id.ivFinalResult);
-        MaterialButton btnBack = findViewById(R.id.btnBack);
-        MaterialButton btnSavePng = findViewById(R.id.btnSavePng);
-        btnNext = findViewById(R.id.btnNext);
 
-        Toast.makeText(this, "Đang xử lý ảnh và ghép frame...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.processing_collage, Toast.LENGTH_SHORT).show();
 
+        // Chạy ngầm để không bị lag máy
         new Thread(() -> {
             List<String> imageUrisToCollage = new ArrayList<>();
-            for (String originalUri : sessionState.getCapturedImageUris()) {
+            for (String originalUri : sourceOriginalUris) {
                 String editedUri = sessionState.getEditedImageUris().get(originalUri);
                 imageUrisToCollage.add(editedUri != null ? editedUri : originalUri);
             }
 
-            int selectedFrameId = sessionState.getSelectedFrameResId();
-            Bitmap collageWithFrame = createVerticalCollageUseCase.execute(this, imageUrisToCollage, selectedFrameId);
+            // Gọi hàm ghép
+            Bitmap collageBitmap = createVerticalCollageUseCase.execute(this, imageUrisToCollage);
 
+            // Sau khi ghép xong, quay lại UI Thread để hiển thị
             runOnUiThread(() -> {
-                if (collageWithFrame != null) {
-                    resultUri = saveBitmapToCache(collageWithFrame);
-                    ivFinalResult.setImageBitmap(collageWithFrame);
+                if (collageBitmap != null) {
+                    resultUri = saveBitmapToCache(collageBitmap);
+                    ivFinalResult.setImageBitmap(collageBitmap);
                     sessionState.setResultImageUri(resultUri.toString());
                     sessionRepository.saveSession(sessionState);
+                } else {
+                    Toast.makeText(this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
                 }
             });
         }).start();
 
-        btnSavePng.setOnClickListener(v -> {
-            Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
-            btnSavePng.startAnimation(press);
-            saveCurrentResultAsPng();
-        });
+        MaterialButton btnSavePng = findViewById(R.id.btnSavePng);
+        btnSaveVideo = findViewById(R.id.btnNext);
+        btnSavePng.setOnClickListener(v -> saveCurrentResultAsPng());
+        btnSaveVideo.setOnClickListener(v -> exportTimelapseVideo());
 
-        btnNext.setOnClickListener(v -> {
-            Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
-            btnNext.startAnimation(press);
-            press.setAnimationListener(new Animation.AnimationListener() {
-                @Override public void onAnimationStart(Animation animation) {}
-                @Override public void onAnimationRepeat(Animation animation) {}
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    exportTimelapseVideo();
-                }
-            });
-        });
-
+        MaterialButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> {
-            Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
-            btnBack.startAnimation(press);
-            press.setAnimationListener(new Animation.AnimationListener() {
-                @Override public void onAnimationStart(Animation animation) {}
-                @Override public void onAnimationRepeat(Animation animation) {}
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    sessionRepository.clearSession();
-                    Intent intent = new Intent(ResultActivity.this, HomeActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivity(intent);
-                }
-            });
+            sessionRepository.clearSession();
+            Intent intent = new Intent(ResultActivity.this, HomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
         });
     }
 
@@ -124,35 +104,48 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void exportTimelapseVideo() {
-        List<String> sourceUris = sessionState.getTimelapseImageUris();
-        if (sourceUris == null || sourceUris.isEmpty()) {
-            Toast.makeText(this, "Không có dữ liệu video!", Toast.LENGTH_SHORT).show();
+        List<String> sourceUris = new ArrayList<>();
+        for (String originalUri : sourceOriginalUris) {
+            String editedUri = sessionState.getEditedImageUris().get(originalUri);
+            sourceUris.add(editedUri != null ? editedUri : originalUri);
+        }
+
+        if (sourceUris.isEmpty()) {
+            Toast.makeText(this, R.string.no_images_for_video, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        btnNext.setEnabled(false);
-        Toast.makeText(this, "Đang tạo video timelapse...", Toast.LENGTH_SHORT).show();
+        btnSaveVideo.setEnabled(false);
+        Toast.makeText(this, R.string.exporting_video, Toast.LENGTH_SHORT).show();
 
         new Thread(() -> {
             try {
-                Uri videoUri = createTimelapseVideoUseCase.execute(this, sourceUris, 10);
+                // Sử dụng sourceUris đã bao gồm ảnh edit
+                Uri videoUri = createTimelapseVideoUseCase.execute(this, sourceUris, 2);
                 runOnUiThread(() -> {
-                    btnNext.setEnabled(true);
-                    Toast.makeText(this, "Video đã lưu vào thư viện!", Toast.LENGTH_LONG).show();
+                    btnSaveVideo.setEnabled(true);
+                    Toast.makeText(this, R.string.video_saved_success, Toast.LENGTH_LONG).show();
                 });
             } catch (IOException e) {
                 runOnUiThread(() -> {
-                    btnNext.setEnabled(true);
-                    Toast.makeText(this, "Lỗi khi lưu video", Toast.LENGTH_SHORT).show();
+                    btnSaveVideo.setEnabled(true);
+                    Toast.makeText(this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
                 });
             }
         }).start();
     }
 
     private void saveCurrentResultAsPng() {
-        if (resultUri == null) return;
+        if (resultUri == null) {
+            Toast.makeText(this, R.string.no_result_to_save, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Bitmap bitmap = decodeBitmap(resultUri);
-        if (bitmap == null) return;
+        if (bitmap == null) {
+            Toast.makeText(this, R.string.failed_open_photo, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         String name = "photobooth_" + System.currentTimeMillis() + ".png";
         ContentValues values = new ContentValues();
@@ -161,21 +154,54 @@ public class ResultActivity extends AppCompatActivity {
         values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Photobooth");
 
         Uri outputUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        if (outputUri == null) return;
+        if (outputUri == null) {
+            Toast.makeText(this, R.string.failed_save_result, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         try (OutputStream out = getContentResolver().openOutputStream(outputUri)) {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            Toast.makeText(this, "Đã lưu ảnh!", Toast.LENGTH_SHORT).show();
+            if (out == null || !bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)) {
+                Toast.makeText(this, R.string.failed_save_result, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(this, getString(R.string.saved_to_gallery, name), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
-            e.printStackTrace();
+            Toast.makeText(this, R.string.failed_save_result, Toast.LENGTH_SHORT).show();
         }
     }
 
     private Bitmap decodeBitmap(Uri uri) {
         try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
+            if (inputStream == null) {
+                return null;
+            }
             return BitmapFactory.decodeStream(inputStream);
         } catch (IOException e) {
             return null;
         }
+    }
+
+    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        getOnBackPressedDispatcher().onBackPressed();
+        return true;
+    }
+
+    private List<String> resolveSourceOriginalUris() {
+        ArrayList<String> fromIntent = getIntent().getStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES);
+        if (fromIntent != null && !fromIntent.isEmpty()) {
+            return fromIntent;
+        }
+        return new ArrayList<>(sessionState.getCapturedImageUris());
     }
 }

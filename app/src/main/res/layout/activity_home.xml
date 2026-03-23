@@ -35,7 +35,7 @@
             android:id="@+id/btnStart"
             android:layout_width="260dp"
             android:layout_height="72dp"
-            android:text="✦ START ✦"
+            android:text="@string/btn_start_decorated"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold"

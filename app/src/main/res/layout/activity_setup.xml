@@ -42,7 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Choose Your Frame"
+        android:text="@string/setup_title"
         android:fontFamily="@font/pacifico_regular"
         android:shadowColor="#FFFFFF"
         android:shadowRadius="8"
@@ -59,20 +59,47 @@
         android:id="@+id/tvSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select a frame for your photo"
+        android:text="@string/setup_subtitle"
         android:textColor="#1F618D"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/togglePhotoCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:checkedButton="@+id/btnCount4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCount4"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setup_count_4" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCount6"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setup_count_6" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvConcepts"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+        app:layout_constraintTop_toBottomOf="@id/togglePhotoCount"
         app:layout_constraintBottom_toTopOf="@id/btnNext"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -83,7 +110,7 @@
         android:layout_width="200dp"
         android:layout_height="56dp"
         android:layout_marginBottom="28dp"
-        android:text="✦ NEXT ✦"
+        android:text="@string/btn_next_decorated"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"

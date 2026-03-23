@@ -2,4 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="launcher_splash_bg">#FFF8F2FF</color>
+    <color name="launcher_icon_bg">#FF8A6DDE</color>
 </resources>
