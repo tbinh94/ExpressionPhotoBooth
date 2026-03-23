@@ -3,6 +3,7 @@ package com.example.expressionphotobooth;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isCapturingSequence = false;
     private SessionRepository sessionRepository;
     private SessionState sessionState;
+    private MediaActionSound shutterSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
         sessionRepository = appContainer.getSessionRepository();
         sessionState = sessionRepository.getSession();
         setupToolbar();
+
+        shutterSound = new MediaActionSound();
+        shutterSound.load(MediaActionSound.SHUTTER_CLICK);
 
         // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
@@ -254,6 +259,12 @@ public class MainActivity extends AppCompatActivity {
                         savedImageUris.add(savedUri);
                         showLastCapturePreview(savedUri);
                         playCaptureFlash();
+                        
+                        // Phát âm thanh chụp hình
+                        if (shutterSound != null) {
+                            shutterSound.play(MediaActionSound.SHUTTER_CLICK);
+                        }
+
                         updateCaptureProgressUi();
                         updateCaptureStatus(getString(R.string.capture_status_captured, capturedCount, maxPhotos));
                         
@@ -364,6 +375,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         if (cameraProvider != null) {
             cameraProvider.unbindAll();
+        }
+        if (shutterSound != null) {
+            shutterSound.release();
         }
     }
 }
