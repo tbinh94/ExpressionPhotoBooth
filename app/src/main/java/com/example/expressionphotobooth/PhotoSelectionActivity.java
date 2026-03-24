@@ -163,10 +163,9 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         });
 
         btnDirectToResult.setOnClickListener(v -> {
-            int requiredCount = getRequiredSelectionCount();
             List<Uri> selectedDisplayUris = adapter.getSelectedUris();
-            if (selectedDisplayUris.size() != requiredCount) {
-                Toast.makeText(this, getString(R.string.select_enough_for_result, requiredCount), Toast.LENGTH_SHORT).show();
+            if (selectedDisplayUris.isEmpty()) {
+                Toast.makeText(this, "Vui lòng chọn ít nhất 1 ảnh để tiếp tục.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -178,8 +177,8 @@ public class PhotoSelectionActivity extends AppCompatActivity {
                 }
             }
 
-            if (selectedOriginalUris.size() != requiredCount) {
-                Toast.makeText(this, getString(R.string.select_enough_for_result, requiredCount), Toast.LENGTH_SHORT).show();
+            if (selectedOriginalUris.isEmpty()) {
+                Toast.makeText(this, "Vui lòng chọn ít nhất 1 ảnh để tiếp tục.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -229,7 +228,7 @@ public class PhotoSelectionActivity extends AppCompatActivity {
 
     private void updateResultButtonState(int selectedCount) {
         int required = getRequiredSelectionCount();
-        boolean canExport = required > 0 && selectedCount == required;
+        boolean canExport = selectedCount > 0;
         btnDirectToResult.setEnabled(canExport);
         btnDirectToResult.setText(getString(R.string.btn_result_with_count, selectedCount, required));
     }
