@@ -45,7 +45,6 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
         // Glide handles file/content URI decoding better than setImageURI in RecyclerView.
         Glide.with(holder.imageView)
                 .load(uri)
-                .centerCrop()
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .placeholder(android.R.color.darker_gray)
                 .error(android.R.drawable.ic_menu_report_image)

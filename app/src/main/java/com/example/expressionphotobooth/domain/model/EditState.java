@@ -25,6 +25,7 @@ public class EditState {
     private FilterStyle filterStyle = FilterStyle.NONE;
     private FrameStyle frameStyle = FrameStyle.NONE;
     private StickerStyle stickerStyle = StickerStyle.NONE;
+    private float filterIntensity = 0.8f;
 
     public EditState() {
     }
@@ -36,6 +37,7 @@ public class EditState {
         this.filterStyle = other.filterStyle;
         this.frameStyle = other.frameStyle;
         this.stickerStyle = other.stickerStyle;
+        this.filterIntensity = other.filterIntensity;
     }
 
     public EditState copy() {
@@ -65,5 +67,12 @@ public class EditState {
     public void setStickerStyle(StickerStyle stickerStyle) {
         this.stickerStyle = stickerStyle;
     }
-}
 
+    public float getFilterIntensity() {
+        return filterIntensity;
+    }
+
+    public void setFilterIntensity(float filterIntensity) {
+        this.filterIntensity = filterIntensity;
+    }
+}

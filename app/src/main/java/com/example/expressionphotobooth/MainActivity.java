@@ -3,6 +3,7 @@ package com.example.expressionphotobooth;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "CameraX";
     private PreviewView viewFinder;
     private CardView previewCard;
-    private Button captureButton;
+    private View captureButton;
     private Button squareRatioButton;
     private Button wideRatioButton;
     private TextView tvCountdown;
@@ -66,11 +67,12 @@ public class MainActivity extends AppCompatActivity {
     private int capturedCount = 0;
     private final List<Uri> savedImageUris = new ArrayList<>();
     private ProcessCameraProvider cameraProvider;
-    private final CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
+    private CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
     private boolean isSquareRatio = true;
     private boolean isCapturingSequence = false;
     private SessionRepository sessionRepository;
     private SessionState sessionState;
+    private MediaActionSound shutterSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
         sessionRepository = appContainer.getSessionRepository();
         sessionState = sessionRepository.getSession();
         setupToolbar();
+
+        shutterSound = new MediaActionSound();
+        shutterSound.load(MediaActionSound.SHUTTER_CLICK);
 
         // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
@@ -106,6 +111,20 @@ public class MainActivity extends AppCompatActivity {
         captureButton.setEnabled(false);
         captureButton.setOnClickListener(v -> startPhotoSequence());
         
+        View btnSwitchCamera = findViewById(R.id.btnSwitchCamera);
+        if (btnSwitchCamera != null) {
+            btnSwitchCamera.setOnClickListener(v -> {
+                if (cameraProvider != null && !isCapturingSequence) {
+                    if (cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) {
+                        cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+                    } else {
+                        cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
+                    }
+                    bindCameraUseCases();
+                }
+            });
+        }
+
         squareRatioButton.setOnClickListener(v -> {
             if (!isSquareRatio) {
                 isSquareRatio = true;
@@ -181,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         if (isSquareRatio) {
             builder.setTargetResolution(new Size(1080, 1080));
         } else {
-            builder.setTargetResolution(new Size(1920, 1080));
+            builder.setTargetAspectRatio(androidx.camera.core.AspectRatio.RATIO_16_9);
         }
         return builder.build();
     }
@@ -254,6 +273,12 @@ public class MainActivity extends AppCompatActivity {
                         savedImageUris.add(savedUri);
                         showLastCapturePreview(savedUri);
                         playCaptureFlash();
+                        
+                        // Phát âm thanh chụp hình
+                        if (shutterSound != null) {
+                            shutterSound.play(MediaActionSound.SHUTTER_CLICK);
+                        }
+
                         updateCaptureProgressUi();
                         updateCaptureStatus(getString(R.string.capture_status_captured, capturedCount, maxPhotos));
                         
@@ -364,6 +389,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         if (cameraProvider != null) {
             cameraProvider.unbindAll();
+        }
+        if (shutterSound != null) {
+            shutterSound.release();
         }
     }
 }

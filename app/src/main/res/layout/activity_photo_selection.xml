@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#F8FAFB">
+    android:layout_height="match_parent">
+
+    <!-- Background -->
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_gradient"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
@@ -11,22 +22,37 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIconTint="#2C3E50"
-        app:title="@string/title_selection"
-        app:titleCentered="true"
-        app:titleTextColor="#2C3E50" />
+        app:navigationIcon="@drawable/ic_arrow_back_24"
+        app:navigationIconTint="#2A5298" />
 
     <TextView
-        android:id="@+id/tvSelectionInstruction"
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/pacifico_regular"
+        android:shadowColor="#FFFFFF"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="8"
+        android:text="@string/title_selection"
+        android:textColor="#2A5298"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/selection_instruction"
-        android:textColor="#7F8C8D"
+        android:textColor="#1F618D"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar" />
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
     <TextView
         android:id="@+id/tvSelectionStatus"
@@ -39,18 +65,17 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSelectionInstruction" />
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPhotos"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
         android:clipToPadding="false"
-        android:paddingBottom="8dp"
+        android:paddingBottom="16dp"
         app:layout_constraintBottom_toTopOf="@id/selectedStripCard"
         app:layout_constraintTop_toBottomOf="@id/tvSelectionStatus" />
 
@@ -58,12 +83,13 @@
         android:id="@+id/selectedStripCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="8dp"
-        app:cardCornerRadius="14dp"
-        app:cardElevation="2dp"
-        app:layout_constraintBottom_toTopOf="@id/actionCard"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#CCFFFFFF"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toTopOf="@id/buttonContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -71,7 +97,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -85,16 +111,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/selected_strip_title"
-                    android:textColor="#3D4E5F"
-                    android:textSize="12sp"
+                    android:textColor="#2A5298"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvClearSelection"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="6dp"
-                    android:paddingVertical="2dp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
                     android:text="@string/clear_selection"
                     android:textColor="#E74C3C"
                     android:textSize="12sp"
@@ -104,64 +130,57 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvSelectedPhotos"
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="100dp"
                 android:layout_marginTop="8dp"
                 android:clipToPadding="false"
-                android:overScrollMode="ifContentScrolls"
-                android:paddingEnd="4dp" />
+                android:overScrollMode="ifContentScrolls" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/actionCard"
+    <LinearLayout
+        android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="0dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="28dp"
+        android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp"
-            android:paddingBottom="44dp">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNextToEdit"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="@string/btn_edit"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#ff99be"
+            app:cornerRadius="28dp"
+            app:elevation="4dp"
+            app:icon="@drawable/ic_launcher_foreground"
+            app:iconSize="20dp"
+            app:iconTint="#FFFFFF" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnNextToEdit"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:text="@string/btn_edit"
-                    android:textAllCaps="true"
-                    android:textStyle="bold"
-                    app:backgroundTint="#34495E"
-                    app:cornerRadius="12dp"
-                    app:icon="@android:drawable/ic_menu_edit" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnDirectToResult"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/btn_result"
-                    android:textAllCaps="true"
-                    android:textStyle="bold"
-                    app:backgroundTint="#27AE60"
-                    app:cornerRadius="12dp"
-                    app:icon="@android:drawable/ic_menu_gallery" />
-
-            </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDirectToResult"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/btn_result"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#2A5298"
+            app:cornerRadius="28dp"
+            app:elevation="4dp"
+            app:icon="@drawable/ic_launcher_foreground"
+            app:iconSize="20dp"
+            app:iconTint="#FFFFFF" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

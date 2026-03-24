@@ -70,7 +70,7 @@
         android:id="@+id/togglePhotoCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         app:singleSelection="true"
         app:selectionRequired="true"
         app:checkedButton="@+id/btnCount4"
@@ -81,15 +81,23 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCount4"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/selector_toggle_color"
+            app:strokeColor="@color/selector_toggle_color"
             android:text="@string/setup_count_4" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCount6"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="130dp"
+            android:layout_height="60dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/selector_toggle_color"
+            app:strokeColor="@color/selector_toggle_color"
             android:text="@string/setup_count_6" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 

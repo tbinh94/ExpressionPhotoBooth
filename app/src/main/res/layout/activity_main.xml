@@ -5,66 +5,93 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#F4F7F9">
+    android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/topAppBar"
+    <!-- Background -->
+    <ImageView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:navigationIconTint="#2C3E50"
-        app:title="@string/title_camera"
-        app:titleCentered="true"
-        app:titleTextColor="#2C3E50"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_gradient"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Header Area -->
-    <LinearLayout
-        android:id="@+id/header"
+    <!-- Top Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Nút Quay lại (Legacy, kept for reference but usually handled by topAppBar) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBack"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="36dp"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:visibility="gone"
+        app:icon="@drawable/ic_arrow_back_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="#2A5298"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
+        app:cornerRadius="24dp" />
+
+    <TextView
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:layout_marginTop="24dp"
+        android:text="Smile for Camera"
+        android:fontFamily="@font/pacifico_regular"
+        android:shadowColor="#FFFFFF"
+        android:shadowRadius="8"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:textColor="#2A5298"
+        android:textSize="30sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.05"
-            android:text="@string/camera_header_title"
-            android:textColor="#2C3E50"
-            android:textSize="28sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/camera_header_subtitle"
-            android:textColor="#7F8C8D"
-            android:textSize="12sp"
-            android:letterSpacing="0.1" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Elegant Capture Experience"
+        android:textColor="#1F618D"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
     <!-- Khung Camera chính -->
     <androidx.cardview.widget.CardView
         android:id="@+id/previewCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
+        android:layout_marginEnd="32dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header">
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -73,180 +100,145 @@
             <androidx.camera.view.PreviewView
                 android:id="@+id/viewFinder"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#DCDFE2" />
+                android:layout_height="match_parent" />
 
-            <!-- TextView hiển thị Countdown (Mặc định ẩn) -->
             <TextView
                 android:id="@+id/tvCountdown"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:fontFamily="sans-serif-black"
-                android:text="@string/capture_countdown_default"
+                android:text="3"
                 android:textColor="@android:color/white"
-                android:textSize="100sp"
+                android:textSize="120sp"
                 android:visibility="gone"
                 android:shadowColor="#80000000"
-                android:shadowDx="2"
-                android:shadowDy="2"
-                android:shadowRadius="10"/>
-
-            <View
-                android:id="@+id/captureFlashOverlay"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:alpha="0"
-                android:background="@android:color/white"
-                android:visibility="gone" />
+                android:shadowDx="4"
+                android:shadowDy="4"
+                android:shadowRadius="15"/>
         </FrameLayout>
     </androidx.cardview.widget.CardView>
-
-    <!-- Thumbnail da chup, dat ngoai khung camera de khong che preview -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardLastCapture"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_marginTop="10dp"
-        android:visibility="gone"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
-        app:layout_constraintEnd_toEndOf="@id/previewCard"
-        app:layout_constraintTop_toBottomOf="@id/previewCard"
-        app:strokeColor="#CCFFFFFF"
-        app:strokeWidth="1dp">
-
-        <ImageView
-            android:id="@+id/ivLastCapturePreview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
-    </com.google.android.material.card.MaterialCardView>
 
     <!-- Nút chọn tỉ lệ -->
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/ratioContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         app:singleSelection="true"
         app:checkedButton="@+id/btnRatioSquare"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardLastCapture">
+        app:layout_constraintTop_toBottomOf="@id/previewCard">
 
         <Button
             android:id="@+id/btnRatioSquare"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ratio_square"
-            android:textColor="#2C3E50"
-            app:strokeColor="#BDC3C7" />
+            android:text="1:1"
+            android:textColor="#2A5298"
+            app:strokeColor="#2A5298" />
 
         <Button
             android:id="@+id/btnRatioWide"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ratio_wide"
-            android:textColor="#2C3E50"
-            app:strokeColor="#BDC3C7" />
-
+            android:text="16:9"
+            android:textColor="#2A5298"
+            app:strokeColor="#2A5298" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
+    <!-- Status & Progress -->
     <TextView
         android:id="@+id/tvCaptureStatus"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
         android:layout_marginTop="12dp"
-        android:gravity="center"
-        android:text="@string/capture_status_ready"
-        android:textColor="#2C3E50"
-        android:textSize="13sp"
+        android:text="Ready"
+        android:textColor="#2A5298"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ratioContainer" />
 
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/captureProgress"
-        android:layout_width="0dp"
-        android:layout_height="6dp"
-        android:layout_marginHorizontal="48dp"
-        android:layout_marginTop="8dp"
-        app:indicatorColor="#2C3E50"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvCaptureStatus"
-        app:trackColor="#D5DEE6"
-        app:trackCornerRadius="3dp" />
-
     <LinearLayout
         android:id="@+id/dotContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/captureProgress" />
+        app:layout_constraintTop_toBottomOf="@id/tvCaptureStatus" />
 
-    <!-- Nút Chụp ảnh -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCapture"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_marginHorizontal="48dp"
-        android:layout_marginBottom="40dp"
-        android:fontFamily="sans-serif-black"
-        android:letterSpacing="0.15"
-        android:text="@string/btn_start_capturing"
-        android:textSize="14sp"
-        app:backgroundTint="#2C3E50"
-        app:cornerRadius="0dp"
-        app:elevation="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/captureProgress"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:indicatorColor="#2A5298"
+        app:trackColor="#D1D9E6"
+        app:trackThickness="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dotContainer" />
 
-    <!-- Overlay kết quả (ẩn mặc định) -->
-    <LinearLayout
-        android:id="@+id/layoutResult"
+    <!-- Nút Switch Camera -->
+    <ImageButton
+        android:id="@+id/btnSwitchCamera"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_flip_camera"
+        android:contentDescription="Switch Camera"
+        app:tint="#2A5298"
+        app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+        app:layout_constraintEnd_toStartOf="@id/btnCapture"
+        app:layout_constraintTop_toTopOf="@id/btnCapture" />
+
+    <!-- Nút Capture -->
+    <ImageButton
+        android:id="@+id/btnCapture"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/selector_camera_btn"
+        android:contentDescription="Capture"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Last Capture Preview -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardLastCapture"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toTopOf="@id/btnCapture"
+        app:layout_constraintEnd_toEndOf="parent">
+        <ImageView
+            android:id="@+id/ivLastCapturePreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Flash Overlay -->
+    <View
+        android:id="@+id/captureFlashOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F4F7F9"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:background="@android:color/white"
         android:visibility="gone"
-        android:padding="20dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/camera_result_overlay_title"
-            android:textSize="24sp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="#2C3E50"
-            android:layout_marginBottom="20dp"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvPhotos"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnNextToEdit"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="@string/btn_next_to_edit"
-            app:backgroundTint="#2C3E50"
-            app:cornerRadius="0dp"
-            android:layout_marginTop="20dp"/>
-    </LinearLayout>
+        android:elevation="100dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
