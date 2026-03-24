@@ -21,7 +21,14 @@ public class FrameConfig {
             holes.add(new Rect(10, 245, 170, 355)); // Lỗ 3
             holes.add(new Rect(10, 365, 170, 475)); // Lỗ 4
         }
-        // Thêm các IF cho các frame khác ở đây...
+
+        if (frameResId == R.drawable.frm_brown_caro) {
+            // Rect(trái, trên, phải, dưới) - Đo bằng Pixel tương ứng với kích thước gốc của file Frame.png
+            holes.add(new Rect(8, 12, 220, 165)); // Lỗ 1
+            holes.add(new Rect(8, 178, 220, 331)); // Lỗ 2
+            holes.add(new Rect(8, 348, 220, 500)); // Lỗ 3
+//            holes.add(new Rect(8, 365, 170, 475)); // Lỗ 4
+        }
 
         return holes;
     }

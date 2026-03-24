@@ -120,8 +120,8 @@ public class SetupActivity extends AppCompatActivity {
         List<Concept> concepts = new ArrayList<>();
 
         List<Frame> summerFrames = new ArrayList<>();
-        summerFrames.add(new Frame(1, R.drawable.frm_basic_white, "Color", EditState.FrameStyle.NONE));
-        summerFrames.add(new Frame(2, R.drawable.sample_frame, "Cortis", EditState.FrameStyle.CORTIS));
+        summerFrames.add(new Frame(1, R.drawable.frm_basic_white, "White", EditState.FrameStyle.NONE));
+        summerFrames.add(new Frame(2, R.drawable.frm_brown_caro, "Brown Caro", EditState.FrameStyle.CORTIS));
         summerFrames.add(new Frame(3, R.drawable.sample_frame, "T1", EditState.FrameStyle.T1));
         concepts.add(new Concept("Summer Concept", summerFrames));
 
