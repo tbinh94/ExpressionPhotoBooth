@@ -2,7 +2,7 @@ package com.example.expressionphotobooth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,7 +30,6 @@ public class SetupActivity extends AppCompatActivity {
     private SessionRepository sessionRepository;
 
     private RecyclerView rvConcepts;
-    private ConceptAdapter conceptAdapter;
     private Frame selectedFrame;
     private int selectedPhotoCount = 4;
 
@@ -77,12 +76,26 @@ public class SetupActivity extends AppCompatActivity {
             }
 
             // Tạo session mới để tránh dính dữ liệu cũ
-            SessionState session = new SessionState();
+            SessionState session = sessionRepository.getSession();
+            if (session == null) {
+                session = new SessionState();
+            }
+
             session.setPhotoCount(selectedPhotoCount);
             EditState editState = new EditState();
             editState.setFrameStyle(selectedFrame.getFrameStyle());
             session.setEditState(editState);
             sessionRepository.saveSession(session);
+
+            if (selectedFrame != null) {
+                getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
+                        .edit()
+                        .putInt("SELECTED_FRAME_ID", selectedFrame.getImageResId())
+                        .apply();
+            } else {
+                Toast.makeText(SetupActivity.this, "Vui lòng chọn 1 frame!", Toast.LENGTH_SHORT).show();
+                return; // Chặn lại nếu user chưa chọn frame
+            }
 
             // Chuyển sang MainActivity
             Intent intent = new Intent(SetupActivity.this, MainActivity.class);
@@ -95,9 +108,10 @@ public class SetupActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         rvConcepts.setLayoutManager(new LinearLayoutManager(this));
         List<Concept> conceptData = createConceptData();
-        conceptAdapter = new ConceptAdapter(conceptData, selectedFrame == null ? -1 : selectedFrame.getId(), frame -> {
+        ConceptAdapter conceptAdapter = new ConceptAdapter(conceptData, -1, frame -> {
             selectedFrame = frame;
             btnNext.setEnabled(true);
+            Toast.makeText(SetupActivity.this, "Đã chọn frame!", Toast.LENGTH_SHORT).show();
         });
         rvConcepts.setAdapter(conceptAdapter);
     }
@@ -106,7 +120,7 @@ public class SetupActivity extends AppCompatActivity {
         List<Concept> concepts = new ArrayList<>();
 
         List<Frame> summerFrames = new ArrayList<>();
-        summerFrames.add(new Frame(1, R.drawable.sample_frame, "Color", EditState.FrameStyle.NONE));
+        summerFrames.add(new Frame(1, R.drawable.frm_basic_white, "Color", EditState.FrameStyle.NONE));
         summerFrames.add(new Frame(2, R.drawable.sample_frame, "Cortis", EditState.FrameStyle.CORTIS));
         summerFrames.add(new Frame(3, R.drawable.sample_frame, "T1", EditState.FrameStyle.T1));
         concepts.add(new Concept("Summer Concept", summerFrames));

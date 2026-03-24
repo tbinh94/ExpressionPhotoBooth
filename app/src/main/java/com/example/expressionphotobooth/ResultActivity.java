@@ -54,7 +54,7 @@ public class ResultActivity extends AppCompatActivity {
 
         ImageView ivFinalResult = findViewById(R.id.ivFinalResult);
 
-        Toast.makeText(this, R.string.processing_collage, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Frame ID nhận được: " + sessionState.getSelectedFrameResId(), Toast.LENGTH_LONG).show();
 
         // Chạy ngầm để không bị lag máy
         new Thread(() -> {
@@ -64,18 +64,29 @@ public class ResultActivity extends AppCompatActivity {
                 imageUrisToCollage.add(editedUri != null ? editedUri : originalUri);
             }
 
-            // Gọi hàm ghép
-            Bitmap collageBitmap = createVerticalCollageUseCase.execute(this, imageUrisToCollage);
+            Bitmap tempBitmap = null;
+            int selectedFrameResId = getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
+                    .getInt("SELECTED_FRAME_ID", -1);
 
-            // Sau khi ghép xong, quay lại UI Thread để hiển thị
+            if (selectedFrameResId != -1) {
+                // NẾU CÓ CHỌN FRAME
+                tempBitmap = createFramedCollage(imageUrisToCollage, selectedFrameResId);
+            } else {
+                // NẾU KHÔNG CHỌN FRAME
+                tempBitmap = createVerticalCollageUseCase.execute(ResultActivity.this, imageUrisToCollage);
+            }
+
+            // FIX LỖI: Chốt cứng (final) biến bitmap trước khi mang vào runOnUiThread
+            final Bitmap bitmapToSave = tempBitmap;
+
             runOnUiThread(() -> {
-                if (collageBitmap != null) {
-                    resultUri = saveBitmapToCache(collageBitmap);
-                    ivFinalResult.setImageBitmap(collageBitmap);
+                if (bitmapToSave != null) {
+                    resultUri = saveBitmapToCache(bitmapToSave);
+                    ivFinalResult.setImageBitmap(bitmapToSave);
                     sessionState.setResultImageUri(resultUri.toString());
                     sessionRepository.saveSession(sessionState);
                 } else {
-                    Toast.makeText(this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ResultActivity.this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
                 }
             });
         }).start();
@@ -96,14 +107,76 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
+    // Hàm dùng để lưu ảnh tạm thời vào bộ nhớ Cache
     private Uri saveBitmapToCache(Bitmap bitmap) {
-        File file = new File(getCacheDir(), "collage_" + System.currentTimeMillis() + ".png");
-        try (FileOutputStream out = new FileOutputStream(file)) {
+        try {
+            // Tạo một file tạm trong thư mục cache của ứng dụng
+            File cacheFile = new File(getCacheDir(), "temp_result_" + System.currentTimeMillis() + ".png");
+            FileOutputStream out = new FileOutputStream(cacheFile);
+
+            // Nén ảnh và lưu vào file
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            return Uri.fromFile(file);
+            out.flush();
+            out.close();
+
+            // Trả về đường dẫn (Uri) của file vừa lưu
+            return Uri.fromFile(cacheFile);
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
+    }
+
+    private Bitmap createFramedCollage(List<String> photoUris, int frameResId) {
+        // 1. Cấm Android tự phóng to ảnh gốc (Trường hợp 2 của bạn)
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
+        Bitmap frameBitmap = BitmapFactory.decodeResource(getResources(), frameResId, options);
+        if (frameBitmap == null) return null;
+
+        Bitmap resultBitmap = Bitmap.createBitmap(frameBitmap.getWidth(), frameBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(resultBitmap);
+
+        List<android.graphics.Rect> holes = com.example.expressionphotobooth.utils.FrameConfig.getHolesForFrame(frameResId);
+
+        // 2. VẼ ẢNH CHỤP XUỐNG DƯỚI VỚI THUẬT TOÁN CENTER CROP
+        for (int i = 0; i < Math.min(photoUris.size(), holes.size()); i++) {
+            Uri photoUri = Uri.parse(photoUris.get(i));
+            Bitmap photoBitmap = decodeBitmap(photoUri);
+
+            if (photoBitmap != null) {
+                android.graphics.Rect targetHole = holes.get(i); // Vị trí lỗ hổng trên frame
+
+                // --- BẮT ĐẦU THUẬT TOÁN CENTER CROP ---
+                int photoW = photoBitmap.getWidth();
+                int photoH = photoBitmap.getHeight();
+                float holeRatio = (float) targetHole.width() / targetHole.height();
+                float photoRatio = (float) photoW / photoH;
+
+                int cropW = photoW;
+                int cropH = photoH;
+                int cropX = 0;
+                int cropY = 0;
+
+                if (photoRatio > holeRatio) {
+                    // Ảnh rộng hơn lỗ hổng -> Cắt bớt 2 bên hông
+                    cropW = (int) (photoH * holeRatio);
+                    cropX = (photoW - cropW) / 2;
+                } else {
+                    // Ảnh cao hơn lỗ hổng -> Cắt bớt đỉnh đầu và đáy
+                    cropH = (int) (photoW / holeRatio);
+                    cropY = (photoH - cropH) / 2;
+                }
+
+                // Chọn vùng ảnh chụp để lấy (đã cắt đúng tỷ lệ)
+                android.graphics.Rect srcRect = new android.graphics.Rect(cropX, cropY, cropX + cropW, cropY + cropH);
+                // --- KẾT THÚC CENTER CROP ---
+
+                canvas.drawBitmap(photoBitmap, srcRect, targetHole, (android.graphics.Paint) null);
+            }
+        }
+
+        return resultBitmap;
     }
 
     private void exportTimelapseVideo() {
