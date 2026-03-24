@@ -186,19 +186,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dotContainer" />
 
+    <!-- Nút Switch Camera -->
+    <ImageButton
+        android:id="@+id/btnSwitchCamera"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_flip_camera"
+        android:contentDescription="Switch Camera"
+        app:tint="#2A5298"
+        app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+        app:layout_constraintEnd_toStartOf="@id/btnCapture"
+        app:layout_constraintTop_toTopOf="@id/btnCapture" />
+
     <!-- Nút Capture -->
-    <com.google.android.material.button.MaterialButton
+    <ImageButton
         android:id="@+id/btnCapture"
-        android:layout_width="220dp"
-        android:layout_height="64dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_marginBottom="32dp"
-        android:text="✦ CAPTURE ✦"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:backgroundTint="#ff99be"
-        app:cornerRadius="32dp"
-        app:elevation="8dp"
+        android:background="@drawable/selector_camera_btn"
+        android:contentDescription="Capture"
+        android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
