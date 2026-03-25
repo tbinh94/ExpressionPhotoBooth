@@ -19,10 +19,16 @@
     <color name="thumb_preset_cute">#F9C4D4</color>   <!-- hồng pastel -->
     <color name="thumb_preset_kpop">#A8C4F0</color>   <!-- xanh dương nhạt -->
     <color name="thumb_preset_classic">#C8B89A</color> <!-- nâu vintage -->
+    <color name="thumb_preset_retro">#D4A373</color>
+    <color name="thumb_preset_cinematic">#2A3B4C</color>
 
     <!-- Filters -->
     <color name="thumb_filter_soft">#EDD5C8</color>   <!-- cam đào mờ -->
     <color name="thumb_filter_bw">#7A7A7A</color>     <!-- xám trung -->
+    <color name="thumb_filter_vintage">#EDC68A</color>
+    <color name="thumb_filter_cool">#8AABED</color>
+    <color name="thumb_filter_warm">#ECAE7E</color>
+    <color name="thumb_filter_sepia">#B89973</color>
 
     <!-- Frames -->
     <color name="thumb_frame_cortis">#FFFFFF</color>  <!-- trắng — viền trắng kiểu Polaroid -->

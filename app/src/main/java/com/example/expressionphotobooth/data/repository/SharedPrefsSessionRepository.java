@@ -76,6 +76,9 @@ public class SharedPrefsSessionRepository implements SessionRepository {
             editJson.put("filterStyle", editState.getFilterStyle().name());
             editJson.put("frameStyle", editState.getFrameStyle().name());
             editJson.put("stickerStyle", editState.getStickerStyle().name());
+            editJson.put("filterIntensity", editState.getFilterIntensity());
+            editJson.put("stickerX", editState.getStickerX());
+            editJson.put("stickerY", editState.getStickerY());
             json.put("editState", editJson);
 
             JSONObject photoEditsJson = new JSONObject();
@@ -85,6 +88,9 @@ public class SharedPrefsSessionRepository implements SessionRepository {
                 onePhotoJson.put("filterStyle", photoEdit.getFilterStyle().name());
                 onePhotoJson.put("frameStyle", photoEdit.getFrameStyle().name());
                 onePhotoJson.put("stickerStyle", photoEdit.getStickerStyle().name());
+                onePhotoJson.put("filterIntensity", photoEdit.getFilterIntensity());
+                onePhotoJson.put("stickerX", photoEdit.getStickerX());
+                onePhotoJson.put("stickerY", photoEdit.getStickerY());
                 photoEditsJson.put(entry.getKey(), onePhotoJson);
             }
             json.put("photoEditStates", photoEditsJson);
@@ -124,6 +130,9 @@ public class SharedPrefsSessionRepository implements SessionRepository {
             editState.setFilterStyle(parseEnum(EditState.FilterStyle.class, editJson.optString("filterStyle"), EditState.FilterStyle.NONE));
             editState.setFrameStyle(parseEnum(EditState.FrameStyle.class, editJson.optString("frameStyle"), EditState.FrameStyle.NONE));
             editState.setStickerStyle(parseEnum(EditState.StickerStyle.class, editJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
+            editState.setFilterIntensity((float) editJson.optDouble("filterIntensity", 0.8));
+            editState.setStickerX((float) editJson.optDouble("stickerX", -1.0));
+            editState.setStickerY((float) editJson.optDouble("stickerY", -1.0));
         }
         state.setEditState(editState);
 
@@ -140,6 +149,9 @@ public class SharedPrefsSessionRepository implements SessionRepository {
                 onePhotoState.setFilterStyle(parseEnum(EditState.FilterStyle.class, onePhotoJson.optString("filterStyle"), EditState.FilterStyle.NONE));
                 onePhotoState.setFrameStyle(parseEnum(EditState.FrameStyle.class, onePhotoJson.optString("frameStyle"), EditState.FrameStyle.NONE));
                 onePhotoState.setStickerStyle(parseEnum(EditState.StickerStyle.class, onePhotoJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
+                onePhotoState.setFilterIntensity((float) onePhotoJson.optDouble("filterIntensity", 0.8));
+                onePhotoState.setStickerX((float) onePhotoJson.optDouble("stickerX", -1.0));
+                onePhotoState.setStickerY((float) onePhotoJson.optDouble("stickerY", -1.0));
                 state.setPhotoEditState(originalUri, onePhotoState);
             }
         }

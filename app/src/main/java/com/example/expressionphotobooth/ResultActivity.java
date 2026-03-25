@@ -191,7 +191,53 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void exportTimelapseVideo() {
-        // ... (Giữ nguyên logic video hiện tại của bạn)
+        if (sourceOriginalUris == null || sourceOriginalUris.isEmpty()) {
+            Toast.makeText(this, R.string.no_images_for_video, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnSaveVideo.setEnabled(false);
+        Toast.makeText(this, R.string.exporting_video, Toast.LENGTH_SHORT).show();
+
+        new Thread(() -> {
+            try {
+                // Prepare edited URIs
+                List<String> editedUris = new ArrayList<>();
+                for (String originalUri : sourceOriginalUris) {
+                    String editedUri = sessionState.getEditedImageUris().get(originalUri);
+                    editedUris.add(editedUri != null ? editedUri : originalUri);
+                }
+
+                // Photobooth Ping-Pong loop: e.g. [0, 1, 2, 3, 2, 1]
+                List<String> loopSequence = new ArrayList<>(editedUris);
+                for (int i = editedUris.size() - 2; i >= 1; i--) {
+                    loopSequence.add(editedUris.get(i));
+                }
+
+                // Repeat the loop 2 times to reach ~4 seconds at 3 FPS
+                List<String> finalFrames = new ArrayList<>();
+                finalFrames.addAll(loopSequence);
+                finalFrames.addAll(loopSequence);
+
+                // Encode at 3 Frames Per Second for standard photobooth bounce feel
+                Uri videoUri = createTimelapseVideoUseCase.execute(ResultActivity.this, finalFrames, 3);
+
+                runOnUiThread(() -> {
+                    btnSaveVideo.setEnabled(true);
+                    if (videoUri != null) {
+                        Toast.makeText(ResultActivity.this, R.string.video_saved_success, Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(ResultActivity.this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    btnSaveVideo.setEnabled(true);
+                    Toast.makeText(ResultActivity.this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
     }
 
     private void saveCurrentResultAsPng() {

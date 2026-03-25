@@ -1,5 +1,6 @@
 package com.example.expressionphotobooth;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -7,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -129,7 +131,8 @@ public class EditPhotoActivity extends AppCompatActivity {
             }
 
             // Selected ring
-            h.ring.setVisibility(selected ? View.VISIBLE : View.INVISIBLE);
+            h.cardThumb.setStrokeWidth(selected ? 6 : 0); // 6 px outline
+            h.cardThumb.setStrokeColor(getColor(R.color.edit_accent));
             h.label.setTextColor(selected
                     ? getColor(R.color.edit_accent)
                     : getColor(R.color.edit_label));
@@ -148,14 +151,14 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         class VH extends RecyclerView.ViewHolder {
             ImageView preview;
-            View ring;
+            com.google.android.material.card.MaterialCardView cardThumb;
             TextView label;
 
             VH(@NonNull View itemView) {
                 super(itemView);
-                preview = itemView.findViewById(R.id.ivThumbPreview);
-                ring    = itemView.findViewById(R.id.vThumbRing);
-                label   = itemView.findViewById(R.id.tvThumbLabel);
+                preview   = itemView.findViewById(R.id.ivThumbPreview);
+                cardThumb = itemView.findViewById(R.id.cardThumb);
+                label     = itemView.findViewById(R.id.tvThumbLabel);
             }
         }
     }
@@ -195,6 +198,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         setupAdapters();
         setupIntensitySlider();
         setupActionButtons();
+        setupStickerDrag();
 
         originalBitmap = decodeBitmapFromUri(currentPhotoUri);
         if (originalBitmap == null) {
@@ -231,7 +235,6 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void setupTabs() {
         editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_presets)));
         editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_filters)));
-        editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_frames)));
         editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_stickers)));
 
         editTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -249,8 +252,8 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void showPanel(int index) {
         panelPresets.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         panelFilters.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
-        panelFrames .setVisibility(index == 2 ? View.VISIBLE : View.GONE);
-        panelStickers.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+        panelFrames.setVisibility(View.GONE);
+        panelStickers.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
     }
 
     // ── Adapters setup ────────────────────────────────────────────────────────
@@ -261,13 +264,17 @@ public class EditPhotoActivity extends AppCompatActivity {
         List<ThumbItem> presetItems = Arrays.asList(
                 new ThumbItem(getString(R.string.edit_preset_cute),    0, R.color.thumb_preset_cute,    "cute"),
                 new ThumbItem(getString(R.string.edit_preset_kpop),    0, R.color.thumb_preset_kpop,    "kpop"),
-                new ThumbItem(getString(R.string.edit_preset_classic), 0, R.color.thumb_preset_classic, "classic")
+                new ThumbItem(getString(R.string.edit_preset_classic), 0, R.color.thumb_preset_classic, "classic"),
+                new ThumbItem(getString(R.string.edit_preset_retro),   0, R.color.thumb_preset_retro,   "retro"),
+                new ThumbItem(getString(R.string.edit_preset_cinematic), 0, R.color.thumb_preset_cinematic, "cinematic")
         );
         presetsAdapter = new ThumbAdapter(presetItems, item -> {
             switch ((String) item.value) {
                 case "cute":    applyPreset(EditState.FilterStyle.SOFT, EditState.FrameStyle.AESPA, EditState.StickerStyle.STAR);    break;
                 case "kpop":    applyPreset(EditState.FilterStyle.NONE, EditState.FrameStyle.T1,    EditState.StickerStyle.FLASH);   break;
                 case "classic": applyPreset(EditState.FilterStyle.BW,   EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE);   break;
+                case "retro":   applyPreset(EditState.FilterStyle.VINTAGE, EditState.FrameStyle.CORTIS, EditState.StickerStyle.CAMERA); break;
+                case "cinematic": applyPreset(EditState.FilterStyle.COOL, EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE); break;
             }
         });
         rvPresets.setAdapter(presetsAdapter);
@@ -276,7 +283,11 @@ public class EditPhotoActivity extends AppCompatActivity {
         List<ThumbItem> filterItems = Arrays.asList(
                 new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none,        EditState.FilterStyle.NONE),
                 new ThumbItem(getString(R.string.edit_filter_soft), 0, R.color.thumb_filter_soft, EditState.FilterStyle.SOFT),
-                new ThumbItem(getString(R.string.edit_filter_bw),   0, R.color.thumb_filter_bw,   EditState.FilterStyle.BW)
+                new ThumbItem(getString(R.string.edit_filter_bw),   0, R.color.thumb_filter_bw,   EditState.FilterStyle.BW),
+                new ThumbItem(getString(R.string.edit_filter_vintage), 0, R.color.thumb_filter_vintage, EditState.FilterStyle.VINTAGE),
+                new ThumbItem(getString(R.string.edit_filter_cool), 0, R.color.thumb_filter_cool, EditState.FilterStyle.COOL),
+                new ThumbItem(getString(R.string.edit_filter_warm), 0, R.color.thumb_filter_warm, EditState.FilterStyle.WARM),
+                new ThumbItem(getString(R.string.edit_filter_sepia), 0, R.color.thumb_filter_sepia, EditState.FilterStyle.SEPIA)
         );
         filtersAdapter = new ThumbAdapter(filterItems, item -> {
             updateFilter((EditState.FilterStyle) item.value);
@@ -335,6 +346,107 @@ public class EditPhotoActivity extends AppCompatActivity {
         btnFinish.setOnClickListener(v -> saveAndFinish());
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupStickerDrag() {
+        ivEditingPhoto.setOnTouchListener(new View.OnTouchListener() {
+            private boolean isDragging = false;
+            private float offsetX = 0f;
+            private float offsetY = 0f;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) {
+                    return false;
+                }
+                if (originalBitmap == null) return false;
+
+                float viewWidth = ivEditingPhoto.getWidth();
+                float viewHeight = ivEditingPhoto.getHeight();
+                float imgWidth = originalBitmap.getWidth();
+                float imgHeight = originalBitmap.getHeight();
+
+                if (viewWidth == 0 || viewHeight == 0 || imgWidth == 0 || imgHeight == 0) {
+                    return false;
+                }
+
+                float scaleX = viewWidth / imgWidth;
+                float scaleY = viewHeight / imgHeight;
+                float scale = Math.min(scaleX, scaleY);
+
+                float drawLeft = (viewWidth - (imgWidth * scale)) / 2f;
+                float drawTop = (viewHeight - (imgHeight * scale)) / 2f;
+
+                float bX = (event.getX() - drawLeft) / scale;
+                float bY = (event.getY() - drawTop) / scale;
+
+                float sx = currentEditState.getStickerX();
+                float sy = currentEditState.getStickerY();
+
+                float bw = imgWidth;
+                float bh = imgHeight;
+
+                int minL = Math.min((int)bw, (int)bh);
+                int size = Math.max(72, minL / 5);
+
+                if (sx < 0 || sy < 0) {
+                     int safeW = (int) (minL * 0.75f);
+                     int safeH = (int) (minL * 0.75f);
+                     int centerX = (int)(bw / 2f);
+                     int centerY = (int)(bh / 2f);
+                     int padding = 24;
+                     
+                     float left = centerX + (safeW / 2f) - size - padding;
+                     float top = centerY - (safeH / 2f) + padding;
+                     sx = (left + size / 2f) / bw;
+                     sy = (top + size / 2f) / bh;
+                }
+
+                float scX = sx * bw;
+                float scY = sy * bh;
+
+                float dx = bX - scX;
+                float dy = bY - scY;
+                float distSq = dx*dx + dy*dy;
+                
+                float radius = size / 2f;
+                float radiusSq = (radius * 1.5f) * (radius * 1.5f);
+
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (distSq < radiusSq * 3.0f) { // Cung cấp vùng chạm rộng
+                            isDragging = true;
+                            offsetX = bX - scX;
+                            offsetY = bY - scY;
+                            return true;
+                        }
+                        return false;
+                    case MotionEvent.ACTION_MOVE:
+                        if (isDragging) {
+                            float newCenterX = bX - offsetX;
+                            float newCenterY = bY - offsetY;
+                            
+                            newCenterX = Math.max(0, Math.min(newCenterX, bw));
+                            newCenterY = Math.max(0, Math.min(newCenterY, bh));
+
+                            currentEditState.setStickerX(newCenterX / bw);
+                            currentEditState.setStickerY(newCenterY / bh);
+                            applyCurrentEditState();
+                            return true;
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        if (isDragging) {
+                            isDragging = false;
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
     // ── Logic ─────────────────────────────────────────────────────────────────
 
     private void applyPreset(EditState.FilterStyle filter, EditState.FrameStyle frame, EditState.StickerStyle sticker) {
@@ -382,21 +494,42 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     private void updateEditSummary() {
         String filter = currentEditState.getFilterStyle().name();
-        String frame  = currentEditState.getFrameStyle().name();
         String sticker = currentEditState.getStickerStyle().name();
-        tvEditSummary.setText(String.format("Filter: %s | Frame: %s | Sticker: %s", filter, frame, sticker));
+        tvEditSummary.setText(String.format("Filter: %s | Sticker: %s", filter, sticker));
         chipActiveEdit.setVisibility(
                 (currentEditState.getFilterStyle() != EditState.FilterStyle.NONE ||
-                 currentEditState.getFrameStyle() != EditState.FrameStyle.NONE ||
                  currentEditState.getStickerStyle() != EditState.StickerStyle.NONE)
                 ? View.VISIBLE : View.GONE
         );
     }
 
     private void saveAndFinish() {
-        sessionState.setPhotoEditState(currentPhotoUri.toString(), currentEditState);
-        sessionRepository.saveSession(sessionState);
-        setResult(Activity.RESULT_OK);
+        if (editedBitmap == null) {
+            applyCurrentEditState();
+        }
+
+        Uri editedUri = null;
+        if (editedBitmap != null) {
+            java.io.File file = new java.io.File(getExternalFilesDir(null), "edited_" + System.currentTimeMillis() + ".jpg");
+            try (java.io.FileOutputStream out = new java.io.FileOutputStream(file)) {
+                editedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                editedUri = Uri.fromFile(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (editedUri != null) {
+            sessionState.setPhotoEditState(currentPhotoUri.toString(), currentEditState);
+            sessionRepository.saveSession(sessionState);
+
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra(IntentKeys.EXTRA_ORIGINAL_URI, currentPhotoUri.toString());
+            resultIntent.putExtra(IntentKeys.EXTRA_EDITED_URI, editedUri.toString());
+            setResult(Activity.RESULT_OK, resultIntent);
+        } else {
+            setResult(Activity.RESULT_CANCELED);
+        }
         finish();
     }
 
