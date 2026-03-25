@@ -5,7 +5,11 @@ public class EditState {
     public enum FilterStyle {
         NONE,
         SOFT,
-        BW
+        BW,
+        VINTAGE,
+        COOL,
+        WARM,
+        SEPIA
     }
 
     public enum FrameStyle {
@@ -26,6 +30,8 @@ public class EditState {
     private FrameStyle frameStyle = FrameStyle.NONE;
     private StickerStyle stickerStyle = StickerStyle.NONE;
     private float filterIntensity = 0.8f;
+    private float stickerX = -1f;
+    private float stickerY = -1f;
 
     public EditState() {
     }
@@ -38,6 +44,8 @@ public class EditState {
         this.frameStyle = other.frameStyle;
         this.stickerStyle = other.stickerStyle;
         this.filterIntensity = other.filterIntensity;
+        this.stickerX = other.stickerX;
+        this.stickerY = other.stickerY;
     }
 
     public EditState copy() {
@@ -74,5 +82,21 @@ public class EditState {
 
     public void setFilterIntensity(float filterIntensity) {
         this.filterIntensity = filterIntensity;
+    }
+
+    public float getStickerX() {
+        return stickerX;
+    }
+
+    public void setStickerX(float stickerX) {
+        this.stickerX = stickerX;
+    }
+
+    public float getStickerY() {
+        return stickerY;
+    }
+
+    public void setStickerY(float stickerY) {
+        this.stickerY = stickerY;
     }
 }

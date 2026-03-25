@@ -156,18 +156,20 @@
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/editTabLayout"
                 android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                app:tabBackground="@android:color/transparent"
+                android:layout_height="44dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_tab_container"
+                app:tabBackground="@drawable/tab_selector"
                 app:tabGravity="fill"
-                app:tabIndicatorColor="#2A5298"
-                app:tabIndicatorHeight="2dp"
-                app:tabIndicatorGravity="bottom"
+                app:tabIndicatorHeight="0dp"
                 app:tabMode="fixed"
-                app:tabSelectedTextColor="#2A5298"
-                app:tabTextColor="#88000000"
-                app:tabRippleColor="@android:color/transparent" />
+                app:tabSelectedTextColor="#FFFFFF"
+                app:tabTextColor="#8899A6"
+                app:tabRippleColor="@android:color/transparent"
+                app:tabPaddingStart="8dp"
+                app:tabPaddingEnd="8dp" />
 
             <!-- CONTENT PANELS — swap visibility via TabLayout listener -->
 

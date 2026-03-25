@@ -76,9 +76,15 @@
     <string name="edit_preset_cute">Cute</string>
     <string name="edit_preset_kpop">K-pop</string>
     <string name="edit_preset_classic">Classic</string>
+    <string name="edit_preset_retro">Retro</string>
+    <string name="edit_preset_cinematic">Cinematic</string>
     <string name="edit_option_none">None</string>
     <string name="edit_filter_soft">Soft</string>
     <string name="edit_filter_bw">B/W</string>
+    <string name="edit_filter_vintage">Vintage</string>
+    <string name="edit_filter_cool">Cool</string>
+    <string name="edit_filter_warm">Warm</string>
+    <string name="edit_filter_sepia">Sepia</string>
     <string name="edit_frame_cortis">Cortis</string>
     <string name="edit_frame_t1">T1</string>
     <string name="edit_frame_aespa">Aespa</string>
