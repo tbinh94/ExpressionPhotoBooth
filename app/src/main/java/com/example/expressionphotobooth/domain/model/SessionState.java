@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class SessionState {
     private int photoCount = 4;
-    private int selectedFrameResId;
+    private int selectedFrameResId = -1;
     private final List<String> capturedImageUris = new ArrayList<>();
     private final List<String> timelapseImageUris = new ArrayList<>(); // Thêm list riêng cho timelapse
     private final Map<String, String> editedImageUris = new HashMap<>();
