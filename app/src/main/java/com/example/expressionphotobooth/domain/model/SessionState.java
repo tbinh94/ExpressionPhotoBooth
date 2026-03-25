@@ -14,6 +14,8 @@ public class SessionState {
     private final Map<String, EditState> photoEditStates = new HashMap<>();
     private String selectedImageUri;
     private String resultImageUri;
+    private boolean flashEnabled;
+    private boolean screenFlashStrong;
     private EditState editState = new EditState();
 
     public int getPhotoCount() {
@@ -95,6 +97,22 @@ public class SessionState {
 
     public void setResultImageUri(String resultImageUri) {
         this.resultImageUri = resultImageUri;
+    }
+
+    public boolean isFlashEnabled() {
+        return flashEnabled;
+    }
+
+    public void setFlashEnabled(boolean flashEnabled) {
+        this.flashEnabled = flashEnabled;
+    }
+
+    public boolean isScreenFlashStrong() {
+        return screenFlashStrong;
+    }
+
+    public void setScreenFlashStrong(boolean screenFlashStrong) {
+        this.screenFlashStrong = screenFlashStrong;
     }
 
     public EditState getEditState() {

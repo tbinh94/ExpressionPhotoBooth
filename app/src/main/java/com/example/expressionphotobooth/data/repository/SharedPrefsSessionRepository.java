@@ -54,6 +54,8 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         JSONObject json = new JSONObject();
         try {
             json.put("photoCount", state.getPhotoCount());
+            json.put("flashEnabled", state.isFlashEnabled());
+            json.put("screenFlashStrong", state.isScreenFlashStrong());
             json.put("selectedImageUri", state.getSelectedImageUri());
             json.put("resultImageUri", state.getResultImageUri());
 
@@ -93,6 +95,8 @@ public class SharedPrefsSessionRepository implements SessionRepository {
     private SessionState fromJson(JSONObject json) {
         SessionState state = new SessionState();
         state.setPhotoCount(json.optInt("photoCount", 4));
+        state.setFlashEnabled(json.optBoolean("flashEnabled", false));
+        state.setScreenFlashStrong(json.optBoolean("screenFlashStrong", false));
         state.setSelectedImageUri(json.optString("selectedImageUri", null));
         state.setResultImageUri(json.optString("resultImageUri", null));
 

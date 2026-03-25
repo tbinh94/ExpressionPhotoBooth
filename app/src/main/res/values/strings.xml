@@ -52,7 +52,8 @@
     <string name="capture_status_captured">Captured %1$d/%2$d photos</string>
     <string name="capture_status_done">Done! %1$d photos captured</string>
     <string name="capture_status_error">Capture interrupted. Please try again.</string>
-        <string name="camera_header_title">Memories</string>
+            <string name="camera_header_title">Memories</string>
+            <string name="camera_main_title">Smile for Camera</string>
     <string name="camera_header_subtitle">Elegant Capture Experience</string>
     <string name="capture_countdown_default">3</string>
     <string name="btn_start_capturing">START CAPTURING</string>
@@ -86,6 +87,14 @@
     <string name="edit_sticker_camera">Camera</string>
     <string name="btn_save_return">SAVE &amp; RETURN</string>
     <string name="btn_start_decorated">✦ START ✦</string>
+    <string name="camera_switch_lens">Switch Camera</string>
+    <string name="camera_flash_toggle">Toggle Flash</string>
+    <string name="camera_flash_on">Flash on</string>
+    <string name="camera_flash_off">Flash off</string>
+    <string name="camera_flash_back_only">Flash is only available on back camera</string>
+    <string name="camera_screen_flash_level_normal">Normal</string>
+    <string name="camera_screen_flash_level_strong">Strong</string>
+    <string name="camera_screen_flash_level_changed">Selfie flash level: %1$s</string>
     <string name="item_concept_placeholder">Concept</string>
     <string name="item_frame_placeholder">Frame</string>
     <string name="item_selected_badge">SELECTED</string>
