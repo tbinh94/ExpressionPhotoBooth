@@ -184,13 +184,13 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvPresets"
                     android:layout_width="match_parent"
-                    android:layout_height="108dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:clipToPadding="false"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="4" />
 
             </LinearLayout>
 
@@ -205,13 +205,13 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvFilters"
                     android:layout_width="match_parent"
-                    android:layout_height="108dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:clipToPadding="false"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="4" />
 
                 <!-- Intensity slider -->
                 <LinearLayout
@@ -272,13 +272,13 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvFrames"
                     android:layout_width="match_parent"
-                    android:layout_height="108dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:clipToPadding="false"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="4" />
 
             </LinearLayout>
 
@@ -293,13 +293,13 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvStickers"
                     android:layout_width="match_parent"
-                    android:layout_height="108dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:clipToPadding="false"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="4" />
 
             </LinearLayout>
 

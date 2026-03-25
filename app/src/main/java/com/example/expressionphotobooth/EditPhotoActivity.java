@@ -131,7 +131,8 @@ public class EditPhotoActivity extends AppCompatActivity {
             }
 
             // Selected ring
-            h.ring.setVisibility(selected ? View.VISIBLE : View.INVISIBLE);
+            h.cardThumb.setStrokeWidth(selected ? 6 : 0); // 6 px outline
+            h.cardThumb.setStrokeColor(getColor(R.color.edit_accent));
             h.label.setTextColor(selected
                     ? getColor(R.color.edit_accent)
                     : getColor(R.color.edit_label));
@@ -150,14 +151,14 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         class VH extends RecyclerView.ViewHolder {
             ImageView preview;
-            View ring;
+            com.google.android.material.card.MaterialCardView cardThumb;
             TextView label;
 
             VH(@NonNull View itemView) {
                 super(itemView);
-                preview = itemView.findViewById(R.id.ivThumbPreview);
-                ring    = itemView.findViewById(R.id.vThumbRing);
-                label   = itemView.findViewById(R.id.tvThumbLabel);
+                preview   = itemView.findViewById(R.id.ivThumbPreview);
+                cardThumb = itemView.findViewById(R.id.cardThumb);
+                label     = itemView.findViewById(R.id.tvThumbLabel);
             }
         }
     }

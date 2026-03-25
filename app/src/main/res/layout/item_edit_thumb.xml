@@ -2,46 +2,40 @@
 <!-- res/layout/item_edit_thumb.xml -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="72dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:layout_marginEnd="8dp"
-    android:paddingBottom="4dp">
+    android:paddingBottom="12dp"
+    android:paddingTop="12dp">
 
-    <!-- Ring border (shown when selected) -->
-    <FrameLayout
+    <!-- Preview image/color Card with built-in stroke -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardThumb"
         android:layout_width="66dp"
-        android:layout_height="80dp">
+        android:layout_height="66dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp"
+        app:strokeColor="#2A5298"
+        app:cardBackgroundColor="#E0E6F0">
 
-        <!-- Selection ring -->
-        <View
-            android:id="@+id/vThumbRing"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="1dp"
-            android:background="@drawable/bg_thumb_ring"
-            android:visibility="invisible" />
-
-        <!-- Preview image/color -->
         <ImageView
             android:id="@+id/ivThumbPreview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="3dp"
-            android:scaleType="centerCrop"
-            android:background="#E0E6F0"
-            android:clipToOutline="true" />
+            android:scaleType="centerCrop" />
 
-    </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- Label -->
     <TextView
         android:id="@+id/tvThumbLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textSize="10sp"
+        android:layout_marginTop="8dp"
+        android:textSize="11sp"
         android:textStyle="bold"
         android:maxLines="1"
         android:ellipsize="end"
