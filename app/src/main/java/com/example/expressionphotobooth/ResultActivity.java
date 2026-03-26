@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ResultActivity extends AppCompatActivity {
     private Uri resultUri;
@@ -51,17 +52,32 @@ public class ResultActivity extends AppCompatActivity {
 
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
         sessionState = sessionRepository.getSession();
+        
+        if (sessionState == null) {
+            Toast.makeText(this, "Session data not found", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         createTimelapseVideoUseCase = new CreateTimelapseVideoUseCase(new TimelapseVideoEncoder());
         createVerticalCollageUseCase = new CreateVerticalCollageUseCase();
         sourceOriginalUris = resolveSourceOriginalUris();
+
+        if (sourceOriginalUris.isEmpty()) {
+            Toast.makeText(this, R.string.no_photo_to_continue, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         ImageView ivFinalResult = findViewById(R.id.ivFinalResult);
 
         // Chạy ngầm để xử lý ảnh nặng
         new Thread(() -> {
             List<String> imageUrisToCollage = new ArrayList<>();
+            Map<String, String> editedImageUris = sessionState.getEditedImageUris();
+            
             for (String originalUri : sourceOriginalUris) {
-                String editedUri = sessionState.getEditedImageUris().get(originalUri);
+                String editedUri = (editedImageUris != null) ? editedImageUris.get(originalUri) : null;
                 imageUrisToCollage.add(editedUri != null ? editedUri : originalUri);
             }
 
@@ -83,7 +99,7 @@ public class ResultActivity extends AppCompatActivity {
                 if (finalBitmap != null) {
                     resultUri = saveBitmapToCache(finalBitmap);
                     ivFinalResult.setImageBitmap(finalBitmap);
-                    sessionState.setResultImageUri(resultUri.toString());
+                    sessionState.setResultImageUri(resultUri != null ? resultUri.toString() : null);
                     sessionRepository.saveSession(sessionState);
                 } else {
                     Toast.makeText(ResultActivity.this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
@@ -141,6 +157,8 @@ public class ResultActivity extends AppCompatActivity {
         // Ép Canvas vẽ chính xác 1:1, không cho phép tự động zoom
         Rect frameRect = new Rect(0, 0, frameBitmap.getWidth(), frameBitmap.getHeight());
         canvas.drawBitmap(frameBitmap, null, frameRect, null);
+        
+        frameBitmap.recycle(); // Giải phóng frame bitmap sau khi vẽ xong
 
         return resultBitmap;
     }
@@ -173,7 +191,7 @@ public class ResultActivity extends AppCompatActivity {
     private Bitmap decodeBitmap(Uri uri) {
         try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
             return BitmapFactory.decodeStream(inputStream);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -203,8 +221,10 @@ public class ResultActivity extends AppCompatActivity {
             try {
                 // Prepare edited URIs
                 List<String> editedUris = new ArrayList<>();
+                Map<String, String> editedImageUris = sessionState.getEditedImageUris();
+                
                 for (String originalUri : sourceOriginalUris) {
-                    String editedUri = sessionState.getEditedImageUris().get(originalUri);
+                    String editedUri = (editedImageUris != null) ? editedImageUris.get(originalUri) : null;
                     editedUris.add(editedUri != null ? editedUri : originalUri);
                 }
 
@@ -241,7 +261,10 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void saveCurrentResultAsPng() {
-        if (resultUri == null) return;
+        if (resultUri == null) {
+            Toast.makeText(this, R.string.no_result_to_save, Toast.LENGTH_SHORT).show();
+            return;
+        }
         Bitmap bitmap = decodeBitmap(resultUri);
         if (bitmap == null) return;
 
@@ -264,6 +287,10 @@ public class ResultActivity extends AppCompatActivity {
 
     private List<String> resolveSourceOriginalUris() {
         ArrayList<String> fromIntent = getIntent().getStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES);
-        return (fromIntent != null) ? fromIntent : new ArrayList<>(sessionState.getCapturedImageUris());
+        if (fromIntent != null) return fromIntent;
+        if (sessionState != null && sessionState.getCapturedImageUris() != null) {
+            return new ArrayList<>(sessionState.getCapturedImageUris());
+        }
+        return new ArrayList<>();
     }
 }

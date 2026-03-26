@@ -21,10 +21,12 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
 public class PhotoSelectionActivity extends AppCompatActivity {
+    private static final int REQUIRED_SELECTION_COUNT = 4;
     private PhotoAdapter adapter;
     private SessionRepository sessionRepository;
     private SessionState sessionState;
@@ -90,9 +92,11 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         RecyclerView rvPhotos = findViewById(R.id.rvPhotos);
         btnContinueToEdit = findViewById(R.id.btnNextToEdit);
         btnDirectToResult = findViewById(R.id.btnDirectToResult);
+        MaterialButton btnHelpSelection = findViewById(R.id.btnHelpSelection);
         tvSelectionStatus = findViewById(R.id.tvSelectionStatus);
         tvClearSelection = findViewById(R.id.tvClearSelection);
         RecyclerView rvSelectedPhotos = findViewById(R.id.rvSelectedPhotos);
+        btnHelpSelection.setOnClickListener(v -> showSelectionHelpDialog());
 
         selectedPhotoPreviewAdapter = new SelectedPhotoPreviewAdapter();
         rvSelectedPhotos.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
@@ -110,7 +114,7 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         rvPhotos.setLayoutManager(new GridLayoutManager(this, 2));
         rvPhotos.setHasFixedSize(true);
 
-        adapter = new PhotoAdapter(new ArrayList<>(), (selectedUris, selectedCount) -> {
+        adapter = new PhotoAdapter(new ArrayList<>(), REQUIRED_SELECTION_COUNT, (selectedUris, selectedCount) -> {
             btnContinueToEdit.setEnabled(selectedCount > 0);
             updateSelectionStatus(selectedCount);
             updateResultButtonState(selectedCount);
@@ -164,8 +168,9 @@ public class PhotoSelectionActivity extends AppCompatActivity {
 
         btnDirectToResult.setOnClickListener(v -> {
             List<Uri> selectedDisplayUris = adapter.getSelectedUris();
-            if (selectedDisplayUris.isEmpty()) {
-                Toast.makeText(this, "Vui lòng chọn ít nhất 1 ảnh để tiếp tục.", Toast.LENGTH_SHORT).show();
+            int required = getRequiredSelectionCount();
+            if (selectedDisplayUris.size() != required) {
+                Toast.makeText(this, getString(R.string.select_enough_for_result, required), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -177,8 +182,8 @@ public class PhotoSelectionActivity extends AppCompatActivity {
                 }
             }
 
-            if (selectedOriginalUris.isEmpty()) {
-                Toast.makeText(this, "Vui lòng chọn ít nhất 1 ảnh để tiếp tục.", Toast.LENGTH_SHORT).show();
+            if (selectedOriginalUris.size() != required) {
+                Toast.makeText(this, getString(R.string.select_enough_for_result, required), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -228,7 +233,7 @@ public class PhotoSelectionActivity extends AppCompatActivity {
 
     private void updateResultButtonState(int selectedCount) {
         int required = getRequiredSelectionCount();
-        boolean canExport = selectedCount > 0;
+        boolean canExport = required > 0 && selectedCount == required;
         btnDirectToResult.setEnabled(canExport);
         btnDirectToResult.setText(getString(R.string.btn_result_with_count, selectedCount, required));
     }
@@ -238,8 +243,7 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         if (capturedCount <= 0) {
             return 0;
         }
-        int configuredCount = sessionState.getPhotoCount();
-        return configuredCount > 0 ? Math.min(configuredCount, capturedCount) : capturedCount;
+        return Math.min(REQUIRED_SELECTION_COUNT, capturedCount);
     }
 
     private Uri getSelectedOriginalUri(Uri currentDisplayUri) {
@@ -286,6 +290,20 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         }
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24);
         toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+    }
+
+    private void showSelectionHelpDialog() {
+        int requiredCount = getRequiredSelectionCount();
+        HelpDialogUtils.showPhotoboothHelp(
+                this,
+                getString(R.string.help_selection_title),
+                getString(R.string.help_selection_subtitle),
+                Arrays.asList(
+                        getString(R.string.help_selection_bullet_1, requiredCount),
+                        getString(R.string.help_selection_bullet_2),
+                        getString(R.string.help_selection_bullet_3, requiredCount)
+                )
+        );
     }
 
     @Override
