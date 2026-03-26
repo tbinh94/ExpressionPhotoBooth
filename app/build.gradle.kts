@@ -50,4 +50,12 @@ dependencies {
     implementation("androidx.camera:camera-view:1.5.3")
     implementation("org.jcodec:jcodec-android:0.2.5")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.google.mlkit:face-detection:16.1.6")
+    implementation("com.google.mlkit:pose-detection:18.0.0-beta5")
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }

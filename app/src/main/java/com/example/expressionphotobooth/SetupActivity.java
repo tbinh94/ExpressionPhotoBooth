@@ -72,6 +72,7 @@ public class SetupActivity extends AppCompatActivity {
         // GIAO NHIỆM VỤ: Lắng nghe sự kiện click nút NEXT
         btnNext.setOnClickListener(v -> {
             if (selectedFrame == null) {
+                Toast.makeText(SetupActivity.this, "Bạn phải chọn một khung hình trước khi tiếp tục!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -87,15 +88,10 @@ public class SetupActivity extends AppCompatActivity {
             session.setEditState(editState);
             sessionRepository.saveSession(session);
 
-            if (selectedFrame != null) {
-                getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
-                        .edit()
-                        .putInt("SELECTED_FRAME_ID", selectedFrame.getImageResId())
-                        .apply();
-            } else {
-                Toast.makeText(SetupActivity.this, "Vui lòng chọn 1 frame!", Toast.LENGTH_SHORT).show();
-                return; // Chặn lại nếu user chưa chọn frame
-            }
+            getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
+                    .edit()
+                    .putInt("SELECTED_FRAME_ID", selectedFrame.getImageResId())
+                    .apply();
 
             // Chuyển sang MainActivity
             Intent intent = new Intent(SetupActivity.this, MainActivity.class);
@@ -111,9 +107,14 @@ public class SetupActivity extends AppCompatActivity {
         ConceptAdapter conceptAdapter = new ConceptAdapter(conceptData, -1, frame -> {
             selectedFrame = frame;
             btnNext.setEnabled(true);
-            Toast.makeText(SetupActivity.this, "Đã chọn frame!", Toast.LENGTH_SHORT).show();
+            btnNext.setAlpha(1.0f);
+            Toast.makeText(SetupActivity.this, "Đã chọn: " + frame.getLabel(), Toast.LENGTH_SHORT).show();
         });
         rvConcepts.setAdapter(conceptAdapter);
+        
+        // Mặc định làm mờ nút Next
+        btnNext.setAlpha(0.5f);
+        btnNext.setEnabled(false);
     }
 
     private List<Concept> createConceptData() {
