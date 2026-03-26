@@ -114,10 +114,20 @@ public class ResultActivity extends AppCompatActivity {
         View btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> {
+                // Return to edit screen
+                onBackPressed(); 
+            });
+        }
+
+        View btnHome = findViewById(R.id.btnHome);
+        if (btnHome != null) {
+            btnHome.setOnClickListener(v -> {
+                // Clear session and return home
                 sessionRepository.clearSession();
                 Intent intent = new Intent(ResultActivity.this, HomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
+                finish();
             });
         }
     }
@@ -135,7 +145,7 @@ public class ResultActivity extends AppCompatActivity {
         Canvas canvas = new Canvas(resultBitmap);
         Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG); // Giúp ảnh sau khi scale mượt hơn
 
-        // Lấy danh sách tọa độ các lỗ hổng
+        // Lấy danh sách tọa độ các lỗ hổng từ FrameConfig (cấu hình tĩnh)
         List<Rect> holes = FrameConfig.getHolesForFrame(frameResId);
 
         // 3. VẼ CÁC ẢNH CHỤP NẰM DƯỚI FRAME
