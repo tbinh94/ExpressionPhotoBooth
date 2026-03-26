@@ -19,9 +19,9 @@ import com.example.expressionphotobooth.domain.model.EditState;
 import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SetupActivity extends AppCompatActivity {
@@ -46,7 +46,7 @@ public class SetupActivity extends AppCompatActivity {
         btnNext = findViewById(R.id.btnNext);
         rvConcepts = findViewById(R.id.rvConcepts);
         MaterialButton btnBack = findViewById(R.id.btnBack);
-        MaterialButtonToggleGroup togglePhotoCount = findViewById(R.id.togglePhotoCount);
+        MaterialButton btnHelpSetup = findViewById(R.id.btnHelpSetup);
         btnNext.setEnabled(false);
 
         // 2. CÀI ĐẶT RECYCLERVIEW: Đổ dữ liệu vào danh sách
@@ -61,13 +61,7 @@ public class SetupActivity extends AppCompatActivity {
 
         // Lắng nghe sự kiện click: Khi bấm vào thì quay lại màn hình trước đó
         btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-
-        togglePhotoCount.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) {
-                return;
-            }
-            selectedPhotoCount = checkedId == R.id.btnCount6 ? 6 : 4;
-        });
+        btnHelpSetup.setOnClickListener(v -> showSetupHelpDialog());
 
         // GIAO NHIỆM VỤ: Lắng nghe sự kiện click nút NEXT
         btnNext.setOnClickListener(v -> {
@@ -95,7 +89,6 @@ public class SetupActivity extends AppCompatActivity {
 
             // Chuyển sang MainActivity
             Intent intent = new Intent(SetupActivity.this, MainActivity.class);
-            intent.putExtra(IntentKeys.EXTRA_PHOTO_COUNT, selectedPhotoCount);
             startActivity(intent);
         });
     }
@@ -132,5 +125,18 @@ public class SetupActivity extends AppCompatActivity {
         concepts.add(new Concept("Idol Concept", cortisFrames));
 
         return concepts;
+    }
+
+    private void showSetupHelpDialog() {
+        HelpDialogUtils.showPhotoboothHelp(
+                this,
+                getString(R.string.help_setup_title),
+                getString(R.string.help_setup_subtitle),
+                Arrays.asList(
+                        getString(R.string.help_setup_bullet_1),
+                        getString(R.string.help_setup_bullet_2),
+                        getString(R.string.help_setup_bullet_3)
+                )
+        );
     }
 }

@@ -87,7 +87,7 @@ public class HomeActivity extends AppCompatActivity {
             mediaPlayer.pause();
         }
     }
-
+//DucNT183-26.03.2026
     @Override
     protected void onResume() {
         super.onResume();

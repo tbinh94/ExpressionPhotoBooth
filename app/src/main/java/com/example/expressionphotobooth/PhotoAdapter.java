@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,10 +27,16 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
 
     private final List<Uri> uris;
     private final OnPhotoSelectedListener onPhotoSelectedListener;
+    private final int maxSelection;
     private final Set<Integer> selectedPositions = new LinkedHashSet<>();
 
     public PhotoAdapter(List<Uri> uris, OnPhotoSelectedListener onPhotoSelectedListener) {
+        this(uris, Integer.MAX_VALUE, onPhotoSelectedListener);
+    }
+
+    public PhotoAdapter(List<Uri> uris, int maxSelection, OnPhotoSelectedListener onPhotoSelectedListener) {
         this.uris = new ArrayList<>(uris);
+        this.maxSelection = Math.max(1, maxSelection);
         this.onPhotoSelectedListener = onPhotoSelectedListener;
     }
 
@@ -66,6 +73,10 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
             if (selectedPositions.contains(current)) {
                 selectedPositions.remove(current);
             } else {
+                if (selectedPositions.size() >= maxSelection) {
+                    Toast.makeText(v.getContext(), v.getContext().getString(R.string.selection_limit_reached, maxSelection), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 selectedPositions.add(current);
             }
             notifyItemChanged(current);

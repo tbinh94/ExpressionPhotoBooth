@@ -55,6 +55,7 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_CODE = 100;
+    private static final int CAPTURE_COUNT = 6;
     private static final String TAG = "CameraX";
     private PreviewView viewFinder;
     private CardView previewCard;
@@ -132,10 +133,8 @@ public class MainActivity extends AppCompatActivity {
         cardLastCapture = findViewById(R.id.cardLastCapture);
         captureFlashOverlay = findViewById(R.id.captureFlashOverlay);
 
-        // Nhận số lượng ảnh từ trang trước
-        maxPhotos = getIntent().getIntExtra(IntentKeys.EXTRA_PHOTO_COUNT, sessionState.getPhotoCount());
-        sessionState.setPhotoCount(maxPhotos);
-        sessionRepository.saveSession(sessionState);
+        // Camera luôn chụp 6 ảnh; selection phía sau sẽ yêu cầu chọn đúng 4 ảnh.
+        maxPhotos = CAPTURE_COUNT;
         initCaptureUi();
 
         captureButton.setEnabled(false);
