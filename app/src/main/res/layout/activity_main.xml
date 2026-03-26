@@ -118,6 +118,13 @@
                 android:shadowDx="4"
                 android:shadowDy="4"
                 android:shadowRadius="15"/>
+
+            <!-- Khung vẽ debbuging AI -->
+            <com.example.expressionphotobooth.AiOverlayView
+                android:id="@+id/overlayView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible" />
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 
@@ -152,19 +159,87 @@
             app:strokeColor="#2A5298" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
+    <!-- Nút chọn chế độ chụp -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/modeContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:singleSelection="true"
+        app:checkedButton="@+id/btnModeCountdown"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ratioContainer">
+
+        <Button
+            android:id="@+id/btnModeCountdown"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tự động"
+            android:textColor="#2A5298"
+            app:strokeColor="#2A5298" />
+
+        <Button
+            android:id="@+id/btnModeExpression"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI Detect"
+            android:textColor="#2A5298"
+            app:strokeColor="#2A5298" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <!-- Thêm chọn Face hoặc Gesture -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/aiSelectionContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:checkedButton="@+id/btnAiFace"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/modeContainer">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAiFace"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🙂 Khuôn mặt"
+            android:textColor="@color/selector_ai_btn_text"
+            android:backgroundTint="@color/selector_ai_btn_bg"
+            android:textSize="12sp"
+            app:strokeColor="#2A5298" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAiHand"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✌️ Hành động"
+            android:textColor="@color/selector_ai_btn_text"
+            android:backgroundTint="@color/selector_ai_btn_bg"
+            android:textSize="12sp"
+            app:strokeColor="#2A5298" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <!-- Status & Progress -->
     <TextView
         android:id="@+id/tvCaptureStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/camera_status_margin_top"
+        android:layout_marginTop="8dp"
         android:text="@string/capture_status_ready"
         android:textColor="#2A5298"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ratioContainer" />
+        app:layout_constraintTop_toBottomOf="@id/aiSelectionContainer" />
 
     <LinearLayout
         android:id="@+id/dotContainer"
@@ -213,8 +288,23 @@
         android:padding="12dp"
         app:tint="#2A5298"
         app:layout_constraintBottom_toBottomOf="@id/btnCapture"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnSound"
         app:layout_constraintStart_toEndOf="@id/btnCapture"
+        app:layout_constraintTop_toTopOf="@id/btnCapture" />
+
+    <!-- Nút Sound -->
+    <ImageButton
+        android:id="@+id/btnSound"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_flash_pill"
+        android:src="@drawable/ic_sound_on"
+        android:contentDescription="Bật/Tắt âm thanh"
+        android:padding="12dp"
+        app:tint="#2A5298"
+        app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/btnCapture" />
 
     <!-- Nút Capture -->

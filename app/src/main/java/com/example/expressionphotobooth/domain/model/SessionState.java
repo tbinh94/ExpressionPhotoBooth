@@ -16,6 +16,7 @@ public class SessionState {
     private String resultImageUri;
     private boolean flashEnabled;
     private boolean screenFlashStrong;
+    private boolean soundEnabled = true;
     private EditState editState = new EditState();
 
     public int getPhotoCount() {
@@ -124,5 +125,13 @@ public class SessionState {
 
     public void setEditState(EditState editState) {
         this.editState = editState == null ? new EditState() : editState;
+    }
+
+    public boolean isSoundEnabled() {
+        return soundEnabled;
+    }
+
+    public void setSoundEnabled(boolean soundEnabled) {
+        this.soundEnabled = soundEnabled;
     }
 }

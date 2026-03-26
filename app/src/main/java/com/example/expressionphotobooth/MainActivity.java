@@ -3,6 +3,7 @@ package com.example.expressionphotobooth;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.CameraSelector;
@@ -39,6 +41,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.bumptech.glide.Glide;
 import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
+import com.example.expressionphotobooth.domain.usecase.ExpressionAnalyzer;
+import com.example.expressionphotobooth.domain.usecase.GestureAnalyzer;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -54,8 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "CameraX";
     private PreviewView viewFinder;
     private CardView previewCard;
+    private AiOverlayView aiOverlayView;
     private View captureButton;
     private ImageButton flashButton;
+    private ImageButton soundButton;
     private Button squareRatioButton;
     private Button wideRatioButton;
     private TextView tvCountdown;
@@ -66,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
     private View cardLastCapture;
     private View captureFlashOverlay;
     private ImageCapture imageCapture;
+    private ImageAnalysis imageAnalysis;
+    private ExpressionAnalyzer expressionAnalyzer;
+    private GestureAnalyzer gestureAnalyzer;
+    private boolean isWaitingForExpression = false;
+    private String targetExpression = "HI"; // Default to Hi gesture
     private int maxPhotos;
     private int capturedCount = 0;
     private final List<Uri> savedImageUris = new ArrayList<>();
@@ -74,8 +85,12 @@ public class MainActivity extends AppCompatActivity {
     private CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
     private boolean isSquareRatio = true;
     private boolean isCapturingSequence = false;
+    private boolean isExpressionMode = false; // Main AI Mode flag
+    private boolean isHandGestureMode = false; // Sub AI Mode: Hand (default = false, Face is default)
+    private boolean isFaceExpressionMode = true; // Sub AI Mode: Face (default = true)
     private boolean isFlashPreferredOn = false;
     private boolean isScreenFlashStrong = false;
+    private boolean isSoundEnabled = true;
     private SessionRepository sessionRepository;
     private SessionState sessionState;
     private MediaActionSound shutterSound;
@@ -91,16 +106,22 @@ public class MainActivity extends AppCompatActivity {
         sessionState = sessionRepository.getSession();
         isFlashPreferredOn = sessionState.isFlashEnabled();
         isScreenFlashStrong = sessionState.isScreenFlashStrong();
+        isSoundEnabled = sessionState.isSoundEnabled();
         setupToolbar();
 
         shutterSound = new MediaActionSound();
         shutterSound.load(MediaActionSound.SHUTTER_CLICK);
+        
+        expressionAnalyzer = new ExpressionAnalyzer();
+        gestureAnalyzer = new GestureAnalyzer();
 
         // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
+        aiOverlayView = (AiOverlayView) findViewById(R.id.overlayView);
         captureButton = findViewById(R.id.btnCapture);
         flashButton = findViewById(R.id.btnFlash);
+        soundButton = findViewById(R.id.btnSound);
         tvCountdown = findViewById(R.id.tvCountdown);
         squareRatioButton = findViewById(R.id.btnRatioSquare);
         wideRatioButton = findViewById(R.id.btnRatioWide);
@@ -142,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        if (soundButton != null) {
+            updateSoundIcon();
+            soundButton.setOnClickListener(v -> toggleSound());
+        }
+
         squareRatioButton.setOnClickListener(v -> {
             if (!isSquareRatio) {
                 isSquareRatio = true;
@@ -155,6 +181,38 @@ public class MainActivity extends AppCompatActivity {
                 isSquareRatio = false;
                 applyPreviewRatio();
                 if (cameraProvider != null) bindCameraUseCases();
+            }
+        });
+
+        com.google.android.material.button.MaterialButtonToggleGroup modeGroup = findViewById(R.id.modeContainer);
+        View aiSubGroup = findViewById(R.id.aiSelectionContainer);
+        modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                isExpressionMode = (checkedId == R.id.btnModeExpression);
+                aiSubGroup.setVisibility(isExpressionMode ? View.VISIBLE : View.GONE);
+                if (isExpressionMode) {
+                    Toast.makeText(this, "Chế độ AI: Hãy chọn kiểu detect!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Chế độ tự động: Đếm ngược 3 giây", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = 
+            (com.google.android.material.button.MaterialButtonToggleGroup) findViewById(R.id.aiSelectionContainer);
+        
+        // Đồng bộ trạng thái ban đầu theo nút đang được check trong XML (btnAiFace)
+        isHandGestureMode = false;
+        isFaceExpressionMode = true;
+        
+        aiSubSelector.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) return; // chỉ xử lý khi nút được chọn
+            isHandGestureMode = (checkedId == R.id.btnAiHand);
+            isFaceExpressionMode = (checkedId == R.id.btnAiFace);
+            if (isFaceExpressionMode) {
+                Toast.makeText(this, "Đã chuyển sang: Nhận diện khuôn mặt", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Đã chuyển sang: Nhận diện hành động", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -197,11 +255,46 @@ public class MainActivity extends AppCompatActivity {
 
         Preview preview = new Preview.Builder().build();
         imageCapture = buildImageCaptureUseCase();
+        imageAnalysis = new ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build();
+        
+        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), imageProxy -> {
+            boolean isWaiting = isWaitingForExpression;
+            if (isHandGestureMode && gestureAnalyzer != null) {
+                gestureAnalyzer.analyzeImageProxy(imageProxy, (gesture, box) -> {
+                    // Luôn hiện khung xanh để test kể cả khi không trong mode capture
+                    updateAiOverlay(box, gesture, android.graphics.Color.parseColor("#00E676"),
+                            imageProxy.getWidth(), imageProxy.getHeight(),
+                            imageProxy.getImageInfo().getRotationDegrees());
+                    // Chỉ trigger nếu gesture nằm trong phần HIỂN THỊ của camera
+                    if (isWaiting && targetExpression.equals(gesture)
+                            && isBoxVisibleInPreview(box, imageProxy.getWidth(), imageProxy.getHeight(),
+                                                    imageProxy.getImageInfo().getRotationDegrees())) {
+                        triggerImmediateCapture();
+                    }
+                });
+            } else if (isFaceExpressionMode && expressionAnalyzer != null) {
+                expressionAnalyzer.analyzeImageProxy(imageProxy, (expression, faceBox) -> {
+                    updateAiOverlay(faceBox, expression, android.graphics.Color.parseColor("#00B0FF"),
+                            imageProxy.getWidth(), imageProxy.getHeight(),
+                            imageProxy.getImageInfo().getRotationDegrees());
+                    if (isWaiting && targetExpression.equals(expression)
+                            && isBoxVisibleInPreview(faceBox, imageProxy.getWidth(), imageProxy.getHeight(),
+                                                    imageProxy.getImageInfo().getRotationDegrees())) {
+                        triggerImmediateCapture();
+                    }
+                });
+            } else {
+                imageProxy.close();
+            }
+        });
+        
         preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
 
         try {
             cameraProvider.unbindAll();
-            camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
+            camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalysis);
             captureButton.setEnabled(true);
             applyFlashMode();
             updateFlashAvailability();
@@ -241,26 +334,160 @@ public class MainActivity extends AppCompatActivity {
         captureButton.setEnabled(false);
         squareRatioButton.setEnabled(false);
         wideRatioButton.setEnabled(false);
+        findViewById(R.id.modeContainer).setEnabled(false);
         if (flashButton != null) flashButton.setEnabled(false);
         updateCaptureProgressUi();
         updateCaptureStatus(getString(R.string.capture_status_starting, maxPhotos));
         
-        // Bắt đầu chuỗi chụp với đếm ngược
+        // Bắt đầu chuỗi chụp
         startCountdownAndCapture();
+    }
+
+    private void triggerImmediateCapture() {
+        isWaitingForExpression = false;
+        tvCountdown.post(() -> {
+            if (aiOverlayView != null) aiOverlayView.updateOverlay(null, "");
+            tvCountdown.setVisibility(View.GONE);
+            takePhoto();
+        });
+    }
+
+    private void updateAiOverlay(Rect box, String label, int color, int imgW, int imgH, int rotation) {
+        if (aiOverlayView == null) return;
+        aiOverlayView.post(() -> {
+            java.util.List<Rect> boxes = new java.util.ArrayList<>();
+            int viewW = aiOverlayView.getWidth();
+            int viewH = aiOverlayView.getHeight();
+
+            if (box != null && viewW > 0 && viewH > 0) {
+                // Sau khi rotation, portrait device: imgW/imgH có thể được đảo
+                float srcW = (rotation == 90 || rotation == 270) ? (float) imgH : (float) imgW;
+                float srcH = (rotation == 90 || rotation == 270) ? (float) imgW : (float) imgH;
+
+                // Tính CENTER_CROP: tìm scale để cả 2 chiều đều >= view (giống scaleType=centerCrop)
+                float scaleX = viewW / srcW;
+                float scaleY = viewH / srcH;
+                float scale = Math.max(scaleX, scaleY); // CENTER_CROP lấy scale lớn nhất
+
+                // Phần thừa bị crop ở giữa
+                float cropOffsetX = (srcW * scale - viewW) / 2f;
+                float cropOffsetY = (srcH * scale - viewH) / 2f;
+
+                // Chuyển đổi: pixel ảnh -> pixel view (sau crop)
+                int left   = (int)(box.left   * scale - cropOffsetX);
+                int top    = (int)(box.top    * scale - cropOffsetY);
+                int right  = (int)(box.right  * scale - cropOffsetX);
+                int bottom = (int)(box.bottom * scale - cropOffsetY);
+
+                // Mirror X cho camera trước
+                if (cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) {
+                    int newLeft = viewW - right;
+                    right = viewW - left;
+                    left = newLeft;
+                }
+
+                // Clip vào phần hiển thị thực tế của overlay
+                left   = Math.max(0, left);
+                top    = Math.max(0, top);
+                right  = Math.min(viewW, right);
+                bottom = Math.min(viewH, bottom);
+
+                // Chỉ vẽ nếu hộp hợp lệ
+                if (left < right && top < bottom) {
+                    boxes.add(new Rect(left, top, right, bottom));
+                }
+            }
+            aiOverlayView.updateOverlay(boxes, label, color);
+        });
+    }
+
+    // Overload for calls without images (e.g. clearing)
+    private void updateAiOverlay(Rect box, String label) {
+        updateAiOverlay(box, label, android.graphics.Color.parseColor("#00E676"), 640, 480, 90);
+    }
+
+    /**
+     * Kiểm tra xem trung tâm bounding box có nằm trong phần hiển thị thực tế
+     * (sau CENTER_CROP) của camera preview không.
+     */
+    private boolean isBoxVisibleInPreview(Rect box, int imgW, int imgH, int rotation) {
+        if (box == null || aiOverlayView == null) return false;
+        int viewW = aiOverlayView.getWidth();
+        int viewH = aiOverlayView.getHeight();
+        if (viewW <= 0 || viewH <= 0) return true; // biến mết thì cứ cho qua
+
+        float srcW = (rotation == 90 || rotation == 270) ? (float) imgH : (float) imgW;
+        float srcH = (rotation == 90 || rotation == 270) ? (float) imgW : (float) imgH;
+
+        float scale = Math.max(viewW / srcW, viewH / srcH);
+        float cropOffsetX = (srcW * scale - viewW) / 2f;
+        float cropOffsetY = (srcH * scale - viewH) / 2f;
+
+        // Tính trung tâm hộp sau transform
+        float cx = ((box.left + box.right) / 2f) * scale - cropOffsetX;
+        float cy = ((box.top + box.bottom) / 2f) * scale - cropOffsetY;
+
+        // Mirror cho camera trước
+        if (cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) {
+            cx = viewW - cx;
+        }
+
+        return cx >= 0 && cx <= viewW && cy >= 0 && cy <= viewH;
     }
 
     private void startCountdownAndCapture() {
         if (capturedCount >= maxPhotos) {
             isCapturingSequence = false;
             updateCaptureStatus(getString(R.string.capture_status_done, maxPhotos));
+            findViewById(R.id.modeContainer).setEnabled(true);
+            findViewById(R.id.aiSelectionContainer).setEnabled(true);
             goToSelectionPage();
             return;
         }
 
         tvCountdown.setVisibility(View.VISIBLE);
         int nextShot = capturedCount + 1;
-        updateCaptureStatus(getString(R.string.capture_status_next, nextShot, maxPhotos));
-        runCountdown(3); // Bắt đầu đếm từ 3
+        
+        if (isExpressionMode) {
+            if (isHandGestureMode) {
+                if (nextShot % 2 != 0) {
+                    targetExpression = "HI";
+                    tvCountdown.setText("✌️");
+                    updateCaptureStatus("Chụp " + nextShot + ": Giơ tay Hi nào!");
+                } else {
+                    targetExpression = "HEART";
+                    tvCountdown.setText("❤️");
+                    updateCaptureStatus("Chụp " + nextShot + ": Thả tim xem!");
+                }
+            } else {
+                // Face mode
+                if (nextShot % 2 != 0) {
+                    targetExpression = "SMILE";
+                    tvCountdown.setText(":D");
+                    updateCaptureStatus("Chụp " + nextShot + ": Cười lên nào!");
+                } else {
+                    targetExpression = "WINK_RIGHT"; // Simple specific wink
+                    tvCountdown.setText(";)");
+                    updateCaptureStatus("Chụp " + nextShot + ": Nháy mắt cái nào!");
+                }
+            }
+
+            // Lock indicator...
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (isCapturingSequence) {
+                    isWaitingForExpression = true;
+                    // Fallback 7s
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (isCapturingSequence && isWaitingForExpression) {
+                            triggerImmediateCapture();
+                        }
+                    }, 7000);
+                }
+            }, 1000);
+        } else {
+            // Standard Countdown Mode
+            runCountdown(3);
+        }
     }
 
     private void runCountdown(int seconds) {
@@ -268,7 +495,11 @@ public class MainActivity extends AppCompatActivity {
             tvCountdown.setText(String.valueOf(seconds));
             int nextShot = Math.min(capturedCount + 1, maxPhotos);
             updateCaptureStatus(getString(R.string.capture_status_countdown, nextShot, maxPhotos, seconds));
-            new Handler(Looper.getMainLooper()).postDelayed(() -> runCountdown(seconds - 1), 1000);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (isCapturingSequence && !isExpressionMode) {
+                    runCountdown(seconds - 1);
+                }
+            }, 1000);
         } else {
             tvCountdown.setVisibility(View.GONE);
             takePhoto();
@@ -298,7 +529,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         
                         // Phát âm thanh chụp hình
-                        if (shutterSound != null) {
+                        if (shutterSound != null && isSoundEnabled) {
                             shutterSound.play(MediaActionSound.SHUTTER_CLICK);
                         }
 
@@ -312,9 +543,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
                         isCapturingSequence = false;
+                        isWaitingForExpression = false;
                         captureButton.setEnabled(true);
                         squareRatioButton.setEnabled(true);
                         wideRatioButton.setEnabled(true);
+                        findViewById(R.id.modeContainer).setEnabled(true);
                         updateFlashAvailability();
                         updateCaptureStatus(getString(R.string.capture_status_error));
                         Toast.makeText(MainActivity.this, R.string.capture_failed, Toast.LENGTH_SHORT).show();
@@ -425,6 +658,20 @@ public class MainActivity extends AppCompatActivity {
         flashButton.setEnabled(canToggleFlash);
         flashButton.setAlpha(canToggleFlash ? 1f : 0.35f);
         flashButton.setImageResource(isFlashPreferredOn ? R.drawable.ic_flash_on_24 : R.drawable.ic_flash_off_24);
+    }
+
+    private void toggleSound() {
+        isSoundEnabled = !isSoundEnabled;
+        sessionState.setSoundEnabled(isSoundEnabled);
+        sessionRepository.saveSession(sessionState);
+        updateSoundIcon();
+        Toast.makeText(this, isSoundEnabled ? "Đã bật âm thanh" : "Đã tắt âm thanh", Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateSoundIcon() {
+        if (soundButton != null) {
+            soundButton.setImageResource(isSoundEnabled ? R.drawable.ic_sound_on : R.drawable.ic_sound_off);
+        }
     }
 
     private boolean shouldUseHardwareFlash() {
