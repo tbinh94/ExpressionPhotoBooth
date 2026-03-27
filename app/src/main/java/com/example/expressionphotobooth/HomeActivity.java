@@ -9,11 +9,13 @@ import android.view.animation.AnimationUtils;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.google.android.material.button.MaterialButton;
 
 public class HomeActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private static boolean isMuted = false;
+    private AuthRepository authRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,8 +23,25 @@ public class HomeActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
+        authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        if (!authRepository.isLoggedIn()) {
+            startActivity(new Intent(HomeActivity.this, LoginActivity.class));
+            finish();
+            return;
+        }
+
         // Phát nhạc nền
         startBackgroundMusic();
+
+        MaterialButton btnLogout = findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(v -> {
+            authRepository.signOut();
+            Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
+            loginIntent.putExtra(IntentKeys.EXTRA_NOTICE_TITLE, getString(R.string.auth_sign_out_title));
+            loginIntent.putExtra(IntentKeys.EXTRA_NOTICE_MESSAGE, getString(R.string.auth_sign_out_message));
+            startActivity(loginIntent);
+            finish();
+        });
 
         MaterialButton btnStart = findViewById(R.id.btnStart);
         btnStart.setOnClickListener(v -> {

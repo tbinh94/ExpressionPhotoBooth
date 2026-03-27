@@ -52,15 +52,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int CAPTURE_COUNT = 6;
     private static final String TAG = "CameraX";
+    // Tuned timing so front-camera screen flash feels natural and visible.
+    private static final long SCREEN_FLASH_FADE_IN_NORMAL_MS = 140L;
+    private static final long SCREEN_FLASH_FADE_IN_STRONG_MS = 180L;
+    private static final long SCREEN_FLASH_HOLD_NORMAL_MS = 90L;
+    private static final long SCREEN_FLASH_HOLD_STRONG_MS = 140L;
+    private static final long SCREEN_FLASH_FADE_OUT_NORMAL_MS = 260L;
+    private static final long SCREEN_FLASH_FADE_OUT_STRONG_MS = 340L;
     private PreviewView viewFinder;
     private CardView previewCard;
     private AiOverlayView aiOverlayView;
@@ -122,21 +126,7 @@ public class MainActivity extends AppCompatActivity {
         expressionAnalyzer = new ExpressionAnalyzer();
         gestureAnalyzer = new GestureAnalyzer();
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("status", "connected");
-        testData.put("time", System.currentTimeMillis());
-        db.collection("connection_test")
-            .add(testData)
-            .addOnSuccessListener(documentReference -> {
-                Log.d("FirebaseTest", "Kết nối THÀNH CÔNG! ID: " + documentReference.getId());
-                Toast.makeText(this, "Đã kết nối Firebase Database!", Toast.LENGTH_SHORT).show();
-            })
-            .addOnFailureListener(e -> {
-                Log.e("FirebaseTest", "Kết nối THẤT BẠI: ", e);
-                Toast.makeText(this, "Lỗi kết nối Firebase!", Toast.LENGTH_SHORT).show();
-            });
+        // Firebase test probe removed to keep camera screen independent from backend setup.
         // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
@@ -721,9 +711,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void playScreenFlashThenCapture(Runnable onFlashPeak) {
         float flashPeakAlpha = isScreenFlashStrong ? 1.0f : 0.86f;
-        long fadeInDuration = isScreenFlashStrong ? 110L : 90L;
-        long fadeOutDuration = isScreenFlashStrong ? 220L : 170L;
+        long fadeInDuration = isScreenFlashStrong ? SCREEN_FLASH_FADE_IN_STRONG_MS : SCREEN_FLASH_FADE_IN_NORMAL_MS;
+        long flashHoldDuration = isScreenFlashStrong ? SCREEN_FLASH_HOLD_STRONG_MS : SCREEN_FLASH_HOLD_NORMAL_MS;
+        long fadeOutDuration = isScreenFlashStrong ? SCREEN_FLASH_FADE_OUT_STRONG_MS : SCREEN_FLASH_FADE_OUT_NORMAL_MS;
 
+        captureFlashOverlay.animate().cancel();
         captureFlashOverlay.setVisibility(View.VISIBLE);
         captureFlashOverlay.setAlpha(0f);
         captureFlashOverlay.animate()
@@ -733,6 +725,7 @@ public class MainActivity extends AppCompatActivity {
                     onFlashPeak.run();
                     captureFlashOverlay.animate()
                             .alpha(0f)
+                            .setStartDelay(flashHoldDuration)
                             .setDuration(fadeOutDuration)
                             .withEndAction(() -> captureFlashOverlay.setVisibility(View.GONE))
                             .start();

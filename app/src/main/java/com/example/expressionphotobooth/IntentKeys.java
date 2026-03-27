@@ -7,6 +7,8 @@ public final class IntentKeys {
     public static final String EXTRA_RESULT_IMAGE = "result_image";
     public static final String EXTRA_ORIGINAL_URI = "original_uri";
     public static final String EXTRA_EDITED_URI = "edited_uri";
+    public static final String EXTRA_NOTICE_MESSAGE = "notice_message";
+    public static final String EXTRA_NOTICE_TITLE = "notice_title";
 
     private IntentKeys() {
     }

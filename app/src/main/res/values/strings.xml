@@ -121,4 +121,31 @@
     <string name="item_selected_order_placeholder">1</string>
     <string name="edit_summary_default">Filter: None  •  Frame: None  •  Sticker: None</string>
     <string name="edit_summary_format">Filter: %1$s  •  Frame: %2$s  •  Sticker: %3$s</string>
+
+    <string name="common_ok">Đã hiểu</string>
+
+    <string name="auth_title">Welcome to PhotoBooth</string>
+    <string name="auth_subtitle">Đăng nhập để bắt đầu phiên chụp của bạn</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Mật khẩu</string>
+    <string name="auth_sign_in">Đăng nhập</string>
+    <string name="auth_register">Đăng ký nhanh</string>
+    <string name="auth_loading">Đang xử lý...</string>
+    <string name="auth_error_title">Lỗi xác thực</string>
+    <string name="auth_sign_in_failed_title">Đăng nhập thất bại</string>
+    <string name="auth_register_success_title">Đăng ký thành công</string>
+    <string name="auth_register_success_message">Tài khoản đã được tạo. Mời bạn tiếp tục vào app.</string>
+    <string name="auth_register_failed_title">Đăng ký thất bại</string>
+    <string name="auth_invalid_input_title">Thông tin chưa hợp lệ</string>
+    <string name="auth_invalid_input_message">Vui lòng nhập email và mật khẩu.</string>
+    <string name="auth_invalid_email_message">Email chưa đúng định dạng.</string>
+    <string name="auth_invalid_password_message">Mật khẩu tối thiểu 6 ký tự.</string>
+    <string name="auth_sign_out">Đăng xuất</string>
+    <string name="auth_sign_out_title">Đã đăng xuất</string>
+    <string name="auth_sign_out_message">Bạn đã đăng xuất khỏi phiên hiện tại.</string>
+
+    <string name="admin_title">Admin Dashboard</string>
+    <string name="admin_subtitle">Quản trị nội dung khung, sticker và theo dõi luồng sử dụng.</string>
+    <string name="admin_open_user_flow">Vào giao diện người dùng</string>
+    <string name="admin_logged_in_as">Đăng nhập: %1$s</string>
 </resources>
