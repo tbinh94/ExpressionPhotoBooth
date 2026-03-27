@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "423474439806",
+    "project_id": "aiphotobooth-ece0a",
+    "storage_bucket": "aiphotobooth-ece0a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423474439806:android:8d8ebe0a38e79889349a2f",
+        "android_client_info": {
+          "package_name": "com.example.expressionphotobooth"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5p4QvAENIG3eFvIUUg5rJoi6yPgk2fSc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

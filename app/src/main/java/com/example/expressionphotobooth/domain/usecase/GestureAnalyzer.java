@@ -136,27 +136,24 @@ public class GestureAnalyzer {
         if (!isValid(wrist, thumb, index)) return false;
         float dThumbIndex = dist(thumb, index);
         float dIndexWrist = dist(index, wrist);
-        // Ngón cái và trỏ chụm sát nhau
-        return dThumbIndex < dIndexWrist * 0.35f && dThumbIndex < faceWidth * 0.4f;
+        // Ngón cái và trỏ chụm khít sát nhau (HEART) - giảm ngưỡng xuống 0.2 để nó chỉ nhận khi thật sự chụm
+        return dThumbIndex < dIndexWrist * 0.20f && dThumbIndex < faceWidth * 0.3f;
     }
 
     private boolean checkHi(PoseLandmark wrist, PoseLandmark thumb, PoseLandmark index, float faceWidth) {
         if (!isValid(wrist, index)) return false; 
         float dIndexWrist = dist(index, wrist);
         
-        // Quan trọng: Phân biệt xòe ngón tay (V-sign/Hi) với việc lỡ nắm đấm tay (Fist).
         // Khi ngón trỏ duỗi thẳng, khoảng cách từ cổ tay tới ngón trỏ phải dài (tương đương > 50% chiều ngang mặt).
-        // Nếu tay đang nắm lại, khoảng cách này rụt ngắn đi rất nhiều!
         if (dIndexWrist < faceWidth * 0.5f) return false;
 
         // Cho phép tay nghiêng chữ V (tilted) bằng cách giảm điều kiện y
         boolean indexUp = index.getPosition().y < wrist.getPosition().y - (dIndexWrist * 0.15f);
         
-        // V-sign: ngón trỏ thẳng, ngón cái co lại 
-        // Waving: xòe cả bàn
-        // Khoảng cách cái - trỏ chỉ cần lớn hơn 30% khoảng cách trỏ - cổ tay
+        // V-sign: ngón trỏ thẳng, ngón cái co lại hoặc xòe cả bàn
+        // Khoảng cách cái - trỏ phải lớn (để tách biệt với tay đang định làm Heart)
         float dThumbIndex = isValid(thumb) ? dist(thumb, index) : Float.MAX_VALUE;
-        boolean fingersSpread = dThumbIndex > dIndexWrist * 0.25f;
+        boolean fingersSpread = dThumbIndex > dIndexWrist * 0.40f;
         
         return indexUp && fingersSpread;
     }

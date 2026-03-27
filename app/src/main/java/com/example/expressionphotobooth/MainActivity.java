@@ -52,6 +52,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_CODE = 100;
@@ -118,6 +122,21 @@ public class MainActivity extends AppCompatActivity {
         expressionAnalyzer = new ExpressionAnalyzer();
         gestureAnalyzer = new GestureAnalyzer();
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("status", "connected");
+        testData.put("time", System.currentTimeMillis());
+        db.collection("connection_test")
+            .add(testData)
+            .addOnSuccessListener(documentReference -> {
+                Log.d("FirebaseTest", "Kết nối THÀNH CÔNG! ID: " + documentReference.getId());
+                Toast.makeText(this, "Đã kết nối Firebase Database!", Toast.LENGTH_SHORT).show();
+            })
+            .addOnFailureListener(e -> {
+                Log.e("FirebaseTest", "Kết nối THẤT BẠI: ", e);
+                Toast.makeText(this, "Lỗi kết nối Firebase!", Toast.LENGTH_SHORT).show();
+            });
         // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
