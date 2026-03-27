@@ -29,6 +29,12 @@ public class FirebaseAuthRepository implements AuthRepository {
     }
 
     @Override
+    public boolean isGuest() {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        return user != null && user.isAnonymous();
+    }
+
+    @Override
     public String getCurrentUid() {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         return user != null ? user.getUid() : null;
@@ -51,7 +57,7 @@ public class FirebaseAuthRepository implements AuthRepository {
                             callback.onError("Không tìm thấy tài khoản sau khi đăng nhập.");
                             return;
                         }
-                        callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), role));
+                        callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), role, false));
                     }
 
                     @Override
@@ -63,7 +69,7 @@ public class FirebaseAuthRepository implements AuthRepository {
     }
 
     @Override
-    public void register(String email, String password, AuthCallback callback) {
+    public void register(String email, String password, String name, String birthday, AuthCallback callback) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(authResult -> {
                     FirebaseUser user = firebaseAuth.getCurrentUser();
@@ -74,6 +80,8 @@ public class FirebaseAuthRepository implements AuthRepository {
 
                     Map<String, Object> userDoc = new HashMap<>();
                     userDoc.put("email", user.getEmail());
+                    userDoc.put("displayName", name);
+                    userDoc.put("birthday", birthday);
                     userDoc.put("role", UserRole.USER.toFirestoreValue());
                     userDoc.put("isActive", true);
                     userDoc.put("updatedAt", System.currentTimeMillis());
@@ -82,10 +90,32 @@ public class FirebaseAuthRepository implements AuthRepository {
                     firestore.collection(USERS_COLLECTION)
                             .document(user.getUid())
                             .set(userDoc)
-                            .addOnSuccessListener(unused -> callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), UserRole.USER)))
+                            .addOnSuccessListener(unused -> callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), UserRole.USER, false)))
                             .addOnFailureListener(e -> callback.onError(safeMessage(e, "Tạo hồ sơ người dùng thất bại.")));
                 })
                 .addOnFailureListener(e -> callback.onError(safeMessage(e, "Đăng ký thất bại. Vui lòng thử lại.")));
+    }
+
+    @Override
+    public void signInAsGuest(AuthCallback callback) {
+        firebaseAuth.signInAnonymously()
+                .addOnSuccessListener(authResult -> {
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    if (user != null) {
+                        callback.onSuccess(new AuthSession(user.getUid(), "Guest", UserRole.USER, true));
+                    } else {
+                        callback.onError("Không thể tạo phiên khách.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    String msg = safeMessage(e, "Lỗi khi đăng nhập khách.");
+                    // Common cause: Anonymous Authentication is disabled in Firebase Console
+                    if (msg.contains("CONFIGURATION_NOT_FOUND") || msg.contains("not enabled") || msg.contains("restricted")) {
+                        callback.onError("Chế độ Khách chưa được bật.\nVui lòng vào Firebase Console > Authentication > Sign-in method > bật 'Anonymous'.");
+                    } else {
+                        callback.onError(msg);
+                    }
+                });
     }
 
     @Override
@@ -93,6 +123,11 @@ public class FirebaseAuthRepository implements AuthRepository {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if (user == null) {
             callback.onError("Bạn chưa đăng nhập.");
+            return;
+        }
+
+        if (user.isAnonymous()) {
+            callback.onSuccess(UserRole.USER);
             return;
         }
 

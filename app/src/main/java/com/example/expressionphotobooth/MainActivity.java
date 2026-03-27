@@ -52,19 +52,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import com.example.expressionphotobooth.domain.repository.AuthRepository;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int CAPTURE_COUNT = 6;
     private static final String TAG = "CameraX";
-    // Tuned timing so front-camera screen flash feels natural and visible.
-    private static final long SCREEN_FLASH_FADE_IN_NORMAL_MS = 140L;
-    private static final long SCREEN_FLASH_FADE_IN_STRONG_MS = 180L;
-    private static final long SCREEN_FLASH_HOLD_NORMAL_MS = 90L;
-    private static final long SCREEN_FLASH_HOLD_STRONG_MS = 140L;
-    private static final long SCREEN_FLASH_FADE_OUT_NORMAL_MS = 260L;
-    private static final long SCREEN_FLASH_FADE_OUT_STRONG_MS = 340L;
+    // Tăng thời gian và độ sáng để mô phỏng đèn flash thật
+    private static final long SCREEN_FLASH_FADE_IN_NORMAL_MS = 100L;
+    private static final long SCREEN_FLASH_FADE_IN_STRONG_MS = 140L;
+    private static final long SCREEN_FLASH_HOLD_NORMAL_MS = 300L;
+    private static final long SCREEN_FLASH_HOLD_STRONG_MS = 500L;
+    private static final long SCREEN_FLASH_FADE_OUT_NORMAL_MS = 400L;
+    private static final long SCREEN_FLASH_FADE_OUT_STRONG_MS = 600L;
     private PreviewView viewFinder;
     private CardView previewCard;
     private AiOverlayView aiOverlayView;
@@ -198,6 +199,14 @@ public class MainActivity extends AppCompatActivity {
         View aiSubGroup = findViewById(R.id.aiSelectionContainer);
         modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
+                AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
+                if (checkedId == R.id.btnModeExpression && authRepo.isGuest()) {
+                    group.check(R.id.btnModeCountdown); // Force back to auto
+                    HelpDialogUtils.showCenteredNotice(this, "Yêu cầu đăng nhập", 
+                        "Tính năng AI (Pose/Expression) chỉ dành cho thành viên chính thức. Vui lòng đăng nhập để sử dụng!", false);
+                    return;
+                }
+                
                 isExpressionMode = (checkedId == R.id.btnModeExpression);
                 aiSubGroup.setVisibility(isExpressionMode ? View.VISIBLE : View.GONE);
                 if (isExpressionMode) {
@@ -710,7 +719,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playScreenFlashThenCapture(Runnable onFlashPeak) {
-        float flashPeakAlpha = isScreenFlashStrong ? 1.0f : 0.86f;
+        float flashPeakAlpha = isScreenFlashStrong ? 1.0f : 0.95f;
         long fadeInDuration = isScreenFlashStrong ? SCREEN_FLASH_FADE_IN_STRONG_MS : SCREEN_FLASH_FADE_IN_NORMAL_MS;
         long flashHoldDuration = isScreenFlashStrong ? SCREEN_FLASH_HOLD_STRONG_MS : SCREEN_FLASH_HOLD_NORMAL_MS;
         long fadeOutDuration = isScreenFlashStrong ? SCREEN_FLASH_FADE_OUT_STRONG_MS : SCREEN_FLASH_FADE_OUT_NORMAL_MS;

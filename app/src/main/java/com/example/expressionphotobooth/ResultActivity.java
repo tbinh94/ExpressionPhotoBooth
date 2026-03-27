@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -24,7 +25,11 @@ import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.CreateTimelapseVideoUseCase;
 import com.example.expressionphotobooth.domain.usecase.CreateVerticalCollageUseCase;
 import com.example.expressionphotobooth.utils.FrameConfig;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.example.expressionphotobooth.domain.repository.AuthRepository;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +49,7 @@ public class ResultActivity extends AppCompatActivity {
     private CreateVerticalCollageUseCase createVerticalCollageUseCase;
     private MaterialButton btnSaveVideo;
     private List<String> sourceOriginalUris;
+    private boolean hasShownFeedback = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -256,6 +263,7 @@ public class ResultActivity extends AppCompatActivity {
                     btnSaveVideo.setEnabled(true);
                     if (videoUri != null) {
                         Toast.makeText(ResultActivity.this, R.string.video_saved_success, Toast.LENGTH_LONG).show();
+                        showFeedbackBottomSheet();
                     } else {
                         Toast.makeText(ResultActivity.this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
                     }
@@ -289,10 +297,54 @@ public class ResultActivity extends AppCompatActivity {
             try (OutputStream out = getContentResolver().openOutputStream(outputUri)) {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                 Toast.makeText(this, "Đã lưu vào bộ sưu tập!", Toast.LENGTH_SHORT).show();
+                showFeedbackBottomSheet();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void showFeedbackBottomSheet() {
+        if (hasShownFeedback) return;
+        hasShownFeedback = true;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View bottomSheetView = getLayoutInflater().inflate(R.layout.layout_feedback_bottom_sheet, null);
+        bottomSheetDialog.setContentView(bottomSheetView);
+
+        RatingBar ratingBar = bottomSheetView.findViewById(R.id.ratingBar);
+        TextInputEditText etFeedback = bottomSheetView.findViewById(R.id.etFeedback);
+        MaterialButton btnSubmit = bottomSheetView.findViewById(R.id.btnSubmitFeedback);
+
+        btnSubmit.setOnClickListener(v -> {
+            float rating = ratingBar.getRating();
+            String feedback = etFeedback.getText() != null ? etFeedback.getText().toString().trim() : "";
+            
+            AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+            String uid = authRepository.getCurrentUid();
+            String email = authRepository.getCurrentEmail();
+
+            Map<String, Object> review = new HashMap<>();
+            review.put("userId", uid);
+            review.put("userEmail", email);
+            review.put("rating", rating);
+            review.put("feedback", feedback);
+            review.put("timestamp", System.currentTimeMillis());
+
+            btnSubmit.setEnabled(false);
+            FirebaseFirestore.getInstance().collection("reviews")
+                .add(review)
+                .addOnSuccessListener(doc -> {
+                    Toast.makeText(this, "Cảm ơn bạn đã đánh giá " + rating + " sao!", Toast.LENGTH_SHORT).show();
+                    bottomSheetDialog.dismiss();
+                })
+                .addOnFailureListener(e -> {
+                    btnSubmit.setEnabled(true);
+                    Toast.makeText(this, "Lỗi khi gửi đánh giá. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                });
+        });
+
+        bottomSheetDialog.show();
     }
 
     private List<String> resolveSourceOriginalUris() {

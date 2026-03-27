@@ -20,9 +20,13 @@ public interface AuthRepository {
 
     String getCurrentEmail();
 
+    boolean isGuest();
+
     void signIn(String email, String password, AuthCallback callback);
 
-    void register(String email, String password, AuthCallback callback);
+    void register(String email, String password, String name, String birthday, AuthCallback callback);
+
+    void signInAsGuest(AuthCallback callback);
 
     void fetchCurrentRole(RoleCallback callback);
 

@@ -15,11 +15,11 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private TextInputEditText etEmail;
-    private TextInputEditText etPassword;
-    private MaterialButton btnSignIn;
-    private MaterialButton btnRegister;
+    private TextInputEditText etEmail, etPassword, etName, etBirthday;
+    private View layoutRegisterExtra;
+    private MaterialButton btnSignIn, btnRegister, btnGuest;
     private AuthRepository authRepository;
+    private boolean isRegisterMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +46,47 @@ public class LoginActivity extends AppCompatActivity {
 
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        etName = findViewById(R.id.etName);
+        etBirthday = findViewById(R.id.etBirthday);
+        layoutRegisterExtra = findViewById(R.id.layoutRegisterExtra);
         btnSignIn = findViewById(R.id.btnSignIn);
         btnRegister = findViewById(R.id.btnRegister);
+        btnGuest = findViewById(R.id.btnGuest);
 
-        btnSignIn.setOnClickListener(v -> doSignIn());
-        btnRegister.setOnClickListener(v -> doRegister());
+        etBirthday.setOnClickListener(v -> showDatePicker());
+        btnGuest.setOnClickListener(v -> doSignInAsGuest());
+        btnSignIn.setOnClickListener(v -> {
+            if (isRegisterMode) {
+                setRegisterMode(false);
+            } else {
+                doSignIn();
+            }
+        });
+        btnRegister.setOnClickListener(v -> {
+            if (!isRegisterMode) {
+                setRegisterMode(true);
+            } else {
+                doRegister();
+            }
+        });
+    }
+
+    private void showDatePicker() {
+        com.google.android.material.datepicker.MaterialDatePicker<Long> picker = 
+            com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker().build();
+        picker.addOnPositiveButtonClickListener(selection -> {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTimeInMillis(selection);
+            etBirthday.setText(android.text.format.DateFormat.format("dd/MM/yyyy", cal).toString());
+        });
+        picker.show(getSupportFragmentManager(), "DP");
+    }
+
+    private void setRegisterMode(boolean register) {
+        this.isRegisterMode = register;
+        layoutRegisterExtra.setVisibility(register ? View.VISIBLE : View.GONE);
+        btnSignIn.setText(register ? "Quay lại" : getString(R.string.auth_sign_in));
+        btnRegister.setText(register ? "Xác nhận đăng ký" : getString(R.string.auth_register));
     }
 
     private void doSignIn() {
@@ -82,16 +118,36 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void doSignInAsGuest() {
+        setLoading(true);
+        authRepository.signInAsGuest(new AuthRepository.AuthCallback() {
+            @Override
+            public void onSuccess(com.example.expressionphotobooth.domain.model.AuthSession session) {
+                setLoading(false);
+                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                finish();
+            }
+
+            @Override
+            public void onError(String message) {
+                setLoading(false);
+                HelpDialogUtils.showCenteredNotice(LoginActivity.this, "Lỗi", message, false);
+            }
+        });
+    }
+
     private void doRegister() {
         String email = getText(etEmail);
         String password = getText(etPassword);
+        String name = getText(etName);
+        String birthday = getText(etBirthday);
 
         if (!isInputValid(email, password)) {
             return;
         }
 
         setLoading(true);
-        authRepository.register(email, password, new AuthRepository.AuthCallback() {
+        authRepository.register(email, password, name, birthday, new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(com.example.expressionphotobooth.domain.model.AuthSession session) {
                 setLoading(false);
@@ -119,31 +175,26 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean isInputValid(String email, String password) {
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            HelpDialogUtils.showCenteredNotice(
-                    this,
-                    getString(R.string.auth_invalid_input_title),
-                    getString(R.string.auth_invalid_input_message),
-                    false
-            );
+            HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_invalid_input_title), getString(R.string.auth_invalid_input_message), false);
             return false;
         }
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            HelpDialogUtils.showCenteredNotice(
-                    this,
-                    getString(R.string.auth_invalid_input_title),
-                    getString(R.string.auth_invalid_email_message),
-                    false
-            );
+            HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_invalid_input_title), getString(R.string.auth_invalid_email_message), false);
             return false;
         }
         if (password.length() < 6) {
-            HelpDialogUtils.showCenteredNotice(
-                    this,
-                    getString(R.string.auth_invalid_input_title),
-                    getString(R.string.auth_invalid_password_message),
-                    false
-            );
+            HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_invalid_input_title), getString(R.string.auth_invalid_password_message), false);
             return false;
+        }
+        if (isRegisterMode) {
+           if (TextUtils.isEmpty(getText(etName))) {
+               HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_invalid_input_title), getString(R.string.auth_invalid_name_message), false);
+               return false;
+           }
+           if (TextUtils.isEmpty(getText(etBirthday))) {
+               HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_invalid_input_title), getString(R.string.auth_invalid_birthday_message), false);
+               return false;
+           }
         }
         return true;
     }
@@ -174,8 +225,10 @@ public class LoginActivity extends AppCompatActivity {
     private void setLoading(boolean isLoading) {
         btnSignIn.setEnabled(!isLoading);
         btnRegister.setEnabled(!isLoading);
-        btnSignIn.setText(isLoading ? R.string.auth_loading : R.string.auth_sign_in);
-        btnRegister.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
+        btnGuest.setEnabled(!isLoading);
+        btnSignIn.setText(isLoading ? getString(R.string.auth_loading) : (isRegisterMode ? "Quay lại" : getString(R.string.auth_sign_in)));
+        btnRegister.setVisibility(isLoading || isRegisterMode ? View.VISIBLE : View.VISIBLE); // Adjust visibility if needed
+        btnGuest.setVisibility(isLoading || isRegisterMode ? View.GONE : View.VISIBLE);
     }
 
     private String getText(TextInputEditText editText) {

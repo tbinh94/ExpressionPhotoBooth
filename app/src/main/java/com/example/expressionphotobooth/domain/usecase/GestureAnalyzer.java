@@ -126,8 +126,8 @@ public class GestureAnalyzer {
 
     private boolean isValid(PoseLandmark... landmarks) {
         for (PoseLandmark lm : landmarks) {
-            // Ngưỡng 0.5f: ngón tay trỏ/cái thường có độ tin cậy thấp hơn vai/mặt
-            if (lm == null || lm.getInFrameLikelihood() < 0.5f) return false;
+            // Ngưỡng 0.25f: ngón tay trỏ/cái thường có độ tin cậy thấp hơn vai/mặt trong model Pose Detection
+            if (lm == null || lm.getInFrameLikelihood() < 0.25f) return false;
         }
         return true;
     }
@@ -136,24 +136,24 @@ public class GestureAnalyzer {
         if (!isValid(wrist, thumb, index)) return false;
         float dThumbIndex = dist(thumb, index);
         float dIndexWrist = dist(index, wrist);
-        // Ngón cái và trỏ chụm khít sát nhau (HEART) - giảm ngưỡng xuống 0.2 để nó chỉ nhận khi thật sự chụm
-        return dThumbIndex < dIndexWrist * 0.20f && dThumbIndex < faceWidth * 0.3f;
+        // Ngón cái và trỏ chụm khít sát nhau (HEART) - nới lỏng xuống 0.35 để dễ bắt hơn
+        return dThumbIndex < dIndexWrist * 0.35f && dThumbIndex < faceWidth * 0.6f;
     }
 
     private boolean checkHi(PoseLandmark wrist, PoseLandmark thumb, PoseLandmark index, float faceWidth) {
         if (!isValid(wrist, index)) return false; 
         float dIndexWrist = dist(index, wrist);
         
-        // Khi ngón trỏ duỗi thẳng, khoảng cách từ cổ tay tới ngón trỏ phải dài (tương đương > 50% chiều ngang mặt).
-        if (dIndexWrist < faceWidth * 0.5f) return false;
+        // Khi ngón trỏ duỗi thẳng, khoảng cách từ cổ tay tới ngón trỏ dài hơn
+        if (dIndexWrist < faceWidth * 0.35f) return false;
 
         // Cho phép tay nghiêng chữ V (tilted) bằng cách giảm điều kiện y
-        boolean indexUp = index.getPosition().y < wrist.getPosition().y - (dIndexWrist * 0.15f);
+        boolean indexUp = index.getPosition().y < wrist.getPosition().y - (dIndexWrist * 0.10f);
         
-        // V-sign: ngón trỏ thẳng, ngón cái co lại hoặc xòe cả bàn
-        // Khoảng cách cái - trỏ phải lớn (để tách biệt với tay đang định làm Heart)
+        // V-sign: ngón trỏ thẳng, ngón cái co lại hoặc xòe
+        // Khoảng cách cái - trỏ không cần quá lớn, 25% là đủ để tránh trùng với Heart
         float dThumbIndex = isValid(thumb) ? dist(thumb, index) : Float.MAX_VALUE;
-        boolean fingersSpread = dThumbIndex > dIndexWrist * 0.40f;
+        boolean fingersSpread = dThumbIndex > dIndexWrist * 0.25f;
         
         return indexUp && fingersSpread;
     }
