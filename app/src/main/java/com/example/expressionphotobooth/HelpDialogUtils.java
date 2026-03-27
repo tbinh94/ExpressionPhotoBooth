@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -62,6 +63,32 @@ public final class HelpDialogUtils {
                 .create();
 
         btnGotIt.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    public static void showCenteredNotice(Context context, String title, String message, boolean isPositive) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_center_notice, null, false);
+
+        ImageView ivIcon = dialogView.findViewById(R.id.ivNoticeIcon);
+        TextView tvTitle = dialogView.findViewById(R.id.tvNoticeTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvNoticeMessage);
+        MaterialButton btnOk = dialogView.findViewById(R.id.btnNoticeOk);
+
+        ivIcon.setImageResource(isPositive ? R.drawable.ic_check_24 : R.drawable.ic_help_24);
+        ivIcon.setColorFilter(Color.parseColor(isPositive ? "#1AA36D" : "#2A5298"));
+        tvTitle.setText(title);
+        tvMessage.setText(message);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        btnOk.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
         if (dialog.getWindow() != null) {
