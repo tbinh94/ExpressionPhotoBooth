@@ -54,17 +54,18 @@
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/camera_title_margin_top"
-        android:text="@string/camera_main_title"
+        android:layout_marginTop="12dp"
         android:fontFamily="@font/pacifico_regular"
         android:shadowColor="#FFFFFF"
-        android:shadowRadius="8"
         android:shadowDx="0"
         android:shadowDy="0"
+        android:shadowRadius="8"
+        android:text="@string/camera_main_title"
         android:textColor="#2A5298"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.465"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topAppBar" />
 
@@ -125,6 +126,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="visible" />
+
+            <!-- Nút Switch Camera (Inside frame) -->
+            <ImageButton
+                android:id="@+id/btnSwitchCamera"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="12dp"
+                android:background="@drawable/bg_flash_pill"
+                android:elevation="4dp"
+                android:padding="10dp"
+                android:src="@drawable/ic_flip_camera"
+                android:contentDescription="@string/camera_switch_lens"
+                app:tint="#2A5298" />
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 
@@ -263,32 +278,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dotContainer" />
 
-    <!-- Nút Switch Camera -->
-    <ImageButton
-        android:id="@+id/btnSwitchCamera"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_flip_camera"
-        android:contentDescription="@string/camera_switch_lens"
-        app:tint="#2A5298"
-        app:layout_constraintBottom_toBottomOf="@id/btnCapture"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnCapture"
-        app:layout_constraintTop_toTopOf="@id/btnCapture" />
 
     <!-- Nút Flash -->
     <ImageButton
         android:id="@+id/btnFlash"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginStart="16dp"
         android:background="@drawable/bg_flash_pill"
         android:src="@drawable/ic_flash_off_24"
         android:contentDescription="@string/camera_flash_toggle"
         android:padding="12dp"
         app:tint="#2A5298"
         app:layout_constraintBottom_toBottomOf="@id/btnCapture"
-        app:layout_constraintEnd_toStartOf="@id/btnSound"
         app:layout_constraintStart_toEndOf="@id/btnCapture"
         app:layout_constraintTop_toTopOf="@id/btnCapture" />
 
@@ -297,14 +299,14 @@
         android:id="@+id/btnSound"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/bg_flash_pill"
         android:src="@drawable/ic_sound_on"
         android:contentDescription="Bật/Tắt âm thanh"
         android:padding="12dp"
         app:tint="#2A5298"
         app:layout_constraintBottom_toBottomOf="@id/btnCapture"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnFlash"
         app:layout_constraintTop_toTopOf="@id/btnCapture" />
 
     <!-- Nút Capture -->
@@ -323,15 +325,15 @@
     <!-- Last Capture Preview -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardLastCapture"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="@dimen/camera_last_capture_margin_start"
-        android:layout_marginBottom="@dimen/camera_last_capture_margin_bottom"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="16dp"
         android:visibility="gone"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
-        app:layout_constraintBottom_toTopOf="@id/btnCapture"
-        app:layout_constraintStart_toStartOf="parent">
+        app:cardCornerRadius="12dp"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+        app:layout_constraintEnd_toStartOf="@id/btnCapture"
+        app:layout_constraintTop_toTopOf="@id/btnCapture">
         <ImageView
             android:id="@+id/ivLastCapturePreview"
             android:layout_width="match_parent"

@@ -52,6 +52,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_CODE = 100;
@@ -95,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
     private SessionRepository sessionRepository;
     private SessionState sessionState;
     private MediaActionSound shutterSound;
+    private final Handler captureHandler = new Handler(Looper.getMainLooper());
+    private Runnable fallbackCaptureRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +122,21 @@ public class MainActivity extends AppCompatActivity {
         expressionAnalyzer = new ExpressionAnalyzer();
         gestureAnalyzer = new GestureAnalyzer();
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("status", "connected");
+        testData.put("time", System.currentTimeMillis());
+        db.collection("connection_test")
+            .add(testData)
+            .addOnSuccessListener(documentReference -> {
+                Log.d("FirebaseTest", "Kết nối THÀNH CÔNG! ID: " + documentReference.getId());
+                Toast.makeText(this, "Đã kết nối Firebase Database!", Toast.LENGTH_SHORT).show();
+            })
+            .addOnFailureListener(e -> {
+                Log.e("FirebaseTest", "Kết nối THẤT BẠI: ", e);
+                Toast.makeText(this, "Lỗi kết nối Firebase!", Toast.LENGTH_SHORT).show();
+            });
         // Ánh xạ View
         viewFinder = findViewById(R.id.viewFinder);
         previewCard = findViewById(R.id.previewCard);
@@ -260,31 +281,38 @@ public class MainActivity extends AppCompatActivity {
         
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), imageProxy -> {
             boolean isWaiting = isWaitingForExpression;
-            if (isHandGestureMode && gestureAnalyzer != null) {
-                gestureAnalyzer.analyzeImageProxy(imageProxy, (gesture, box) -> {
-                    // Luôn hiện khung xanh để test kể cả khi không trong mode capture
-                    updateAiOverlay(box, gesture, android.graphics.Color.parseColor("#00E676"),
-                            imageProxy.getWidth(), imageProxy.getHeight(),
-                            imageProxy.getImageInfo().getRotationDegrees());
-                    // Chỉ trigger nếu gesture nằm trong phần HIỂN THỊ của camera
-                    if (isWaiting && targetExpression.equals(gesture)
-                            && isBoxVisibleInPreview(box, imageProxy.getWidth(), imageProxy.getHeight(),
-                                                    imageProxy.getImageInfo().getRotationDegrees())) {
-                        triggerImmediateCapture();
-                    }
-                });
-            } else if (isFaceExpressionMode && expressionAnalyzer != null) {
-                expressionAnalyzer.analyzeImageProxy(imageProxy, (expression, faceBox) -> {
-                    updateAiOverlay(faceBox, expression, android.graphics.Color.parseColor("#00B0FF"),
-                            imageProxy.getWidth(), imageProxy.getHeight(),
-                            imageProxy.getImageInfo().getRotationDegrees());
-                    if (isWaiting && targetExpression.equals(expression)
-                            && isBoxVisibleInPreview(faceBox, imageProxy.getWidth(), imageProxy.getHeight(),
-                                                    imageProxy.getImageInfo().getRotationDegrees())) {
-                        triggerImmediateCapture();
-                    }
-                });
+            
+            if (isExpressionMode) {
+                if (isHandGestureMode && gestureAnalyzer != null) {
+                    gestureAnalyzer.analyzeImageProxy(imageProxy, (gesture, box) -> {
+                        // Luôn hiện khung xanh để test kể cả khi không trong mode capture
+                        updateAiOverlay(box, gesture, android.graphics.Color.parseColor("#00E676"),
+                                imageProxy.getWidth(), imageProxy.getHeight(),
+                                imageProxy.getImageInfo().getRotationDegrees());
+                        // Chỉ trigger nếu gesture nằm trong phần HIỂN THỊ của camera
+                        if (isWaiting && targetExpression.equals(gesture)
+                                && isBoxVisibleInPreview(box, imageProxy.getWidth(), imageProxy.getHeight(),
+                                                        imageProxy.getImageInfo().getRotationDegrees())) {
+                            triggerImmediateCapture();
+                        }
+                    });
+                } else if (isFaceExpressionMode && expressionAnalyzer != null) {
+                    expressionAnalyzer.analyzeImageProxy(imageProxy, (expression, faceBox) -> {
+                        updateAiOverlay(faceBox, expression, android.graphics.Color.parseColor("#00B0FF"),
+                                imageProxy.getWidth(), imageProxy.getHeight(),
+                                imageProxy.getImageInfo().getRotationDegrees());
+                        if (isWaiting && targetExpression.equals(expression)
+                                && isBoxVisibleInPreview(faceBox, imageProxy.getWidth(), imageProxy.getHeight(),
+                                                        imageProxy.getImageInfo().getRotationDegrees())) {
+                            triggerImmediateCapture();
+                        }
+                    });
+                } else {
+                    imageProxy.close();
+                }
             } else {
+                // Tắt hoàn toàn overlay và detector khi đang ở Tự động
+                updateAiOverlay(null, "");
                 imageProxy.close();
             }
         });
@@ -343,6 +371,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void triggerImmediateCapture() {
+        if (fallbackCaptureRunnable != null) {
+            captureHandler.removeCallbacks(fallbackCaptureRunnable);
+        }
         isWaitingForExpression = false;
         tvCountdown.post(() -> {
             if (aiOverlayView != null) aiOverlayView.updateOverlay(null, "");
@@ -472,15 +503,19 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // Lock indicator...
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            captureHandler.postDelayed(() -> {
                 if (isCapturingSequence) {
                     isWaitingForExpression = true;
                     // Fallback 7s
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    if (fallbackCaptureRunnable != null) {
+                        captureHandler.removeCallbacks(fallbackCaptureRunnable);
+                    }
+                    fallbackCaptureRunnable = () -> {
                         if (isCapturingSequence && isWaitingForExpression) {
                             triggerImmediateCapture();
                         }
-                    }, 7000);
+                    };
+                    captureHandler.postDelayed(fallbackCaptureRunnable, 7000);
                 }
             }, 1000);
         } else {

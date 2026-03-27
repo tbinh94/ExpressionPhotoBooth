@@ -56,41 +56,36 @@ public class GestureAnalyzer {
                 .addOnSuccessListener(pose -> {
                     PoseLandmark leftWrist    = pose.getPoseLandmark(PoseLandmark.LEFT_WRIST);
                     PoseLandmark rightWrist   = pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST);
-                    PoseLandmark leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER);
-                    PoseLandmark rightShoulder= pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER);
                     PoseLandmark leftThumb    = pose.getPoseLandmark(PoseLandmark.LEFT_THUMB);
                     PoseLandmark rightThumb   = pose.getPoseLandmark(PoseLandmark.RIGHT_THUMB);
                     PoseLandmark leftIndex    = pose.getPoseLandmark(PoseLandmark.LEFT_INDEX);
                     PoseLandmark rightIndex   = pose.getPoseLandmark(PoseLandmark.RIGHT_INDEX);
                     PoseLandmark leftPinky    = pose.getPoseLandmark(PoseLandmark.LEFT_PINKY);
                     PoseLandmark rightPinky   = pose.getPoseLandmark(PoseLandmark.RIGHT_PINKY);
+                    
+                    PoseLandmark leftEye      = pose.getPoseLandmark(PoseLandmark.LEFT_EYE_OUTER);
+                    PoseLandmark rightEye     = pose.getPoseLandmark(PoseLandmark.RIGHT_EYE_OUTER);
 
-                    // === PHÁT HIỆN CỬ CHỈ ===
+                    // === PHÁT HIỆN CỬ CHỈ (Chỉ lấy landmarks có độ tin cậy cao) ===
 
-                    // ❤️ FINGER HEART: ngón CÁI và ngón TRỎ CẠM nhau (1 bàn tay)
-                    // ML Kit trả về thumb tip & index tip - khoảng cách < 15% chiều rộng vai
-                    boolean isHeart = false;
-                    float bodyRef = (leftShoulder != null && rightShoulder != null)
-                            ? dist(leftShoulder, rightShoulder) : 150f;
+                    float faceWidth = 150f;
+                    if (isValid(leftEye, rightEye)) {
+                        faceWidth = dist(leftEye, rightEye) * 1.5f; // uớc tính rộng khuôn mặt
+                    }
 
-                    boolean leftHeart = leftThumb != null && leftIndex != null
-                            && dist(leftThumb, leftIndex) < bodyRef * 0.15f
-                            && isWristRaisedAboveShoulder(leftWrist, leftShoulder);
+                    boolean leftHeart = checkHeart(leftWrist, leftThumb, leftIndex, faceWidth);
+                    boolean rightHeart = checkHeart(rightWrist, rightThumb, rightIndex, faceWidth);
 
-                    boolean rightHeart = rightThumb != null && rightIndex != null
-                            && dist(rightThumb, rightIndex) < bodyRef * 0.15f
-                            && isWristRaisedAboveShoulder(rightWrist, rightShoulder);
+                    boolean leftHi = checkHi(leftWrist, leftThumb, leftIndex, faceWidth);
+                    boolean rightHi = checkHi(rightWrist, rightThumb, rightIndex, faceWidth);
 
-                    isHeart = leftHeart || rightHeart;
-
-                    // ✌️ HI: cổ tay giơ CAO hơn vai (bất kỳ bên)
-                    boolean leftHi  = isWristRaisedAboveShoulder(leftWrist, leftShoulder);
-                    boolean rightHi = isWristRaisedAboveShoulder(rightWrist, rightShoulder);
+                    boolean isHeart = leftHeart || rightHeart;
+                    boolean isHi = leftHi || rightHi;
 
                     String rawGesture;
                     if (isHeart) {
                         rawGesture = "HEART";
-                    } else if (leftHi || rightHi) {
+                    } else if (isHi) {
                         rawGesture = "HI";
                     } else {
                         rawGesture = "NONE";
@@ -112,12 +107,13 @@ public class GestureAnalyzer {
                     else if (hiVotes >= CONFIRM_THRESHOLD) confirmedGesture = "HI";
 
                     // === BOUNDING BOX với smoothing ===
-                    Rect handBox = calculateSmoothedHandBox(
-                            leftWrist, rightWrist,
-                            leftThumb, rightThumb,
-                            leftIndex, rightIndex,
-                            leftPinky, rightPinky
-                    );
+                    // Chỉ vẽ bbox trên tay có độ tin cậy cao để tránh nhảy bậy vào mặt
+                    Rect handBox = null;
+                    if (leftHeart || leftHi || (isValid(leftWrist, leftIndex) && !isValid(rightWrist, rightIndex))) {
+                        handBox = calculateSmoothedHandBox(leftWrist, leftThumb, leftIndex, leftPinky);
+                    } else if (rightHeart || rightHi || isValid(rightWrist, rightIndex)) {
+                        handBox = calculateSmoothedHandBox(rightWrist, rightThumb, rightIndex, rightPinky);
+                    }
 
                     listener.onResult(confirmedGesture, handBox);
                 })
@@ -128,12 +124,39 @@ public class GestureAnalyzer {
                 });
     }
 
-    private boolean isWristRaisedAboveShoulder(PoseLandmark wrist, PoseLandmark shoulder) {
-        if (wrist == null || shoulder == null) return false;
-        // y nhỏ hơn = cao hơn trên màn hình Android
-        return wrist.getPosition().y < shoulder.getPosition().y - 20;
+    private boolean isValid(PoseLandmark... landmarks) {
+        for (PoseLandmark lm : landmarks) {
+            // Ngưỡng 0.5f: ngón tay trỏ/cái thường có độ tin cậy thấp hơn vai/mặt
+            if (lm == null || lm.getInFrameLikelihood() < 0.5f) return false;
+        }
+        return true;
     }
 
+    private boolean checkHeart(PoseLandmark wrist, PoseLandmark thumb, PoseLandmark index, float faceWidth) {
+        if (!isValid(wrist, thumb, index)) return false;
+        float dThumbIndex = dist(thumb, index);
+        float dIndexWrist = dist(index, wrist);
+        // Ngón cái và trỏ chụm khít sát nhau (HEART) - giảm ngưỡng xuống 0.2 để nó chỉ nhận khi thật sự chụm
+        return dThumbIndex < dIndexWrist * 0.20f && dThumbIndex < faceWidth * 0.3f;
+    }
+
+    private boolean checkHi(PoseLandmark wrist, PoseLandmark thumb, PoseLandmark index, float faceWidth) {
+        if (!isValid(wrist, index)) return false; 
+        float dIndexWrist = dist(index, wrist);
+        
+        // Khi ngón trỏ duỗi thẳng, khoảng cách từ cổ tay tới ngón trỏ phải dài (tương đương > 50% chiều ngang mặt).
+        if (dIndexWrist < faceWidth * 0.5f) return false;
+
+        // Cho phép tay nghiêng chữ V (tilted) bằng cách giảm điều kiện y
+        boolean indexUp = index.getPosition().y < wrist.getPosition().y - (dIndexWrist * 0.15f);
+        
+        // V-sign: ngón trỏ thẳng, ngón cái co lại hoặc xòe cả bàn
+        // Khoảng cách cái - trỏ phải lớn (để tách biệt với tay đang định làm Heart)
+        float dThumbIndex = isValid(thumb) ? dist(thumb, index) : Float.MAX_VALUE;
+        boolean fingersSpread = dThumbIndex > dIndexWrist * 0.40f;
+        
+        return indexUp && fingersSpread;
+    }
     private float dist(PoseLandmark a, PoseLandmark b) {
         float dx = a.getPosition().x - b.getPosition().x;
         float dy = a.getPosition().y - b.getPosition().y;

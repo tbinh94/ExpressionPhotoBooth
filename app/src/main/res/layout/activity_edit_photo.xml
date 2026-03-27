@@ -46,18 +46,6 @@
                 android:textColor="#2A5298"
                 android:textSize="20sp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnUndo"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:insetBottom="0dp"
-                android:insetTop="0dp"
-                android:text=""
-                app:icon="@drawable/ic_undo_24"
-                app:iconGravity="textStart"
-                app:iconSize="20dp"
-                app:iconTint="#2A5298" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCompare"
@@ -201,6 +189,37 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Choose Filter"
+                        android:textColor="#1F618D"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUndo"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:insetBottom="0dp"
+                        android:insetTop="0dp"
+                        android:text=""
+                        app:icon="@drawable/ic_undo_24"
+                        app:iconGravity="textStart"
+                        app:iconSize="22dp"
+                        app:iconTint="#2A5298" />
+                </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvFilters"

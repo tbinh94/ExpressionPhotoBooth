@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 public class EditPhotoActivity extends AppCompatActivity {
 
@@ -60,6 +61,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private SessionRepository sessionRepository;
     private SessionState sessionState;
     private EditState currentEditState;
+    private Stack<EditState> undoStack = new Stack<>();
     private RenderEditedBitmapUseCase renderEditedBitmapUseCase;
     private Uri currentPhotoUri;
 
@@ -329,7 +331,9 @@ public class EditPhotoActivity extends AppCompatActivity {
                     applyCurrentEditState();
                 }
             }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {
+                pushToUndoStack();
+            }
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
@@ -339,6 +343,11 @@ public class EditPhotoActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
         
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+
+        View btnUndo = findViewById(R.id.btnUndo);
+        if (btnUndo != null) {
+            btnUndo.setOnClickListener(v -> undo());
+        }
     }
 
     private void setupActionButtons() {
@@ -414,6 +423,7 @@ public class EditPhotoActivity extends AppCompatActivity {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         if (distSq < radiusSq * 3.0f) { // Cung cấp vùng chạm rộng
+                            pushToUndoStack();
                             isDragging = true;
                             offsetX = bX - scX;
                             offsetY = bY - scY;
@@ -449,7 +459,26 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     // ── Logic ─────────────────────────────────────────────────────────────────
 
+    private void pushToUndoStack() {
+        if (undoStack.size() >= 20) {
+            undoStack.remove(0); // Cap history
+        }
+        undoStack.push(currentEditState.copy());
+    }
+
+    private void undo() {
+        if (!undoStack.isEmpty()) {
+            currentEditState = undoStack.pop();
+            applyCurrentEditState();
+            syncSelectionsToAdapters();
+            updateEditSummary();
+        } else {
+            Toast.makeText(this, "Nothing to undo", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void applyPreset(EditState.FilterStyle filter, EditState.FrameStyle frame, EditState.StickerStyle sticker) {
+        pushToUndoStack();
         currentEditState.setFilterStyle(filter);
         currentEditState.setFrameStyle(frame);
         currentEditState.setStickerStyle(sticker);
@@ -459,6 +488,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     }
 
     private void updateFilter(EditState.FilterStyle filter) {
+        pushToUndoStack();
         currentEditState.setFilterStyle(filter);
         applyCurrentEditState();
         updateEditSummary();
@@ -468,12 +498,14 @@ public class EditPhotoActivity extends AppCompatActivity {
     }
 
     private void updateFrame(EditState.FrameStyle frame) {
+        pushToUndoStack();
         currentEditState.setFrameStyle(frame);
         applyCurrentEditState();
         updateEditSummary();
     }
 
     private void updateSticker(EditState.StickerStyle sticker) {
+        pushToUndoStack();
         currentEditState.setStickerStyle(sticker);
         applyCurrentEditState();
         updateEditSummary();
