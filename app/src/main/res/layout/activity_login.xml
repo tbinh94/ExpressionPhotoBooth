@@ -54,10 +54,58 @@
                 android:textColor="#4A5D77"
                 android:textSize="13sp" />
 
+            <LinearLayout
+                android:id="@+id/layoutRegisterExtra"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="@string/auth_name"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:maxLines="1" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="@string/auth_birthday"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_help_24">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etBirthday"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
+                android:layout_marginTop="12dp"
                 android:hint="@string/auth_email"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="14dp"
@@ -114,8 +162,18 @@
                 android:textAllCaps="false"
                 android:textColor="#2A5298"
                 android:textStyle="bold"
-                app:cornerRadius="25dp"
                 app:strokeColor="#2A5298" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuest"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/auth_sign_in_as_guest"
+                android:textAllCaps="false"
+                android:textColor="#4A5D77"
+                app:cornerRadius="25dp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
