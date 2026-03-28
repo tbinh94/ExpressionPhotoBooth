@@ -341,7 +341,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.topBar);
         toolbar.setNavigationOnClickListener(v -> finish());
-        
+
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         View btnUndo = findViewById(R.id.btnUndo);
@@ -398,16 +398,16 @@ public class EditPhotoActivity extends AppCompatActivity {
                 int size = Math.max(72, minL / 5);
 
                 if (sx < 0 || sy < 0) {
-                     int safeW = (int) (minL * 0.75f);
-                     int safeH = (int) (minL * 0.75f);
-                     int centerX = (int)(bw / 2f);
-                     int centerY = (int)(bh / 2f);
-                     int padding = 24;
-                     
-                     float left = centerX + (safeW / 2f) - size - padding;
-                     float top = centerY - (safeH / 2f) + padding;
-                     sx = (left + size / 2f) / bw;
-                     sy = (top + size / 2f) / bh;
+                    int safeW = (int) (minL * 0.75f);
+                    int safeH = (int) (minL * 0.75f);
+                    int centerX = (int)(bw / 2f);
+                    int centerY = (int)(bh / 2f);
+                    int padding = 24;
+
+                    float left = centerX + (safeW / 2f) - size - padding;
+                    float top = centerY - (safeH / 2f) + padding;
+                    sx = (left + size / 2f) / bw;
+                    sy = (top + size / 2f) / bh;
                 }
 
                 float scX = sx * bw;
@@ -416,7 +416,7 @@ public class EditPhotoActivity extends AppCompatActivity {
                 float dx = bX - scX;
                 float dy = bY - scY;
                 float distSq = dx*dx + dy*dy;
-                
+
                 float radius = size / 2f;
                 float radiusSq = (radius * 1.5f) * (radius * 1.5f);
 
@@ -434,7 +434,7 @@ public class EditPhotoActivity extends AppCompatActivity {
                         if (isDragging) {
                             float newCenterX = bX - offsetX;
                             float newCenterY = bY - offsetY;
-                            
+
                             newCenterX = Math.max(0, Math.min(newCenterX, bw));
                             newCenterY = Math.max(0, Math.min(newCenterY, bh));
 
@@ -530,8 +530,8 @@ public class EditPhotoActivity extends AppCompatActivity {
         tvEditSummary.setText(String.format("Filter: %s | Sticker: %s", filter, sticker));
         chipActiveEdit.setVisibility(
                 (currentEditState.getFilterStyle() != EditState.FilterStyle.NONE ||
-                 currentEditState.getStickerStyle() != EditState.StickerStyle.NONE)
-                ? View.VISIBLE : View.GONE
+                        currentEditState.getStickerStyle() != EditState.StickerStyle.NONE)
+                        ? View.VISIBLE : View.GONE
         );
     }
 

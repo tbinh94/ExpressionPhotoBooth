@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +17,8 @@ import com.google.android.material.textfield.TextInputEditText;
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword, etName, etBirthday;
-    private View layoutRegisterExtra;
+    private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage;
+    private View layoutRegisterExtra, tvForgotPassword, layoutLoadingOverlay;
     private MaterialButton btnSignIn, btnRegister, btnGuest;
     private AuthRepository authRepository;
     private boolean isRegisterMode = false;
@@ -44,20 +46,26 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        tvLoginTitle = findViewById(R.id.tvLoginTitle);
+        tvLoginSubtitle = findViewById(R.id.tvLoginSubtitle);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         etName = findViewById(R.id.etName);
         etBirthday = findViewById(R.id.etBirthday);
         layoutRegisterExtra = findViewById(R.id.layoutRegisterExtra);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
         btnSignIn = findViewById(R.id.btnSignIn);
         btnRegister = findViewById(R.id.btnRegister);
         btnGuest = findViewById(R.id.btnGuest);
+        
+        layoutLoadingOverlay = findViewById(R.id.layoutLoadingOverlay);
+        tvLoadingMessage = findViewById(R.id.tvLoadingMessage);
 
         etBirthday.setOnClickListener(v -> showDatePicker());
         btnGuest.setOnClickListener(v -> doSignInAsGuest());
         btnSignIn.setOnClickListener(v -> {
             if (isRegisterMode) {
-                setRegisterMode(false);
+                doRegister();
             } else {
                 doSignIn();
             }
@@ -66,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
             if (!isRegisterMode) {
                 setRegisterMode(true);
             } else {
-                doRegister();
+                setRegisterMode(false);
             }
         });
     }
@@ -85,8 +93,17 @@ public class LoginActivity extends AppCompatActivity {
     private void setRegisterMode(boolean register) {
         this.isRegisterMode = register;
         layoutRegisterExtra.setVisibility(register ? View.VISIBLE : View.GONE);
-        btnSignIn.setText(register ? "Quay lại" : getString(R.string.auth_sign_in));
-        btnRegister.setText(register ? "Xác nhận đăng ký" : getString(R.string.auth_register));
+        tvForgotPassword.setVisibility(register ? View.GONE : View.VISIBLE);
+        btnGuest.setVisibility(View.VISIBLE);
+        
+        tvLoginTitle.setText(register ? getString(R.string.auth_register_title) : getString(R.string.auth_title));
+        tvLoginSubtitle.setText(register ? getString(R.string.auth_register_subtitle) : getString(R.string.auth_subtitle));
+        
+        btnSignIn.setText(register ? getString(R.string.auth_confirm_register) : getString(R.string.auth_sign_in));
+        btnRegister.setText(register ? getString(R.string.auth_back_to_login) : getString(R.string.auth_register));
+        
+        btnSignIn.setIconResource(register ? R.drawable.ic_person_add_24 : R.drawable.ic_login_24);
+        btnRegister.setIconResource(register ? R.drawable.ic_arrow_back_24 : R.drawable.ic_person_add_24);
     }
 
     private void doSignIn() {
@@ -97,17 +114,17 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        setLoading(true);
+        setLoading(true, getString(R.string.auth_loading));
         authRepository.signIn(email, password, new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(com.example.expressionphotobooth.domain.model.AuthSession session) {
-                setLoading(false);
+                setLoading(false, "");
                 routeByRole();
             }
 
             @Override
             public void onError(String message) {
-                setLoading(false);
+                setLoading(false, "");
                 HelpDialogUtils.showCenteredNotice(
                         LoginActivity.this,
                         getString(R.string.auth_sign_in_failed_title),
@@ -119,18 +136,18 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void doSignInAsGuest() {
-        setLoading(true);
+        setLoading(true, getString(R.string.auth_loading));
         authRepository.signInAsGuest(new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(com.example.expressionphotobooth.domain.model.AuthSession session) {
-                setLoading(false);
+                setLoading(false, "");
                 startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                 finish();
             }
 
             @Override
             public void onError(String message) {
-                setLoading(false);
+                setLoading(false, "");
                 HelpDialogUtils.showCenteredNotice(LoginActivity.this, "Lỗi", message, false);
             }
         });
@@ -146,11 +163,11 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        setLoading(true);
+        setLoading(true, "Đang tạo tài khoản...");
         authRepository.register(email, password, name, birthday, new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(com.example.expressionphotobooth.domain.model.AuthSession session) {
-                setLoading(false);
+                setLoading(false, "");
                 HelpDialogUtils.showCenteredNotice(
                         LoginActivity.this,
                         getString(R.string.auth_register_success_title),
@@ -162,7 +179,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message) {
-                setLoading(false);
+                setLoading(false, "");
                 HelpDialogUtils.showCenteredNotice(
                         LoginActivity.this,
                         getString(R.string.auth_register_failed_title),
@@ -222,13 +239,15 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void setLoading(boolean isLoading) {
+    private void setLoading(boolean isLoading, String message) {
+        layoutLoadingOverlay.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        if (isLoading && !TextUtils.isEmpty(message)) {
+            tvLoadingMessage.setText(message);
+        }
+        
         btnSignIn.setEnabled(!isLoading);
         btnRegister.setEnabled(!isLoading);
         btnGuest.setEnabled(!isLoading);
-        btnSignIn.setText(isLoading ? getString(R.string.auth_loading) : (isRegisterMode ? "Quay lại" : getString(R.string.auth_sign_in)));
-        btnRegister.setVisibility(isLoading || isRegisterMode ? View.VISIBLE : View.VISIBLE); // Adjust visibility if needed
-        btnGuest.setVisibility(isLoading || isRegisterMode ? View.GONE : View.VISIBLE);
     }
 
     private String getText(TextInputEditText editText) {
@@ -236,6 +255,3 @@ public class LoginActivity extends AppCompatActivity {
         return value == null ? "" : value.toString().trim();
     }
 }
-
-
-

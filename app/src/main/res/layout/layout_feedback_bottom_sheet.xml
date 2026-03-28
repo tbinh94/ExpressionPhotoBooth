@@ -5,71 +5,87 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_bottom_sheet"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="28dp">
+
+    <!-- Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:background="#E0E0E0" />
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_star_24"
+        app:tint="#FFC107" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Đánh giá trải nghiệm"
+        android:fontFamily="@font/pacifico_regular"
+        android:text="Rate Your Memories"
         android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textColor="#2A5298"
+        android:textSize="24sp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Bạn cảm thấy thế nào về ảnh/video vừa tạo? Hãy chia sẻ với chúng tôi nhé!"
+        android:text="How do you like your photos? Share the love!"
         android:textAlignment="center"
-        android:textColor="#666666" />
+        android:textColor="#546E7A"
+        android:textSize="14sp" />
 
     <RatingBar
         android:id="@+id/ratingBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:numStars="5"
-        android:progressTint="#FFBB00"
+        android:progressTint="#FFD700"
         android:rating="5"
         android:stepSize="1" />
 
     <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:boxCornerRadiusBottomEnd="12dp"
-        app:boxCornerRadiusBottomStart="12dp"
-        app:boxCornerRadiusTopEnd="12dp"
-        app:boxCornerRadiusTopStart="12dp"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp"
-        app:hintEnabled="false">
+        android:layout_marginTop="24dp"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxStrokeColor="#2A5298"
+        app:hintTextColor="#2A5298">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etFeedback"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#F5F5F5"
             android:gravity="top|start"
-            android:hint="Chia sẻ thêm cảm nhận của bạn (tùy chọn)"
+            android:hint="Any sweet words for us?"
             android:inputType="textMultiLine"
             android:lines="3"
-            android:padding="16dp"
-            android:textColor="@color/black"
-            android:textColorHint="#999999" />
+            android:textColor="#263238" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSubmitFeedback"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginTop="24dp"
-        android:text="Gửi đánh giá"
-        android:textColor="@color/white"
+        android:layout_marginTop="28dp"
+        android:text="SUBMIT REVIEW"
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:cornerRadius="12dp" />
+        app:backgroundTint="#ff99be"
+        app:cornerRadius="28dp"
+        app:elevation="4dp" />
 
 </LinearLayout>

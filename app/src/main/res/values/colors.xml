@@ -6,8 +6,6 @@
     <color name="launcher_icon_bg">#FF8A6DDE</color>
     <color name="edit_bg">#121212</color>
 
-    <!-- Thêm vào res/values/colors.xml -->
-
     <!-- Edit UI -->
     <color name="edit_accent">#2A5298</color>
     <color name="edit_label">#88000000</color>
@@ -16,27 +14,37 @@
     <color name="thumb_none">#DCDFE6</color>
 
     <!-- Presets -->
-    <color name="thumb_preset_cute">#F9C4D4</color>   <!-- hồng pastel -->
-    <color name="thumb_preset_kpop">#A8C4F0</color>   <!-- xanh dương nhạt -->
-    <color name="thumb_preset_classic">#C8B89A</color> <!-- nâu vintage -->
+    <color name="thumb_preset_cute">#F9C4D4</color>
+    <color name="thumb_preset_kpop">#A8C4F0</color>
+    <color name="thumb_preset_classic">#C8B89A</color>
     <color name="thumb_preset_retro">#D4A373</color>
     <color name="thumb_preset_cinematic">#2A3B4C</color>
 
     <!-- Filters -->
-    <color name="thumb_filter_soft">#EDD5C8</color>   <!-- cam đào mờ -->
-    <color name="thumb_filter_bw">#7A7A7A</color>     <!-- xám trung -->
+    <color name="thumb_filter_soft">#EDD5C8</color>
+    <color name="thumb_filter_bw">#7A7A7A</color>
     <color name="thumb_filter_vintage">#EDC68A</color>
     <color name="thumb_filter_cool">#8AABED</color>
     <color name="thumb_filter_warm">#ECAE7E</color>
     <color name="thumb_filter_sepia">#B89973</color>
 
     <!-- Frames -->
-    <color name="thumb_frame_cortis">#FFFFFF</color>  <!-- trắng — viền trắng kiểu Polaroid -->
-    <color name="thumb_frame_t1">#1A3A7A</color>      <!-- xanh đậm T1 -->
-    <color name="thumb_frame_aespa">#D070A0</color>   <!-- hồng tím Aespa -->
+    <color name="thumb_frame_cortis">#FFFFFF</color>
+    <color name="thumb_frame_t1">#1A3A7A</color>
+    <color name="thumb_frame_aespa">#D070A0</color>
 
     <!-- Stickers -->
-    <color name="thumb_sticker_star">#FFF0A0</color>  <!-- vàng sao -->
-    <color name="thumb_sticker_flash">#FFE066</color> <!-- vàng sét -->
-    <color name="thumb_sticker_camera">#C8DCF4</color><!-- xanh nhạt camera -->
+    <color name="thumb_sticker_star">#FFF0A0</color>
+    <color name="thumb_sticker_flash">#FFE066</color>
+    <color name="thumb_sticker_camera">#C8DCF4</color>
+
+    <!-- Auth / Input -->
+    <color name="color_input_stroke">#E0E8F4</color>
+
+    <!-- Dashboard Colors -->
+    <color name="app_bg_light">#F0F3FA</color>
+    <color name="app_blue">#3D68E8</color>
+    <color name="app_pink">#FF4081</color>
+    <color name="primary_alpha_10">#1A3D68E8</color>
+    <color name="pink_alpha_12">#1EFF4081</color>
 </resources>
