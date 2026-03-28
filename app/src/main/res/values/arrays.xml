@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="loading_indicator_colors">
+        <item>#2A5298</item>
+        <item>#FF6B9D</item>
+    </array>
+</resources>

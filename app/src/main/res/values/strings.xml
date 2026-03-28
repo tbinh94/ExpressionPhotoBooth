@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">ExpressionPhotoBooth</string>
+    <string name="app_name">Our Memories</string>
     <string name="author">Trọng Đức</string>
     <string name="capture_photo">Capture</string>
     <string name="ratio_square">1:1</string>
     <string name="ratio_wide">16:9</string>
-    <string name="camera_not_ready">Camera is not ready yet</string>
-    <string name="failed_create_folder">Cannot create photo folder</string>
+    <string name="camera_not_ready">Máy ảnh chưa sẵn sàng</string>
+    <string name="failed_create_folder">Không thể tạo thư mục</string>
     <string name="capture_failed">Capture failed</string>
     <string name="camera_permission_granted">Camera permission granted</string>
     <string name="camera_permission_denied">Camera permission denied</string>
@@ -124,18 +124,24 @@
 
     <string name="common_ok">Đã hiểu</string>
 
-    <string name="auth_title">Welcome to PhotoBooth</string>
-    <string name="auth_subtitle">Đăng nhập để bắt đầu phiên chụp của bạn</string>
+    <string name="auth_title">Chào mừng trở lại</string>
+    <string name="auth_subtitle">Hãy đăng nhập để tiếp tục</string>
+    <string name="auth_register_title">Chào mừng đến với ứng dụng</string>
+    <string name="auth_register_subtitle">Hãy đăng ký để tiếp tục</string>
     <string name="auth_email">Email</string>
     <string name="auth_password">Mật khẩu</string>
+    <string name="auth_forgot_password">Quên mật khẩu?</string>
+    <string name="auth_or">Hoặc</string>
     <string name="auth_sign_in">Đăng nhập</string>
-    <string name="auth_register">Đăng ký nhanh</string>
-    <string name="auth_sign_in_as_guest">Sử dụng mà không đăng ký (Khách)</string>
+    <string name="auth_register">Đăng ký</string>
+    <string name="auth_confirm_register">Xác nhận đăng ký</string>
+    <string name="auth_back_to_login">Quay lại đăng nhập</string>
+    <string name="auth_sign_in_as_guest">Đăng nhập dưới tài khoản khách</string>
     <string name="auth_loading">Đang xử lý...</string>
     <string name="auth_error_title">Lỗi xác thực</string>
     <string name="auth_sign_in_failed_title">Đăng nhập thất bại</string>
     <string name="auth_register_success_title">Đăng ký thành công</string>
-    <string name="auth_register_success_message">Tài khoản đã được tạo. Mời bạn tiếp tục vào app.</string>
+    <string name="auth_register_success_message">Đăng ký thành công. Hãy đăng nhập để tiếp tục</string>
     <string name="auth_register_failed_title">Đăng ký thất bại</string>
     <string name="auth_invalid_input_title">Thông tin chưa hợp lệ</string>
     <string name="auth_invalid_input_message">Vui lòng nhập email và mật khẩu.</string>
@@ -149,13 +155,12 @@
     <string name="auth_sign_out_title">Đã đăng xuất</string>
     <string name="auth_sign_out_message">Bạn đã đăng xuất khỏi phiên hiện tại.</string>
 
-    <string name="admin_title">Admin Management</string>
-    <string name="admin_subtitle">Quản trị nội dung và đánh giá khách hàng.</string>
-    <string name="admin_open_user_flow">Vào giao diện người dùng</string>
-    <string name="admin_logged_in_as">Quản trị viên: %1$s</string>
-    <string name="admin_menu_reviews">Xem Reviews</string>
-    <string name="admin_menu_settings">Cài đặt hệ thống</string>
-    <string name="admin_review_title">Đánh giá người dùng</string>
-    <string name="admin_review_empty">Chưa có đánh giá nào.</string>
-    <string name="admin_review_item_format">%1$s sao - %2$s</string>
+    <!-- Admin Dashboard Strings -->
+    <string name="admin_title">Admin Dashboard</string>
+    <string name="admin_subtitle">Quản lý hệ thống</string>
+    <string name="admin_logged_in_as">Đang đăng nhập với tư cách: %1$s</string>
+    <string name="admin_open_user_flow">Mở giao diện người dùng</string>
+    <string name="admin_review_title">Danh sách đánh giá</string>
+    <string name="admin_menu_reviews">Reviews</string>
+    <string name="admin_menu_settings">Cài đặt</string>
 </resources>

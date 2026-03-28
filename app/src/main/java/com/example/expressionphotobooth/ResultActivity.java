@@ -1,5 +1,7 @@
 package com.example.expressionphotobooth;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -7,6 +9,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -50,6 +54,7 @@ public class ResultActivity extends AppCompatActivity {
     private MaterialButton btnSaveVideo;
     private List<String> sourceOriginalUris;
     private boolean hasShownFeedback = false;
+    private ToneGenerator toneGenerator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +70,8 @@ public class ResultActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
         createTimelapseVideoUseCase = new CreateTimelapseVideoUseCase(new TimelapseVideoEncoder());
         createVerticalCollageUseCase = new CreateVerticalCollageUseCase();
@@ -137,6 +144,8 @@ public class ResultActivity extends AppCompatActivity {
                 finish();
             });
         }
+
+        findViewById(R.id.btnRate).setOnClickListener(v -> showFeedbackBottomSheet(false));
     }
 
     private Bitmap createFramedCollage(List<String> photoUris, int frameResId) {
@@ -263,7 +272,7 @@ public class ResultActivity extends AppCompatActivity {
                     btnSaveVideo.setEnabled(true);
                     if (videoUri != null) {
                         Toast.makeText(ResultActivity.this, R.string.video_saved_success, Toast.LENGTH_LONG).show();
-                        showFeedbackBottomSheet();
+                        showFeedbackBottomSheet(true);
                     } else {
                         Toast.makeText(ResultActivity.this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
                     }
@@ -297,16 +306,16 @@ public class ResultActivity extends AppCompatActivity {
             try (OutputStream out = getContentResolver().openOutputStream(outputUri)) {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                 Toast.makeText(this, "Đã lưu vào bộ sưu tập!", Toast.LENGTH_SHORT).show();
-                showFeedbackBottomSheet();
+                showFeedbackBottomSheet(true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void showFeedbackBottomSheet() {
-        if (hasShownFeedback) return;
-        hasShownFeedback = true;
+    private void showFeedbackBottomSheet(boolean autoTrigger) {
+        if (autoTrigger && hasShownFeedback) return;
+        if (autoTrigger) hasShownFeedback = true;
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View bottomSheetView = getLayoutInflater().inflate(R.layout.layout_feedback_bottom_sheet, null);
@@ -315,6 +324,19 @@ public class ResultActivity extends AppCompatActivity {
         RatingBar ratingBar = bottomSheetView.findViewById(R.id.ratingBar);
         TextInputEditText etFeedback = bottomSheetView.findViewById(R.id.etFeedback);
         MaterialButton btnSubmit = bottomSheetView.findViewById(R.id.btnSubmitFeedback);
+
+        ratingBar.setOnRatingBarChangeListener((rb, rating, fromUser) -> {
+            if (fromUser) {
+                int toneType = ToneGenerator.TONE_PROP_BEEP;
+                if (rating >= 5) toneType = ToneGenerator.TONE_DTMF_0;
+                else if (rating >= 4) toneType = ToneGenerator.TONE_DTMF_1;
+                else if (rating >= 3) toneType = ToneGenerator.TONE_DTMF_2;
+                else if (rating >= 2) toneType = ToneGenerator.TONE_DTMF_3;
+                else toneType = ToneGenerator.TONE_DTMF_4;
+                
+                toneGenerator.startTone(toneType, 150);
+            }
+        });
 
         btnSubmit.setOnClickListener(v -> {
             float rating = ratingBar.getRating();
@@ -336,6 +358,7 @@ public class ResultActivity extends AppCompatActivity {
                 .add(review)
                 .addOnSuccessListener(doc -> {
                     Toast.makeText(this, "Cảm ơn bạn đã đánh giá " + rating + " sao!", Toast.LENGTH_SHORT).show();
+                    hasShownFeedback = true;
                     bottomSheetDialog.dismiss();
                 })
                 .addOnFailureListener(e -> {
@@ -354,5 +377,13 @@ public class ResultActivity extends AppCompatActivity {
             return new ArrayList<>(sessionState.getCapturedImageUris());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (toneGenerator != null) {
+            toneGenerator.release();
+        }
     }
 }
