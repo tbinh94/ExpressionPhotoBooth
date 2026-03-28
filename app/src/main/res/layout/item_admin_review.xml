@@ -114,18 +114,6 @@
             android:lineSpacingExtra="2dp" />
 
         <!-- Badge số sao -->
-        <TextView
-            android:id="@+id/tvRatingBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="3dp"
-            android:text="5 sao"
-            android:textColor="#185FA5"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:background="@drawable/bg_badge_blue" />
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
