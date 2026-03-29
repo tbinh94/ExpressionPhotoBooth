@@ -113,19 +113,35 @@ public class SetupActivity extends AppCompatActivity {
     private List<Concept> createConceptData() {
         List<Concept> concepts = new ArrayList<>();
 
-        List<Frame> summerFrames = new ArrayList<>();
-        summerFrames.add(new Frame(1, R.drawable.frm_basic_white, "White", EditState.FrameStyle.NONE));
-        summerFrames.add(new Frame(2, R.drawable.frm_brown_caro, "Brown Caro", EditState.FrameStyle.CORTIS));
-        summerFrames.add(new Frame(3, R.drawable.sample_frame, "T1", EditState.FrameStyle.T1));
-        concepts.add(new Concept("Summer Concept", summerFrames));
 
-        List<Frame> cortisFrames = new ArrayList<>();
-        cortisFrames.add(new Frame(4, R.drawable.sample_frame, "Aespa", EditState.FrameStyle.AESPA));
-        cortisFrames.add(new Frame(5, R.drawable.sample_frame, "Basic", EditState.FrameStyle.NONE));
-        concepts.add(new Concept("Idol Concept", cortisFrames));
+        List<Frame> shinCrayonChan = new ArrayList<>();
+        shinCrayonChan.add(new Frame(1, R.drawable.frm_3x4_cushin, "Cushin", EditState.FrameStyle.NONE));
+        shinCrayonChan.add(new Frame(2, R.drawable.frm_3x4_movie, "Movie", EditState.FrameStyle.CORTIS));
+        shinCrayonChan.add(new Frame(3, R.drawable.frm_3x4_pig_hero, "Pig Hero", EditState.FrameStyle.T1));
+        concepts.add(new Concept("Shin Crayon Chan", shinCrayonChan));
+
+
+        List<Frame> cuteFrames = new ArrayList<>();
+//        cuteFrames.add(new Frame(4, R.drawable.frm3_16x9_blue_canvas, "Blue Canvas", EditState.FrameStyle.AESPA));
+//        cuteFrames.add(new Frame(5, R.drawable.frm3_16x9_green_doodle, "Green Doodle", EditState.FrameStyle.NONE));
+        cuteFrames.add(new Frame(6, R.drawable.frm3_16x9_red_star, "Red Star", EditState.FrameStyle.NONE));
+        concepts.add(new Concept("Cute Concept", cuteFrames));
+
+
+        List<Frame> themeFrames = new ArrayList<>();
+//        themeFrames.add(new Frame(7, R.drawable.frm4_16x9_bow, "Bow", EditState.FrameStyle.AESPA));
+//        themeFrames.add(new Frame(8, R.drawable.frm4_16x9_heart, "Heart", EditState.FrameStyle.NONE));
+        themeFrames.add(new Frame(9, R.drawable.frm4_16x9_food, "Food", EditState.FrameStyle.NONE));
+//        themeFrames.add(new Frame(10, R.drawable.frm4_16x9_bow, "Bow", EditState.FrameStyle.AESPA));
+//        themeFrames.add(new Frame(11, R.drawable.frm4_16x9_heart, "Heart", EditState.FrameStyle.NONE));
+        themeFrames.add(new Frame(12, R.drawable.frm4_16x9_food, "Food", EditState.FrameStyle.NONE));
+        concepts.add(new Concept("Theme Concept", themeFrames));
+
 
         return concepts;
     }
+
+
 
     private void showSetupHelpDialog() {
         HelpDialogUtils.showPhotoboothHelp(

@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import com.example.expressionphotobooth.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class FrameConfig {
@@ -13,23 +14,55 @@ public class FrameConfig {
     public static List<Rect> getHolesForFrame(int frameResId) {
         List<Rect> holes = new ArrayList<>();
 
-        // Ví dụ: Đo tọa độ cho Frame số 1 (Princess 4 ảnh)
-        if (frameResId == R.drawable.frm_basic_white) {
-            // Rect(trái, trên, phải, dưới) - Đo bằng Pixel tương ứng với kích thước gốc của file Frame.png
-            holes.add(new Rect(10, 15, 170, 125)); // Lỗ 1
-            holes.add(new Rect(10, 130, 170, 240)); // Lỗ 2
-            holes.add(new Rect(10, 245, 170, 355)); // Lỗ 3
-            holes.add(new Rect(10, 365, 170, 475)); // Lỗ 4
+
+        // Danh sách các frame có cùng cấu trúc 3x4
+        List<Integer> Frame_3x4 = Arrays.asList(
+                R.drawable.frm_3x4_cushin,
+                R.drawable.frm_3x4_movie,
+                R.drawable.frm_3x4_pig_hero // Thêm các ảnh khác vào đây
+        );
+
+
+        if (Frame_3x4.contains(frameResId)) {
+            holes.add(new Rect(21, 19, 164, 205));
+            holes.add(new Rect(186, 19, 329, 205));
+            holes.add(new Rect(21, 226, 164, 412));
+            holes.add(new Rect(186, 226, 329, 412));
         }
 
-        if (frameResId == R.drawable.frm_brown_caro) {
-            // Rect(trái, trên, phải, dưới) - Đo bằng Pixel tương ứng với kích thước gốc của file Frame.png
-            holes.add(new Rect(8, 12, 220, 165)); // Lỗ 1
-            holes.add(new Rect(8, 178, 220, 331)); // Lỗ 2
-            holes.add(new Rect(8, 348, 220, 500)); // Lỗ 3
-//            holes.add(new Rect(8, 365, 170, 475)); // Lỗ 4
+
+        // Danh sách các frame có cùng cấu trúc 16x9 (3 ảnh)
+        List<Integer> Frame3_16x9 = Arrays.asList(
+                R.drawable.frm3_16x9_blue_canvas,
+                R.drawable.frm3_16x9_green_doodle,
+                R.drawable.frm3_16x9_red_star // Thêm các ảnh khác vào đây
+        );
+
+
+        if (Frame3_16x9.contains(frameResId)) {
+            holes.add(new Rect(22, 30, 260, 162));
+            holes.add(new Rect(22, 187, 260, 322));
+            holes.add(new Rect(22, 343, 260, 477));
+        }
+
+
+        // Danh sách các frame có cùng cấu trúc 16x9 (4 ảnh)
+        List<Integer> Frame4_16x9 = Arrays.asList(
+                R.drawable.frm4_16x9_bow,
+                R.drawable.frm4_16x9_food,
+                R.drawable.frm4_16x9_heart // Thêm các ảnh khác vào đây
+        );
+
+
+        if (Frame4_16x9.contains(frameResId)) {
+            holes.add(new Rect(17, 18, 255, 152));
+            holes.add(new Rect(17, 168, 255, 302));
+            holes.add(new Rect(17, 317, 255, 451));
+            holes.add(new Rect(17, 467, 255, 601));
         }
 
         return holes;
     }
+
+
 }
