@@ -33,14 +33,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⭐"
+                    android:text="@string/admin_redirect_icon"
                     android:textSize="52sp"
                     android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Quản lý đánh giá"
+                    android:text="@string/admin_redirect_title"
                     android:textColor="#1B2A5C"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -50,7 +50,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Xem, lọc và phân tích toàn bộ đánh giá của người dùng với biểu đồ chi tiết"
+                    android:text="@string/admin_redirect_subtitle"
                     android:textColor="#8A9BB8"
                     android:textSize="13sp"
                     android:gravity="center"
@@ -60,7 +60,7 @@
                     android:id="@+id/btnGoToReviews"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:text="Mở trang đánh giá"
+                    android:text="@string/admin_redirect_open_reviews"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="14sp"

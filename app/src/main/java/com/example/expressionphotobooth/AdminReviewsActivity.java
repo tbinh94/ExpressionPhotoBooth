@@ -2,6 +2,7 @@ package com.example.expressionphotobooth;
 
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
@@ -115,7 +116,7 @@ public class AdminReviewsActivity extends AppCompatActivity {
             })
             .addOnFailureListener(e -> {
                 progressReviews.setVisibility(View.GONE);
-                Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.admin_reviews_error_load_format, e.getMessage()), Toast.LENGTH_LONG).show();
             });
     }
 
@@ -159,9 +160,9 @@ public class AdminReviewsActivity extends AppCompatActivity {
         TextView tvRating = itemView.findViewById(R.id.tvReviewRating);
         TextView tvFeedback = itemView.findViewById(R.id.tvReviewFeedback);
 
-        tvEmail.setText(review.email);
+        tvEmail.setText(TextUtils.isEmpty(review.email) ? getString(R.string.admin_review_email_na) : review.email);
         tvRating.setText(String.format(Locale.getDefault(), "%.1f ★", review.rating));
-        tvFeedback.setText(review.feedback.isEmpty() ? "(Không có nội dung)" : review.feedback);
+        tvFeedback.setText(review.feedback.isEmpty() ? getString(R.string.admin_review_no_content) : review.feedback);
 
         containerReviews.addView(itemView);
     }
@@ -172,7 +173,7 @@ public class AdminReviewsActivity extends AppCompatActivity {
         String feedback;
 
         ReviewData(String email, Double rating, String feedback) {
-            this.email = email != null ? email : "N/A";
+            this.email = email != null ? email : "";
             this.rating = rating != null ? rating : 0.0;
             this.feedback = feedback != null ? feedback : "";
         }

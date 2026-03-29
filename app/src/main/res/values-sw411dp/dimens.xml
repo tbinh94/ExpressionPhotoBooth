@@ -1,15 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="setup_top_action_size">48dp</dimen>
+    <dimen name="setup_top_action_margin_horizontal">16dp</dimen>
+    <dimen name="setup_top_action_margin_top">34dp</dimen>
+    <dimen name="setup_title_margin_top">22dp</dimen>
+    <dimen name="setup_subtitle_margin_top">8dp</dimen>
+    <dimen name="setup_list_margin_top">14dp</dimen>
+    <dimen name="setup_list_margin_bottom">14dp</dimen>
+    <dimen name="setup_next_width">200dp</dimen>
+    <dimen name="setup_next_height">56dp</dimen>
+    <dimen name="setup_next_margin_bottom">24dp</dimen>
+    <dimen name="setup_concept_padding_horizontal">16dp</dimen>
+    <dimen name="setup_concept_padding_top">12dp</dimen>
+    <dimen name="setup_concept_title_margin_bottom">10dp</dimen>
+    <dimen name="setup_frame_item_width">152dp</dimen>
+    <dimen name="setup_frame_item_height">210dp</dimen>
+    <dimen name="setup_frame_item_spacing">10dp</dimen>
+
     <dimen name="camera_title_margin_top">10dp</dimen>
     <dimen name="camera_subtitle_margin_top">4dp</dimen>
     <dimen name="camera_preview_horizontal_margin">28dp</dimen>
     <dimen name="camera_preview_margin_top">18dp</dimen>
+    <dimen name="camera_preview_max_height">430dp</dimen>
+    <dimen name="camera_controls_horizontal_margin">28dp</dimen>
+    <dimen name="camera_controls_margin_top">12dp</dimen>
+    <dimen name="camera_controls_margin_bottom">8dp</dimen>
     <dimen name="camera_ratio_margin_top">16dp</dimen>
     <dimen name="camera_status_margin_top">12dp</dimen>
     <dimen name="camera_dot_margin_top">6dp</dimen>
     <dimen name="camera_progress_margin_top">8dp</dimen>
     <dimen name="camera_progress_width">176dp</dimen>
     <dimen name="camera_capture_bottom_margin">24dp</dimen>
+    <dimen name="camera_side_button_margin_start">16dp</dimen>
+    <dimen name="camera_side_button_spacing">8dp</dimen>
     <dimen name="camera_last_capture_margin_start">16dp</dimen>
     <dimen name="camera_last_capture_margin_bottom">16dp</dimen>
 </resources>

@@ -66,7 +66,7 @@ public class ResultActivity extends AppCompatActivity {
         sessionState = sessionRepository.getSession();
         
         if (sessionState == null) {
-            Toast.makeText(this, "Session data not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.session_not_found, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -106,7 +106,7 @@ public class ResultActivity extends AppCompatActivity {
             } else {
                 // TRƯỜNG HỢP LỖI HOẶC KHÔNG CHỌN FRAME -> Fallback về Collage dọc
                 finalBitmap = createVerticalCollageUseCase.execute(ResultActivity.this, imageUrisToCollage);
-                runOnUiThread(() -> Toast.makeText(this, "Không tìm thấy Frame, đang tạo ảnh dọc mặc định", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(this, R.string.frame_not_found_using_default_collage, Toast.LENGTH_SHORT).show());
             }
 
             runOnUiThread(() -> {
@@ -305,7 +305,7 @@ public class ResultActivity extends AppCompatActivity {
         if (outputUri != null) {
             try (OutputStream out = getContentResolver().openOutputStream(outputUri)) {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                Toast.makeText(this, "Đã lưu vào bộ sưu tập!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.saved_to_gallery_short, Toast.LENGTH_SHORT).show();
                 showFeedbackBottomSheet(true);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -357,13 +357,13 @@ public class ResultActivity extends AppCompatActivity {
             FirebaseFirestore.getInstance().collection("reviews")
                 .add(review)
                 .addOnSuccessListener(doc -> {
-                    Toast.makeText(this, "Cảm ơn bạn đã đánh giá " + rating + " sao!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.feedback_thanks_with_rating, rating), Toast.LENGTH_SHORT).show();
                     hasShownFeedback = true;
                     bottomSheetDialog.dismiss();
                 })
                 .addOnFailureListener(e -> {
                     btnSubmit.setEnabled(true);
-                    Toast.makeText(this, "Lỗi khi gửi đánh giá. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.feedback_submit_failed, Toast.LENGTH_SHORT).show();
                 });
         });
 

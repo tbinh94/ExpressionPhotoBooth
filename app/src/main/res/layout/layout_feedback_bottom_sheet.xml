@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/pacifico_regular"
-        android:text="Rate Your Memories"
+        android:text="@string/feedback_title"
         android:textAlignment="center"
         android:textColor="#2A5298"
         android:textSize="24sp" />
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="How do you like your photos? Share the love!"
+        android:text="@string/feedback_subtitle"
         android:textAlignment="center"
         android:textColor="#546E7A"
         android:textSize="14sp" />
@@ -69,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="top|start"
-            android:hint="Any sweet words for us?"
+            android:hint="@string/feedback_hint"
             android:inputType="textMultiLine"
             android:lines="3"
             android:textColor="#263238" />
@@ -80,7 +80,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginTop="28dp"
-        android:text="SUBMIT REVIEW"
+        android:text="@string/feedback_submit"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:textStyle="bold"

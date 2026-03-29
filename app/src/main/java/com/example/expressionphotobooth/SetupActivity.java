@@ -31,7 +31,7 @@ public class SetupActivity extends AppCompatActivity {
 
     private RecyclerView rvConcepts;
     private Frame selectedFrame;
-    private int selectedPhotoCount = 4;
+    private final int selectedPhotoCount = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +66,7 @@ public class SetupActivity extends AppCompatActivity {
         // GIAO NHIỆM VỤ: Lắng nghe sự kiện click nút NEXT
         btnNext.setOnClickListener(v -> {
             if (selectedFrame == null) {
-                Toast.makeText(SetupActivity.this, "Bạn phải chọn một khung hình trước khi tiếp tục!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SetupActivity.this, getString(R.string.setup_select_frame_required), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -101,7 +101,11 @@ public class SetupActivity extends AppCompatActivity {
             selectedFrame = frame;
             btnNext.setEnabled(true);
             btnNext.setAlpha(1.0f);
-            Toast.makeText(SetupActivity.this, "Đã chọn: " + frame.getLabel(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                    SetupActivity.this,
+                    getString(R.string.setup_frame_selected, frame.getLabel()),
+                    Toast.LENGTH_SHORT
+            ).show();
         });
         rvConcepts.setAdapter(conceptAdapter);
         

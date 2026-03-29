@@ -148,7 +148,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
                 setLoading(false, "");
-                HelpDialogUtils.showCenteredNotice(LoginActivity.this, "Lỗi", message, false);
+                HelpDialogUtils.showCenteredNotice(LoginActivity.this, getString(R.string.auth_error_title), message, false);
             }
         });
     }
@@ -163,7 +163,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        setLoading(true, "Đang tạo tài khoản...");
+        setLoading(true, getString(R.string.auth_register_creating));
         authRepository.register(email, password, name, birthday, new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(com.example.expressionphotobooth.domain.model.AuthSession session) {

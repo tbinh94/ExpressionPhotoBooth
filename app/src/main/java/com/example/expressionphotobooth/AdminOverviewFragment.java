@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
-import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -76,7 +75,7 @@ public class AdminOverviewFragment extends Fragment {
         });
 
         view.findViewById(R.id.cardActionSettings).setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Cài đặt hệ thống", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.admin_settings_toast, Toast.LENGTH_SHORT).show()
         );
 
         view.findViewById(R.id.cardActionSignOut).setOnClickListener(v -> {
@@ -119,7 +118,9 @@ public class AdminOverviewFragment extends Fragment {
                     if (tvBigAvg != null) tvBigAvg.setText(String.format(Locale.getDefault(), "%.1f", avg));
                     if (tvBigTotal != null) tvBigTotal.setText(String.valueOf(total));
                     if (tvBig5Star != null) tvBig5Star.setText(String.valueOf(counts[5]));
-                    if (tvChartSubtitle != null) tvChartSubtitle.setText(total + " đánh giá");
+                    if (tvChartSubtitle != null) {
+                        tvChartSubtitle.setText(getString(R.string.admin_overview_chart_subtitle_format, total));
+                    }
 
                     // Individual counts
                     if (tv5 != null) tv5.setText(String.valueOf(counts[5]));
@@ -139,7 +140,7 @@ public class AdminOverviewFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     if (tvChartSubtitle != null)
-                        tvChartSubtitle.setText("Không tải được dữ liệu");
+                        tvChartSubtitle.setText(R.string.admin_overview_chart_subtitle_error);
                 });
     }
 

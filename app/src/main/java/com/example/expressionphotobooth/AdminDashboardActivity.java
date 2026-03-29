@@ -28,7 +28,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         TextView tvAdminEmail = findViewById(R.id.tvAdminEmail);
         String email = authRepository.getCurrentEmail();
-        tvAdminEmail.setText(email == null ? "admin@photobooth.vn" : email);
+        tvAdminEmail.setText(email == null ? getString(R.string.admin_email_fallback) : email);
 
         ViewPager2 viewPager = findViewById(R.id.viewPager);
 

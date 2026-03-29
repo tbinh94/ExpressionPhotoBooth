@@ -39,7 +39,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Xin chào Admin,"
+                            android:text="@string/admin_dashboard_greeting"
                             android:textColor="#B0BED4"
                             android:textSize="14sp" />
 
@@ -59,7 +59,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="6dp"
-                                android:text="admin@photobooth.vn"
+                                android:text="@string/admin_email_fallback"
                                 android:textColor="#FFFFFF"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -100,7 +100,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Đánh giá"
+                            android:text="@string/admin_stat_reviews"
                             android:textColor="#B0BED4"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -128,7 +128,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Điểm TB"
+                            android:text="@string/admin_stat_avg"
                             android:textColor="#E8EFFF"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -156,7 +156,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Dưới 3★"
+                            android:text="@string/admin_stat_low"
                             android:textColor="#FFDADA"
                             android:textSize="11sp" />
                     </LinearLayout>

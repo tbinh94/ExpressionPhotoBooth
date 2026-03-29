@@ -2,9 +2,9 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginEnd="12dp"
+    android:layout_width="@dimen/setup_frame_item_width"
+    android:layout_height="@dimen/setup_frame_item_height"
+    android:layout_marginEnd="@dimen/setup_frame_item_spacing"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
@@ -18,9 +18,6 @@
             android:id="@+id/imgFrame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            android:maxWidth="300dp"
-            android:maxHeight="300dp"
             android:scaleType="centerCrop"
             android:src="@drawable/sample_frame" />
 

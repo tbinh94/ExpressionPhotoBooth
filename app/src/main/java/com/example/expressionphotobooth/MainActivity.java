@@ -202,17 +202,21 @@ public class MainActivity extends AppCompatActivity {
                 AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
                 if (checkedId == R.id.btnModeExpression && authRepo.isGuest()) {
                     group.check(R.id.btnModeCountdown); // Force back to auto
-                    HelpDialogUtils.showCenteredNotice(this, "Yêu cầu đăng nhập", 
-                        "Tính năng AI (Pose/Expression) chỉ dành cho thành viên chính thức. Vui lòng đăng nhập để sử dụng!", false);
+                    HelpDialogUtils.showCenteredNotice(
+                        this,
+                        getString(R.string.main_ai_login_required_title),
+                        getString(R.string.main_ai_login_required_message),
+                        false
+                    );
                     return;
                 }
                 
                 isExpressionMode = (checkedId == R.id.btnModeExpression);
                 aiSubGroup.setVisibility(isExpressionMode ? View.VISIBLE : View.GONE);
                 if (isExpressionMode) {
-                    Toast.makeText(this, "Chế độ AI: Hãy chọn kiểu detect!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.main_mode_ai_selected, Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "Chế độ tự động: Đếm ngược 3 giây", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.main_mode_auto_selected, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -229,9 +233,9 @@ public class MainActivity extends AppCompatActivity {
             isHandGestureMode = (checkedId == R.id.btnAiHand);
             isFaceExpressionMode = (checkedId == R.id.btnAiFace);
             if (isFaceExpressionMode) {
-                Toast.makeText(this, "Đã chuyển sang: Nhận diện khuôn mặt", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.main_ai_face_selected, Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Đã chuyển sang: Nhận diện hành động", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.main_ai_action_selected, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -482,22 +486,22 @@ public class MainActivity extends AppCompatActivity {
                 if (nextShot % 2 != 0) {
                     targetExpression = "HI";
                     tvCountdown.setText("✌️");
-                    updateCaptureStatus("Chụp " + nextShot + ": Giơ tay Hi nào!");
+                    updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
                 } else {
                     targetExpression = "HEART";
                     tvCountdown.setText("❤️");
-                    updateCaptureStatus("Chụp " + nextShot + ": Thả tim xem!");
+                    updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot));
                 }
             } else {
                 // Face mode
                 if (nextShot % 2 != 0) {
                     targetExpression = "SMILE";
                     tvCountdown.setText(":D");
-                    updateCaptureStatus("Chụp " + nextShot + ": Cười lên nào!");
+                    updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
                 } else {
                     targetExpression = "WINK_RIGHT"; // Simple specific wink
                     tvCountdown.setText(";)");
-                    updateCaptureStatus("Chụp " + nextShot + ": Nháy mắt cái nào!");
+                    updateCaptureStatus(getString(R.string.main_capture_prompt_face_wink, nextShot));
                 }
             }
 
@@ -547,7 +551,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         File photoFile = new File(getExternalFilesDir(null), "photo_" + System.currentTimeMillis() + ".jpg");
-        ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+        ImageCapture.Metadata captureMetadata = new ImageCapture.Metadata();
+        // Keep selfie result consistent with on-screen preview on front camera.
+        captureMetadata.setReversedHorizontal(cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA);
+        ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile)
+                .setMetadata(captureMetadata)
+                .build();
 
         Runnable performCapture = () -> imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(this),
                 new ImageCapture.OnImageSavedCallback() {
@@ -698,7 +707,7 @@ public class MainActivity extends AppCompatActivity {
         sessionState.setSoundEnabled(isSoundEnabled);
         sessionRepository.saveSession(sessionState);
         updateSoundIcon();
-        Toast.makeText(this, isSoundEnabled ? "Đã bật âm thanh" : "Đã tắt âm thanh", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, isSoundEnabled ? R.string.main_sound_on : R.string.main_sound_off, Toast.LENGTH_SHORT).show();
     }
 
     private void updateSoundIcon() {

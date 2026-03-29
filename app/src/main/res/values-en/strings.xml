@@ -1,0 +1,198 @@
+<resources>
+    <string name="app_name">Our Memories</string>
+
+    <string name="capture_photo">Capture</string>
+    <string name="camera_not_ready">Camera is not ready</string>
+    <string name="failed_create_folder">Cannot create folder</string>
+    <string name="video_saved_success">Video saved to gallery!</string>
+    <string name="processing_collage">Processing collage...</string>
+
+    <string name="auth_title">Welcome back</string>
+    <string name="auth_subtitle">Sign in to continue</string>
+    <string name="auth_register_title">Welcome to the app</string>
+    <string name="auth_register_subtitle">Create an account to continue</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="auth_or">Or</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_sign_in">Sign In</string>
+    <string name="auth_register">Sign Up</string>
+    <string name="auth_confirm_register">Create Account</string>
+    <string name="auth_sign_in_as_guest">Sign in as guest</string>
+    <string name="auth_loading">Processing...</string>
+    <string name="auth_error_title">Authentication Error</string>
+    <string name="auth_sign_in_failed_title">Sign In Failed</string>
+    <string name="auth_register_success_title">Registration Successful</string>
+    <string name="auth_register_success_message">Registration successful. Please sign in to continue.</string>
+    <string name="auth_register_failed_title">Registration Failed</string>
+    <string name="auth_invalid_input_title">Invalid input</string>
+    <string name="auth_invalid_input_message">Please enter email and password.</string>
+    <string name="auth_name">Full name</string>
+    <string name="auth_birthday">Date of birth</string>
+    <string name="auth_invalid_email_message">Invalid email format.</string>
+    <string name="auth_invalid_password_message">Password must be at least 6 characters.</string>
+    <string name="auth_invalid_name_message">Please enter your full name.</string>
+    <string name="auth_invalid_birthday_message">Please select your date of birth.</string>
+    <string name="auth_back_to_login">Back to Sign In</string>
+    <string name="auth_sign_out">Sign Out</string>
+    <string name="auth_sign_out_title">Signed Out</string>
+    <string name="auth_sign_out_message">You have signed out from this session.</string>
+
+    <string name="title_setup">CHOOSE YOUR FRAME</string>
+    <string name="btn_start_decorated">✦ START ✦</string>
+    <string name="btn_edit">EDIT</string>
+    <string name="btn_result">RESULT</string>
+    <string name="btn_edit_with_count">EDIT (%1$d)</string>
+    <string name="btn_result_with_count">RESULT (%1$d/%2$d)</string>
+    <string name="select_enough_for_result">Please select %1$d photos to continue to result</string>
+    <string name="select_one_photo_for_edit">Please select one photo to edit</string>
+    <string name="batch_edit_start">Editing %1$d selected photos</string>
+    <string name="batch_edit_completed">Batch edit completed</string>
+    <string name="batch_edit_cancelled">Batch edit cancelled</string>
+    <string name="selection_limit_reached">You can select up to %1$d photos only</string>
+
+    <string name="capture_status_ready">Ready to capture</string>
+    <string name="capture_status_starting">Starting capture sequence (%1$d photos)</string>
+    <string name="capture_status_next">Prepare for photo %1$d/%2$d</string>
+    <string name="capture_status_countdown">Photo %1$d/%2$d in %3$ds</string>
+    <string name="capture_status_captured">Captured %1$d/%2$d photos</string>
+    <string name="capture_status_done">Done! %1$d photos captured</string>
+    <string name="capture_status_error">Capture interrupted. Please try again.</string>
+    <string name="camera_header_title">Memories</string>
+    <string name="camera_main_title">Smile for Camera</string>
+    <string name="camera_header_subtitle">Elegant Capture Experience</string>
+    <string name="btn_start_capturing">START CAPTURING</string>
+
+    <string name="home_switch_to_english">English</string>
+    <string name="home_switch_to_vietnamese">Vietnamese</string>
+
+    <string name="setup_title">Choose Your Frame</string>
+    <string name="setup_subtitle">Select a frame for your photo</string>
+    <string name="btn_next_decorated">✦ NEXT ✦</string>
+    <string name="setup_select_frame_required">Please choose a frame before continuing.</string>
+    <string name="setup_frame_selected">Selected: %1$s</string>
+
+    <string name="help_setup_content_desc">Setup help</string>
+    <string name="help_selection_content_desc">Selection help</string>
+    <string name="help_setup_title">How to choose a frame</string>
+    <string name="help_setup_subtitle">Quick setup before opening camera</string>
+    <string name="help_setup_bullet_1">Choose one frame style to apply to the final result.</string>
+    <string name="help_setup_bullet_2">Tap NEXT to enter camera and start automatic capture.</string>
+    <string name="help_setup_bullet_3">The app captures 6 photos, then you choose the best 4 for RESULT.</string>
+    <string name="help_selection_title">How to select photos</string>
+    <string name="help_selection_subtitle">Tips for quick and correct selection</string>
+    <string name="help_selection_bullet_1">Select exactly %1$d best photos from your captured list.</string>
+    <string name="help_selection_bullet_2">Tap EDIT to batch edit selected photos, or skip if done.</string>
+    <string name="help_selection_bullet_3">RESULT is enabled only after selecting %1$d/%1$d photos.</string>
+    <string name="help_got_it">Got it</string>
+
+    <string name="title_camera">Camera</string>
+    <string name="title_selection">OUR MEMORIES</string>
+    <string name="title_edit">Edit Photo</string>
+    <string name="title_result">Result</string>
+
+    <string name="result_title">Your Result</string>
+    <string name="result_subtitle">Save your memories</string>
+    <string name="result_save_image">Save image</string>
+    <string name="result_save_video">Save video</string>
+    <string name="result_rate_title">How do you feel?</string>
+    <string name="result_rate_subtitle">Please rate your experience!</string>
+    <string name="feedback_title">Rate Your Memories</string>
+    <string name="feedback_subtitle">How do you like your photos? Share the love!</string>
+    <string name="feedback_hint">Any sweet words for us?</string>
+    <string name="feedback_submit">SUBMIT REVIEW</string>
+    <string name="feedback_thanks_with_rating">Thanks for your %1$.1f-star rating!</string>
+    <string name="feedback_submit_failed">Failed to submit review. Please try again.</string>
+    <string name="session_not_found">Session data not found</string>
+    <string name="frame_not_found_using_default_collage">Frame not found, generating default vertical collage</string>
+    <string name="saved_to_gallery_short">Saved to gallery!</string>
+    <string name="btn_save_png_decorated">✦ SAVE PNG ✦</string>
+    <string name="btn_save_video_decorated">✦ SAVE VIDEO ✦</string>
+    <string name="selection_instruction">Choose a photo to enhance or proceed to result</string>
+
+    <string name="common_ok">Got it</string>
+
+    <string name="admin_title">Admin Dashboard</string>
+    <string name="admin_subtitle">System management</string>
+    <string name="admin_menu_settings">Settings</string>
+
+    <string name="main_capture_mode_label">CAPTURE MODE</string>
+    <string name="main_mode_auto">Auto</string>
+    <string name="main_mode_ai_detect">AI Detect</string>
+    <string name="main_mode_face">Face</string>
+    <string name="main_mode_action">Gesture</string>
+    <string name="main_sound_toggle">Toggle sound</string>
+    <string name="main_ai_login_required_title">Login required</string>
+    <string name="main_ai_login_required_message">AI features (Pose/Expression) are available for members only. Please sign in to use them.</string>
+    <string name="main_mode_ai_selected">AI mode: Please choose a detection type.</string>
+    <string name="main_mode_auto_selected">Auto mode: 3-second countdown</string>
+    <string name="main_ai_face_selected">Switched to: Face detection</string>
+    <string name="main_ai_action_selected">Switched to: Gesture detection</string>
+    <string name="main_capture_prompt_hand_hi">Shot %1$d: Wave your hand and say hi!</string>
+    <string name="main_capture_prompt_hand_heart">Shot %1$d: Make a heart pose!</string>
+    <string name="main_capture_prompt_face_smile">Shot %1$d: Give us a smile!</string>
+    <string name="main_capture_prompt_face_wink">Shot %1$d: Give a wink!</string>
+    <string name="main_sound_on">Sound enabled</string>
+    <string name="main_sound_off">Sound disabled</string>
+
+    <string name="auth_register_creating">Creating account...</string>
+
+    <string name="admin_dashboard_greeting">Hello Admin,</string>
+    <string name="admin_email_fallback">admin@photobooth.vn</string>
+    <string name="admin_stat_reviews">Reviews</string>
+    <string name="admin_stat_avg">Avg score</string>
+    <string name="admin_stat_low">Below 3★</string>
+    <string name="admin_settings_toast">System settings</string>
+
+    <string name="admin_overview_chart_subtitle_placeholder">0 reviews</string>
+    <string name="admin_overview_chart_subtitle_format">%1$d reviews</string>
+    <string name="admin_overview_chart_subtitle_error">Failed to load data</string>
+    <string name="admin_overview_total_reviews">Review count</string>
+    <string name="admin_overview_five_star_label">5-star reviews</string>
+    <string name="admin_overview_bar_five">5 ★</string>
+    <string name="admin_overview_bar_four">4 ★</string>
+    <string name="admin_overview_bar_three">3 ★</string>
+    <string name="admin_overview_bar_two">2 ★</string>
+    <string name="admin_overview_bar_one">1 ★</string>
+    <string name="admin_overview_quick_actions">QUICK ACTIONS</string>
+    <string name="admin_overview_action_user_title">User Experience</string>
+    <string name="admin_overview_action_user_subtitle">Try user app flow</string>
+    <string name="admin_overview_action_reviews_title">Review Management</string>
+    <string name="admin_overview_action_reviews_subtitle">User feedback insights</string>
+    <string name="admin_overview_action_settings_title">System Settings</string>
+    <string name="admin_overview_action_settings_subtitle">Admin permissions</string>
+    <string name="admin_overview_action_sign_out_title">Sign Out</string>
+    <string name="admin_overview_action_sign_out_subtitle">End current session</string>
+
+    <string name="admin_redirect_icon">★</string>
+    <string name="admin_redirect_title">Review Management</string>
+    <string name="admin_redirect_subtitle">View, filter, and analyze all user reviews with detailed charts</string>
+    <string name="admin_redirect_open_reviews">Open reviews page</string>
+
+    <string name="admin_reviews_title">Review Management</string>
+    <string name="admin_reviews_search_hint">Search by email or content...</string>
+    <string name="admin_reviews_summary_average">Average</string>
+    <string name="admin_reviews_summary_total">Total</string>
+    <string name="admin_reviews_summary_five_star">5-star</string>
+    <string name="admin_reviews_summary_below_three">Below 3</string>
+    <string name="admin_reviews_filter_all">All</string>
+    <string name="admin_reviews_filter_five_star">5 ★</string>
+    <string name="admin_reviews_filter_four_star">4 ★</string>
+    <string name="admin_reviews_filter_three_star">3 ★</string>
+    <string name="admin_reviews_filter_negative">Negative (&lt;3 ★)</string>
+    <string name="admin_reviews_empty">No reviews found</string>
+    <string name="admin_reviews_error_load_format">Error: %1$s</string>
+
+    <string name="admin_review_avatar_placeholder">A</string>
+    <string name="admin_review_email_placeholder">abc@gmail.com</string>
+    <string name="admin_review_email_na">N/A</string>
+    <string name="admin_review_time_placeholder">2 hours ago</string>
+    <string name="admin_review_star_symbol">★</string>
+    <string name="admin_review_rating_placeholder">5</string>
+    <string name="admin_review_feedback_placeholder">Review content appears here...</string>
+    <string name="admin_review_no_content">(No content)</string>
+</resources>
+
+
+
+
