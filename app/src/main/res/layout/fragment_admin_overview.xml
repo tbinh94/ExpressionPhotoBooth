@@ -261,9 +261,9 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Action 3: Settings -->
+            <!-- Action 3: Stickers -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardActionSettings"
+                android:id="@+id/cardActionStickers"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -286,11 +286,11 @@
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_menu_24"
+                            android:src="@drawable/ic_videocam_24"
                             app:tint="@color/app_pink" />
                     </FrameLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_settings_title" android:textColor="@color/app_blue" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_settings_subtitle" android:textColor="#8A9BB8" android:textSize="11sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_stickers_title" android:textColor="@color/app_blue" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_stickers_subtitle" android:textColor="#8A9BB8" android:textSize="11sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

@@ -74,9 +74,9 @@ public class AdminOverviewFragment extends Fragment {
             startActivity(new Intent(requireContext(), AdminReviewsActivity.class));
         });
 
-        view.findViewById(R.id.cardActionSettings).setOnClickListener(v ->
-                Toast.makeText(requireContext(), R.string.admin_settings_toast, Toast.LENGTH_SHORT).show()
-        );
+        view.findViewById(R.id.cardActionStickers).setOnClickListener(v -> {
+            startActivity(new Intent(requireContext(), AdminStickersActivity.class));
+        });
 
         view.findViewById(R.id.cardActionSignOut).setOnClickListener(v -> {
             AuthRepository authRepository = ((AppContainer) requireActivity().getApplication()).getAuthRepository();

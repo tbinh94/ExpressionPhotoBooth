@@ -388,8 +388,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/bg_summary_pill"
-                    android:ellipsize="end"
-                    android:maxLines="1"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="8dp"
                     android:text="@string/edit_summary_default"

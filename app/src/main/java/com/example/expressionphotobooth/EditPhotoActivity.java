@@ -35,6 +35,7 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
@@ -69,16 +70,26 @@ public class EditPhotoActivity extends AppCompatActivity {
     // ── Thumbnail item model ──────────────────────────────────────────────────
 
     static class ThumbItem {
-        final String label;
-        final int drawableRes;   // preview drawable (small cropped sample); 0 = use colorRes
-        final int colorRes;      // fallback solid color for preview swatch
-        final Object value;      // EditState.FilterStyle / FrameStyle / StickerStyle
+        String label;
+        int drawableRes;   // preview drawable (small cropped sample); 0 = use colorRes
+        int colorRes;      // fallback solid color for preview swatch
+        Object value;      // EditState.FilterStyle / FrameStyle / StickerStyle
+        String base64;     // New field for custom stickers
 
         ThumbItem(String label, int drawableRes, int colorRes, Object value) {
             this.label = label;
             this.drawableRes = drawableRes;
             this.colorRes = colorRes;
             this.value = value;
+            this.base64 = null;
+        }
+
+        ThumbItem(String label, String base64, Object value) {
+            this.label = label;
+            this.drawableRes = 0;
+            this.colorRes = 0;
+            this.value = value;
+            this.base64 = base64;
         }
     }
 
@@ -101,7 +112,7 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         void setSelectedByValue(Object value) {
             for (int i = 0; i < items.size(); i++) {
-                if (items.get(i).value == value) {
+                if (items.get(i).value != null && items.get(i).value.equals(value)) {
                     int old = selectedPos;
                     selectedPos = i;
                     notifyItemChanged(old);
@@ -126,8 +137,13 @@ public class EditPhotoActivity extends AppCompatActivity {
 
             h.label.setText(item.label);
 
-            if (item.drawableRes != 0) {
+            if (item.base64 != null) {
+                byte[] bytes = android.util.Base64.decode(item.base64, android.util.Base64.DEFAULT);
+                h.preview.setImageBitmap(android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+                h.preview.setBackground(null);
+            } else if (item.drawableRes != 0) {
                 h.preview.setImageResource(item.drawableRes);
+                h.preview.setBackground(null);
             } else {
                 h.preview.setImageDrawable(null);
                 h.preview.setBackgroundResource(item.colorRes);
@@ -315,7 +331,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         rvFrames.setAdapter(framesAdapter);
 
         // STICKERS
-        List<ThumbItem> stickerItems = Arrays.asList(
+        List<ThumbItem> stickerItems = new ArrayList<>(Arrays.asList(
                 new ThumbItem(getString(R.string.edit_option_none),     0, R.color.thumb_none,             EditState.StickerStyle.NONE),
                 new ThumbItem(getString(R.string.edit_sticker_star),    R.drawable.ic_star_24, R.color.thumb_sticker_star, EditState.StickerStyle.STAR),
                 new ThumbItem(getString(R.string.edit_sticker_heart),   R.drawable.ic_sticker_heart, R.color.thumb_pink, EditState.StickerStyle.HEART),
@@ -324,11 +340,39 @@ public class EditPhotoActivity extends AppCompatActivity {
                 new ThumbItem(getString(R.string.edit_sticker_flower),  R.drawable.ic_sticker_flower, R.color.thumb_pink, EditState.StickerStyle.FLOWER),
                 new ThumbItem(getString(R.string.edit_sticker_camera),  R.drawable.ic_videocam_24, R.color.thumb_blue_grey, EditState.StickerStyle.CAMERA),
                 new ThumbItem(getString(R.string.edit_sticker_flash),   R.drawable.ic_flash_on_24, R.color.thumb_blue_grey, EditState.StickerStyle.FLASH)
-        );
-        stickersAdapter = new ThumbAdapter(stickerItems, item -> {
-            updateSticker((EditState.StickerStyle) item.value);
-        });
+        ));
+
+        stickersAdapter = new ThumbAdapter(stickerItems, item -> updateSticker(item));
         rvStickers.setAdapter(stickersAdapter);
+
+        // Fetch custom stickers from Firestore
+        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("custom_stickers")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(snap -> {
+                    if (snap.isEmpty()) return;
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : snap) {
+                        String label = doc.getString("label");
+                        String base64 = doc.getString("base64");
+                        if (label != null && base64 != null) {
+                            stickerItems.add(new ThumbItem(label, base64, EditState.StickerStyle.CUSTOM));
+                        }
+                    }
+                    stickersAdapter.notifyDataSetChanged();
+                });
+    }
+
+    private void updateSticker(ThumbItem item) {
+        pushToUndoStack();
+        EditState.StickerStyle style = (EditState.StickerStyle) item.value;
+        currentEditState.setStickerStyle(style);
+        if (style == EditState.StickerStyle.CUSTOM) {
+            currentEditState.setCustomStickerBase64(item.base64);
+        } else {
+            currentEditState.setCustomStickerBase64(null);
+        }
+        applyCurrentEditState();
+        updateEditSummary();
     }
 
     private void setupIntensitySlider() {
@@ -538,6 +582,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void updateSticker(EditState.StickerStyle sticker) {
         pushToUndoStack();
         currentEditState.setStickerStyle(sticker);
+        currentEditState.setCustomStickerBase64(null); // Clear custom if any
         applyCurrentEditState();
         updateEditSummary();
     }
