@@ -27,12 +27,14 @@ public class EditState {
         HEART,
         CROWN,
         SMILE,
-        FLOWER
+        FLOWER,
+        CUSTOM // Added CUSTOM type
     }
 
     private FilterStyle filterStyle = FilterStyle.NONE;
     private FrameStyle frameStyle = FrameStyle.NONE;
     private StickerStyle stickerStyle = StickerStyle.NONE;
+    private String customStickerBase64 = null; // New field for custom stickers
     private float filterIntensity = 0.8f;
     private float stickerX = -1f;
     private float stickerY = -1f;
@@ -47,6 +49,7 @@ public class EditState {
         this.filterStyle = other.filterStyle;
         this.frameStyle = other.frameStyle;
         this.stickerStyle = other.stickerStyle;
+        this.customStickerBase64 = other.customStickerBase64;
         this.filterIntensity = other.filterIntensity;
         this.stickerX = other.stickerX;
         this.stickerY = other.stickerY;
@@ -78,6 +81,14 @@ public class EditState {
 
     public void setStickerStyle(StickerStyle stickerStyle) {
         this.stickerStyle = stickerStyle;
+    }
+
+    public String getCustomStickerBase64() {
+        return customStickerBase64;
+    }
+
+    public void setCustomStickerBase64(String customStickerBase64) {
+        this.customStickerBase64 = customStickerBase64;
     }
 
     public float getFilterIntensity() {

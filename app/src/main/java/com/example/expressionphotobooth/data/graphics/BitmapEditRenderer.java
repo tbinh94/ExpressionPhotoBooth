@@ -141,13 +141,28 @@ public class BitmapEditRenderer {
     }
 
     private void drawSticker(Context context, Canvas canvas, EditState state, int width, int height) {
-        int drawableId = resolveStickerDrawable(state.getStickerStyle());
-        if (drawableId == 0) {
+        if (state.getStickerStyle() == EditState.StickerStyle.NONE) {
             return;
         }
 
-        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
-        if (drawable == null) {
+        Bitmap stickerBitmap = null;
+        Drawable drawable = null;
+
+        if (state.getStickerStyle() == EditState.StickerStyle.CUSTOM && state.getCustomStickerBase64() != null) {
+            try {
+                byte[] decodedString = android.util.Base64.decode(state.getCustomStickerBase64(), android.util.Base64.DEFAULT);
+                stickerBitmap = android.graphics.BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            int drawableId = resolveStickerDrawable(state.getStickerStyle());
+            if (drawableId != 0) {
+                drawable = ContextCompat.getDrawable(context, drawableId);
+            }
+        }
+
+        if (stickerBitmap == null && drawable == null) {
             return;
         }
 
@@ -178,8 +193,13 @@ public class BitmapEditRenderer {
             top = (int) (sy * height - size / 2f);
         }
 
-        drawable.setBounds(left, top, left + size, top + size);
-        drawable.draw(canvas);
+        if (stickerBitmap != null) {
+            Rect dest = new Rect(left, top, left + size, top + size);
+            canvas.drawBitmap(stickerBitmap, null, dest, new Paint(Paint.FILTER_BITMAP_FLAG));
+        } else {
+            drawable.setBounds(left, top, left + size, top + size);
+            drawable.draw(canvas);
+        }
     }
 
     @ColorInt

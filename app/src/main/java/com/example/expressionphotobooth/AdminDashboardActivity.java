@@ -34,6 +34,5 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         AdminPagerAdapter adapter = new AdminPagerAdapter(this);
         viewPager.setAdapter(adapter);
-        viewPager.setUserInputEnabled(false); // Disable swiping since navigation is handled elsewhere or limited
     }
 }

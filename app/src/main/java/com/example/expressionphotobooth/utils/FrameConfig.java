@@ -61,6 +61,19 @@ public class FrameConfig {
             holes.add(new Rect(17, 467, 255, 601));
         }
 
+        if (holes.isEmpty()) {
+            return getDefaultHoles();
+        }
+        
+        return holes;
+    }
+
+    public static List<Rect> getDefaultHoles() {
+        List<Rect> holes = new ArrayList<>();
+        holes.add(new Rect(17, 18, 255, 152));
+        holes.add(new Rect(17, 168, 255, 302));
+        holes.add(new Rect(17, 317, 255, 451));
+        holes.add(new Rect(17, 467, 255, 601));
         return holes;
     }
 

@@ -40,7 +40,17 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.FrameViewHol
     @Override
     public void onBindViewHolder(@NonNull FrameViewHolder holder, int position) {
         Frame frame = frameList.get(position);
-        holder.imgFrame.setImageResource(frame.getImageResId());
+        if (frame.isRemote()) {
+            try {
+                byte[] decodedString = android.util.Base64.decode(frame.getRemoteBase64(), android.util.Base64.DEFAULT);
+                android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                holder.imgFrame.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                holder.imgFrame.setImageResource(R.drawable.ic_image_error); // Placeholder for error
+            }
+        } else {
+            holder.imgFrame.setImageResource(frame.getImageResId());
+        }
         holder.tvFrameName.setText(frame.getLabel());
 
         boolean isSelected = frame.getId() == selectedFrameId;

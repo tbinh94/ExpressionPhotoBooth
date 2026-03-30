@@ -108,7 +108,7 @@ public class SetupActivity extends AppCompatActivity {
             ).show();
         });
         rvConcepts.setAdapter(conceptAdapter);
-        
+
         // Mặc định làm mờ nút Next
         btnNext.setAlpha(0.5f);
         btnNext.setEnabled(false);
