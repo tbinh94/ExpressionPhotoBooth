@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="setup_top_action_size">42dp</dimen>
+    <dimen name="setup_top_action_margin_horizontal">10dp</dimen>
+    <dimen name="setup_top_action_margin_top">20dp</dimen>
+    <dimen name="setup_title_margin_top">14dp</dimen>
+    <dimen name="setup_subtitle_margin_top">4dp</dimen>
+    <dimen name="setup_list_margin_top">8dp</dimen>
+    <dimen name="setup_list_margin_bottom">8dp</dimen>
+    <dimen name="setup_next_width">164dp</dimen>
+    <dimen name="setup_next_height">48dp</dimen>
+    <dimen name="setup_next_margin_bottom">14dp</dimen>
+    <dimen name="setup_concept_padding_horizontal">10dp</dimen>
+    <dimen name="setup_concept_padding_top">8dp</dimen>
+    <dimen name="setup_concept_title_margin_bottom">8dp</dimen>
+    <dimen name="setup_frame_item_width">122dp</dimen>
+    <dimen name="setup_frame_item_height">174dp</dimen>
+    <dimen name="setup_frame_item_spacing">8dp</dimen>
+
+    <dimen name="camera_title_margin_top">4dp</dimen>
+    <dimen name="camera_subtitle_margin_top">2dp</dimen>
+    <dimen name="camera_preview_horizontal_margin">14dp</dimen>
+    <dimen name="camera_preview_margin_top">8dp</dimen>
+    <dimen name="camera_preview_max_height">330dp</dimen>
+    <dimen name="camera_controls_horizontal_margin">14dp</dimen>
+    <dimen name="camera_controls_margin_top">6dp</dimen>
+    <dimen name="camera_controls_margin_bottom">4dp</dimen>
+    <dimen name="camera_ratio_margin_top">8dp</dimen>
+    <dimen name="camera_capture_bottom_margin">12dp</dimen>
+    <dimen name="camera_side_button_margin_start">8dp</dimen>
+    <dimen name="camera_side_button_spacing">6dp</dimen>
+    <dimen name="camera_last_capture_margin_start">10dp</dimen>
+    <dimen name="camera_last_capture_margin_bottom">10dp</dimen>
+</resources>
+

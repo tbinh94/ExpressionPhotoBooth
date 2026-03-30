@@ -1,0 +1,209 @@
+<resources>
+    <string name="app_name">Our Memories</string>
+
+    <string name="capture_photo">Chụp</string>
+    <string name="camera_permission_granted">Đã cấp quyền camera</string>
+    <string name="camera_permission_denied">Đã từ chối quyền camera</string>
+    <string name="camera_permission_required">Cần quyền camera để tiếp tục</string>
+    <string name="photo_saved_path">Đã lưu: %1$s</string>
+    <string name="no_photo_to_continue">Chưa có ảnh nào được chụp</string>
+    <string name="no_photo_to_edit">Chưa chọn ảnh để chỉnh sửa</string>
+    <string name="failed_open_photo">Không thể mở ảnh đã chọn</string>
+    <string name="failed_save_temp_result">Không thể tạo ảnh xem trước đã chỉnh sửa</string>
+    <string name="no_result_to_show">Không có ảnh kết quả để hiển thị</string>
+    <string name="no_result_to_save">Không có ảnh kết quả để lưu</string>
+    <string name="failed_save_result">Lưu ảnh thất bại</string>
+    <string name="saved_to_gallery">Đã lưu vào thư viện: %1$s</string>
+    <string name="no_images_for_video">Không có ảnh để tạo video</string>
+    <string name="exporting_video">Đang xuất video timelapse...</string>
+    <string name="failed_save_video">Xuất video thất bại</string>
+    <string name="video_saved_to_gallery">Video đã lưu vào thư viện: %1$s</string>
+
+    <string name="back">Quay lại</string>
+    <string name="title_setup">CHỌN KHUNG ẢNH</string>
+    <string name="title_camera">Máy ảnh</string>
+    <string name="title_selection">KHO ẢNH CỦA BẠN</string>
+    <string name="title_edit">Chỉnh sửa ảnh</string>
+    <string name="title_result">Kết quả</string>
+
+    <string name="btn_edit">CHỈNH SỬA</string>
+    <string name="btn_edit_with_count">CHỈNH SỬA (%1$d)</string>
+    <string name="btn_result">KẾT QUẢ</string>
+    <string name="btn_result_with_count">KẾT QUẢ (%1$d/%2$d)</string>
+    <string name="selected_strip_title">Ảnh đã chọn</string>
+    <string name="clear_selection">Xóa chọn</string>
+    <string name="selection_status_initial">Đã chọn: 0/0</string>
+    <string name="selection_status_none">Đã chọn: 0/%1$d</string>
+    <string name="selection_status_selected">Đã chọn: %1$d/%2$d</string>
+
+    <string name="capture_status_ready">Sẵn sàng chụp</string>
+    <string name="capture_status_starting">Bắt đầu chuỗi chụp (%1$d ảnh)</string>
+    <string name="capture_status_next">Chuẩn bị ảnh %1$d/%2$d</string>
+    <string name="capture_status_countdown">Ảnh %1$d/%2$d sau %3$d giây</string>
+    <string name="capture_status_captured">Đã chụp %1$d/%2$d ảnh</string>
+    <string name="capture_status_done">Hoàn tất! Đã chụp %1$d ảnh</string>
+    <string name="capture_status_error">Chuỗi chụp bị gián đoạn. Vui lòng thử lại.</string>
+    <string name="camera_header_title">Kỷ niệm</string>
+    <string name="camera_main_title">Mỉm cười nào</string>
+    <string name="camera_header_subtitle">Trải nghiệm chụp ảnh tinh tế</string>
+    <string name="btn_start_capturing">BẮT ĐẦU CHỤP</string>
+    <string name="camera_result_overlay_title">Chọn ảnh đẹp nhất</string>
+    <string name="btn_next_to_edit">Tiếp tục chỉnh sửa</string>
+
+    <string name="setup_title">Chọn khung ảnh</string>
+    <string name="setup_subtitle">Chọn một khung cho ảnh của bạn</string>
+    <string name="btn_next_decorated">✦ TIẾP THEO ✦</string>
+    <string name="setup_frame_selected">Đã chọn: %1$s</string>
+    <string name="home_switch_to_english">English</string>
+    <string name="home_switch_to_vietnamese">Tiếng Việt</string>
+
+    <string name="result_title">Kết quả của bạn</string>
+    <string name="result_subtitle">Lưu lại khoảnh khắc</string>
+    <string name="result_save_image">Lưu ảnh</string>
+    <string name="result_save_video">Lưu video</string>
+    <string name="result_rate_title">Bạn thấy thế nào?</string>
+    <string name="result_rate_subtitle">Đánh giá giúp chúng mình nhé!</string>
+    <string name="feedback_title">Đánh giá khoảnh khắc của bạn</string>
+    <string name="feedback_subtitle">Bạn thấy bộ ảnh thế nào? Chia sẻ cảm nhận nhé!</string>
+    <string name="feedback_hint">Gửi đôi lời dễ thương cho chúng mình...</string>
+    <string name="feedback_submit">GỬI ĐÁNH GIÁ</string>
+    <string name="feedback_thanks_with_rating">Cảm ơn bạn đã đánh giá %1$.1f sao!</string>
+    <string name="feedback_submit_failed">Gửi đánh giá thất bại. Vui lòng thử lại.</string>
+    <string name="session_not_found">Không tìm thấy dữ liệu phiên chụp</string>
+    <string name="frame_not_found_using_default_collage">Không tìm thấy frame, đang tạo ảnh dọc mặc định</string>
+    <string name="saved_to_gallery_short">Đã lưu vào bộ sưu tập!</string>
+    <string name="btn_save_png_decorated">✦ LƯU PNG ✦</string>
+    <string name="btn_save_video_decorated">✦ LƯU VIDEO ✦</string>
+    <string name="selection_instruction">Chọn ảnh để chỉnh sửa hoặc xuất kết quả</string>
+
+    <string name="edit_section_presets">Mẫu nhanh</string>
+    <string name="edit_section_filters">Bộ lọc</string>
+    <string name="edit_section_frames">Khung</string>
+    <string name="edit_section_stickers">Nhãn dán</string>
+    <string name="edit_preset_classic">Cổ điển</string>
+
+    <string name="btn_save_return">LƯU &amp; QUAY LẠI</string>
+    <string name="btn_start_decorated">✦ BẮT ĐẦU ✦</string>
+    <string name="camera_switch_lens">Đổi camera</string>
+    <string name="camera_flash_toggle">Bật/tắt flash</string>
+    <string name="camera_flash_on">Đã bật flash</string>
+    <string name="camera_flash_off">Đã tắt flash</string>
+    <string name="camera_flash_back_only">Flash chỉ khả dụng với camera sau</string>
+    <string name="camera_screen_flash_level_normal">Thường</string>
+    <string name="camera_screen_flash_level_strong">Mạnh</string>
+    <string name="camera_screen_flash_level_changed">Mức flash selfie: %1$s</string>
+
+    <string name="item_selected_badge">ĐÃ CHỌN</string>
+    <string name="edit_summary_default">Bộ lọc: Không  •  Khung: Không  •  Sticker: Không</string>
+    <string name="edit_summary_format">Bộ lọc: %1$s  •  Khung: %2$s  •  Sticker: %3$s</string>
+
+    <string name="main_capture_mode_label">CHẾ ĐỘ CHỤP</string>
+    <string name="main_mode_auto">Tự động</string>
+    <string name="main_mode_ai_detect">AI Detect</string>
+    <string name="main_mode_face">Khuôn mặt</string>
+    <string name="main_mode_action">Hành động</string>
+    <string name="main_sound_toggle">Bật/Tắt âm thanh</string>
+    <string name="main_ai_login_required_title">Yêu cầu đăng nhập</string>
+    <string name="main_ai_login_required_message">Tính năng AI (Pose/Expression) chỉ dành cho thành viên chính thức. Vui lòng đăng nhập để sử dụng!</string>
+    <string name="main_mode_ai_selected">Chế độ AI: Hãy chọn kiểu detect!</string>
+    <string name="main_mode_auto_selected">Chế độ tự động: Đếm ngược 3 giây</string>
+    <string name="main_ai_face_selected">Đã chuyển sang: Nhận diện khuôn mặt</string>
+    <string name="main_ai_action_selected">Đã chuyển sang: Nhận diện hành động</string>
+    <string name="main_capture_prompt_hand_hi">Chụp %1$d: Giơ tay Hi nào!</string>
+    <string name="main_capture_prompt_hand_heart">Chụp %1$d: Thả tim xem!</string>
+    <string name="main_capture_prompt_face_smile">Chụp %1$d: Cười lên nào!</string>
+    <string name="main_capture_prompt_face_wink">Chụp %1$d: Nháy mắt cái nào!</string>
+    <string name="main_sound_on">Đã bật âm thanh</string>
+    <string name="main_sound_off">Đã tắt âm thanh</string>
+
+    <string name="auth_title">Chào mừng trở lại</string>
+    <string name="auth_subtitle">Hãy đăng nhập để tiếp tục</string>
+    <string name="auth_register_title">Chào mừng đến với ứng dụng</string>
+    <string name="auth_register_subtitle">Hãy đăng ký để tiếp tục</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Mật khẩu</string>
+    <string name="auth_forgot_password">Quên mật khẩu?</string>
+    <string name="auth_or">Hoặc</string>
+    <string name="auth_sign_in">Đăng nhập</string>
+    <string name="auth_register">Đăng ký</string>
+    <string name="auth_confirm_register">Xác nhận đăng ký</string>
+    <string name="auth_back_to_login">Quay lại đăng nhập</string>
+    <string name="auth_sign_in_as_guest">Đăng nhập dưới tài khoản khách</string>
+    <string name="auth_loading">Đang xử lý...</string>
+    <string name="auth_error_title">Lỗi xác thực</string>
+    <string name="auth_sign_in_failed_title">Đăng nhập thất bại</string>
+    <string name="auth_register_success_title">Đăng ký thành công</string>
+    <string name="auth_register_success_message">Đăng ký thành công. Hãy đăng nhập để tiếp tục</string>
+    <string name="auth_register_failed_title">Đăng ký thất bại</string>
+    <string name="auth_invalid_input_title">Thông tin chưa hợp lệ</string>
+    <string name="auth_invalid_input_message">Vui lòng nhập email và mật khẩu.</string>
+    <string name="auth_name">Họ và tên</string>
+    <string name="auth_birthday">Ngày sinh</string>
+    <string name="auth_invalid_email_message">Email chưa đúng định dạng.</string>
+    <string name="auth_invalid_password_message">Mật khẩu tối thiểu 6 ký tự.</string>
+    <string name="auth_invalid_name_message">Vui lòng nhập họ tên.</string>
+    <string name="auth_invalid_birthday_message">Vui lòng chọn ngày sinh.</string>
+    <string name="auth_sign_out">Đăng xuất</string>
+    <string name="auth_sign_out_title">Đã đăng xuất</string>
+    <string name="auth_sign_out_message">Bạn đã đăng xuất khỏi phiên hiện tại.</string>
+    <string name="auth_register_creating">Đang tạo tài khoản...</string>
+
+    <string name="admin_dashboard_greeting">Xin chào Admin,</string>
+    <string name="admin_email_fallback">admin@photobooth.vn</string>
+    <string name="admin_stat_reviews">Đánh giá</string>
+    <string name="admin_stat_avg">Điểm TB</string>
+    <string name="admin_stat_low">Dưới 3★</string>
+    <string name="admin_settings_toast">Cài đặt hệ thống</string>
+
+    <string name="admin_overview_chart_subtitle_placeholder">0 đánh giá</string>
+    <string name="admin_overview_chart_subtitle_format">%1$d đánh giá</string>
+    <string name="admin_overview_chart_subtitle_error">Không tải được dữ liệu</string>
+    <string name="admin_overview_total_reviews">Lượt đánh giá</string>
+    <string name="admin_overview_five_star_label">5 sao</string>
+    <string name="admin_overview_bar_five">5 ⭐</string>
+    <string name="admin_overview_bar_four">4 ⭐</string>
+    <string name="admin_overview_bar_three">3 ⭐</string>
+    <string name="admin_overview_bar_two">2 ⭐</string>
+    <string name="admin_overview_bar_one">1 ⭐</string>
+    <string name="admin_overview_quick_actions">THAO TÁC NHANH</string>
+    <string name="admin_overview_action_user_title">Trải nghiệm User</string>
+    <string name="admin_overview_action_user_subtitle">Dùng thử app</string>
+    <string name="admin_overview_action_reviews_title">Quản lý đánh giá</string>
+    <string name="admin_overview_action_reviews_subtitle">Đánh giá từ người dùng</string>
+    <string name="admin_overview_action_settings_title">Cài đặt hệ thống</string>
+    <string name="admin_overview_action_settings_subtitle">Phân quyền admin</string>
+    <string name="admin_overview_action_sign_out_title">Đăng xuất</string>
+    <string name="admin_overview_action_sign_out_subtitle">Thoát phiên làm việc</string>
+
+    <string name="admin_redirect_icon">⭐</string>
+    <string name="admin_redirect_title">Quản lý đánh giá</string>
+    <string name="admin_redirect_subtitle">Xem, lọc và phân tích toàn bộ đánh giá của người dùng với biểu đồ chi tiết</string>
+    <string name="admin_redirect_open_reviews">Mở trang đánh giá</string>
+
+    <string name="admin_reviews_title">Quản lý đánh giá</string>
+    <string name="admin_reviews_search_hint">Tìm theo email hoặc nội dung...</string>
+    <string name="admin_reviews_summary_average">Trung bình</string>
+    <string name="admin_reviews_summary_total">Tổng</string>
+    <string name="admin_reviews_summary_five_star">5 sao</string>
+    <string name="admin_reviews_summary_below_three">Dưới 3</string>
+    <string name="admin_reviews_filter_all">Tất cả</string>
+    <string name="admin_reviews_filter_five_star">5 ⭐</string>
+    <string name="admin_reviews_filter_four_star">4 ⭐</string>
+    <string name="admin_reviews_filter_three_star">3 ⭐</string>
+    <string name="admin_reviews_filter_negative">Tiêu cực (&lt;3 ⭐)</string>
+    <string name="admin_reviews_empty">Không tìm thấy đánh giá nào</string>
+    <string name="admin_reviews_error_load_format">Lỗi: %1$s</string>
+
+    <string name="admin_review_avatar_placeholder">A</string>
+    <string name="admin_review_email_placeholder">abc@gmail.com</string>
+    <string name="admin_review_email_na">N/A</string>
+    <string name="admin_review_time_placeholder">2 giờ trước</string>
+    <string name="admin_review_star_symbol">★</string>
+    <string name="admin_review_rating_placeholder">5</string>
+    <string name="admin_review_feedback_placeholder">Nội dung đánh giá ở đây...</string>
+    <string name="admin_review_no_content">(Không có nội dung)</string>
+</resources>
+
+
+
+

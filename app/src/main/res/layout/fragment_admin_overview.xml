@@ -53,7 +53,7 @@
                             android:id="@+id/tvChartSubtitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 đánh giá"
+                            android:text="@string/admin_overview_chart_subtitle_placeholder"
                             android:textColor="#8A9BB8"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -81,7 +81,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Lượt đánh giá"
+                            android:text="@string/admin_overview_total_reviews"
                             android:textColor="#8A9BB8"
                             android:textSize="11sp" />
 
@@ -98,7 +98,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5 sao"
+                            android:text="@string/admin_overview_five_star_label"
                             android:textColor="#8A9BB8"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -112,7 +112,7 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="5 ⭐" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_five" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar5Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_green"/>
                     </FrameLayout>
@@ -126,7 +126,7 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="4 ⭐" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_four" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar4Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_blue"/>
                     </FrameLayout>
@@ -140,7 +140,7 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="3 ⭐" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_three" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar3Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_gold"/>
                     </FrameLayout>
@@ -154,7 +154,7 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="2 ⭐" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_two" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar2Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_orange"/>
                     </FrameLayout>
@@ -167,7 +167,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="1 ⭐" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_one" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar1Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_red"/>
                     </FrameLayout>
@@ -180,7 +180,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="THAO TÁC NHANH"
+            android:text="@string/admin_overview_quick_actions"
             android:textColor="#8A9BB8"
             android:textSize="11sp"
             android:letterSpacing="0.10"
@@ -223,8 +223,8 @@
                             android:src="@drawable/ic_home_24"
                             app:tint="@color/app_blue" />
                     </FrameLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trải nghiệm User" android:textColor="@color/app_blue" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dùng thử app" android:textColor="#8A9BB8" android:textSize="11sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_user_title" android:textColor="@color/app_blue" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_user_subtitle" android:textColor="#8A9BB8" android:textSize="11sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -256,8 +256,8 @@
                             android:src="@drawable/ic_star_24"
                             app:tint="@color/app_blue" />
                     </FrameLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Quản lý đánh giá" android:textColor="@color/app_blue" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Đánh giá từ người dùng" android:textColor="#8A9BB8" android:textSize="11sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_reviews_title" android:textColor="@color/app_blue" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_reviews_subtitle" android:textColor="#8A9BB8" android:textSize="11sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -289,8 +289,8 @@
                             android:src="@drawable/ic_menu_24"
                             app:tint="@color/app_pink" />
                     </FrameLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cài đặt hệ thống" android:textColor="@color/app_blue" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Phân quyền admin" android:textColor="#8A9BB8" android:textSize="11sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_settings_title" android:textColor="@color/app_blue" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_settings_subtitle" android:textColor="#8A9BB8" android:textSize="11sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -323,8 +323,8 @@
                             android:rotation="180"
                             app:tint="#E24B4A" />
                     </FrameLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Đăng xuất" android:textColor="#E24B4A" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Thoát phiên làm việc" android:textColor="#8A9BB8" android:textSize="11sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_sign_out_title" android:textColor="#E24B4A" android:textStyle="bold" android:textSize="13sp" android:layout_marginTop="12dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/admin_overview_action_sign_out_subtitle" android:textColor="#8A9BB8" android:textSize="11sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </GridLayout>

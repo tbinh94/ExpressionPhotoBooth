@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingHorizontal="16dp"
-    android:paddingTop="16dp">
+    android:paddingHorizontal="@dimen/setup_concept_padding_horizontal"
+    android:paddingTop="@dimen/setup_concept_padding_top">
 
     <TextView
         android:id="@+id/tvConceptName"
@@ -14,7 +14,7 @@
         android:textColor="#1A5276"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="@dimen/setup_concept_title_margin_bottom" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFrames"

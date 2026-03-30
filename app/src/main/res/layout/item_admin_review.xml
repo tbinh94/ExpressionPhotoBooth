@@ -29,7 +29,7 @@
                 android:layout_width="38dp"
                 android:layout_height="38dp"
                 android:gravity="center"
-                android:text="A"
+                android:text="@string/admin_review_avatar_placeholder"
                 android:textColor="#2A5298"
                 android:textSize="15sp"
                 android:textStyle="bold"
@@ -46,7 +46,7 @@
                     android:id="@+id/tvReviewEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="abc@gmail.com"
+                    android:text="@string/admin_review_email_placeholder"
                     android:textColor="#2A5298"
                     android:textSize="13sp"
                     android:textStyle="bold"
@@ -58,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
-                    android:text="2 giờ trước"
+                    android:text="@string/admin_review_time_placeholder"
                     android:textColor="#8A9BB0"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -86,7 +86,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="★"
+                        android:text="@string/admin_review_star_symbol"
                         android:textColor="#FFBB00"
                         android:textSize="12sp" />
 
@@ -95,7 +95,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="2dp"
-                        android:text="5"
+                        android:text="@string/admin_review_rating_placeholder"
                         android:textColor="#B8860B"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -108,7 +108,7 @@
             android:id="@+id/tvReviewFeedback"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nội dung đánh giá ở đây..."
+            android:text="@string/admin_review_feedback_placeholder"
             android:textColor="#4A5D77"
             android:textSize="13sp"
             android:lineSpacingExtra="2dp" />

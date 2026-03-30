@@ -10,12 +10,14 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
+import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.button.MaterialButton;
 
 public class HomeActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private static boolean isMuted = false;
     private AuthRepository authRepository;
+    private MaterialButton btnLanguageToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +68,13 @@ public class HomeActivity extends AppCompatActivity {
         MaterialButton btnVolumeToggle = findViewById(R.id.btnVolumeToggle);
         updateVolumeIcon(btnVolumeToggle);
 
+        btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
+        updateLanguageButtonText();
+        btnLanguageToggle.setOnClickListener(v -> {
+            LocaleManager.toggleLanguage(this);
+            recreate();
+        });
+
         btnVolumeToggle.setOnClickListener(v -> {
             isMuted = !isMuted;
             if (isMuted) {
@@ -83,6 +92,16 @@ public class HomeActivity extends AppCompatActivity {
 
     private void updateVolumeIcon(MaterialButton button) {
         button.setIconResource(isMuted ? R.drawable.ic_volume_off : R.drawable.ic_volume_up);
+    }
+
+    private void updateLanguageButtonText() {
+        if (btnLanguageToggle == null) {
+            return;
+        }
+        int textRes = LocaleManager.isVietnamese()
+                ? R.string.home_switch_to_english
+                : R.string.home_switch_to_vietnamese;
+        btnLanguageToggle.setText(textRes);
     }
 
     private void startBackgroundMusic() {
