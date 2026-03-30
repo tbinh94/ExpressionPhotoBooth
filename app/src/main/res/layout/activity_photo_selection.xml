@@ -26,24 +26,8 @@
         app:navigationIconTint="#2A5298"
          />
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:fontFamily="@font/pacifico_regular"
-        android:shadowColor="#FFFFFF"
-        android:shadowDx="0"
-        android:shadowDy="0"
-        android:shadowRadius="8"
-        android:text="@string/title_selection"
-        android:textColor="#2A5298"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar" />
-
+    <!-- Search or filter placeholder if needed -->
+    
     <!-- Subtitle + Help button cùng hàng -->
     <TextView
         android:id="@+id/tvSubtitle"
@@ -57,7 +41,7 @@
         android:textSize="13sp"
         app:layout_constraintEnd_toStartOf="@id/btnHelpSelection"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        app:layout_constraintTop_toBottomOf="@id/topAppBar" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnHelpSelection"

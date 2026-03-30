@@ -23,7 +23,11 @@ public class EditState {
         NONE,
         STAR,
         FLASH,
-        CAMERA
+        CAMERA,
+        HEART,
+        CROWN,
+        SMILE,
+        FLOWER
     }
 
     private FilterStyle filterStyle = FilterStyle.NONE;

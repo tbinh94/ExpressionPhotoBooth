@@ -2,29 +2,18 @@
     <string name="app_name">Our Memories</string>
 
     <string name="capture_photo">Chụp</string>
-    <string name="camera_permission_granted">Đã cấp quyền camera</string>
-    <string name="camera_permission_denied">Đã từ chối quyền camera</string>
     <string name="camera_permission_required">Cần quyền camera để tiếp tục</string>
-    <string name="photo_saved_path">Đã lưu: %1$s</string>
     <string name="no_photo_to_continue">Chưa có ảnh nào được chụp</string>
     <string name="no_photo_to_edit">Chưa chọn ảnh để chỉnh sửa</string>
     <string name="failed_open_photo">Không thể mở ảnh đã chọn</string>
-    <string name="failed_save_temp_result">Không thể tạo ảnh xem trước đã chỉnh sửa</string>
     <string name="no_result_to_show">Không có ảnh kết quả để hiển thị</string>
     <string name="no_result_to_save">Không có ảnh kết quả để lưu</string>
-    <string name="failed_save_result">Lưu ảnh thất bại</string>
-    <string name="saved_to_gallery">Đã lưu vào thư viện: %1$s</string>
     <string name="no_images_for_video">Không có ảnh để tạo video</string>
     <string name="exporting_video">Đang xuất video timelapse...</string>
     <string name="failed_save_video">Xuất video thất bại</string>
-    <string name="video_saved_to_gallery">Video đã lưu vào thư viện: %1$s</string>
 
-    <string name="back">Quay lại</string>
-    <string name="title_setup">CHỌN KHUNG ẢNH</string>
-    <string name="title_camera">Máy ảnh</string>
     <string name="title_selection">KHO ẢNH CỦA BẠN</string>
     <string name="title_edit">Chỉnh sửa ảnh</string>
-    <string name="title_result">Kết quả</string>
 
     <string name="btn_edit">CHỈNH SỬA</string>
     <string name="btn_edit_with_count">CHỈNH SỬA (%1$d)</string>
@@ -38,17 +27,12 @@
 
     <string name="capture_status_ready">Sẵn sàng chụp</string>
     <string name="capture_status_starting">Bắt đầu chuỗi chụp (%1$d ảnh)</string>
-    <string name="capture_status_next">Chuẩn bị ảnh %1$d/%2$d</string>
     <string name="capture_status_countdown">Ảnh %1$d/%2$d sau %3$d giây</string>
     <string name="capture_status_captured">Đã chụp %1$d/%2$d ảnh</string>
     <string name="capture_status_done">Hoàn tất! Đã chụp %1$d ảnh</string>
     <string name="capture_status_error">Chuỗi chụp bị gián đoạn. Vui lòng thử lại.</string>
-    <string name="camera_header_title">Kỷ niệm</string>
     <string name="camera_main_title">Mỉm cười nào</string>
     <string name="camera_header_subtitle">Trải nghiệm chụp ảnh tinh tế</string>
-    <string name="btn_start_capturing">BẮT ĐẦU CHỤP</string>
-    <string name="camera_result_overlay_title">Chọn ảnh đẹp nhất</string>
-    <string name="btn_next_to_edit">Tiếp tục chỉnh sửa</string>
 
     <string name="setup_title">Chọn khung ảnh</string>
     <string name="setup_subtitle">Chọn một khung cho ảnh của bạn</string>
@@ -72,13 +56,10 @@
     <string name="session_not_found">Không tìm thấy dữ liệu phiên chụp</string>
     <string name="frame_not_found_using_default_collage">Không tìm thấy frame, đang tạo ảnh dọc mặc định</string>
     <string name="saved_to_gallery_short">Đã lưu vào bộ sưu tập!</string>
-    <string name="btn_save_png_decorated">✦ LƯU PNG ✦</string>
-    <string name="btn_save_video_decorated">✦ LƯU VIDEO ✦</string>
     <string name="selection_instruction">Chọn ảnh để chỉnh sửa hoặc xuất kết quả</string>
 
     <string name="edit_section_presets">Mẫu nhanh</string>
     <string name="edit_section_filters">Bộ lọc</string>
-    <string name="edit_section_frames">Khung</string>
     <string name="edit_section_stickers">Nhãn dán</string>
     <string name="edit_preset_classic">Cổ điển</string>
 
@@ -88,14 +69,12 @@
     <string name="camera_flash_toggle">Bật/tắt flash</string>
     <string name="camera_flash_on">Đã bật flash</string>
     <string name="camera_flash_off">Đã tắt flash</string>
-    <string name="camera_flash_back_only">Flash chỉ khả dụng với camera sau</string>
     <string name="camera_screen_flash_level_normal">Thường</string>
     <string name="camera_screen_flash_level_strong">Mạnh</string>
     <string name="camera_screen_flash_level_changed">Mức flash selfie: %1$s</string>
 
     <string name="item_selected_badge">ĐÃ CHỌN</string>
     <string name="edit_summary_default">Bộ lọc: Không  •  Khung: Không  •  Sticker: Không</string>
-    <string name="edit_summary_format">Bộ lọc: %1$s  •  Khung: %2$s  •  Sticker: %3$s</string>
 
     <string name="main_capture_mode_label">CHẾ ĐỘ CHỤP</string>
     <string name="main_mode_auto">Tự động</string>
