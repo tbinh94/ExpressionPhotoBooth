@@ -1,20 +1,26 @@
 package com.example.expressionphotobooth.domain.usecase;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.media.Image;
+import android.util.Log;
 
 import androidx.annotation.OptIn;
 import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageProxy;
 
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.pose.PoseDetection;
-import com.google.mlkit.vision.pose.PoseDetector;
-import com.google.mlkit.vision.pose.PoseLandmark;
-import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions;
+import com.google.mediapipe.framework.image.BitmapImageBuilder;
+import com.google.mediapipe.framework.image.MPImage;
+import com.google.mediapipe.tasks.core.BaseOptions;
+import com.google.mediapipe.tasks.components.containers.NormalizedLandmark;
+import com.google.mediapipe.tasks.vision.core.RunningMode;
+import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker;
+import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 public class GestureAnalyzer {
 
@@ -22,188 +28,168 @@ public class GestureAnalyzer {
         void onResult(String gesture, Rect handBox);
     }
 
-    private static final int HISTORY_SIZE = 6; // Số frame cần nhất quán để xác nhận gesture
-    private static final int CONFIRM_THRESHOLD = 4; // Cần ít nhất 4/6 frame khớp
+    private static final String TAG = "GestureAnalyzer";
+    private static final int HISTORY_SIZE = 5;
+    private static final int CONFIRM_THRESHOLD = 3;
 
-    private final PoseDetector poseDetector;
+    private HandLandmarker handLandmarker;
     private final Deque<String> gestureHistory = new ArrayDeque<>();
-    
-    // Smoothed bounding box để giảm flicker
-    private float smoothLeft = 0, smoothTop = 0, smoothRight = 0, smoothBottom = 0;
-    private static final float SMOOTH_FACTOR = 0.4f; // 0 = không đổi, 1 = lấy ngay giá trị mới
-
     private boolean isProcessing = false;
 
-    public GestureAnalyzer() {
-        PoseDetectorOptions options = new PoseDetectorOptions.Builder()
-                .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
-                .build();
-        poseDetector = PoseDetection.getClient(options);
+    // Smoothed bounding box
+    private float smoothLeft = 0, smoothTop = 0, smoothRight = 0, smoothBottom = 0;
+    private static final float SMOOTH_FACTOR = 0.5f;
+
+    public GestureAnalyzer(Context context) {
+        try {
+            BaseOptions baseOptions = BaseOptions.builder()
+                    .setModelAssetPath("hand_landmarker.task")
+                    .build();
+
+            HandLandmarker.HandLandmarkerOptions options = HandLandmarker.HandLandmarkerOptions.builder()
+                    .setBaseOptions(baseOptions)
+                    .setRunningMode(RunningMode.IMAGE)
+                    .setNumHands(1)
+                    .setMinHandDetectionConfidence(0.3f)
+                    .setMinHandPresenceConfidence(0.3f)
+                    .setMinTrackingConfidence(0.3f)
+                    .build();
+
+            handLandmarker = HandLandmarker.createFromOptions(context, options);
+            Log.d(TAG, "MediaPipe HandLandmarker initialized");
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing MediaPipe: " + e.getMessage());
+        }
+    }
+
+    public void reset() {
+        gestureHistory.clear();
+        smoothLeft = smoothTop = smoothRight = smoothBottom = 0;
     }
 
     @OptIn(markerClass = ExperimentalGetImage.class)
     public void analyzeImageProxy(ImageProxy imageProxy, OnGestureDetected listener) {
-        if (isProcessing || imageProxy.getImage() == null) {
+        if (handLandmarker == null || isProcessing || imageProxy.getImage() == null) {
             imageProxy.close();
             return;
         }
 
         isProcessing = true;
-        Image mediaImage = imageProxy.getImage();
-        InputImage image = InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
+        try {
+            // Conver image to Bitmap first as MediaPipe MPImageBuilder from Bitmap is most stable in Java
+            // We can also use MediaImageBuilder if memory is tight but Bitmap is easier for rotation/flipping
+            MPImage mpImage = new BitmapImageBuilder(imageProxy.toBitmap()).build();
 
-        poseDetector.process(image)
-                .addOnSuccessListener(pose -> {
-                    PoseLandmark leftWrist    = pose.getPoseLandmark(PoseLandmark.LEFT_WRIST);
-                    PoseLandmark rightWrist   = pose.getPoseLandmark(PoseLandmark.RIGHT_WRIST);
-                    PoseLandmark leftThumb    = pose.getPoseLandmark(PoseLandmark.LEFT_THUMB);
-                    PoseLandmark rightThumb   = pose.getPoseLandmark(PoseLandmark.RIGHT_THUMB);
-                    PoseLandmark leftIndex    = pose.getPoseLandmark(PoseLandmark.LEFT_INDEX);
-                    PoseLandmark rightIndex   = pose.getPoseLandmark(PoseLandmark.RIGHT_INDEX);
-                    PoseLandmark leftPinky    = pose.getPoseLandmark(PoseLandmark.LEFT_PINKY);
-                    PoseLandmark rightPinky   = pose.getPoseLandmark(PoseLandmark.RIGHT_PINKY);
-                    
-                    PoseLandmark leftEye      = pose.getPoseLandmark(PoseLandmark.LEFT_EYE_OUTER);
-                    PoseLandmark rightEye     = pose.getPoseLandmark(PoseLandmark.RIGHT_EYE_OUTER);
+            HandLandmarkerResult result = handLandmarker.detect(mpImage);
+            
+            String rawGesture = "NONE";
+            Rect handBox = null;
 
-                    // === PHÁT HIỆN CỬ CHỈ (Chỉ lấy landmarks có độ tin cậy cao) ===
+            if (result != null && !result.landmarks().isEmpty()) {
+                List<NormalizedLandmark> landmarks = result.landmarks().get(0);
+                
+                // 1. Detect Hand Features
+                boolean[] isFingerRaised = checkFingersRaised(landmarks);
+                Log.d(TAG, String.format("Fingers: T:%b I:%b M:%b R:%b P:%b", 
+                    isFingerRaised[0], isFingerRaised[1], isFingerRaised[2], isFingerRaised[3], isFingerRaised[4]));
+                
+                // HI (V-Sign): Index and Middle up, Ring and Pinky down
+                if (isFingerRaised[1] && isFingerRaised[2] && !isFingerRaised[3] && !isFingerRaised[4]) {
+                    rawGesture = "HI";
+                }
+                // HEART (Finger heart): Index and Thumb tips cross
+                else if (checkFingerHeart(landmarks)) {
+                    rawGesture = "HEART";
+                }
 
-                    float faceWidth = 150f;
-                    if (isValid(leftEye, rightEye)) {
-                        faceWidth = dist(leftEye, rightEye) * 1.5f; // uớc tính rộng khuôn mặt
-                    }
+                handBox = calculateHandBox(landmarks, mpImage.getWidth(), mpImage.getHeight());
+            }
 
-                    boolean leftHeart = checkHeart(leftWrist, leftThumb, leftIndex, faceWidth);
-                    boolean rightHeart = checkHeart(rightWrist, rightThumb, rightIndex, faceWidth);
+            // Smoothing
+            gestureHistory.addLast(rawGesture);
+            if (gestureHistory.size() > HISTORY_SIZE) gestureHistory.pollFirst();
 
-                    boolean leftHi = checkHi(leftWrist, leftThumb, leftIndex, faceWidth);
-                    boolean rightHi = checkHi(rightWrist, rightThumb, rightIndex, faceWidth);
+            String confirmed = "NONE";
+            int hiVotes = 0, heartVotes = 0;
+            for (String g : gestureHistory) {
+                if ("HI".equals(g)) hiVotes++;
+                else if ("HEART".equals(g)) heartVotes++;
+            }
+            if (hiVotes >= CONFIRM_THRESHOLD) confirmed = "HI";
+            else if (heartVotes >= CONFIRM_THRESHOLD) confirmed = "HEART";
 
-                    boolean isHeart = leftHeart || rightHeart;
-                    boolean isHi = leftHi || rightHi;
+            listener.onResult(confirmed, handBox);
 
-                    String rawGesture;
-                    if (isHeart) {
-                        rawGesture = "HEART";
-                    } else if (isHi) {
-                        rawGesture = "HI";
-                    } else {
-                        rawGesture = "NONE";
-                    }
-
-                    // === TEMPORAL SMOOTHING: bỏ phiếu qua N frame ===
-                    gestureHistory.addLast(rawGesture);
-                    if (gestureHistory.size() > HISTORY_SIZE) {
-                        gestureHistory.pollFirst();
-                    }
-
-                    String confirmedGesture = "NONE";
-                    int heartVotes = 0, hiVotes = 0;
-                    for (String g : gestureHistory) {
-                        if ("HEART".equals(g)) heartVotes++;
-                        else if ("HI".equals(g)) hiVotes++;
-                    }
-                    if (heartVotes >= CONFIRM_THRESHOLD) confirmedGesture = "HEART";
-                    else if (hiVotes >= CONFIRM_THRESHOLD) confirmedGesture = "HI";
-
-                    // === BOUNDING BOX với smoothing ===
-                    // Chỉ vẽ bbox trên tay có độ tin cậy cao để tránh nhảy bậy vào mặt
-                    Rect handBox = null;
-                    if (leftHeart || leftHi || (isValid(leftWrist, leftIndex) && !isValid(rightWrist, rightIndex))) {
-                        handBox = calculateSmoothedHandBox(leftWrist, leftThumb, leftIndex, leftPinky);
-                    } else if (rightHeart || rightHi || isValid(rightWrist, rightIndex)) {
-                        handBox = calculateSmoothedHandBox(rightWrist, rightThumb, rightIndex, rightPinky);
-                    }
-
-                    listener.onResult(confirmedGesture, handBox);
-                })
-                .addOnFailureListener(e -> listener.onResult("NONE", null))
-                .addOnCompleteListener(task -> {
-                    isProcessing = false;
-                    imageProxy.close();
-                });
-    }
-
-    private boolean isValid(PoseLandmark... landmarks) {
-        for (PoseLandmark lm : landmarks) {
-            // Ngưỡng 0.25f: ngón tay trỏ/cái thường có độ tin cậy thấp hơn vai/mặt trong model Pose Detection
-            if (lm == null || lm.getInFrameLikelihood() < 0.25f) return false;
+        } catch (Exception e) {
+            Log.e(TAG, "Analysis error: " + e.getMessage());
+        } finally {
+            isProcessing = false;
+            imageProxy.close();
         }
-        return true;
-    }
-
-    private boolean checkHeart(PoseLandmark wrist, PoseLandmark thumb, PoseLandmark index, float faceWidth) {
-        if (!isValid(wrist, thumb, index)) return false;
-        float dThumbIndex = dist(thumb, index);
-        float dIndexWrist = dist(index, wrist);
-        // Ngón cái và trỏ chụm khít sát nhau (HEART) - nới lỏng xuống 0.35 để dễ bắt hơn
-        return dThumbIndex < dIndexWrist * 0.35f && dThumbIndex < faceWidth * 0.6f;
-    }
-
-    private boolean checkHi(PoseLandmark wrist, PoseLandmark thumb, PoseLandmark index, float faceWidth) {
-        if (!isValid(wrist, index)) return false; 
-        float dIndexWrist = dist(index, wrist);
-        
-        // Khi ngón trỏ duỗi thẳng, khoảng cách từ cổ tay tới ngón trỏ dài hơn
-        if (dIndexWrist < faceWidth * 0.35f) return false;
-
-        // Cho phép tay nghiêng chữ V (tilted) bằng cách giảm điều kiện y
-        boolean indexUp = index.getPosition().y < wrist.getPosition().y - (dIndexWrist * 0.10f);
-        
-        // V-sign: ngón trỏ thẳng, ngón cái co lại hoặc xòe
-        // Khoảng cách cái - trỏ không cần quá lớn, 25% là đủ để tránh trùng với Heart
-        float dThumbIndex = isValid(thumb) ? dist(thumb, index) : Float.MAX_VALUE;
-        boolean fingersSpread = dThumbIndex > dIndexWrist * 0.25f;
-        
-        return indexUp && fingersSpread;
-    }
-    private float dist(PoseLandmark a, PoseLandmark b) {
-        float dx = a.getPosition().x - b.getPosition().x;
-        float dy = a.getPosition().y - b.getPosition().y;
-        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
     /**
-     * Tính bounding box có exponential smoothing để tránh flicker.
+     * Logic đếm ngón tay (dựa trên vị trí Tip vs PIP)
+     * Index: 0:wrist, 1-4:thumb, 5-8:index, 9-12:middle, 13-16:ring, 17-20:pinky
      */
-    private Rect calculateSmoothedHandBox(PoseLandmark... landmarks) {
-        float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
-        float maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
-        boolean hasAny = false;
+    private boolean[] checkFingersRaised(List<NormalizedLandmark> landmarks) {
+        boolean[] raised = new boolean[5];
+        NormalizedLandmark wrist = landmarks.get(0);
+        
+        // Ngón cái
+        float dThumbTip = dist(landmarks.get(4), wrist);
+        float dThumbIP = dist(landmarks.get(3), wrist);
+        raised[0] = dThumbTip > dThumbIP * 1.1f;
 
-        for (PoseLandmark lm : landmarks) {
-            if (lm == null) continue;
-            float x = lm.getPosition().x;
-            float y = lm.getPosition().y;
-            if (x < minX) minX = x;
-            if (y < minY) minY = y;
-            if (x > maxX) maxX = x;
-            if (y > maxY) maxY = y;
-            hasAny = true;
+        // Trỏ (8,6), Giữa (12,10), Áp út (16,14), Út (20,18)
+        int[][] fingerIndices = {{8, 6}, {12, 10}, {16, 14}, {20, 18}};
+        for (int i = 0; i < 4; i++) {
+            float dTip = dist(landmarks.get(fingerIndices[i][0]), wrist);
+            float dPIP = dist(landmarks.get(fingerIndices[i][1]), wrist);
+            // Nếu đầu ngón tay xa cổ tay hơn khớp giữa 15%, coi như đang mở
+            raised[i + 1] = dTip > dPIP * 1.15f;
+        }
+        
+        return raised;
+    }
+
+    private boolean checkFingerHeart(List<NormalizedLandmark> landmarks) {
+        // Finger heart: Đầu ngón cái (4) và đầu ngón trỏ (8) gần nhau
+        float dThumbIndex = dist(landmarks.get(4), landmarks.get(8));
+        return dThumbIndex < 0.12f; // Nới lỏng để dễ nhận diện hơn
+    }
+
+    private float dist(NormalizedLandmark a, NormalizedLandmark b) {
+        float dx = a.x() - b.x();
+        float dy = a.y() - b.y();
+        return (float) Math.sqrt(dx * dx + dy * dy);
+    }
+
+    private Rect calculateHandBox(List<NormalizedLandmark> landmarks, int width, int height) {
+        float minX = 1f, minY = 1f, maxX = 0f, maxY = 0f;
+        for (NormalizedLandmark lm : landmarks) {
+            if (lm.x() < minX) minX = lm.x();
+            if (lm.y() < minY) minY = lm.y();
+            if (lm.x() > maxX) maxX = lm.x();
+            if (lm.y() > maxY) maxY = lm.y();
         }
 
-        if (!hasAny) return null;
+        int pad = 40;
+        int left = (int)(minX * width) - pad;
+        int top = (int)(minY * height) - pad;
+        int right = (int)(maxX * width) + pad;
+        int bottom = (int)(maxY * height) + pad;
 
-        int pad = 50;
-        float targetLeft   = minX - pad;
-        float targetTop    = minY - pad;
-        float targetRight  = maxX + pad;
-        float targetBottom = maxY + pad;
-
-        // Exponential smoothing: trộn giá trị cũ với giá trị mới
+        // Exponential smoothing
         if (smoothRight == 0) {
-            // Lần đầu tiên: lấy luôn
-            smoothLeft = targetLeft;
-            smoothTop = targetTop;
-            smoothRight = targetRight;
-            smoothBottom = targetBottom;
+            smoothLeft = left; smoothTop = top; smoothRight = right; smoothBottom = bottom;
         } else {
-            smoothLeft   = smoothLeft   + SMOOTH_FACTOR * (targetLeft   - smoothLeft);
-            smoothTop    = smoothTop    + SMOOTH_FACTOR * (targetTop    - smoothTop);
-            smoothRight  = smoothRight  + SMOOTH_FACTOR * (targetRight  - smoothRight);
-            smoothBottom = smoothBottom + SMOOTH_FACTOR * (targetBottom - smoothBottom);
+            smoothLeft += SMOOTH_FACTOR * (left - smoothLeft);
+            smoothTop += SMOOTH_FACTOR * (top - smoothTop);
+            smoothRight += SMOOTH_FACTOR * (right - smoothRight);
+            smoothBottom += SMOOTH_FACTOR * (bottom - smoothBottom);
         }
 
-        return new Rect((int) smoothLeft, (int) smoothTop, (int) smoothRight, (int) smoothBottom);
+        return new Rect((int)smoothLeft, (int)smoothTop, (int)smoothRight, (int)smoothBottom);
     }
 }

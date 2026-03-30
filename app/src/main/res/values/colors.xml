@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="launcher_splash_bg">#FFF8F2FF</color>
     <color name="launcher_icon_bg">#FF8A6DDE</color>
-    <color name="edit_bg">#121212</color>
 
     <!-- Edit UI -->
     <color name="edit_accent">#2A5298</color>
@@ -37,6 +35,10 @@
     <color name="thumb_sticker_star">#FFF0A0</color>
     <color name="thumb_sticker_flash">#FFE066</color>
     <color name="thumb_sticker_camera">#C8DCF4</color>
+    <color name="thumb_pink">#ff99be</color>
+    <color name="thumb_gold">#FFC107</color>
+    <color name="thumb_yellow">#FFEB3B</color>
+    <color name="thumb_blue_grey">#607D8B</color>
 
     <!-- Auth / Input -->
     <color name="color_input_stroke">#E0E8F4</color>

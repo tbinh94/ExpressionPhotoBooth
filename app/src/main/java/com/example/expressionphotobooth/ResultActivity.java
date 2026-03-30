@@ -14,6 +14,8 @@ import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
@@ -40,8 +42,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.List;
 import java.util.Map;
 
@@ -115,6 +120,11 @@ public class ResultActivity extends AppCompatActivity {
                     ivFinalResult.setImageBitmap(finalBitmap);
                     sessionState.setResultImageUri(resultUri != null ? resultUri.toString() : null);
                     sessionRepository.saveSession(sessionState);
+
+                    // Tự động bật popup đánh giá sau khi người dùng xem kết quả 1 lúc
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (!isFinishing()) showFeedbackBottomSheet(true);
+                    }, 1500);
                 } else {
                     Toast.makeText(ResultActivity.this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
                 }
@@ -145,7 +155,10 @@ public class ResultActivity extends AppCompatActivity {
             });
         }
 
-        findViewById(R.id.btnRate).setOnClickListener(v -> showFeedbackBottomSheet(false));
+        View btnRate = findViewById(R.id.btnRate);
+        if (btnRate != null) {
+            btnRate.setOnClickListener(v -> showFeedbackBottomSheet(false));
+        }
     }
 
     private Bitmap createFramedCollage(List<String> photoUris, int frameResId) {
@@ -352,6 +365,7 @@ public class ResultActivity extends AppCompatActivity {
             review.put("rating", rating);
             review.put("feedback", feedback);
             review.put("timestamp", System.currentTimeMillis());
+            review.put("date", new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
 
             btnSubmit.setEnabled(false);
             FirebaseFirestore.getInstance().collection("reviews")

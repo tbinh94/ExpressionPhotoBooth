@@ -64,16 +64,15 @@ public class PhotoSelectionActivity extends AppCompatActivity {
                 if (isBatchEditing && !pendingEditOriginalUris.isEmpty()) {
                     launchNextEditInQueue();
                 } else {
+                    // Cập nhật lại danh sách hiển thị
                     isBatchEditing = false;
                     pendingEditOriginalUris.clear();
                     updateAdapterUris();
-                    if (adapter != null) {
-                        adapter.clearSelection();
-                    }
-                    updateSelectionStatus(0);
-                    updateSelectedPreviewStrip(new ArrayList<>());
-                    btnContinueToEdit.setEnabled(false);
-                    btnContinueToEdit.setText(R.string.btn_edit);
+                    
+                    // KHÔNG gọi clearSelection và updateSelectionStatus(0) ở đây
+                    // Để giữ lại 4 ảnh đã chọn (giờ đã được cập nhật bản edit mới)
+                    // PhotoSelectionActivity.java:71-76 removed.
+
                     if (editSaved) {
                         Toast.makeText(this, R.string.batch_edit_completed, Toast.LENGTH_SHORT).show();
                     }

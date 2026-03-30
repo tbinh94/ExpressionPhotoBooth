@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -19,7 +20,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import android.text.format.DateUtils;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,6 +44,7 @@ public class AdminReviewsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_reviews);
 
@@ -102,7 +107,9 @@ public class AdminReviewsActivity extends AppCompatActivity {
                     ReviewData data = new ReviewData(
                         doc.getString("userEmail"),
                         doc.getDouble("rating"),
-                        doc.getString("feedback")
+                        doc.getString("feedback"),
+                        doc.getLong("timestamp"),
+                        doc.getString("date")
                     );
                     allReviews.add(data);
 
@@ -159,10 +166,29 @@ public class AdminReviewsActivity extends AppCompatActivity {
         TextView tvEmail = itemView.findViewById(R.id.tvReviewEmail);
         TextView tvRating = itemView.findViewById(R.id.tvReviewRating);
         TextView tvFeedback = itemView.findViewById(R.id.tvReviewFeedback);
+        TextView tvTime = itemView.findViewById(R.id.tvReviewTime);
 
         tvEmail.setText(TextUtils.isEmpty(review.email) ? getString(R.string.admin_review_email_na) : review.email);
-        tvRating.setText(String.format(Locale.getDefault(), "%.1f ★", review.rating));
+        tvRating.setText(String.format(Locale.getDefault(), "%.1f", review.rating));
         tvFeedback.setText(review.feedback.isEmpty() ? getString(R.string.admin_review_no_content) : review.feedback);
+
+        if (review.timestamp != null && review.timestamp > 0) {
+            tvTime.setText(DateUtils.getRelativeTimeSpanString(review.timestamp, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS));
+        } else if (!TextUtils.isEmpty(review.date)) {
+            tvTime.setText(review.date);
+        } else {
+            tvTime.setText("");
+        }
+
+        // Set avatar letter
+        TextView tvAvatar = itemView.findViewById(R.id.tvAvatar);
+        if (tvAvatar != null) {
+            String initial = "A";
+            if (!TextUtils.isEmpty(review.email)) {
+                initial = review.email.substring(0, 1).toUpperCase();
+            }
+            tvAvatar.setText(initial);
+        }
 
         containerReviews.addView(itemView);
     }
@@ -171,11 +197,15 @@ public class AdminReviewsActivity extends AppCompatActivity {
         String email;
         double rating;
         String feedback;
+        Long timestamp;
+        String date;
 
-        ReviewData(String email, Double rating, String feedback) {
+        ReviewData(String email, Double rating, String feedback, Long timestamp, String date) {
             this.email = email != null ? email : "";
             this.rating = rating != null ? rating : 0.0;
             this.feedback = feedback != null ? feedback : "";
+            this.timestamp = timestamp;
+            this.date = date;
         }
     }
 }

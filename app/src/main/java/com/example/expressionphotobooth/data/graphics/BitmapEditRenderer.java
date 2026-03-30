@@ -200,11 +200,19 @@ public class BitmapEditRenderer {
     private int resolveStickerDrawable(EditState.StickerStyle stickerStyle) {
         switch (stickerStyle) {
             case STAR:
-                return android.R.drawable.btn_star_big_on;
+                return com.example.expressionphotobooth.R.drawable.ic_star_24;
             case FLASH:
-                return android.R.drawable.ic_menu_compass;
+                return com.example.expressionphotobooth.R.drawable.ic_flash_on_24;
             case CAMERA:
-                return android.R.drawable.ic_menu_camera;
+                return com.example.expressionphotobooth.R.drawable.ic_videocam_24;
+            case HEART:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_heart;
+            case CROWN:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_crown;
+            case SMILE:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_smile;
+            case FLOWER:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_flower;
             case NONE:
             default:
                 return 0;

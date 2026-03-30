@@ -30,6 +30,5 @@
     <dimen name="camera_side_button_margin_start">8dp</dimen>
     <dimen name="camera_side_button_spacing">6dp</dimen>
     <dimen name="camera_last_capture_margin_start">10dp</dimen>
-    <dimen name="camera_last_capture_margin_bottom">10dp</dimen>
 </resources>
 

@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.exifinterface.media.ExifInterface;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expressionphotobooth.data.graphics.BitmapEditRenderer;
@@ -264,11 +265,12 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         // PRESETS
         List<ThumbItem> presetItems = Arrays.asList(
-                new ThumbItem(getString(R.string.edit_preset_cute),    0, R.color.thumb_preset_cute,    "cute"),
-                new ThumbItem(getString(R.string.edit_preset_kpop),    0, R.color.thumb_preset_kpop,    "kpop"),
-                new ThumbItem(getString(R.string.edit_preset_classic), 0, R.color.thumb_preset_classic, "classic"),
-                new ThumbItem(getString(R.string.edit_preset_retro),   0, R.color.thumb_preset_retro,   "retro"),
-                new ThumbItem(getString(R.string.edit_preset_cinematic), 0, R.color.thumb_preset_cinematic, "cinematic")
+                new ThumbItem(getString(R.string.edit_option_none),     R.drawable.ic_filter_none, R.color.thumb_none,             "none"),
+                new ThumbItem(getString(R.string.edit_preset_cute),    R.drawable.ic_preset_cute, R.color.thumb_preset_cute,    "cute"),
+                new ThumbItem(getString(R.string.edit_preset_kpop),    R.drawable.ic_preset_kpop, R.color.thumb_preset_kpop,    "kpop"),
+                new ThumbItem(getString(R.string.edit_preset_classic), R.drawable.ic_preset_classic, R.color.thumb_preset_classic, "classic"),
+                new ThumbItem(getString(R.string.edit_preset_retro),   R.drawable.ic_preset_retro, R.color.thumb_preset_retro,   "retro"),
+                new ThumbItem(getString(R.string.edit_preset_cinematic), R.drawable.ic_preset_cinematic, R.color.thumb_preset_cinematic, "cinematic")
         );
         presetsAdapter = new ThumbAdapter(presetItems, item -> {
             switch ((String) item.value) {
@@ -277,28 +279,32 @@ public class EditPhotoActivity extends AppCompatActivity {
                 case "classic": applyPreset(EditState.FilterStyle.BW,   EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE);   break;
                 case "retro":   applyPreset(EditState.FilterStyle.VINTAGE, EditState.FrameStyle.CORTIS, EditState.StickerStyle.CAMERA); break;
                 case "cinematic": applyPreset(EditState.FilterStyle.COOL, EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE); break;
+                default:        applyPreset(EditState.FilterStyle.NONE, EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE);   break;
             }
         });
         rvPresets.setAdapter(presetsAdapter);
 
         // FILTERS
         List<ThumbItem> filterItems = Arrays.asList(
-                new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none,        EditState.FilterStyle.NONE),
-                new ThumbItem(getString(R.string.edit_filter_soft), 0, R.color.thumb_filter_soft, EditState.FilterStyle.SOFT),
-                new ThumbItem(getString(R.string.edit_filter_bw),   0, R.color.thumb_filter_bw,   EditState.FilterStyle.BW),
-                new ThumbItem(getString(R.string.edit_filter_vintage), 0, R.color.thumb_filter_vintage, EditState.FilterStyle.VINTAGE),
-                new ThumbItem(getString(R.string.edit_filter_cool), 0, R.color.thumb_filter_cool, EditState.FilterStyle.COOL),
-                new ThumbItem(getString(R.string.edit_filter_warm), 0, R.color.thumb_filter_warm, EditState.FilterStyle.WARM),
-                new ThumbItem(getString(R.string.edit_filter_sepia), 0, R.color.thumb_filter_sepia, EditState.FilterStyle.SEPIA)
+                new ThumbItem(getString(R.string.edit_option_none),     R.drawable.ic_filter_none, R.color.thumb_none,             EditState.FilterStyle.NONE),
+                new ThumbItem(getString(R.string.edit_filter_soft),    R.drawable.ic_filter_soft, R.color.thumb_filter_soft,    EditState.FilterStyle.SOFT),
+                new ThumbItem(getString(R.string.edit_filter_bw),      R.drawable.ic_filter_bw, R.color.thumb_filter_bw,      EditState.FilterStyle.BW),
+                new ThumbItem(getString(R.string.edit_filter_vintage), R.drawable.ic_filter_vintage, R.color.thumb_filter_vintage, EditState.FilterStyle.VINTAGE),
+                new ThumbItem(getString(R.string.edit_filter_cool),    R.drawable.ic_filter_cool, R.color.thumb_filter_cool,    EditState.FilterStyle.COOL),
+                new ThumbItem(getString(R.string.edit_filter_warm),    R.drawable.ic_filter_warm, R.color.thumb_filter_warm,    EditState.FilterStyle.WARM),
+                new ThumbItem(getString(R.string.edit_filter_sepia),   R.drawable.ic_filter_sepia, R.color.thumb_filter_sepia,   EditState.FilterStyle.SEPIA)
         );
         filtersAdapter = new ThumbAdapter(filterItems, item -> {
             updateFilter((EditState.FilterStyle) item.value);
+            findViewById(R.id.filterIntensityRow).setVisibility(item.value == EditState.FilterStyle.NONE ? View.GONE : View.VISIBLE);
         });
         rvFilters.setAdapter(filtersAdapter);
 
+        findViewById(R.id.btnQuickApplyFilter).setOnClickListener(v -> saveAndFinish());
+
         // FRAMES
         List<ThumbItem> frameItems = Arrays.asList(
-                new ThumbItem(getString(R.string.edit_option_none),    0, R.color.thumb_none,         EditState.FrameStyle.NONE),
+                new ThumbItem(getString(R.string.edit_option_none),    R.drawable.ic_filter_none, R.color.thumb_none,         EditState.FrameStyle.NONE),
                 new ThumbItem(getString(R.string.edit_frame_cortis),   0, R.color.thumb_frame_cortis, EditState.FrameStyle.CORTIS),
                 new ThumbItem(getString(R.string.edit_frame_aespa),    0, R.color.thumb_frame_aespa,  EditState.FrameStyle.AESPA),
                 new ThumbItem(getString(R.string.edit_frame_t1),       0, R.color.thumb_frame_t1,     EditState.FrameStyle.T1)
@@ -311,9 +317,13 @@ public class EditPhotoActivity extends AppCompatActivity {
         // STICKERS
         List<ThumbItem> stickerItems = Arrays.asList(
                 new ThumbItem(getString(R.string.edit_option_none),     0, R.color.thumb_none,             EditState.StickerStyle.NONE),
-                new ThumbItem(getString(R.string.edit_sticker_star),    0, R.color.thumb_sticker_star,     EditState.StickerStyle.STAR),
-                new ThumbItem(getString(R.string.edit_sticker_camera),  0, R.color.thumb_sticker_camera,   EditState.StickerStyle.CAMERA),
-                new ThumbItem(getString(R.string.edit_sticker_flash),   0, R.color.thumb_sticker_flash,    EditState.StickerStyle.FLASH)
+                new ThumbItem(getString(R.string.edit_sticker_star),    R.drawable.ic_star_24, R.color.thumb_sticker_star, EditState.StickerStyle.STAR),
+                new ThumbItem(getString(R.string.edit_sticker_heart),   R.drawable.ic_sticker_heart, R.color.thumb_pink, EditState.StickerStyle.HEART),
+                new ThumbItem(getString(R.string.edit_sticker_crown),   R.drawable.ic_sticker_crown, R.color.thumb_gold, EditState.StickerStyle.CROWN),
+                new ThumbItem(getString(R.string.edit_sticker_smile),   R.drawable.ic_sticker_smile, R.color.thumb_yellow, EditState.StickerStyle.SMILE),
+                new ThumbItem(getString(R.string.edit_sticker_flower),  R.drawable.ic_sticker_flower, R.color.thumb_pink, EditState.StickerStyle.FLOWER),
+                new ThumbItem(getString(R.string.edit_sticker_camera),  R.drawable.ic_videocam_24, R.color.thumb_blue_grey, EditState.StickerStyle.CAMERA),
+                new ThumbItem(getString(R.string.edit_sticker_flash),   R.drawable.ic_flash_on_24, R.color.thumb_blue_grey, EditState.StickerStyle.FLASH)
         );
         stickersAdapter = new ThumbAdapter(stickerItems, item -> {
             updateSticker((EditState.StickerStyle) item.value);
@@ -326,7 +336,9 @@ public class EditPhotoActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    currentEditState.setFilterIntensity(progress / 100f);
+                    float intensity = progress / 100f;
+                    currentEditState.setFilterIntensity(intensity);
+                    applyFilterToAllPhotos(currentEditState.getFilterStyle(), intensity);
                     tvIntensityValue.setText(String.valueOf(progress));
                     applyCurrentEditState();
                 }
@@ -482,6 +494,10 @@ public class EditPhotoActivity extends AppCompatActivity {
         currentEditState.setFilterStyle(filter);
         currentEditState.setFrameStyle(frame);
         currentEditState.setStickerStyle(sticker);
+        
+        // Filter áp dụng cho tất cả
+        applyFilterToAllPhotos(filter, currentEditState.getFilterIntensity());
+        
         applyCurrentEditState();
         syncSelectionsToAdapters();
         updateEditSummary();
@@ -490,11 +506,26 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void updateFilter(EditState.FilterStyle filter) {
         pushToUndoStack();
         currentEditState.setFilterStyle(filter);
+        applyFilterToAllPhotos(filter, currentEditState.getFilterIntensity());
         applyCurrentEditState();
         updateEditSummary();
         filterIntensityRow.setVisibility(filter == EditState.FilterStyle.NONE ? View.GONE : View.VISIBLE);
         seekFilterIntensity.setProgress((int)(currentEditState.getFilterIntensity() * 100));
         tvIntensityValue.setText(String.valueOf((int)(currentEditState.getFilterIntensity() * 100)));
+    }
+
+    private void applyFilterToAllPhotos(EditState.FilterStyle filter, float intensity) {
+        // Cập nhật filter cho bộ nhớ session (global)
+        sessionState.getEditState().setFilterStyle(filter);
+        sessionState.getEditState().setFilterIntensity(intensity);
+        
+        // Cập nhật filter cho tất cả các tấm ảnh khác đã/chưa có trong map
+        for (String uri : sessionState.getCapturedImageUris()) {
+            EditState state = sessionState.getPhotoEditState(uri);
+            state.setFilterStyle(filter);
+            state.setFilterIntensity(intensity);
+            sessionState.setPhotoEditState(uri, state);
+        }
     }
 
     private void updateFrame(EditState.FrameStyle frame) {
@@ -581,11 +612,35 @@ public class EditPhotoActivity extends AppCompatActivity {
             options.inJustDecodeBounds = false;
             options.inSampleSize = scale;
             try (InputStream is2 = getContentResolver().openInputStream(uri)) {
-                return BitmapFactory.decodeStream(is2, null, options);
+                Bitmap bitmap = BitmapFactory.decodeStream(is2, null, options);
+                return rotateIfRequired(bitmap, uri);
             }
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private Bitmap rotateIfRequired(Bitmap img, Uri uri) {
+        try (InputStream input = getContentResolver().openInputStream(uri)) {
+            ExifInterface ei = new ExifInterface(input);
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:  return rotateImage(img, 90);
+                case ExifInterface.ORIENTATION_ROTATE_180: return rotateImage(img, 180);
+                case ExifInterface.ORIENTATION_ROTATE_270: return rotateImage(img, 270);
+                default: return img;
+            }
+        } catch (IOException e) {
+            return img;
+        }
+    }
+
+    private Bitmap rotateImage(Bitmap img, int degree) {
+        android.graphics.Matrix matrix = new android.graphics.Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
     }
 }

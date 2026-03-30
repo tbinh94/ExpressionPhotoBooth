@@ -1,42 +1,27 @@
 <resources>
     <string name="app_name">Our Memories</string>
-    <string name="author">Trọng Đức</string>
     <string name="capture_photo">Capture</string>
     <string name="ratio_square">1:1</string>
     <string name="ratio_wide">16:9</string>
     <string name="camera_not_ready">Máy ảnh chưa sẵn sàng</string>
-    <string name="failed_create_folder">Không thể tạo thư mục</string>
     <string name="capture_failed">Capture failed</string>
-    <string name="camera_permission_granted">Camera permission granted</string>
-    <string name="camera_permission_denied">Camera permission denied</string>
     <string name="camera_permission_required">Camera permission is required</string>
-    <string name="photo_saved_path">Saved: %1$s</string>
     <string name="no_photo_to_continue">No photos captured</string>
     <string name="no_photo_to_edit">No photo selected for editing</string>
     <string name="failed_open_photo">Cannot open selected photo</string>
-    <string name="failed_save_temp_result">Cannot create edited preview</string>
     <string name="no_result_to_show">No result image to display</string>
     <string name="no_result_to_save">No result image to save</string>
-    <string name="failed_save_result">Failed to save image</string>
-    <string name="saved_to_gallery">Saved to gallery: %1$s</string>
     <string name="no_images_for_video">No captured images to create video</string>
     <string name="exporting_video">Exporting timelapse video...</string>
     <string name="failed_save_video">Failed to export video</string>
-    <string name="video_saved_to_gallery">Video saved to gallery: %1$s</string>
     <string name="video_saved_success">Video đã lưu vào thư viện!</string>
-    <string name="processing_collage">Đang xử lý ảnh ghép...</string>
-    <string name="back">Back</string>
-    <string name="title_setup">CHOOSE YOUR FRAME</string>
-    <string name="title_camera">Camera</string>
     <string name="title_selection">OUR MEMORIES</string>
     <string name="title_edit">Edit Photo</string>
-    <string name="title_result">Result</string>
     <string name="btn_edit">EDIT</string>
     <string name="btn_edit_with_count">EDIT (%1$d)</string>
     <string name="btn_result">RESULT</string>
     <string name="btn_result_with_count">RESULT (%1$d/%2$d)</string>
     <string name="select_enough_for_result">Hãy chọn đủ %1$d ảnh để xuất kết quả</string>
-    <string name="select_one_photo_for_edit">Vui lòng chọn 1 ảnh để chỉnh sửa</string>
     <string name="batch_edit_start">Đang chỉnh sửa %1$d ảnh đã chọn</string>
     <string name="batch_edit_completed">Đã hoàn thành chỉnh sửa ảnh đã chọn</string>
     <string name="batch_edit_cancelled">Đã dừng chỉnh sửa hàng loạt</string>
@@ -47,7 +32,6 @@
     <string name="selection_status_selected">Selected: %1$d/%2$d</string>
     <string name="selection_limit_reached">Chỉ được chọn tối đa %1$d ảnh</string>
     <string name="help_setup_content_desc">Hướng dẫn chọn khung</string>
-    <string name="help_selection_content_desc">Hướng dẫn chọn ảnh</string>
     <string name="help_setup_title">Hướng dẫn chọn khung</string>
     <string name="help_setup_subtitle">Thiết lập nhanh trước khi vào camera</string>
     <string name="help_setup_bullet_1">Chọn 1 frame bạn thích để áp dụng cho kết quả cuối.</string>
@@ -61,18 +45,13 @@
     <string name="help_got_it">Đã hiểu</string>
     <string name="capture_status_ready">Ready to capture</string>
     <string name="capture_status_starting">Starting capture sequence (%1$d photos)</string>
-    <string name="capture_status_next">Prepare for photo %1$d/%2$d</string>
     <string name="capture_status_countdown">Photo %1$d/%2$d in %3$ds</string>
     <string name="capture_status_captured">Captured %1$d/%2$d photos</string>
     <string name="capture_status_done">Done! %1$d photos captured</string>
     <string name="capture_status_error">Capture interrupted. Please try again.</string>
-            <string name="camera_header_title">Memories</string>
-            <string name="camera_main_title">Smile for Camera</string>
+    <string name="camera_main_title">Smile for Camera</string>
     <string name="camera_header_subtitle">Elegant Capture Experience</string>
     <string name="capture_countdown_default">3</string>
-    <string name="btn_start_capturing">START CAPTURING</string>
-    <string name="camera_result_overlay_title">Select your best shot</string>
-    <string name="btn_next_to_edit">Next to Edit</string>
     <string name="setup_title">Choose Your Frame</string>
     <string name="setup_subtitle">Select a frame for your photo</string>
     <string name="btn_next_decorated">✦ NEXT ✦</string>
@@ -95,12 +74,9 @@
     <string name="session_not_found">Session data not found</string>
     <string name="frame_not_found_using_default_collage">Không tìm thấy frame, đang tạo ảnh dọc mặc định</string>
     <string name="saved_to_gallery_short">Đã lưu vào bộ sưu tập!</string>
-    <string name="btn_save_png_decorated">✦ SAVE PNG ✦</string>
-    <string name="btn_save_video_decorated">✦ SAVE VIDEO ✦</string>
     <string name="selection_instruction">Choose a photo to enhance or proceed to result</string>
     <string name="edit_section_presets">Presets</string>
     <string name="edit_section_filters">Filters</string>
-    <string name="edit_section_frames">Frames</string>
     <string name="edit_section_stickers">Stickers</string>
     <string name="edit_preset_cute">Cute</string>
     <string name="edit_preset_kpop">K-pop</string>
@@ -120,13 +96,16 @@
     <string name="edit_sticker_star">Star</string>
     <string name="edit_sticker_flash">Flash</string>
     <string name="edit_sticker_camera">Camera</string>
+    <string name="edit_sticker_heart">Heart</string>
+    <string name="edit_sticker_crown">Crown</string>
+    <string name="edit_sticker_smile">Smile</string>
+    <string name="edit_sticker_flower">Flower</string>
     <string name="btn_save_return">SAVE &amp; RETURN</string>
     <string name="btn_start_decorated">✦ START ✦</string>
     <string name="camera_switch_lens">Switch Camera</string>
     <string name="camera_flash_toggle">Toggle Flash</string>
     <string name="camera_flash_on">Flash on</string>
     <string name="camera_flash_off">Flash off</string>
-    <string name="camera_flash_back_only">Flash is only available on back camera</string>
     <string name="camera_screen_flash_level_normal">Normal</string>
     <string name="camera_screen_flash_level_strong">Strong</string>
     <string name="camera_screen_flash_level_changed">Selfie flash level: %1$s</string>
@@ -135,7 +114,6 @@
     <string name="item_selected_badge">SELECTED</string>
     <string name="item_selected_order_placeholder">1</string>
     <string name="edit_summary_default">Filter: None  •  Frame: None  •  Sticker: None</string>
-    <string name="edit_summary_format">Filter: %1$s  •  Frame: %2$s  •  Sticker: %3$s</string>
 
     <string name="common_ok">Đã hiểu</string>
 
@@ -171,13 +149,6 @@
     <string name="auth_sign_out_message">Bạn đã đăng xuất khỏi phiên hiện tại.</string>
 
     <!-- Admin Dashboard Strings -->
-    <string name="admin_title">Admin Dashboard</string>
-    <string name="admin_subtitle">Quản lý hệ thống</string>
-    <string name="admin_logged_in_as">Đang đăng nhập với tư cách: %1$s</string>
-    <string name="admin_open_user_flow">Mở giao diện người dùng</string>
-    <string name="admin_review_title">Danh sách đánh giá</string>
-    <string name="admin_menu_reviews">Reviews</string>
-    <string name="admin_menu_settings">Cài đặt</string>
 
     <string name="main_capture_mode_label">CHẾ ĐỘ CHỤP</string>
     <string name="main_mode_auto">Tự động</string>
@@ -254,4 +225,5 @@
     <string name="admin_review_rating_placeholder">5</string>
     <string name="admin_review_feedback_placeholder">Nội dung đánh giá ở đây...</string>
     <string name="admin_review_no_content">(Không có nội dung)</string>
+    <string name="fallback_countdown_msg">Nếu không nhận diện được, tự động chụp sau %1$ds</string>
 </resources>

@@ -26,14 +26,9 @@
     <dimen name="camera_controls_margin_top">10dp</dimen>
     <dimen name="camera_controls_margin_bottom">8dp</dimen>
     <dimen name="camera_ratio_margin_top">14dp</dimen>
-    <dimen name="camera_status_margin_top">10dp</dimen>
-    <dimen name="camera_dot_margin_top">6dp</dimen>
-    <dimen name="camera_progress_margin_top">6dp</dimen>
-    <dimen name="camera_progress_width">168dp</dimen>
     <dimen name="camera_capture_bottom_margin">22dp</dimen>
     <dimen name="camera_side_button_margin_start">14dp</dimen>
     <dimen name="camera_side_button_spacing">8dp</dimen>
     <dimen name="camera_last_capture_margin_start">16dp</dimen>
-    <dimen name="camera_last_capture_margin_bottom">16dp</dimen>
 </resources>
 

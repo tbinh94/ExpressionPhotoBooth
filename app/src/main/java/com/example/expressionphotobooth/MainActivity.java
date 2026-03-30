@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     private SessionState sessionState;
     private MediaActionSound shutterSound;
     private final Handler captureHandler = new Handler(Looper.getMainLooper());
-    private Runnable fallbackCaptureRunnable;
+    private android.os.CountDownTimer fallbackCountDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         shutterSound.load(MediaActionSound.SHUTTER_CLICK);
         
         expressionAnalyzer = new ExpressionAnalyzer();
-        gestureAnalyzer = new GestureAnalyzer();
+        gestureAnalyzer = new GestureAnalyzer(this);
 
         // Firebase test probe removed to keep camera screen independent from backend setup.
         // Ánh xạ View
@@ -374,13 +374,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void triggerImmediateCapture() {
-        if (fallbackCaptureRunnable != null) {
-            captureHandler.removeCallbacks(fallbackCaptureRunnable);
+        if (fallbackCountDownTimer != null) {
+            fallbackCountDownTimer.cancel();
+            fallbackCountDownTimer = null;
         }
         isWaitingForExpression = false;
         tvCountdown.post(() -> {
             if (aiOverlayView != null) aiOverlayView.updateOverlay(null, "");
             tvCountdown.setVisibility(View.GONE);
+            updateCaptureStatus(getString(R.string.capture_status_captured, capturedCount + 1, maxPhotos));
             takePhoto();
         });
     }
@@ -505,22 +507,29 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            // Lock indicator...
+            // Reset detector state and wait a bit longer (1.5s) to allow user to see the prompt
             captureHandler.postDelayed(() -> {
                 if (isCapturingSequence) {
+                    if (gestureAnalyzer != null) gestureAnalyzer.reset();
                     isWaitingForExpression = true;
-                    // Fallback 7s
-                    if (fallbackCaptureRunnable != null) {
-                        captureHandler.removeCallbacks(fallbackCaptureRunnable);
-                    }
-                    fallbackCaptureRunnable = () -> {
-                        if (isCapturingSequence && isWaitingForExpression) {
-                            triggerImmediateCapture();
+                    // Fallback 10s (hiển thị countdown trên màn hình để người dùng biết là tính năng)
+                    if (fallbackCountDownTimer != null) fallbackCountDownTimer.cancel();
+                    
+                    fallbackCountDownTimer = new android.os.CountDownTimer(10000, 1000) {
+                        public void onTick(long millisUntilFinished) {
+                            if (isCapturingSequence && isWaitingForExpression) {
+                                String msg = String.format(getString(R.string.fallback_countdown_msg), millisUntilFinished / 1000);
+                                tvCaptureStatus.setText(msg);
+                            }
                         }
-                    };
-                    captureHandler.postDelayed(fallbackCaptureRunnable, 7000);
+                        public void onFinish() {
+                            if (isCapturingSequence && isWaitingForExpression) {
+                                triggerImmediateCapture();
+                            }
+                        }
+                    }.start();
                 }
-            }, 1000);
+            }, 1500);
         } else {
             // Standard Countdown Mode
             runCountdown(3);

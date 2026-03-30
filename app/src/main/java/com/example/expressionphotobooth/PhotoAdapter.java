@@ -109,20 +109,9 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
     }
 
     public void setUris(List<Uri> newUris) {
-        Set<String> keepSelected = new HashSet<>();
-        for (Uri selected : getSelectedUris()) {
-            keepSelected.add(selected.toString());
-        }
-
         uris.clear();
         uris.addAll(newUris);
-        selectedPositions.clear();
-
-        for (int i = 0; i < uris.size(); i++) {
-            if (keepSelected.contains(uris.get(i).toString())) {
-                selectedPositions.add(i);
-            }
-        }
+        // Do not clear selectedPositions here to preserve selection by index
         notifyDataSetChanged();
     }
 

@@ -159,185 +159,228 @@
                 app:tabPaddingStart="8dp"
                 app:tabPaddingEnd="8dp" />
 
-            <!-- CONTENT PANELS — swap visibility via TabLayout listener -->
-
-            <!-- ── PRESETS PANEL ── -->
-            <LinearLayout
-                android:id="@+id/panelPresets"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvPresets"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:clipToPadding="false"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="4" />
-
-            </LinearLayout>
-
-            <!-- ── FILTERS PANEL ── -->
-            <LinearLayout
-                android:id="@+id/panelFilters"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    android:paddingTop="8dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Choose Filter"
-                        android:textColor="#1F618D"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnUndo"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:insetBottom="0dp"
-                        android:insetTop="0dp"
-                        android:text=""
-                        app:icon="@drawable/ic_undo_24"
-                        app:iconGravity="textStart"
-                        app:iconSize="22dp"
-                        app:iconTint="#2A5298" />
-                </LinearLayout>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvFilters"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:clipToPadding="false"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="4" />
-
-                <!-- Intensity slider -->
-                <LinearLayout
-                    android:id="@+id/filterIntensityRow"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="20dp"
-                    android:paddingTop="6dp"
-                    android:paddingEnd="20dp"
-                    android:paddingBottom="2dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="56dp"
-                        android:text="Intensity"
-                        android:textColor="#1F618D"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <SeekBar
-                        android:id="@+id/seekFilterIntensity"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_weight="1"
-                        android:max="100"
-                        android:progress="80"
-                        android:progressTint="#2A5298"
-                        android:thumbTint="#2A5298" />
-
-                    <TextView
-                        android:id="@+id/tvIntensityValue"
-                        android:layout_width="28dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:text="80"
-                        android:textColor="#2A5298"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- ── FRAMES PANEL ── -->
-            <LinearLayout
-                android:id="@+id/panelFrames"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvFrames"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:clipToPadding="false"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="4" />
-
-            </LinearLayout>
-
-            <!-- ── STICKERS PANEL ── -->
-            <LinearLayout
-                android:id="@+id/panelStickers"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvStickers"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:clipToPadding="false"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="4" />
-
-            </LinearLayout>
-
-            <!-- Spacer -->
-            <View
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:fillViewport="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- CONTENT PANELS — swap visibility via TabLayout listener -->
+
+                    <!-- ── PRESETS PANEL ── -->
+                    <LinearLayout
+                        android:id="@+id/panelPresets"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="visible">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvPresets"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:clipToPadding="false"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp"
+                            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                            app:spanCount="4" />
+
+                    </LinearLayout>
+
+                    <!-- ── FILTERS PANEL ── -->
+                    <LinearLayout
+                        android:id="@+id/panelFilters"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="16dp"
+                            android:paddingTop="8dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Select a Filter"
+                                android:textColor="#1F618D"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnQuickApplyFilter"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Apply"
+                                android:textSize="12sp"
+                                android:textColor="#2A5298"
+                                app:icon="@drawable/ic_check_24"
+                                app:iconSize="14dp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="16dp"
+                            android:paddingTop="4dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Fine-tune your selection"
+                                android:textColor="#88000000"
+                                android:textSize="12sp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnUndo"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp"
+                                android:insetBottom="0dp"
+                                android:insetTop="0dp"
+                                android:text=""
+                                app:icon="@drawable/ic_undo_24"
+                                app:iconGravity="textStart"
+                                app:iconSize="22dp"
+                                app:iconTint="#2A5298" />
+                        </LinearLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvFilters"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:clipToPadding="false"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp"
+                            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                            app:spanCount="4" />
+
+                        <!-- Intensity slider -->
+                        <LinearLayout
+                            android:id="@+id/filterIntensityRow"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingStart="20dp"
+                            android:paddingTop="6dp"
+                            android:paddingEnd="20dp"
+                            android:paddingBottom="2dp"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="56dp"
+                                android:text="Intensity"
+                                android:textColor="#1F618D"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <SeekBar
+                                android:id="@+id/seekFilterIntensity"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_weight="1"
+                                android:max="100"
+                                android:progress="80"
+                                android:progressTint="#2A5298"
+                                android:thumbTint="#2A5298" />
+
+                            <TextView
+                                android:id="@+id/tvIntensityValue"
+                                android:layout_width="28dp"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="80"
+                                android:textColor="#2A5298"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- ── FRAMES PANEL ── -->
+                    <LinearLayout
+                        android:id="@+id/panelFrames"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvFrames"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:clipToPadding="false"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp"
+                            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                            app:spanCount="4" />
+
+                    </LinearLayout>
+
+                    <!-- ── STICKERS PANEL ── -->
+                    <LinearLayout
+                        android:id="@+id/panelStickers"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvStickers"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:clipToPadding="false"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp"
+                            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                            app:spanCount="4" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E6F0" />
 
             <!-- ── SUMMARY + SAVE ROW ── -->
             <LinearLayout
+                android:id="@+id/persistentBottomBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="#F8FAFD"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="20dp">
+                android:paddingTop="10dp"
+                android:paddingBottom="24dp">
 
                 <TextView
                     android:id="@+id/tvEditSummary"
@@ -348,24 +391,24 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:paddingHorizontal="12dp"
-                    android:paddingVertical="7dp"
+                    android:paddingVertical="8dp"
                     android:text="@string/edit_summary_default"
                     android:textColor="#1F618D"
                     android:textSize="11sp" />
 
                 <Space
-                    android:layout_width="10dp"
+                    android:layout_width="12dp"
                     android:layout_height="0dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnFinishEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
                     android:text="@string/btn_save_return"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:textStyle="bold"
                     app:backgroundTint="#ff99be"
                     app:cornerRadius="24dp"

@@ -53,6 +53,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.google.mlkit:face-detection:16.1.6")
     implementation("com.google.mlkit:pose-detection:18.0.0-beta5")
+    implementation("com.google.mediapipe:tasks-vision:0.10.14")
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
@@ -64,7 +65,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
-
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 }
 
 java {

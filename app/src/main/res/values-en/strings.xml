@@ -3,9 +3,7 @@
 
     <string name="capture_photo">Capture</string>
     <string name="camera_not_ready">Camera is not ready</string>
-    <string name="failed_create_folder">Cannot create folder</string>
     <string name="video_saved_success">Video saved to gallery!</string>
-    <string name="processing_collage">Processing collage...</string>
 
     <string name="auth_title">Welcome back</string>
     <string name="auth_subtitle">Sign in to continue</string>
@@ -38,14 +36,12 @@
     <string name="auth_sign_out_title">Signed Out</string>
     <string name="auth_sign_out_message">You have signed out from this session.</string>
 
-    <string name="title_setup">CHOOSE YOUR FRAME</string>
     <string name="btn_start_decorated">✦ START ✦</string>
     <string name="btn_edit">EDIT</string>
     <string name="btn_result">RESULT</string>
     <string name="btn_edit_with_count">EDIT (%1$d)</string>
     <string name="btn_result_with_count">RESULT (%1$d/%2$d)</string>
     <string name="select_enough_for_result">Please select %1$d photos to continue to result</string>
-    <string name="select_one_photo_for_edit">Please select one photo to edit</string>
     <string name="batch_edit_start">Editing %1$d selected photos</string>
     <string name="batch_edit_completed">Batch edit completed</string>
     <string name="batch_edit_cancelled">Batch edit cancelled</string>
@@ -53,15 +49,12 @@
 
     <string name="capture_status_ready">Ready to capture</string>
     <string name="capture_status_starting">Starting capture sequence (%1$d photos)</string>
-    <string name="capture_status_next">Prepare for photo %1$d/%2$d</string>
     <string name="capture_status_countdown">Photo %1$d/%2$d in %3$ds</string>
     <string name="capture_status_captured">Captured %1$d/%2$d photos</string>
     <string name="capture_status_done">Done! %1$d photos captured</string>
     <string name="capture_status_error">Capture interrupted. Please try again.</string>
-    <string name="camera_header_title">Memories</string>
     <string name="camera_main_title">Smile for Camera</string>
     <string name="camera_header_subtitle">Elegant Capture Experience</string>
-    <string name="btn_start_capturing">START CAPTURING</string>
 
     <string name="home_switch_to_english">English</string>
     <string name="home_switch_to_vietnamese">Vietnamese</string>
@@ -73,7 +66,6 @@
     <string name="setup_frame_selected">Selected: %1$s</string>
 
     <string name="help_setup_content_desc">Setup help</string>
-    <string name="help_selection_content_desc">Selection help</string>
     <string name="help_setup_title">How to choose a frame</string>
     <string name="help_setup_subtitle">Quick setup before opening camera</string>
     <string name="help_setup_bullet_1">Choose one frame style to apply to the final result.</string>
@@ -86,10 +78,8 @@
     <string name="help_selection_bullet_3">RESULT is enabled only after selecting %1$d/%1$d photos.</string>
     <string name="help_got_it">Got it</string>
 
-    <string name="title_camera">Camera</string>
     <string name="title_selection">OUR MEMORIES</string>
     <string name="title_edit">Edit Photo</string>
-    <string name="title_result">Result</string>
 
     <string name="result_title">Your Result</string>
     <string name="result_subtitle">Save your memories</string>
@@ -106,15 +96,9 @@
     <string name="session_not_found">Session data not found</string>
     <string name="frame_not_found_using_default_collage">Frame not found, generating default vertical collage</string>
     <string name="saved_to_gallery_short">Saved to gallery!</string>
-    <string name="btn_save_png_decorated">✦ SAVE PNG ✦</string>
-    <string name="btn_save_video_decorated">✦ SAVE VIDEO ✦</string>
     <string name="selection_instruction">Choose a photo to enhance or proceed to result</string>
 
     <string name="common_ok">Got it</string>
-
-    <string name="admin_title">Admin Dashboard</string>
-    <string name="admin_subtitle">System management</string>
-    <string name="admin_menu_settings">Settings</string>
 
     <string name="main_capture_mode_label">CAPTURE MODE</string>
     <string name="main_mode_auto">Auto</string>
