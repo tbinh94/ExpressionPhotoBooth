@@ -60,12 +60,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAPTURE_COUNT = 6;
     private static final String TAG = "CameraX";
     // Tăng thời gian và độ sáng để mô phỏng đèn flash thật
-    private static final long SCREEN_FLASH_FADE_IN_NORMAL_MS = 100L;
-    private static final long SCREEN_FLASH_FADE_IN_STRONG_MS = 140L;
-    private static final long SCREEN_FLASH_HOLD_NORMAL_MS = 300L;
-    private static final long SCREEN_FLASH_HOLD_STRONG_MS = 500L;
-    private static final long SCREEN_FLASH_FADE_OUT_NORMAL_MS = 400L;
-    private static final long SCREEN_FLASH_FADE_OUT_STRONG_MS = 600L;
+    private static final long SCREEN_FLASH_FADE_IN_NORMAL_MS = 60L;
+    private static final long SCREEN_FLASH_FADE_IN_STRONG_MS = 80L;
+    private static final long SCREEN_FLASH_HOLD_NORMAL_MS = 1000L;
+    private static final long SCREEN_FLASH_HOLD_STRONG_MS = 1500L;
+    private static final long SCREEN_FLASH_FADE_OUT_NORMAL_MS = 300L;
+    private static final long SCREEN_FLASH_FADE_OUT_STRONG_MS = 500L;
     private PreviewView viewFinder;
     private CardView previewCard;
     private AiOverlayView aiOverlayView;
@@ -588,7 +588,9 @@ public class MainActivity extends AppCompatActivity {
                         updateCaptureStatus(getString(R.string.capture_status_captured, capturedCount, maxPhotos));
                         
                         // Sau khi chụp xong 1 tấm, đợi 1 chút rồi đếm ngược cho tấm tiếp theo
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> startCountdownAndCapture(), 1000);
+                        // Tăng delay lên 2.5s nếu dùng flash để flash kịp hồi và ổn định ánh sáng
+                        long nextCaptureDelay = isFlashPreferredOn ? 2500L : 1000L;
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> startCountdownAndCapture(), nextCaptureDelay);
                     }
 
                     @Override
@@ -737,7 +739,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playScreenFlashThenCapture(Runnable onFlashPeak) {
-        float flashPeakAlpha = isScreenFlashStrong ? 1.0f : 0.95f;
+        float flashPeakAlpha = 1.0f; // Luôn dùng độ sáng tối đa cho flash màn hình
         long fadeInDuration = isScreenFlashStrong ? SCREEN_FLASH_FADE_IN_STRONG_MS : SCREEN_FLASH_FADE_IN_NORMAL_MS;
         long flashHoldDuration = isScreenFlashStrong ? SCREEN_FLASH_HOLD_STRONG_MS : SCREEN_FLASH_HOLD_NORMAL_MS;
         long fadeOutDuration = isScreenFlashStrong ? SCREEN_FLASH_FADE_OUT_STRONG_MS : SCREEN_FLASH_FADE_OUT_NORMAL_MS;

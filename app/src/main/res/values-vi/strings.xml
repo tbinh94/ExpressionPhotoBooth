@@ -200,6 +200,17 @@
     <string name="admin_review_rating_placeholder">5</string>
     <string name="admin_review_feedback_placeholder">Nội dung đánh giá ở đây...</string>
     <string name="admin_review_no_content">(Không có nội dung)</string>
+    <string name="fallback_countdown_msg">Nếu không nhận diện được, tự động chụp sau %1$ds</string>
+    <string name="admin_overview_action_stickers_title">Quản lý Stickers</string>
+    <string name="admin_overview_action_stickers_subtitle">Thêm sticker cho người dùng</string>
+    <string name="admin_sticker_title">Danh sách Stickers</string>
+    <string name="admin_sticker_upload">Thêm Sticker PNG</string>
+    <string name="admin_sticker_upload_hint">Chọn file PNG trong suốt (Khuyên dùng: 300x300)</string>
+    <string name="admin_sticker_label_hint">Tên sticker (ví dụ: Heart Pink)</string>
+    <string name="admin_sticker_success">Đã thêm sticker mới!</string>
+    <string name="admin_sticker_error">Lỗi khi tải lên sticker!</string>
+    <string name="admin_sticker_empty">Chưa có sticker custom nào.</string>
+    <string name="admin_go_to_dashboard">Quản trị hệ thống</string>
 </resources>
 
 

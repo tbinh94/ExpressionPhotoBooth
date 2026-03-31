@@ -42,14 +42,10 @@ public class PhotoSelectionActivity extends AppCompatActivity {
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 boolean editSaved = false;
-                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    String originalUri = result.getData().getStringExtra(IntentKeys.EXTRA_ORIGINAL_URI);
-                    String editedUri = result.getData().getStringExtra(IntentKeys.EXTRA_EDITED_URI);
-                    if (originalUri != null && editedUri != null) {
-                        sessionState.getEditedImageUris().put(originalUri, editedUri);
-                        sessionRepository.saveSession(sessionState);
-                        editSaved = true;
-                    }
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    // Cập nhật lại toàn bộ sessionState từ repo vì EditPhotoActivity đã lưu hàng loạt
+                    sessionState = sessionRepository.getSession();
+                    editSaved = true;
                 }
 
                 if (isBatchEditing && !editSaved) {
@@ -213,10 +209,6 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         if (adapter != null) {
             adapter.setUris(displayUris);
         }
-        btnContinueToEdit.setEnabled(false);
-        updateSelectionStatus(0);
-        updateResultButtonState(0);
-        updateSelectedPreviewStrip(new ArrayList<>());
     }
 
     private void updateSelectionStatus(int selectedCount) {

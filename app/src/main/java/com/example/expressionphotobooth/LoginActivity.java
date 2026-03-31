@@ -19,7 +19,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText etEmail, etPassword, etName, etBirthday;
     private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage;
     private View layoutRegisterExtra, tvForgotPassword, layoutLoadingOverlay;
-    private MaterialButton btnSignIn, btnRegister, btnGuest;
+    private MaterialButton btnSignIn, btnRegister, btnGuest, btnLanguageToggle;
     private AuthRepository authRepository;
     private boolean isRegisterMode = false;
 
@@ -30,6 +30,14 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        
+        btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
+        updateLanguageButtonText();
+        btnLanguageToggle.setOnClickListener(v -> {
+            com.example.expressionphotobooth.utils.LocaleManager.toggleLanguage(this);
+            recreate();
+        });
+
         String noticeTitle = getIntent().getStringExtra(IntentKeys.EXTRA_NOTICE_TITLE);
         String noticeMessage = getIntent().getStringExtra(IntentKeys.EXTRA_NOTICE_MESSAGE);
         if (!TextUtils.isEmpty(noticeMessage)) {
@@ -77,6 +85,16 @@ public class LoginActivity extends AppCompatActivity {
                 setRegisterMode(false);
             }
         });
+    }
+
+    private void updateLanguageButtonText() {
+        if (btnLanguageToggle == null) {
+            return;
+        }
+        int textRes = com.example.expressionphotobooth.utils.LocaleManager.isVietnamese()
+                ? R.string.home_switch_to_english
+                : R.string.home_switch_to_vietnamese;
+        btnLanguageToggle.setText(textRes);
     }
 
     private void showDatePicker() {

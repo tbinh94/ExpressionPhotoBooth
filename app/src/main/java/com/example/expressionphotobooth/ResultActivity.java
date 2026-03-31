@@ -273,13 +273,15 @@ public class ResultActivity extends AppCompatActivity {
                     loopSequence.add(editedUris.get(i));
                 }
 
-                // Repeat the loop 2 times to reach ~4 seconds at 3 FPS
+                // Repeat the loop 4 times to reach ~4 seconds at 6 FPS (doubling speed)
                 List<String> finalFrames = new ArrayList<>();
                 finalFrames.addAll(loopSequence);
                 finalFrames.addAll(loopSequence);
+                finalFrames.addAll(loopSequence);
+                finalFrames.addAll(loopSequence);
 
-                // Encode at 3 Frames Per Second for standard photobooth bounce feel
-                Uri videoUri = createTimelapseVideoUseCase.execute(ResultActivity.this, finalFrames, 3);
+                // Encode at 6 Frames Per Second for timelapse feel (twice as fast)
+                Uri videoUri = createTimelapseVideoUseCase.execute(ResultActivity.this, finalFrames, 6);
 
                 runOnUiThread(() -> {
                     btnSaveVideo.setEnabled(true);

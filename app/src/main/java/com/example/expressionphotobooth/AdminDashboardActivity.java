@@ -13,6 +13,8 @@ import com.example.expressionphotobooth.domain.repository.AuthRepository;
 
 public class AdminDashboardActivity extends AppCompatActivity {
 
+    private com.google.android.material.button.MaterialButton btnLanguageToggle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,9 +32,26 @@ public class AdminDashboardActivity extends AppCompatActivity {
         String email = authRepository.getCurrentEmail();
         tvAdminEmail.setText(email == null ? getString(R.string.admin_email_fallback) : email);
 
+        btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
+        updateLanguageButtonText();
+        btnLanguageToggle.setOnClickListener(v -> {
+            com.example.expressionphotobooth.utils.LocaleManager.toggleLanguage(this);
+            recreate();
+        });
+
         ViewPager2 viewPager = findViewById(R.id.viewPager);
 
         AdminPagerAdapter adapter = new AdminPagerAdapter(this);
         viewPager.setAdapter(adapter);
+    }
+
+    private void updateLanguageButtonText() {
+        if (btnLanguageToggle == null) {
+            return;
+        }
+        int textRes = com.example.expressionphotobooth.utils.LocaleManager.isVietnamese()
+                ? R.string.home_switch_to_english
+                : R.string.home_switch_to_vietnamese;
+        btnLanguageToggle.setText(textRes);
     }
 }

@@ -297,6 +297,9 @@ public class EditPhotoActivity extends AppCompatActivity {
                 case "cinematic": applyPreset(EditState.FilterStyle.COOL, EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE); break;
                 default:        applyPreset(EditState.FilterStyle.NONE, EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE);   break;
             }
+            if (item.value != null && !item.value.equals("none")) {
+                Toast.makeText(this, R.string.edit_filter_applied_all, Toast.LENGTH_SHORT).show();
+            }
         });
         rvPresets.setAdapter(presetsAdapter);
 
@@ -313,6 +316,9 @@ public class EditPhotoActivity extends AppCompatActivity {
         filtersAdapter = new ThumbAdapter(filterItems, item -> {
             updateFilter((EditState.FilterStyle) item.value);
             findViewById(R.id.filterIntensityRow).setVisibility(item.value == EditState.FilterStyle.NONE ? View.GONE : View.VISIBLE);
+            if (item.value != EditState.FilterStyle.NONE) {
+                Toast.makeText(this, R.string.edit_filter_applied_all, Toast.LENGTH_SHORT).show();
+            }
         });
         rvFilters.setAdapter(filtersAdapter);
 
@@ -612,33 +618,83 @@ public class EditPhotoActivity extends AppCompatActivity {
     }
 
     private void saveAndFinish() {
-        if (editedBitmap == null) {
-            applyCurrentEditState();
-        }
+        // Show progress since we might be rendering multiple photos (up to 6)
+        View progressView = findViewById(R.id.progress);
+        if (progressView != null) progressView.setVisibility(View.VISIBLE);
+        findViewById(R.id.btnFinishEdit).setEnabled(false);
 
-        Uri editedUri = null;
-        if (editedBitmap != null) {
-            java.io.File file = new java.io.File(getExternalFilesDir(null), "edited_" + System.currentTimeMillis() + ".jpg");
-            try (java.io.FileOutputStream out = new java.io.FileOutputStream(file)) {
-                editedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                editedUri = Uri.fromFile(file);
-            } catch (IOException e) {
+        new Thread(() -> {
+            try {
+                // 1. Render and save the CURRENT photo first (to return immediate result if needed)
+                if (editedBitmap == null) {
+                    runOnUiThread(this::applyCurrentEditState);
+                    // Wait a bit for UI thread to finish applying if needed, 
+                    // or just use renderEditedBitmapUseCase directly here.
+                }
+                
+                // We use the use case directly to avoid UI thread dependencies.
+                Bitmap currentEdited = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState);
+                Uri currentEditedUri = saveToInternalCache(currentEdited, "edited_" + System.currentTimeMillis() + ".jpg");
+
+                if (currentEditedUri != null) {
+                    sessionState.setPhotoEditState(currentPhotoUri.toString(), currentEditState);
+                    sessionState.getEditedImageUris().put(currentPhotoUri.toString(), currentEditedUri.toString());
+                }
+
+                // 2. Render and save ALL OTHER PHOTOS with the same filter settings
+                List<String> allUris = sessionState.getCapturedImageUris();
+                for (String uriStr : allUris) {
+                    if (uriStr.equals(currentPhotoUri.toString())) continue;
+
+                    Uri uri = Uri.parse(uriStr);
+                    Bitmap otherOriginal = decodeBitmapFromUri(uri);
+                    if (otherOriginal != null) {
+                        EditState otherState = sessionState.getPhotoEditState(uriStr);
+                        // Filter is already updated in otherState by applyFilterToAllPhotos()
+                        Bitmap otherEdited = renderEditedBitmapUseCase.execute(this, otherOriginal, otherState);
+                        Uri otherEditedUri = saveToInternalCache(otherEdited, "edited_auto_" + System.currentTimeMillis() + ".jpg");
+                        
+                        if (otherEditedUri != null) {
+                            sessionState.getEditedImageUris().put(uriStr, otherEditedUri.toString());
+                        }
+                        otherOriginal.recycle();
+                        otherEdited.recycle();
+                    }
+                }
+
+                // Finalize session
+                sessionRepository.saveSession(sessionState);
+
+                runOnUiThread(() -> {
+                    if (progressView != null) progressView.setVisibility(View.GONE);
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra(IntentKeys.EXTRA_ORIGINAL_URI, currentPhotoUri.toString());
+                    resultIntent.putExtra(IntentKeys.EXTRA_EDITED_URI, currentEditedUri != null ? currentEditedUri.toString() : "");
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    finish();
+                });
+
+            } catch (Exception e) {
                 e.printStackTrace();
+                runOnUiThread(() -> {
+                    if (progressView != null) progressView.setVisibility(View.GONE);
+                    findViewById(R.id.btnFinishEdit).setEnabled(true);
+                    Toast.makeText(this, "Error saving edits: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
             }
-        }
+        }).start();
+    }
 
-        if (editedUri != null) {
-            sessionState.setPhotoEditState(currentPhotoUri.toString(), currentEditState);
-            sessionRepository.saveSession(sessionState);
-
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra(IntentKeys.EXTRA_ORIGINAL_URI, currentPhotoUri.toString());
-            resultIntent.putExtra(IntentKeys.EXTRA_EDITED_URI, editedUri.toString());
-            setResult(Activity.RESULT_OK, resultIntent);
-        } else {
-            setResult(Activity.RESULT_CANCELED);
+    private Uri saveToInternalCache(Bitmap bitmap, String filename) {
+        if (bitmap == null) return null;
+        java.io.File file = new java.io.File(getExternalFilesDir(null), filename);
+        try (java.io.FileOutputStream out = new java.io.FileOutputStream(file)) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            return Uri.fromFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        finish();
     }
 
     private Bitmap decodeBitmapFromUri(Uri uri) {
