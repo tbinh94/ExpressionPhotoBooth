@@ -123,6 +123,9 @@
 
     <string name="admin_dashboard_greeting">Hello Admin,</string>
     <string name="admin_email_fallback">admin@photobooth.vn</string>
+    <string name="admin_stat_accounts">Accounts</string>
+    <string name="admin_stat_image_downloads">Image downloads</string>
+    <string name="admin_stat_video_downloads">Video downloads</string>
     <string name="admin_stat_reviews">Reviews</string>
     <string name="admin_stat_avg">Avg score</string>
     <string name="admin_stat_low">Below 3★</string>
@@ -131,6 +134,22 @@
     <string name="admin_overview_chart_subtitle_placeholder">0 reviews</string>
     <string name="admin_overview_chart_subtitle_format">%1$d reviews</string>
     <string name="admin_overview_chart_subtitle_error">Failed to load data</string>
+    <string name="admin_overview_last_review_format">Latest review: %1$s</string>
+    <string name="admin_overview_last_review_fallback">No review timestamp yet</string>
+    <string name="admin_overview_users_chart_title">Accounts over time</string>
+    <string name="admin_overview_users_chart_subtitle">New user accounts by month</string>
+    <string name="admin_overview_download_chart_title">Image downloads over time</string>
+    <string name="admin_overview_download_chart_subtitle">Total image downloads by month</string>
+    <string name="admin_overview_review_score_chart_title">Monthly review score total</string>
+    <string name="admin_overview_review_score_chart_subtitle">Column chart of accumulated score by month</string>
+    <string name="admin_overview_range_title">Time range</string>
+    <string name="admin_overview_range_3m">3M</string>
+    <string name="admin_overview_range_6m">6M</string>
+    <string name="admin_overview_range_12m">12M</string>
+    <string name="admin_overview_legend_users">New accounts</string>
+    <string name="admin_overview_legend_downloads">Image downloads</string>
+    <string name="admin_overview_legend_review_score">Review score</string>
+    <string name="admin_overview_trend_empty">No data available for this period</string>
     <string name="admin_overview_total_reviews">Review count</string>
     <string name="admin_overview_five_star_label">5-star reviews</string>
     <string name="admin_overview_bar_five">5 ★</string>

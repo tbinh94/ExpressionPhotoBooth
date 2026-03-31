@@ -1,7 +1,5 @@
 package com.example.expressionphotobooth;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -22,11 +20,12 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.expressionphotobooth.data.video.TimelapseVideoEncoder;
+import com.example.expressionphotobooth.domain.model.DownloadType;
 import com.example.expressionphotobooth.domain.model.SessionState;
+import com.example.expressionphotobooth.domain.repository.AdminStatsRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.CreateTimelapseVideoUseCase;
 import com.example.expressionphotobooth.domain.usecase.CreateVerticalCollageUseCase;
@@ -35,6 +34,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.File;
@@ -60,18 +60,18 @@ public class ResultActivity extends AppCompatActivity {
     private List<String> sourceOriginalUris;
     private boolean hasShownFeedback = false;
     private ToneGenerator toneGenerator;
+    private AdminStatsRepository adminStatsRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_result);
 
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
+        adminStatsRepository = ((AppContainer) getApplication()).getAdminStatsRepository();
         sessionState = sessionRepository.getSession();
         
         if (sessionState == null) {
-            Toast.makeText(this, R.string.session_not_found, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -139,7 +139,7 @@ public class ResultActivity extends AppCompatActivity {
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> {
                 // Return to edit screen
-                onBackPressed(); 
+                getOnBackPressedDispatcher().onBackPressed();
             });
         }
 
@@ -284,6 +284,7 @@ public class ResultActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     btnSaveVideo.setEnabled(true);
                     if (videoUri != null) {
+                        adminStatsRepository.recordDownload(DownloadType.VIDEO);
                         Toast.makeText(ResultActivity.this, R.string.video_saved_success, Toast.LENGTH_LONG).show();
                         showFeedbackBottomSheet(true);
                     } else {
@@ -317,7 +318,12 @@ public class ResultActivity extends AppCompatActivity {
         Uri outputUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         if (outputUri != null) {
             try (OutputStream out = getContentResolver().openOutputStream(outputUri)) {
+                if (out == null) {
+                    Toast.makeText(this, R.string.failed_open_photo, Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                adminStatsRepository.recordDownload(DownloadType.IMAGE);
                 Toast.makeText(this, R.string.saved_to_gallery_short, Toast.LENGTH_SHORT).show();
                 showFeedbackBottomSheet(true);
             } catch (IOException e) {
@@ -327,7 +333,9 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void showFeedbackBottomSheet(boolean autoTrigger) {
-        if (autoTrigger && hasShownFeedback) return;
+        if (autoTrigger && hasShownFeedback) {
+            return;
+        }
         if (autoTrigger) hasShownFeedback = true;
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
@@ -364,6 +372,7 @@ public class ResultActivity extends AppCompatActivity {
             review.put("userEmail", email);
             review.put("rating", rating);
             review.put("feedback", feedback);
+            review.put("createdAt", FieldValue.serverTimestamp());
             review.put("timestamp", System.currentTimeMillis());
             review.put("date", new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
 
@@ -371,6 +380,7 @@ public class ResultActivity extends AppCompatActivity {
             FirebaseFirestore.getInstance().collection("reviews")
                 .add(review)
                 .addOnSuccessListener(doc -> {
+                    adminStatsRepository.recordReviewSubmitted();
                     Toast.makeText(this, getString(R.string.feedback_thanks_with_rating, rating), Toast.LENGTH_SHORT).show();
                     hasShownFeedback = true;
                     bottomSheetDialog.dismiss();
@@ -382,6 +392,7 @@ public class ResultActivity extends AppCompatActivity {
         });
 
         bottomSheetDialog.show();
+
     }
 
     private List<String> resolveSourceOriginalUris() {
