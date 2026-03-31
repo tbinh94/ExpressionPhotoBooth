@@ -7,8 +7,10 @@ import android.graphics.Rect;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Size;
 import android.view.Gravity;
@@ -50,7 +52,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int CAPTURE_COUNT = 6;
     private static final String TAG = "CameraX";
+    private static final long AI_ANALYSIS_MIN_INTERVAL_MS = 120L;
     // Tăng thời gian và độ sáng để mô phỏng đèn flash thật
     private static final long SCREEN_FLASH_FADE_IN_NORMAL_MS = 60L;
     private static final long SCREEN_FLASH_FADE_IN_STRONG_MS = 80L;
@@ -106,6 +111,9 @@ public class MainActivity extends AppCompatActivity {
     private MediaActionSound shutterSound;
     private final Handler captureHandler = new Handler(Looper.getMainLooper());
     private android.os.CountDownTimer fallbackCountDownTimer;
+    private final ExecutorService analysisExecutor = Executors.newSingleThreadExecutor();
+    private volatile long lastAiAnalysisAtMs = 0L;
+    private boolean isHandAnalyzerAvailable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         shutterSound.load(MediaActionSound.SHUTTER_CLICK);
         
         expressionAnalyzer = new ExpressionAnalyzer();
-        gestureAnalyzer = new GestureAnalyzer(this);
+        initOptionalGestureAnalyzer();
 
         // Firebase test probe removed to keep camera screen independent from backend setup.
         // Ánh xạ View
@@ -223,6 +231,11 @@ public class MainActivity extends AppCompatActivity {
 
         com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = 
             (com.google.android.material.button.MaterialButtonToggleGroup) findViewById(R.id.aiSelectionContainer);
+        com.google.android.material.button.MaterialButton btnAiHand = findViewById(R.id.btnAiHand);
+        if (btnAiHand != null && !isHandAnalyzerAvailable) {
+            btnAiHand.setEnabled(false);
+            btnAiHand.setAlpha(0.45f);
+        }
         
         // Đồng bộ trạng thái ban đầu theo nút đang được check trong XML (btnAiFace)
         isHandGestureMode = false;
@@ -230,6 +243,11 @@ public class MainActivity extends AppCompatActivity {
         
         aiSubSelector.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return; // chỉ xử lý khi nút được chọn
+            if (checkedId == R.id.btnAiHand && !isHandAnalyzerAvailable) {
+                group.check(R.id.btnAiFace);
+                Toast.makeText(this, R.string.main_ai_hand_unavailable, Toast.LENGTH_SHORT).show();
+                return;
+            }
             isHandGestureMode = (checkedId == R.id.btnAiHand);
             isFaceExpressionMode = (checkedId == R.id.btnAiFace);
             if (isFaceExpressionMode) {
@@ -261,6 +279,34 @@ public class MainActivity extends AppCompatActivity {
         requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
     }
 
+    private void initOptionalGestureAnalyzer() {
+        if (!isMediaPipeHandSupportedAbi()) {
+            Log.w(TAG, "Hand analyzer disabled on this ABI: " + java.util.Arrays.toString(Build.SUPPORTED_ABIS));
+            isHandAnalyzerAvailable = false;
+            gestureAnalyzer = null;
+            return;
+        }
+
+        try {
+            gestureAnalyzer = new GestureAnalyzer(this);
+            isHandAnalyzerAvailable = (gestureAnalyzer != null);
+        } catch (Throwable throwable) {
+            // Prevent app crash if MediaPipe native library is missing on current device.
+            Log.e(TAG, "Failed to initialize hand analyzer", throwable);
+            isHandAnalyzerAvailable = false;
+            gestureAnalyzer = null;
+        }
+    }
+
+    private boolean isMediaPipeHandSupportedAbi() {
+        for (String abi : Build.SUPPORTED_ABIS) {
+            if (abi != null && abi.startsWith("arm64")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void startCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
@@ -280,10 +326,20 @@ public class MainActivity extends AppCompatActivity {
         imageCapture = buildImageCaptureUseCase();
         imageAnalysis = new ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                // Reduce ML load to keep preview smooth on mid-range devices.
+                .setTargetResolution(new Size(640, 480))
                 .build();
         
-        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), imageProxy -> {
+        imageAnalysis.setAnalyzer(analysisExecutor, imageProxy -> {
             boolean isWaiting = isWaitingForExpression;
+
+            // Throttle AI analyzer frequency to reduce CPU spikes and UI jank.
+            long now = SystemClock.elapsedRealtime();
+            if ((now - lastAiAnalysisAtMs) < AI_ANALYSIS_MIN_INTERVAL_MS) {
+                imageProxy.close();
+                return;
+            }
+            lastAiAnalysisAtMs = now;
             
             if (isExpressionMode) {
                 if (isHandGestureMode && gestureAnalyzer != null) {
@@ -561,8 +617,8 @@ public class MainActivity extends AppCompatActivity {
 
         File photoFile = new File(getExternalFilesDir(null), "photo_" + System.currentTimeMillis() + ".jpg");
         ImageCapture.Metadata captureMetadata = new ImageCapture.Metadata();
-        // Keep selfie result consistent with on-screen preview on front camera.
-        captureMetadata.setReversedHorizontal(cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA);
+        // Save final photo with real orientation (non-mirrored) so collage/export is not flipped.
+        captureMetadata.setReversedHorizontal(false);
         ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile)
                 .setMetadata(captureMetadata)
                 .build();
@@ -793,6 +849,7 @@ public class MainActivity extends AppCompatActivity {
         if (cameraProvider != null) {
             cameraProvider.unbindAll();
         }
+        analysisExecutor.shutdown();
         if (shutterSound != null) {
             shutterSound.release();
         }

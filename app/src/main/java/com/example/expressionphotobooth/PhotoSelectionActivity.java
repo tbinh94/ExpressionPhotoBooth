@@ -26,13 +26,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 public class PhotoSelectionActivity extends AppCompatActivity {
-    private static final int REQUIRED_SELECTION_COUNT = 4;
+    private static final int FALLBACK_SELECTION_COUNT = 4;
     private PhotoAdapter adapter;
     private SessionRepository sessionRepository;
     private SessionState sessionState;
     private MaterialButton btnContinueToEdit;
     private MaterialButton btnDirectToResult;
-    private TextView tvSelectionStatus;
+    private TextView tvSelectedStripTitle;
     private TextView tvClearSelection;
     private SelectedPhotoPreviewAdapter selectedPhotoPreviewAdapter;
     private final ArrayDeque<String> pendingEditOriginalUris = new ArrayDeque<>();
@@ -41,6 +41,7 @@ public class PhotoSelectionActivity extends AppCompatActivity {
     private final ActivityResultLauncher<Intent> editActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
+                boolean wasBatchFlow = isBatchEditing;
                 boolean editSaved = false;
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     // Cập nhật lại toàn bộ sessionState từ repo vì EditPhotoActivity đã lưu hàng loạt
@@ -69,7 +70,7 @@ public class PhotoSelectionActivity extends AppCompatActivity {
                     // Để giữ lại 4 ảnh đã chọn (giờ đã được cập nhật bản edit mới)
                     // PhotoSelectionActivity.java:71-76 removed.
 
-                    if (editSaved) {
+                    if (editSaved && wasBatchFlow) {
                         Toast.makeText(this, R.string.batch_edit_completed, Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -88,12 +89,18 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         btnContinueToEdit = findViewById(R.id.btnNextToEdit);
         btnDirectToResult = findViewById(R.id.btnDirectToResult);
         MaterialButton btnHelpSelection = findViewById(R.id.btnHelpSelection);
-        tvSelectionStatus = findViewById(R.id.tvSelectionStatus);
+        tvSelectedStripTitle = findViewById(R.id.tvSelectedStripTitle);
         tvClearSelection = findViewById(R.id.tvClearSelection);
         RecyclerView rvSelectedPhotos = findViewById(R.id.rvSelectedPhotos);
         btnHelpSelection.setOnClickListener(v -> showSelectionHelpDialog());
 
-        selectedPhotoPreviewAdapter = new SelectedPhotoPreviewAdapter();
+        selectedPhotoPreviewAdapter = new SelectedPhotoPreviewAdapter((selectedDisplayUri, position) -> {
+            Uri originalUri = getSelectedOriginalUri(selectedDisplayUri);
+            if (originalUri == null) {
+                return;
+            }
+            launchSingleEdit(originalUri.toString());
+        });
         rvSelectedPhotos.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
         rvSelectedPhotos.setAdapter(selectedPhotoPreviewAdapter);
         
@@ -109,7 +116,8 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         rvPhotos.setLayoutManager(new GridLayoutManager(this, 2));
         rvPhotos.setHasFixedSize(true);
 
-        adapter = new PhotoAdapter(new ArrayList<>(), REQUIRED_SELECTION_COUNT, (selectedUris, selectedCount) -> {
+        int requiredSelectionLimit = getRequiredSelectionCount();
+        adapter = new PhotoAdapter(new ArrayList<>(), requiredSelectionLimit, (selectedUris, selectedCount) -> {
             btnContinueToEdit.setEnabled(selectedCount > 0);
             updateSelectionStatus(selectedCount);
             updateResultButtonState(selectedCount);
@@ -119,6 +127,8 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         });
         rvPhotos.setAdapter(adapter);
         updateAdapterUris();
+        updateSelectionStatus(0);
+        updateResultButtonState(0);
 
         tvClearSelection.setOnClickListener(v -> {
             if (adapter == null) {
@@ -213,11 +223,10 @@ public class PhotoSelectionActivity extends AppCompatActivity {
 
     private void updateSelectionStatus(int selectedCount) {
         int required = getRequiredSelectionCount();
+        tvSelectedStripTitle.setText(getString(R.string.selected_strip_title_with_count, selectedCount, required));
         if (selectedCount <= 0) {
-            tvSelectionStatus.setText(getString(R.string.selection_status_none, required));
             btnContinueToEdit.setText(R.string.btn_edit);
         } else {
-            tvSelectionStatus.setText(getString(R.string.selection_status_selected, selectedCount, required));
             btnContinueToEdit.setText(getString(R.string.btn_edit_with_count, selectedCount));
         }
     }
@@ -230,11 +239,16 @@ public class PhotoSelectionActivity extends AppCompatActivity {
     }
 
     private int getRequiredSelectionCount() {
+        int requiredFromFrame = sessionState.getPhotoCount();
+        if (requiredFromFrame <= 0) {
+            requiredFromFrame = FALLBACK_SELECTION_COUNT;
+        }
+
         int capturedCount = sessionState.getCapturedImageUris().size();
         if (capturedCount <= 0) {
-            return 0;
+            return requiredFromFrame;
         }
-        return Math.min(REQUIRED_SELECTION_COUNT, capturedCount);
+        return Math.min(requiredFromFrame, capturedCount);
     }
 
     private Uri getSelectedOriginalUri(Uri currentDisplayUri) {
@@ -266,6 +280,20 @@ public class PhotoSelectionActivity extends AppCompatActivity {
 
         Intent intent = new Intent(PhotoSelectionActivity.this, EditPhotoActivity.class);
         intent.putExtra(IntentKeys.EXTRA_SELECTED_IMAGE, nextOriginalUri);
+        editActivityResultLauncher.launch(intent);
+    }
+
+    private void launchSingleEdit(String originalUri) {
+        if (originalUri == null || originalUri.isEmpty()) {
+            return;
+        }
+        isBatchEditing = false;
+        pendingEditOriginalUris.clear();
+        sessionState.setSelectedImageUri(originalUri);
+        sessionRepository.saveSession(sessionState);
+
+        Intent intent = new Intent(PhotoSelectionActivity.this, EditPhotoActivity.class);
+        intent.putExtra(IntentKeys.EXTRA_SELECTED_IMAGE, originalUri);
         editActivityResultLauncher.launch(intent);
     }
 

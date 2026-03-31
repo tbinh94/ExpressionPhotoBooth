@@ -46,6 +46,7 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     // Views
     private ImageView ivEditingPhoto;
+    private ImageView ivFrameOverlay;
     private Chip chipActiveEdit;
     private TextView tvEditSummary;
     private TabLayout editTabLayout;
@@ -66,6 +67,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private Stack<EditState> undoStack = new Stack<>();
     private RenderEditedBitmapUseCase renderEditedBitmapUseCase;
     private Uri currentPhotoUri;
+    private int selectedFrameResId = -1;
 
     // ── Thumbnail item model ──────────────────────────────────────────────────
 
@@ -226,6 +228,9 @@ public class EditPhotoActivity extends AppCompatActivity {
             return;
         }
 
+        selectedFrameResId = resolveSelectedFrameResId();
+        applyFrameOverlay();
+
         applyCurrentEditState();
         syncSelectionsToAdapters();
         updateEditSummary();
@@ -233,6 +238,7 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     private void bindViews() {
         ivEditingPhoto    = findViewById(R.id.ivEditingPhoto);
+        ivFrameOverlay    = findViewById(R.id.ivFrameOverlay);
         chipActiveEdit    = findViewById(R.id.chipActiveEdit);
         tvEditSummary     = findViewById(R.id.tvEditSummary);
         editTabLayout     = findViewById(R.id.editTabLayout);
@@ -247,6 +253,46 @@ public class EditPhotoActivity extends AppCompatActivity {
         rvFilters         = findViewById(R.id.rvFilters);
         rvFrames          = findViewById(R.id.rvFrames);
         rvStickers        = findViewById(R.id.rvStickers);
+    }
+
+    private int resolveSelectedFrameResId() {
+        if (sessionState != null && sessionState.getSelectedFrameResId() != -1) {
+            return sessionState.getSelectedFrameResId();
+        }
+        return getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
+                .getInt("SELECTED_FRAME_ID", -1);
+    }
+
+    private void applyFrameOverlay() {
+        if (ivFrameOverlay == null) {
+            return;
+        }
+        int overlayResId = resolveOverlayFrameResId(currentEditState.getFrameStyle());
+        if (overlayResId == -1) {
+            ivFrameOverlay.setVisibility(View.GONE);
+            ivFrameOverlay.setImageDrawable(null);
+            return;
+        }
+        ivFrameOverlay.setImageResource(overlayResId);
+        ivFrameOverlay.setVisibility(View.VISIBLE);
+    }
+
+    private int resolveOverlayFrameResId(EditState.FrameStyle frameStyle) {
+        if (frameStyle == null) {
+            return -1;
+        }
+        switch (frameStyle) {
+            case CORTIS:
+                return R.drawable.frm_3x4_movie;
+            case T1:
+                return R.drawable.frm_3x4_pig_hero;
+            case AESPA:
+                return R.drawable.frm3_16x9_blue_canvas;
+            case NONE:
+            default:
+                // Do not force setup frame on single-photo edit preview.
+                return -1;
+        }
     }
 
     // ── Tab setup ─────────────────────────────────────────────────────────────
@@ -597,6 +643,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         if (originalBitmap == null) return;
         editedBitmap = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState);
         ivEditingPhoto.setImageBitmap(editedBitmap);
+        applyFrameOverlay();
     }
 
     private void syncSelectionsToAdapters() {

@@ -18,7 +18,16 @@ import java.util.List;
 // Horizontal preview list of currently selected photos.
 public class SelectedPhotoPreviewAdapter extends RecyclerView.Adapter<SelectedPhotoPreviewAdapter.SelectedPhotoViewHolder> {
 
+    public interface OnSelectedPreviewClickListener {
+        void onSelectedPreviewClick(Uri selectedUri, int position);
+    }
+
     private final List<Uri> selectedUris = new ArrayList<>();
+    private final OnSelectedPreviewClickListener onSelectedPreviewClickListener;
+
+    public SelectedPhotoPreviewAdapter(OnSelectedPreviewClickListener onSelectedPreviewClickListener) {
+        this.onSelectedPreviewClickListener = onSelectedPreviewClickListener;
+    }
 
     @NonNull
     @Override
@@ -35,6 +44,13 @@ public class SelectedPhotoPreviewAdapter extends RecyclerView.Adapter<SelectedPh
                 .centerCrop()
                 .into(holder.ivSelectedPreview);
         holder.tvSelectedOrder.setText(String.valueOf(position + 1));
+        holder.itemView.setOnClickListener(v -> {
+            int adapterPos = holder.getBindingAdapterPosition();
+            if (adapterPos == RecyclerView.NO_POSITION || onSelectedPreviewClickListener == null) {
+                return;
+            }
+            onSelectedPreviewClickListener.onSelectedPreviewClick(selectedUris.get(adapterPos), adapterPos);
+        });
     }
 
     @Override
