@@ -85,6 +85,25 @@
             app:cornerRadius="40dp"
             app:elevation="8dp" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAdmin"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_marginTop="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="@string/admin_go_to_dashboard"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:icon="@drawable/ic_settings_24"
+            app:iconTint="#FFFFFF"
+            app:backgroundTint="#40FFFFFF"
+            app:cornerRadius="20dp" />
+
         <!-- Button Logout - ngay bên dưới btnStart -->
 
         <com.google.android.material.button.MaterialButton

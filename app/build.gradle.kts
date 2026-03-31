@@ -53,6 +53,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.google.mlkit:face-detection:16.1.6")
     implementation("com.google.mlkit:pose-detection:18.0.0-beta5")
+    implementation("com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1")
     implementation("com.google.mediapipe:tasks-vision:0.10.14")
 
     // Import the Firebase BoM

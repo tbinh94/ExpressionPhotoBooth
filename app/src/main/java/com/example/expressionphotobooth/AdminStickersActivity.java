@@ -36,6 +36,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenter;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions;
+
 public class AdminStickersActivity extends AppCompatActivity {
 
     private RecyclerView rvStickers;
@@ -46,6 +53,8 @@ public class AdminStickersActivity extends AppCompatActivity {
     private MaterialButton btnUpload;
     private LinearProgressIndicator progress;
     private TextView tvEmpty;
+
+    private SubjectSegmenter segmenter;
 
     private ActivityResultLauncher<Intent> pickImageLauncher;
 
@@ -63,6 +72,12 @@ public class AdminStickersActivity extends AppCompatActivity {
         adapter = new StickerAdapter(stickerList);
         rvStickers.setLayoutManager(new GridLayoutManager(this, 3));
         rvStickers.setAdapter(adapter);
+
+        segmenter = SubjectSegmentation.getClient(
+                new SubjectSegmenterOptions.Builder()
+                        .enableForegroundBitmap()
+                        .build()
+        );
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
@@ -105,32 +120,37 @@ public class AdminStickersActivity extends AppCompatActivity {
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                 if (bitmap == null) throw new Exception("Decoding failed");
 
-                // Auto Transparency for any white background (threshold 245)
-                Bitmap transparentBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                int w = transparentBitmap.getWidth();
-                int h = transparentBitmap.getHeight();
-                int[] pixels = new int[w * h];
-                transparentBitmap.getPixels(pixels, 0, w, 0, 0, w, h);
-                for (int i = 0; i < pixels.length; i++) {
-                    int p = pixels[i];
-                    int r = (p >> 16) & 0xff;
-                    int g = (p >> 8) & 0xff;
-                    int b = p & 0xff;
-                    if (r > 245 && g > 245 && b > 245) pixels[i] = 0x00FFFFFF;
+                // Use ML Kit Subject Segmentation to extract the subject (Messenger style)
+                InputImage inputImage = InputImage.fromBitmap(bitmap, 0);
+                
+                // Synchronously wait for the segmentation to complete on this background thread
+                Task<Bitmap> task = segmenter.process(inputImage)
+                        .continueWith(t -> {
+                            if (!t.isSuccessful()) throw t.getException();
+                            return t.getResult().getForegroundBitmap();
+                        });
+
+                Bitmap extractedSubject = Tasks.await(task);
+                if (extractedSubject == null) {
+                    // Fallback to basic white removal if segmentation fails
+                    extractedSubject = applyBasicWhiteRemoval(bitmap);
                 }
-                transparentBitmap.setPixels(pixels, 0, w, 0, 0, w, h);
+
+                int w = extractedSubject.getWidth();
+                int h = extractedSubject.getHeight();
 
                 // Resize stickers to max 400px to keep firestore data small
                 int max = 400;
+                Bitmap finalSticker = extractedSubject;
                 if (w > max || h > max) {
                     float ratio = (float) w / h;
                     int nw = ratio > 1 ? max : (int)(max * ratio);
                     int nh = ratio > 1 ? (int)(max / ratio) : max;
-                    transparentBitmap = Bitmap.createScaledBitmap(transparentBitmap, nw, nh, true);
+                    finalSticker = Bitmap.createScaledBitmap(extractedSubject, nw, nh, true);
                 }
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                transparentBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                finalSticker.compress(Bitmap.CompressFormat.PNG, 100, baos);
                 String base64 = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
 
                 Map<String, Object> data = new HashMap<>();
@@ -165,6 +185,23 @@ public class AdminStickersActivity extends AppCompatActivity {
                 });
             }
         }).start();
+    }
+
+    private Bitmap applyBasicWhiteRemoval(Bitmap bitmap) {
+        Bitmap transparentBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        int w = transparentBitmap.getWidth();
+        int h = transparentBitmap.getHeight();
+        int[] pixels = new int[w * h];
+        transparentBitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+        for (int i = 0; i < pixels.length; i++) {
+            int p = pixels[i];
+            int r = (p >> 16) & 0xff;
+            int g = (p >> 8) & 0xff;
+            int b = p & 0xff;
+            if (r > 245 && g > 245 && b > 245) pixels[i] = 0x00FFFFFF;
+        }
+        transparentBitmap.setPixels(pixels, 0, w, 0, 0, w, h);
+        return transparentBitmap;
     }
 
     private void loadStickers() {

@@ -28,12 +28,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="20dp"
-                    android:paddingTop="54dp"
+                    android:paddingTop="60dp"
                     android:paddingBottom="20dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
                         android:orientation="vertical">
 
                         <TextView
@@ -52,8 +53,6 @@
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="4dp">
 
-
-
                             <TextView
                                 android:id="@+id/tvAdminEmail"
                                 android:layout_width="wrap_content"
@@ -66,6 +65,23 @@
                         </LinearLayout>
                     </LinearLayout>
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLanguageToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp"
+                        app:cornerRadius="16dp"
+                        app:backgroundTint="#2E4280"
+                        android:text="English"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        app:strokeColor="#4A65C4"
+                        app:strokeWidth="1dp" />
 
                 </RelativeLayout>
 

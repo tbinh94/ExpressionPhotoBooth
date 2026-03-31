@@ -18,6 +18,26 @@
         android:layout_height="match_parent"
         android:background="#812C2A2A" />
 
+    <!-- Language Toggle -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLanguageToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="54dp"
+        android:layout_marginEnd="16dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        app:cornerRadius="16dp"
+        app:backgroundTint="#40FFFFFF"
+        android:text="English"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
+        app:strokeColor="#80FFFFFF"
+        app:strokeWidth="1dp" />
+
     <!-- Logo / App branding at top -->
     <LinearLayout
         android:layout_width="match_parent"

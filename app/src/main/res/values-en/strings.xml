@@ -192,8 +192,18 @@
     <string name="admin_review_time_placeholder">2 hours ago</string>
     <string name="admin_review_star_symbol">★</string>
     <string name="admin_review_rating_placeholder">5</string>
-    <string name="admin_review_feedback_placeholder">Review content appears here...</string>
     <string name="admin_review_no_content">(No content)</string>
+    <string name="fallback_countdown_msg">If not recognized, auto capture in %1$ds</string>
+    <string name="admin_overview_action_stickers_title">Manage Stickers</string>
+    <string name="admin_overview_action_stickers_subtitle">Add custom stickers</string>
+    <string name="admin_sticker_title">Sticker List</string>
+    <string name="admin_sticker_upload">Add PNG Sticker</string>
+    <string name="admin_sticker_upload_hint">Select transparent PNG (300x300 rec)</string>
+    <string name="admin_sticker_label_hint">Sticker name (e.g. Heart Pink)</string>
+    <string name="admin_sticker_success">New sticker added!</string>
+    <string name="admin_sticker_error">Failed to upload sticker!</string>
+    <string name="admin_sticker_empty">No custom stickers yet.</string>
+    <string name="admin_go_to_dashboard">Admin Dashboard</string>
 </resources>
 
 

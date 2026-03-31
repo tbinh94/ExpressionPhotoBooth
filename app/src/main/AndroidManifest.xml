@@ -45,5 +45,9 @@
         <activity android:name=".EditPhotoActivity" android:exported="false" />
         <activity android:name=".ResultActivity" android:exported="false" />
 
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="subject_segment" />
+
     </application>
 </manifest>

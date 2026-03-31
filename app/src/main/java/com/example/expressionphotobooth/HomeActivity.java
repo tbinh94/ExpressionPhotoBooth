@@ -10,6 +10,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
+import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.button.MaterialButton;
 
@@ -18,6 +19,7 @@ public class HomeActivity extends AppCompatActivity {
     private static boolean isMuted = false;
     private AuthRepository authRepository;
     private MaterialButton btnLanguageToggle;
+    private MaterialButton btnAdmin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,14 +38,10 @@ public class HomeActivity extends AppCompatActivity {
         startBackgroundMusic();
 
         MaterialButton btnLogout = findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(v -> {
-            authRepository.signOut();
-            Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
-            loginIntent.putExtra(IntentKeys.EXTRA_NOTICE_TITLE, getString(R.string.auth_sign_out_title));
-            loginIntent.putExtra(IntentKeys.EXTRA_NOTICE_MESSAGE, getString(R.string.auth_sign_out_message));
-            startActivity(loginIntent);
-            finish();
-        });
+        btnLogout.setOnClickListener(v -> handleSignOut());
+
+        btnAdmin = findViewById(R.id.btnAdmin);
+        checkAdminAccess();
 
         MaterialButton btnStart = findViewById(R.id.btnStart);
         btnStart.setOnClickListener(v -> {
@@ -141,5 +139,31 @@ public class HomeActivity extends AppCompatActivity {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+    }
+
+    private void checkAdminAccess() {
+        authRepository.fetchCurrentRole(new AuthRepository.RoleCallback() {
+            @Override
+            public void onSuccess(UserRole role) {
+                if (role == UserRole.ADMIN) {
+                    btnAdmin.setVisibility(android.view.View.VISIBLE);
+                    btnAdmin.setOnClickListener(v -> {
+                        startActivity(new Intent(HomeActivity.this, AdminDashboardActivity.class));
+                        finish();
+                    });
+                }
+            }
+            @Override
+            public void onError(String message) {}
+        });
+    }
+
+    private void handleSignOut() {
+        authRepository.signOut();
+        Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
+        loginIntent.putExtra(IntentKeys.EXTRA_NOTICE_TITLE, getString(R.string.auth_sign_out_title));
+        loginIntent.putExtra(IntentKeys.EXTRA_NOTICE_MESSAGE, getString(R.string.auth_sign_out_message));
+        startActivity(loginIntent);
+        finish();
     }
 }

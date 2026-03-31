@@ -111,8 +111,13 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
     public void setUris(List<Uri> newUris) {
         uris.clear();
         uris.addAll(newUris);
-        // Do not clear selectedPositions here to preserve selection by index
         notifyDataSetChanged();
+        
+        // Trigger listener to sync UI controls (buttons, status text)
+        if (onPhotoSelectedListener != null) {
+            List<Uri> selectedUris = getSelectedUris();
+            onPhotoSelectedListener.onSelectionChanged(selectedUris, selectedUris.size());
+        }
     }
 
     public void clearSelection() {
