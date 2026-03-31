@@ -10,6 +10,11 @@ import java.util.List;
 
 public class FrameConfig {
 
+    // Returns number of photo slots required by a frame.
+    public static int getSlotCountForFrame(int frameResId) {
+        return getHolesForFrame(frameResId).size();
+    }
+
     // Hàm này trả về danh sách các hình chữ nhật (vị trí các lỗ hổng) dựa vào ID của Frame
     public static List<Rect> getHolesForFrame(int frameResId) {
         List<Rect> holes = new ArrayList<>();

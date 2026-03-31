@@ -18,6 +18,7 @@ import com.example.expressionphotobooth.domain.model.Frame;
 import com.example.expressionphotobooth.domain.model.EditState;
 import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
+import com.example.expressionphotobooth.utils.FrameConfig;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ public class SetupActivity extends AppCompatActivity {
 
     private RecyclerView rvConcepts;
     private Frame selectedFrame;
-    private final int selectedPhotoCount = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +76,9 @@ public class SetupActivity extends AppCompatActivity {
                 session = new SessionState();
             }
 
-            session.setPhotoCount(selectedPhotoCount);
+            int requiredSelectionCount = FrameConfig.getSlotCountForFrame(selectedFrame.getImageResId());
+            session.setPhotoCount(requiredSelectionCount);
+            session.setSelectedFrameResId(selectedFrame.getImageResId());
             EditState editState = new EditState();
             editState.setFrameStyle(selectedFrame.getFrameStyle());
             session.setEditState(editState);

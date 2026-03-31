@@ -26,10 +26,8 @@
     <string name="batch_edit_completed">Đã hoàn thành chỉnh sửa ảnh đã chọn</string>
     <string name="batch_edit_cancelled">Đã dừng chỉnh sửa hàng loạt</string>
     <string name="selected_strip_title">Selected photos</string>
+    <string name="selected_strip_title_with_count">Selected photos (%1$d/%2$d)</string>
     <string name="clear_selection">Clear</string>
-    <string name="selection_status_initial">Selected: 0/0</string>
-    <string name="selection_status_none">Selected: 0/%1$d</string>
-    <string name="selection_status_selected">Selected: %1$d/%2$d</string>
     <string name="selection_limit_reached">Chỉ được chọn tối đa %1$d ảnh</string>
     <string name="help_setup_content_desc">Frame selection guide</string>
     <string name="help_setup_title">Choose your frame</string>
@@ -163,6 +161,7 @@
     <string name="main_mode_auto_selected">Auto Mode: 3-second countdown</string>
     <string name="main_ai_face_selected">Switched to: Face detection</string>
     <string name="main_ai_action_selected">Switched to: Gesture detection</string>
+    <string name="main_ai_hand_unavailable">Gesture AI is unavailable on this device/emulator. Please use Face mode.</string>
     <string name="main_capture_prompt_hand_hi">Shot %1$d: Give a Hi wave!</string>
     <string name="main_capture_prompt_hand_heart">Shot %1$d: Show some heart!</string>
     <string name="main_capture_prompt_face_smile">Shot %1$d: Smile for us!</string>

@@ -51,7 +51,8 @@ dependencies {
     implementation("androidx.camera:camera-view:1.5.3")
     implementation("org.jcodec:jcodec-android:0.2.5")
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    implementation("com.google.mlkit:face-detection:16.1.6")
+    // Use Play Services Face Detection so the app does not package bundled native face .so files.
+    implementation("com.google.android.gms:play-services-mlkit-face-detection:17.1.0")
     implementation("com.google.mlkit:pose-detection:18.0.0-beta5")
     implementation("com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1")
     implementation("com.google.mediapipe:tasks-vision:0.10.14")

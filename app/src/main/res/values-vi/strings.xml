@@ -20,10 +20,8 @@
     <string name="btn_result">KẾT QUẢ</string>
     <string name="btn_result_with_count">KẾT QUẢ (%1$d/%2$d)</string>
     <string name="selected_strip_title">Ảnh đã chọn</string>
+    <string name="selected_strip_title_with_count">Ảnh đã chọn (%1$d/%2$d)</string>
     <string name="clear_selection">Xóa chọn</string>
-    <string name="selection_status_initial">Đã chọn: 0/0</string>
-    <string name="selection_status_none">Đã chọn: 0/%1$d</string>
-    <string name="selection_status_selected">Đã chọn: %1$d/%2$d</string>
 
     <string name="capture_status_ready">Sẵn sàng chụp</string>
     <string name="capture_status_starting">Bắt đầu chuỗi chụp (%1$d ảnh)</string>
@@ -88,6 +86,7 @@
     <string name="main_mode_auto_selected">Chế độ tự động: Đếm ngược 3 giây</string>
     <string name="main_ai_face_selected">Đã chuyển sang: Nhận diện khuôn mặt</string>
     <string name="main_ai_action_selected">Đã chuyển sang: Nhận diện hành động</string>
+    <string name="main_ai_hand_unavailable">AI nhận diện hành động chưa hỗ trợ trên máy/giả lập này. Vui lòng dùng chế độ Khuôn mặt.</string>
     <string name="main_capture_prompt_hand_hi">Chụp %1$d: Giơ tay Hi nào!</string>
     <string name="main_capture_prompt_hand_heart">Chụp %1$d: Thả tim xem!</string>
     <string name="main_capture_prompt_face_smile">Chụp %1$d: Cười lên nào!</string>

@@ -64,23 +64,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tvSubtitle" />
 
-    <!-- Status pill -->
-    <TextView
-        android:id="@+id/tvSelectionStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="20dp"
-        android:background="@drawable/bg_pill_blue_light"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="4dp"
-        android:text="@string/selection_status_initial"
-        android:textColor="#2A5298"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSubtitle" />
-
     <!-- ── PHOTO GRID ── -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPhotos"
@@ -94,7 +77,7 @@
         app:layout_constraintBottom_toTopOf="@id/selectedStripCard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSelectionStatus" />
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle" />
 
     <!-- ── SELECTED STRIP ── -->
     <com.google.android.material.card.MaterialCardView

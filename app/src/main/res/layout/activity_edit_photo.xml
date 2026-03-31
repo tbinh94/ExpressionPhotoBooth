@@ -92,6 +92,15 @@
                 android:background="#E8EDF5"
                 android:scaleType="centerCrop" />
 
+            <ImageView
+                android:id="@+id/ivFrameOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
+                android:visibility="gone" />
+
             <!-- Active edit chip, floats top-right -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipActiveEdit"

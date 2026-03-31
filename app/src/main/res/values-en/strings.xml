@@ -41,6 +41,7 @@
     <string name="btn_result">RESULT</string>
     <string name="btn_edit_with_count">EDIT (%1$d)</string>
     <string name="btn_result_with_count">RESULT (%1$d/%2$d)</string>
+    <string name="selected_strip_title_with_count">Selected photos (%1$d/%2$d)</string>
     <string name="select_enough_for_result">Please select %1$d photos to continue to result</string>
     <string name="batch_edit_start">Editing %1$d selected photos</string>
     <string name="batch_edit_completed">Batch edit completed</string>
@@ -112,6 +113,7 @@
     <string name="main_mode_auto_selected">Auto mode: 3-second countdown</string>
     <string name="main_ai_face_selected">Switched to: Face detection</string>
     <string name="main_ai_action_selected">Switched to: Gesture detection</string>
+    <string name="main_ai_hand_unavailable">Gesture AI is unavailable on this device/emulator. Please use Face mode.</string>
     <string name="main_capture_prompt_hand_hi">Shot %1$d: Wave your hand and say hi!</string>
     <string name="main_capture_prompt_hand_heart">Shot %1$d: Make a heart pose!</string>
     <string name="main_capture_prompt_face_smile">Shot %1$d: Give us a smile!</string>
