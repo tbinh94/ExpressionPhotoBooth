@@ -77,7 +77,7 @@
                     android:paddingHorizontal="16dp"
                     android:weightSum="3">
 
-                    <!-- Card 1: Total -->
+                    <!-- Card 1: Accounts -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
                         android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tvStatTotalReviews"
+                            android:id="@+id/tvStatTotalAccounts"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
@@ -100,12 +100,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="@string/admin_stat_reviews"
+                            android:text="@string/admin_stat_accounts"
                             android:textColor="#B0BED4"
                             android:textSize="11sp" />
                     </LinearLayout>
 
-                    <!-- Card 2: Avg -->
+                    <!-- Card 2: Image downloads -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -116,35 +116,7 @@
                         android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tvStatAvgScore"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0.0"
-                            android:textColor="#FFFFFF"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/admin_stat_avg"
-                            android:textColor="#E8EFFF"
-                            android:textSize="11sp" />
-                    </LinearLayout>
-
-                    <!-- Card 3: Negative -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="6dp"
-                        android:background="@drawable/shape_stat_card_red"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/tvStatLow"
+                            android:id="@+id/tvStatImageDownloads"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
@@ -156,7 +128,35 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="@string/admin_stat_low"
+                            android:text="@string/admin_stat_image_downloads"
+                            android:textColor="#E8EFFF"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <!-- Card 3: Video downloads -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:background="@drawable/shape_stat_card_red"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvStatVideoDownloads"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/admin_stat_video_downloads"
                             android:textColor="#FFDADA"
                             android:textSize="11sp" />
                     </LinearLayout>

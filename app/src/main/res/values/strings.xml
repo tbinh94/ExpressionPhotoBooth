@@ -173,6 +173,9 @@
 
     <string name="admin_dashboard_greeting">Xin chào Admin,</string>
     <string name="admin_email_fallback">admin@photobooth.vn</string>
+    <string name="admin_stat_accounts">Tài khoản</string>
+    <string name="admin_stat_image_downloads">Tải ảnh</string>
+    <string name="admin_stat_video_downloads">Tải video</string>
     <string name="admin_stat_reviews">Đánh giá</string>
     <string name="admin_stat_avg">Điểm TB</string>
     <string name="admin_stat_low">Dưới 3★</string>
@@ -181,6 +184,22 @@
     <string name="admin_overview_chart_subtitle_placeholder">0 đánh giá</string>
     <string name="admin_overview_chart_subtitle_format">%1$d đánh giá</string>
     <string name="admin_overview_chart_subtitle_error">Không tải được dữ liệu</string>
+    <string name="admin_overview_last_review_format">Đánh giá gần nhất: %1$s</string>
+    <string name="admin_overview_last_review_fallback">Chưa có mốc thời gian đánh giá</string>
+    <string name="admin_overview_users_chart_title">Tài khoản theo thời gian</string>
+    <string name="admin_overview_users_chart_subtitle">Số user tạo mới theo tháng</string>
+    <string name="admin_overview_download_chart_title">Lượt tải ảnh theo thời gian</string>
+    <string name="admin_overview_download_chart_subtitle">Tổng lượt tải ảnh theo tháng</string>
+    <string name="admin_overview_review_score_chart_title">Tổng điểm đánh giá theo thời gian</string>
+    <string name="admin_overview_review_score_chart_subtitle">Biểu đồ cột điểm đánh giá cộng dồn theo tháng</string>
+    <string name="admin_overview_range_title">Khoảng thời gian</string>
+    <string name="admin_overview_range_3m">3 tháng</string>
+    <string name="admin_overview_range_6m">6 tháng</string>
+    <string name="admin_overview_range_12m">12 tháng</string>
+    <string name="admin_overview_legend_users">Tài khoản mới</string>
+    <string name="admin_overview_legend_downloads">Lượt tải ảnh</string>
+    <string name="admin_overview_legend_review_score">Điểm đánh giá</string>
+    <string name="admin_overview_trend_empty">Chưa có dữ liệu trong giai đoạn này</string>
     <string name="admin_overview_total_reviews">Lượt đánh giá</string>
     <string name="admin_overview_five_star_label">5 sao</string>
     <string name="admin_overview_bar_five">5 ⭐</string>
