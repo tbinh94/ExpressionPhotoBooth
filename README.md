@@ -109,7 +109,7 @@ Predicted classes:
 
 ## 👨‍💻 Author
 
-Developed by **Binh Ca**
+Developed by **Binh Ca** **Duc Trong** **Chi Mai** **Han Gia**
 
 ---
 
