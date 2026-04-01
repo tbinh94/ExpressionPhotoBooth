@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -89,6 +90,29 @@ public final class HelpDialogUtils {
                 .create();
 
         btnOk.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    public static void showSubscriptionQR(Context context, String qrUrl) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_subscription_qr, null, false);
+        ImageView ivQr = dialogView.findViewById(R.id.ivQrCode);
+        MaterialButton btnClose = dialogView.findViewById(R.id.btnSubClose);
+
+        Glide.with(context)
+                .load(qrUrl)
+                .placeholder(R.drawable.ic_image_error)
+                .into(ivQr);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        btnClose.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
         if (dialog.getWindow() != null) {

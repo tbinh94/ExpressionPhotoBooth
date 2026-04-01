@@ -14,6 +14,11 @@ public interface AuthRepository {
         void onError(String message);
     }
 
+    interface UserInfoCallback {
+        void onSuccess(UserRole role, long premiumUntil);
+        void onError(String message);
+    }
+
     boolean isLoggedIn();
 
     String getCurrentUid();
@@ -29,6 +34,8 @@ public interface AuthRepository {
     void signInAsGuest(AuthCallback callback);
 
     void fetchCurrentRole(RoleCallback callback);
+
+    void fetchCurrentUserInfo(UserInfoCallback callback);
 
     void signOut();
 }

@@ -210,6 +210,16 @@
     <string name="admin_sticker_error">Lỗi khi tải lên sticker!</string>
     <string name="admin_sticker_empty">Chưa có sticker custom nào.</string>
     <string name="admin_go_to_dashboard">Quản trị hệ thống</string>
+    <string name="main_subscription_required_title">Yêu cầu trả phí Premium</string>
+    <string name="main_subscription_required_message">Tính năng AI (Pose/Expression) yêu cầu gói thành viên tháng để sử dụng.\nGiá: 50.000 VNĐ / tháng</string>
+    <string name="main_subscription_pay_now">Thanh toán ngay (Quét QR)</string>
+    <string name="admin_overview_users_title">Duyệt người dùng</string>
+    <string name="admin_overview_users_subtitle">Cấp quyền Premium</string>
+    <string name="admin_users_title">Danh sách người dùng</string>
+    <string name="admin_users_approve">Duyệt Premium</string>
+    <string name="admin_users_revoke">Hủy Premium</string>
+    <string name="admin_users_save_success">Đã cập nhật quyền thành công!</string>
+    <string name="admin_users_save_error">Lỗi khi cập nhật quyền</string>
 </resources>
 
 

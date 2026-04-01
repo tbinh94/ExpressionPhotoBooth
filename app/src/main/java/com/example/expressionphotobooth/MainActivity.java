@@ -57,6 +57,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
+import com.example.expressionphotobooth.domain.model.UserRole;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -114,6 +115,8 @@ public class MainActivity extends AppCompatActivity {
     private final ExecutorService analysisExecutor = Executors.newSingleThreadExecutor();
     private volatile long lastAiAnalysisAtMs = 0L;
     private boolean isHandAnalyzerAvailable = false;
+    private UserRole currentUserRole = UserRole.USER; // Default to normal User
+    private long premiumUntil = 0L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +137,20 @@ public class MainActivity extends AppCompatActivity {
         
         expressionAnalyzer = new ExpressionAnalyzer();
         initOptionalGestureAnalyzer();
+
+        // Fetch current user info to handle premium features and expiration logic
+        ((AppContainer) getApplication()).getAuthRepository().fetchCurrentUserInfo(new AuthRepository.UserInfoCallback() {
+            @Override
+            public void onSuccess(UserRole role, long until) {
+                currentUserRole = role;
+                premiumUntil = until;
+                Log.d(TAG, "User role: " + role + ", premiumUntil: " + until);
+            }
+            @Override
+            public void onError(String message) {
+                Log.e(TAG, "Failed to fetch user info: " + message);
+            }
+        });
 
         // Firebase test probe removed to keep camera screen independent from backend setup.
         // Ánh xạ View
@@ -208,15 +225,29 @@ public class MainActivity extends AppCompatActivity {
         modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
-                if (checkedId == R.id.btnModeExpression && authRepo.isGuest()) {
-                    group.check(R.id.btnModeCountdown); // Force back to auto
-                    HelpDialogUtils.showCenteredNotice(
-                        this,
-                        getString(R.string.main_ai_login_required_title),
-                        getString(R.string.main_ai_login_required_message),
-                        false
-                    );
-                    return;
+                if (checkedId == R.id.btnModeExpression) {
+                    if (authRepo.isGuest()) {
+                        group.check(R.id.btnModeCountdown); // Force back to auto
+                        HelpDialogUtils.showCenteredNotice(
+                                this,
+                                getString(R.string.main_ai_login_required_title),
+                                getString(R.string.main_ai_login_required_message),
+                                false
+                        );
+                        return;
+                    }
+
+                    // Check for Premium Subscription if not Admin
+                    boolean isPremium = (currentUserRole == UserRole.PREMIUM && premiumUntil > System.currentTimeMillis());
+                    
+                    if (currentUserRole != UserRole.ADMIN && !isPremium) {
+                        group.check(R.id.btnModeCountdown); // Force back to auto
+                        String paymentUrl = "https://img.vietqr.io/image/MB-56111166662004-compact.png" +
+                                "?amount=50000&addInfo=Premium%20Sub%20" + authRepo.getCurrentEmail() +
+                                "&accountName=PHOTO%20BOOTH";
+                        HelpDialogUtils.showSubscriptionQR(this, paymentUrl);
+                        return;
+                    }
                 }
                 
                 isExpressionMode = (checkedId == R.id.btnModeExpression);
