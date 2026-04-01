@@ -157,6 +157,34 @@ public class FirebaseAuthRepository implements AuthRepository {
     }
 
     @Override
+    public void fetchCurrentUserInfo(UserInfoCallback callback) {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        if (user == null) {
+            callback.onError("Bạn chưa đăng nhập.");
+            return;
+        }
+
+        if (user.isAnonymous()) {
+            callback.onSuccess(UserRole.USER, 0L);
+            return;
+        }
+
+        firestore.collection(USERS_COLLECTION)
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        UserRole role = UserRole.from(snapshot.getString("role"));
+                        Long premiumUntil = snapshot.getLong("premiumUntil");
+                        callback.onSuccess(role, premiumUntil != null ? premiumUntil : 0L);
+                        return;
+                    }
+                    callback.onSuccess(UserRole.USER, 0L);
+                })
+                .addOnFailureListener(e -> callback.onError(safeMessage(e, "Không lấy được thông tin người dùng.")));
+    }
+
+    @Override
     public void signOut() {
         firebaseAuth.signOut();
     }

@@ -165,6 +165,11 @@ public class AdminOverviewFragment extends Fragment {
             stickers.setOnClickListener(v -> startActivity(new Intent(requireContext(), AdminStickersActivity.class)));
         }
 
+        View users = root.findViewById(R.id.cardActionUsers);
+        if (users != null) {
+            users.setOnClickListener(v -> startActivity(new Intent(requireContext(), AdminUsersActivity.class)));
+        }
+
         View signOut = root.findViewById(R.id.cardActionSignOut);
         if (signOut != null) {
             signOut.setOnClickListener(v -> {
