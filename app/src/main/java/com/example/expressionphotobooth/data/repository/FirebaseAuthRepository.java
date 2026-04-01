@@ -185,6 +185,31 @@ public class FirebaseAuthRepository implements AuthRepository {
     }
 
     @Override
+    public void sendPasswordResetEmail(String email, SimpleCallback callback) {
+        if (email == null || email.trim().isEmpty()) {
+            callback.onError("Vui lòng nhập email.");
+            return;
+        }
+        
+        // Kiểm tra xem email có tồn tại trong Firestore hay không trước khi gửi
+        firestore.collection(USERS_COLLECTION)
+                .whereEqualTo("email", email)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        callback.onError("Email này chưa được đăng ký trong hệ thống.");
+                        return;
+                    }
+                    
+                    // Nếu tồn tại mới gọi Firebase Auth để gửi email
+                    firebaseAuth.sendPasswordResetEmail(email)
+                            .addOnSuccessListener(unused -> callback.onSuccess())
+                            .addOnFailureListener(e -> callback.onError(safeMessage(e, "Không thể gửi email đặt lại mật khẩu.")));
+                })
+                .addOnFailureListener(e -> callback.onError(safeMessage(e, "Lỗi khi kiểm tra thông tin tài khoản.")));
+    }
+
+    @Override
     public void signOut() {
         firebaseAuth.signOut();
     }

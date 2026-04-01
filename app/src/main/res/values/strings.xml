@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Our Memories</string>
+    <string name="app_name">Our Memories Photobooth</string>
     <string name="capture_photo">Capture</string>
     <string name="ratio_square">1:1</string>
     <string name="ratio_wide">16:9</string>
@@ -264,4 +264,8 @@
     <string name="admin_users_revoke">Revoke</string>
     <string name="admin_users_save_success">Role updated successfully!</string>
     <string name="admin_users_save_error">Failed to update role</string>
+    <string name="auth_forgot_password_email_required">Please enter your email address to reset password.</string>
+    <string name="auth_forgot_password_sending">Sending reset link...</string>
+    <string name="auth_forgot_password_success_title">Email Sent</string>
+    <string name="auth_forgot_password_success_message">A password reset link has been sent to your Gmail. Please check your inbox.</string>
 </resources>

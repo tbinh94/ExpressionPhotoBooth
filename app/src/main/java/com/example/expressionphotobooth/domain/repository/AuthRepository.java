@@ -19,6 +19,11 @@ public interface AuthRepository {
         void onError(String message);
     }
 
+    interface SimpleCallback {
+        void onSuccess();
+        void onError(String message);
+    }
+
     boolean isLoggedIn();
 
     String getCurrentUid();
@@ -36,6 +41,8 @@ public interface AuthRepository {
     void fetchCurrentRole(RoleCallback callback);
 
     void fetchCurrentUserInfo(UserInfoCallback callback);
+
+    void sendPasswordResetEmail(String email, SimpleCallback callback);
 
     void signOut();
 }

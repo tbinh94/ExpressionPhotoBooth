@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Our Memories</string>
+    <string name="app_name">Our Memories Photobooth</string>
 
     <string name="capture_photo">Chụp</string>
     <string name="camera_permission_required">Cần quyền camera để tiếp tục</string>
@@ -220,6 +220,10 @@
     <string name="admin_users_revoke">Hủy Premium</string>
     <string name="admin_users_save_success">Đã cập nhật quyền thành công!</string>
     <string name="admin_users_save_error">Lỗi khi cập nhật quyền</string>
+    <string name="auth_forgot_password_email_required">Vui lòng nhập địa chỉ email để đặt lại mật khẩu.</string>
+    <string name="auth_forgot_password_sending">Đang gửi liên kết thiết lập lại...</string>
+    <string name="auth_forgot_password_success_title">Đã gửi Email</string>
+    <string name="auth_forgot_password_success_message">Liên kết đặt lại mật khẩu đã được gửi đến Gmail của bạn. Vui lòng kiểm tra hộp thư đến.</string>
 </resources>
 
 
