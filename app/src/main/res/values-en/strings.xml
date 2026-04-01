@@ -3,6 +3,8 @@
 
     <string name="capture_photo">Capture</string>
     <string name="camera_not_ready">Camera is not ready</string>
+    <string name="video_exporting_btn">Generating video...</string>
+    <string name="video_saving_btn">Saving...</string>
     <string name="video_saved_success">Video saved to gallery!</string>
 
     <string name="auth_title">Welcome back</string>
@@ -207,7 +209,3 @@
     <string name="admin_sticker_empty">No custom stickers yet.</string>
     <string name="admin_go_to_dashboard">Admin Dashboard</string>
 </resources>
-
-
-
-

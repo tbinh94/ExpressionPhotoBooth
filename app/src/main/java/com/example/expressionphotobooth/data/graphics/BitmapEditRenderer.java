@@ -28,7 +28,7 @@ public class BitmapEditRenderer {
         canvas.drawBitmap(source, 0f, 0f, filterPaint);
 
         // 2) Ve frame theo style duoc chon.
-        drawFrame(canvas, state.getFrameStyle(), source.getWidth(), source.getHeight());
+        // drawFrame(canvas, state.getFrameStyle(), source.getWidth(), source.getHeight());
 
         // 3) Ve sticker icon len goc anh hoặc vị trí người dùng kéo thả.
         drawSticker(context, canvas, state, source.getWidth(), source.getHeight());
@@ -239,4 +239,3 @@ public class BitmapEditRenderer {
         }
     }
 }
-

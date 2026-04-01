@@ -1,7 +1,6 @@
 package com.example.expressionphotobooth;
 
 import android.animation.ValueAnimator;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -19,7 +18,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.expressionphotobooth.domain.model.AdminDashboardStats;
 import com.example.expressionphotobooth.domain.repository.AdminStatsRepository;
-import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.ui.chart.MonthlyBarChartView;
 import com.example.expressionphotobooth.ui.chart.MonthlyChartPoint;
 
@@ -116,7 +114,6 @@ public class AdminOverviewFragment extends Fragment {
             tvStatVideoDownloads = getActivity().findViewById(R.id.tvStatVideoDownloads);
         }
 
-        bindActions(view);
         loadStats();
     }
 
@@ -143,41 +140,6 @@ public class AdminOverviewFragment extends Fragment {
         selectedRangeMonths = months;
         if (latestStats != null) {
             renderStats(latestStats);
-        }
-    }
-
-    private void bindActions(View root) {
-        View userFlow = root.findViewById(R.id.cardActionUserFlow);
-        if (userFlow != null) {
-            userFlow.setOnClickListener(v -> {
-                startActivity(new Intent(requireContext(), HomeActivity.class));
-                requireActivity().finish();
-            });
-        }
-
-        View reviews = root.findViewById(R.id.cardActionReviews);
-        if (reviews != null) {
-            reviews.setOnClickListener(v -> startActivity(new Intent(requireContext(), AdminReviewsActivity.class)));
-        }
-
-        View stickers = root.findViewById(R.id.cardActionStickers);
-        if (stickers != null) {
-            stickers.setOnClickListener(v -> startActivity(new Intent(requireContext(), AdminStickersActivity.class)));
-        }
-
-        View users = root.findViewById(R.id.cardActionUsers);
-        if (users != null) {
-            users.setOnClickListener(v -> startActivity(new Intent(requireContext(), AdminUsersActivity.class)));
-        }
-
-        View signOut = root.findViewById(R.id.cardActionSignOut);
-        if (signOut != null) {
-            signOut.setOnClickListener(v -> {
-                AuthRepository authRepository = ((AppContainer) requireActivity().getApplication()).getAuthRepository();
-                authRepository.signOut();
-                startActivity(new Intent(requireContext(), LoginActivity.class));
-                requireActivity().finish();
-            });
         }
     }
 

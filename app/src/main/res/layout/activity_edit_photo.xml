@@ -10,8 +10,11 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topBar"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         android:background="@android:color/transparent"
+        android:paddingTop="12dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         app:contentInsetStart="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,45 +22,48 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="56dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingEnd="8dp">
+            android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBack"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:insetBottom="0dp"
                 android:insetTop="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
                 android:text=""
                 app:icon="@drawable/ic_arrow_back_24"
                 app:iconGravity="textStart"
-                app:iconSize="22dp"
+                app:iconSize="24dp"
                 app:iconTint="#2A5298" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="8dp"
                 android:fontFamily="@font/pacifico_regular"
                 android:text="@string/title_edit"
                 android:textColor="#2A5298"
-                android:textSize="20sp" />
-
+                android:textSize="22sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCompare"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:insetBottom="0dp"
                 android:insetTop="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
                 android:text=""
                 app:icon="@drawable/ic_visibility_24"
                 app:iconGravity="textStart"
-                app:iconSize="20dp"
+                app:iconSize="24dp"
                 app:iconTint="#2A5298" />
 
         </LinearLayout>
@@ -124,11 +130,11 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="0dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="0dp"
         app:cardBackgroundColor="#FAFCFF"
-        app:cardCornerRadius="28dp"
+        app:cardCornerRadius="32dp"
         app:cardElevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -142,11 +148,11 @@
 
             <!-- Drag handle -->
             <View
-                android:layout_width="36dp"
+                android:layout_width="40dp"
                 android:layout_height="4dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="2dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp"
                 android:background="@drawable/bg_handle" />
 
             <!-- TAB BAR -->
@@ -154,8 +160,8 @@
                 android:id="@+id/editTabLayout"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_tab_container"
                 app:tabBackground="@drawable/tab_selector"
@@ -179,7 +185,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- CONTENT PANELS — swap visibility via TabLayout listener -->
+                    <!-- CONTENT PANELS -->
 
                     <!-- ── PRESETS PANEL ── -->
                     <LinearLayout
@@ -193,8 +199,9 @@
                             android:id="@+id/rvPresets"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
+                            android:layout_marginTop="12dp"
                             android:clipToPadding="false"
+                            android:paddingHorizontal="12dp"
                             android:paddingTop="4dp"
                             android:paddingBottom="4dp"
                             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
@@ -215,8 +222,8 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingHorizontal="16dp"
-                            android:paddingTop="8dp">
+                            android:paddingHorizontal="20dp"
+                            android:paddingTop="12dp">
 
                             <TextView
                                 android:layout_width="0dp"
@@ -244,7 +251,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="20dp"
                             android:paddingTop="4dp">
 
                             <TextView
@@ -273,8 +280,9 @@
                             android:id="@+id/rvFilters"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
+                            android:layout_marginTop="12dp"
                             android:clipToPadding="false"
+                            android:paddingHorizontal="12dp"
                             android:paddingTop="4dp"
                             android:paddingBottom="4dp"
                             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
@@ -287,10 +295,10 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingStart="20dp"
-                            android:paddingTop="6dp"
-                            android:paddingEnd="20dp"
-                            android:paddingBottom="2dp"
+                            android:paddingStart="24dp"
+                            android:paddingTop="8dp"
+                            android:paddingEnd="24dp"
+                            android:paddingBottom="4dp"
                             android:visibility="gone">
 
                             <TextView
@@ -306,8 +314,8 @@
                                 android:id="@+id/seekFilterIntensity"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="10dp"
-                                android:layout_marginEnd="10dp"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginEnd="12dp"
                                 android:layout_weight="1"
                                 android:max="100"
                                 android:progress="80"
@@ -340,8 +348,9 @@
                             android:id="@+id/rvFrames"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
+                            android:layout_marginTop="12dp"
                             android:clipToPadding="false"
+                            android:paddingHorizontal="12dp"
                             android:paddingTop="4dp"
                             android:paddingBottom="4dp"
                             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
@@ -361,8 +370,9 @@
                             android:id="@+id/rvStickers"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
+                            android:layout_marginTop="12dp"
                             android:clipToPadding="false"
+                            android:paddingHorizontal="12dp"
                             android:paddingTop="4dp"
                             android:paddingBottom="4dp"
                             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
@@ -378,55 +388,34 @@
                 android:layout_height="1dp"
                 android:background="#E0E6F0" />
 
-            <!-- ── SUMMARY + SAVE ROW ── -->
-            <LinearLayout
+            <!-- ── SAVE BUTTON ROW ── -->
+            <FrameLayout
                 android:id="@+id/persistentBottomBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#F8FAFD"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="24dp">
-
-                <TextView
-                    android:id="@+id/tvEditSummary"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_summary_pill"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="8dp"
-                    android:text="@string/edit_summary_default"
-                    android:textColor="#1F618D"
-                    android:textSize="11sp" />
-
-                <Space
-                    android:layout_width="12dp"
-                    android:layout_height="0dp" />
+                android:paddingHorizontal="24dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="32dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnFinishEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
                     android:text="@string/btn_save_return"
                     android:textColor="#FFFFFF"
-                    android:textSize="13sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
                     app:backgroundTint="#ff99be"
-                    app:cornerRadius="24dp"
+                    app:cornerRadius="27dp"
                     app:elevation="4dp"
                     app:icon="@drawable/ic_check_24"
                     app:iconGravity="textStart"
-                    app:iconPadding="6dp"
-                    app:iconSize="16dp"
+                    app:iconPadding="8dp"
+                    app:iconSize="20dp"
                     app:iconTint="#FFFFFF" />
 
-            </LinearLayout>
+            </FrameLayout>
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

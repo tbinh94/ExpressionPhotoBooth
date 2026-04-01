@@ -1,5 +1,7 @@
 package com.example.expressionphotobooth;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -12,8 +14,10 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -83,9 +87,30 @@ public class AdminReviewsActivity extends AppCompatActivity {
         chipGroupFilters.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId != View.NO_ID) {
                 currentFilterId = checkedId;
+                updateChipAppearance();
                 applyFilters();
             }
         });
+    }
+
+    private void updateChipAppearance() {
+        int activeColor = ContextCompat.getColor(this, R.color.app_blue);
+        int inactiveColor = Color.parseColor("#FFFFFF");
+        int activeTextColor = Color.WHITE;
+        int inactiveTextColor = Color.parseColor("#475569");
+
+        for (int i = 0; i < chipGroupFilters.getChildCount(); i++) {
+            Chip chip = (Chip) chipGroupFilters.getChildAt(i);
+            boolean isSelected = chip.getId() == currentFilterId;
+            
+            chip.setChipBackgroundColor(ColorStateList.valueOf(isSelected ? activeColor : inactiveColor));
+            chip.setTextColor(isSelected ? activeTextColor : inactiveTextColor);
+            chip.setChipStrokeWidth(isSelected ? 0 : dpToPx(1));
+        }
+    }
+
+    private float dpToPx(int dp) {
+        return dp * getResources().getDisplayMetrics().density;
     }
 
     private void loadReviews() {

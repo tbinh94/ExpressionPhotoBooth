@@ -10,6 +10,9 @@
     <string name="no_result_to_save">Không có ảnh kết quả để lưu</string>
     <string name="no_images_for_video">Không có ảnh để tạo video</string>
     <string name="exporting_video">Đang xuất video timelapse...</string>
+    <string name="video_exporting_btn">Đang tạo video...</string>
+    <string name="video_saving_btn">Đang lưu...</string>
+    <string name="video_saved_success">Đã lưu video vào bộ sưu tập!</string>
     <string name="failed_save_video">Xuất video thất bại</string>
 
     <string name="title_selection">KHO ẢNH CỦA BẠN</string>
@@ -225,7 +228,3 @@
     <string name="auth_forgot_password_success_title">Đã gửi Email</string>
     <string name="auth_forgot_password_success_message">Liên kết đặt lại mật khẩu đã được gửi đến Gmail của bạn. Vui lòng kiểm tra hộp thư đến.</string>
 </resources>
-
-
-
-
