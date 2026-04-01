@@ -70,6 +70,7 @@ public class LoginActivity extends AppCompatActivity {
         tvLoadingMessage = findViewById(R.id.tvLoadingMessage);
 
         etBirthday.setOnClickListener(v -> showDatePicker());
+        tvForgotPassword.setOnClickListener(v -> doForgotPassword());
         btnGuest.setOnClickListener(v -> doSignInAsGuest());
         btnSignIn.setOnClickListener(v -> {
             if (isRegisterMode) {
@@ -83,6 +84,49 @@ public class LoginActivity extends AppCompatActivity {
                 setRegisterMode(true);
             } else {
                 setRegisterMode(false);
+            }
+        });
+    }
+
+    private void doForgotPassword() {
+        String email = getText(etEmail);
+        if (TextUtils.isEmpty(email)) {
+            HelpDialogUtils.showCenteredNotice(
+                    this,
+                    getString(R.string.auth_invalid_input_title),
+                    getString(R.string.auth_forgot_password_email_required),
+                    false
+            );
+            return;
+        }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_invalid_input_title), getString(R.string.auth_invalid_email_message), false);
+            return;
+        }
+
+        setLoading(true, getString(R.string.auth_forgot_password_sending));
+        authRepository.sendPasswordResetEmail(email, new AuthRepository.SimpleCallback() {
+            @Override
+            public void onSuccess() {
+                setLoading(false, "");
+                HelpDialogUtils.showCenteredNotice(
+                        LoginActivity.this,
+                        getString(R.string.auth_forgot_password_success_title),
+                        getString(R.string.auth_forgot_password_success_message),
+                        false
+                );
+            }
+
+            @Override
+            public void onError(String message) {
+                setLoading(false, "");
+                HelpDialogUtils.showCenteredNotice(
+                        LoginActivity.this,
+                        getString(R.string.auth_error_title),
+                        message,
+                        false
+                );
             }
         });
     }
