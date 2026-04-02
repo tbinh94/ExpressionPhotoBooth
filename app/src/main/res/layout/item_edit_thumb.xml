@@ -6,27 +6,27 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:paddingBottom="12dp"
-    android:paddingTop="12dp">
+    android:gravity="center"
+    android:padding="8dp">
 
     <!-- Preview image/color Card with built-in stroke -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardThumb"
-        android:layout_width="66dp"
-        android:layout_height="66dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
         app:strokeWidth="0dp"
         app:strokeColor="#2A5298"
-        app:cardBackgroundColor="#E0E6F0">
+        app:cardBackgroundColor="#FFFFFF">
 
         <ImageView
             android:id="@+id/ivThumbPreview"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="match_parent"
             android:scaleType="centerInside"
-            android:padding="6dp" />
+            android:padding="8dp"
+            android:adjustViewBounds="true" />
 
     </com.google.android.material.card.MaterialCardView>
 
@@ -35,11 +35,11 @@
         android:id="@+id/tvThumbLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textSize="11sp"
-        android:textStyle="bold"
+        android:layout_marginTop="6dp"
+        android:textSize="10sp"
+        android:textStyle="normal"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textColor="@color/edit_label" />
+        android:textColor="#546E7A" />
 
 </LinearLayout>

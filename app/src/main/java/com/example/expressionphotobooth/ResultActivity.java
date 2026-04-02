@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.AudioManager;
@@ -21,6 +22,7 @@ import android.widget.RatingBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.exifinterface.media.ExifInterface;
 
 import com.example.expressionphotobooth.data.video.TimelapseVideoEncoder;
 import com.example.expressionphotobooth.domain.model.DownloadType;
@@ -228,9 +230,44 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private Bitmap decodeBitmap(Uri uri) {
-        try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
-            return BitmapFactory.decodeStream(inputStream);
+        try {
+            // 1. Decode bitmap gốc
+            Bitmap bitmap;
+            try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
+                bitmap = BitmapFactory.decodeStream(inputStream);
+            }
+            if (bitmap == null) return null;
+
+            // 2. Kiểm tra hướng xoay EXIF
+            int rotation = 0;
+            try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
+                if (inputStream != null) {
+                    ExifInterface exif = new ExifInterface(inputStream);
+                    int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                    switch (orientation) {
+                        case ExifInterface.ORIENTATION_ROTATE_90: rotation = 90; break;
+                        case ExifInterface.ORIENTATION_ROTATE_180: rotation = 180; break;
+                        case ExifInterface.ORIENTATION_ROTATE_270: rotation = 270; break;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // 3. Xoay bitmap nếu cần
+            if (rotation != 0) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(rotation);
+                Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                if (rotated != bitmap) {
+                    bitmap.recycle();
+                }
+                return rotated;
+            }
+
+            return bitmap;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -253,7 +290,11 @@ public class ResultActivity extends AppCompatActivity {
             return;
         }
 
+        // UI/UX Improvement: Disable button and show loading text
         btnSaveVideo.setEnabled(false);
+        String originalText = btnSaveVideo.getText().toString();
+        btnSaveVideo.setText(R.string.video_exporting_btn);
+        
         Toast.makeText(this, R.string.exporting_video, Toast.LENGTH_SHORT).show();
 
         new Thread(() -> {
@@ -273,18 +314,21 @@ public class ResultActivity extends AppCompatActivity {
                     loopSequence.add(editedUris.get(i));
                 }
 
-                // Repeat the loop 4 times to reach ~4 seconds at 6 FPS (doubling speed)
+                // Optimization: Reducing loops from 4 to 3 to speed up export while keeping decent length
                 List<String> finalFrames = new ArrayList<>();
                 finalFrames.addAll(loopSequence);
                 finalFrames.addAll(loopSequence);
                 finalFrames.addAll(loopSequence);
-                finalFrames.addAll(loopSequence);
 
-                // Encode at 6 Frames Per Second for timelapse feel (twice as fast)
+                // UI update before saving
+                runOnUiThread(() -> btnSaveVideo.setText(R.string.video_saving_btn));
+
+                // Encode at 6 Frames Per Second
                 Uri videoUri = createTimelapseVideoUseCase.execute(ResultActivity.this, finalFrames, 6);
 
                 runOnUiThread(() -> {
                     btnSaveVideo.setEnabled(true);
+                    btnSaveVideo.setText(originalText);
                     if (videoUri != null) {
                         adminStatsRepository.recordDownload(DownloadType.VIDEO);
                         Toast.makeText(ResultActivity.this, R.string.video_saved_success, Toast.LENGTH_LONG).show();
@@ -297,6 +341,7 @@ public class ResultActivity extends AppCompatActivity {
                 e.printStackTrace();
                 runOnUiThread(() -> {
                     btnSaveVideo.setEnabled(true);
+                    btnSaveVideo.setText(originalText);
                     Toast.makeText(ResultActivity.this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
                 });
             }

@@ -4,8 +4,10 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -31,7 +33,7 @@ public class MonthlyBarChartView extends View {
     private int barColor = Color.parseColor("#3D68E8");
     private boolean showYAxis = true;
     private String legendText = "";
-    private float animationProgress = 1f;
+    private float animationProgress = 0f;
     private ValueAnimator barAnimator;
 
     public MonthlyBarChartView(Context context) {
@@ -50,30 +52,30 @@ public class MonthlyBarChartView extends View {
     }
 
     private void init() {
-        axisPaint.setColor(Color.parseColor("#D5DEEA"));
-        axisPaint.setStrokeWidth(dp(1f));
+        axisPaint.setColor(Color.parseColor("#E2E8F0"));
+        axisPaint.setStrokeWidth(dp(1.5f));
 
-        gridPaint.setColor(Color.parseColor("#EEF2F8"));
+        gridPaint.setColor(Color.parseColor("#F1F5F9"));
         gridPaint.setStrokeWidth(dp(1f));
 
         barPaint.setStyle(Paint.Style.FILL);
         barPaint.setColor(barColor);
 
-        labelPaint.setColor(Color.parseColor("#6D7F99"));
-        labelPaint.setTextSize(sp(10f));
+        labelPaint.setColor(Color.parseColor("#94A3B8"));
+        labelPaint.setTextSize(sp(10.5f));
         labelPaint.setTextAlign(Paint.Align.CENTER);
 
-        valuePaint.setColor(Color.parseColor("#2D3A4D"));
+        valuePaint.setColor(Color.parseColor("#1E293B"));
         valuePaint.setTextSize(sp(10f));
         valuePaint.setFakeBoldText(true);
         valuePaint.setTextAlign(Paint.Align.CENTER);
 
-        yValuePaint.setColor(Color.parseColor("#9AAAC1"));
+        yValuePaint.setColor(Color.parseColor("#94A3B8"));
         yValuePaint.setTextSize(sp(9f));
         yValuePaint.setTextAlign(Paint.Align.RIGHT);
 
-        legendTextPaint.setColor(Color.parseColor("#5E718D"));
-        legendTextPaint.setTextSize(sp(11f));
+        legendTextPaint.setColor(Color.parseColor("#475569"));
+        legendTextPaint.setTextSize(sp(12f));
         legendTextPaint.setFakeBoldText(true);
 
         legendDotPaint.setStyle(Paint.Style.FILL);
@@ -97,10 +99,6 @@ public class MonthlyBarChartView extends View {
         invalidate();
     }
 
-    public void setChartData(List<MonthlyChartPoint> data) {
-        setChartData(data, true);
-    }
-
     public void setChartData(List<MonthlyChartPoint> data, boolean animate) {
         points.clear();
         if (data != null) {
@@ -121,8 +119,8 @@ public class MonthlyBarChartView extends View {
         }
         animationProgress = 0f;
         barAnimator = ValueAnimator.ofFloat(0f, 1f);
-        barAnimator.setDuration(720L);
-        barAnimator.setInterpolator(new DecelerateInterpolator());
+        barAnimator.setDuration(1000L);
+        barAnimator.setInterpolator(new DecelerateInterpolator(1.5f));
         barAnimator.addUpdateListener(animator -> {
             animationProgress = (float) animator.getAnimatedValue();
             invalidate();
@@ -139,76 +137,86 @@ public class MonthlyBarChartView extends View {
 
         float width = getWidth();
         float height = getHeight();
-        float left = getPaddingLeft() + (showYAxis ? dp(34f) : dp(8f));
-        float right = width - getPaddingRight() - dp(8f);
-        float legendExtra = legendText.isEmpty() ? 0f : dp(18f);
-        float top = getPaddingTop() + dp(8f) + legendExtra;
-        float bottom = height - getPaddingBottom() - dp(24f);
+        float leftMargin = showYAxis ? dp(40f) : dp(12f);
+        float rightMargin = dp(12f);
+        float bottomMargin = dp(28f);
+        float legendExtra = legendText.isEmpty() ? 0f : dp(24f);
+        float topMargin = dp(12f) + legendExtra;
 
-        if (right <= left || bottom <= top) {
-            return;
-        }
+        float left = getPaddingLeft() + leftMargin;
+        float right = width - getPaddingRight() - rightMargin;
+        float top = getPaddingTop() + topMargin;
+        float bottom = height - getPaddingBottom() - bottomMargin;
 
-        float maxValue = 1f;
+        if (right <= left || bottom <= top) return;
+
+        float maxValue = 0.1f;
         for (MonthlyChartPoint point : points) {
             maxValue = Math.max(maxValue, point.getValue());
         }
+        maxValue *= 1.15f; // Add 15% head room
 
+        // Legend
         if (!legendText.isEmpty()) {
-            float cy = getPaddingTop() + dp(10f);
-            canvas.drawCircle(left, cy, dp(4f), legendDotPaint);
-            canvas.drawText(legendText, left + dp(10f), cy + dp(3.5f), legendTextPaint);
+            float lx = left;
+            float ly = getPaddingTop() + dp(14f);
+            reusableBarRect.set(lx, ly - dp(6f), lx + dp(12f), ly + dp(6f));
+            canvas.drawRoundRect(reusableBarRect, dp(4f), dp(4f), legendDotPaint);
+            canvas.drawText(legendText, lx + dp(20f), ly + dp(4.5f), legendTextPaint);
         }
 
-        canvas.drawLine(left, bottom, right, bottom, axisPaint);
-        if (showYAxis) {
-            canvas.drawLine(left, top, left, bottom, axisPaint);
-        }
-
-        for (int i = 0; i <= 4; i++) {
-            float y = top + ((bottom - top) * i / 4f);
+        // Horizontal Grid Lines
+        int gridCount = 5;
+        for (int i = 0; i < gridCount; i++) {
+            float y = bottom - ((bottom - top) * i / (float)(gridCount - 1));
             canvas.drawLine(left, y, right, y, gridPaint);
             if (showYAxis) {
-                float yValue = maxValue - ((maxValue * i) / 4f);
-                String yText = yValue >= 10f
-                        ? String.format(Locale.getDefault(), "%.0f", yValue)
-                        : String.format(Locale.getDefault(), "%.1f", yValue);
-                canvas.drawText(yText, left - dp(6f), y + dp(3f), yValuePaint);
+                float v = (maxValue * i) / (float)(gridCount - 1);
+                String yText = v >= 10f ? String.format(Locale.getDefault(), "%.0f", v) : String.format(Locale.getDefault(), "%.1f", v);
+                canvas.drawText(yText, left - dp(10f), y + dp(4f), yValuePaint);
             }
         }
 
+        // Draw Bars
         float usableWidth = right - left;
         float slotWidth = usableWidth / points.size();
-        float barWidth = Math.min(dp(26f), slotWidth * 0.55f);
+        float barWidth = slotWidth * 0.65f;
+        float maxBarWidth = dp(32f);
+        if (barWidth > maxBarWidth) barWidth = maxBarWidth;
 
         for (int i = 0; i < points.size(); i++) {
             MonthlyChartPoint point = points.get(i);
             float centerX = left + (i * slotWidth) + (slotWidth / 2f);
             float animatedValue = point.getValue() * animationProgress;
-            float ratio = animatedValue / maxValue;
-            float barHeight = Math.max(dp(2f), (bottom - top) * ratio);
+            float barHeight = (bottom - top) * (animatedValue / maxValue);
             float barTop = bottom - barHeight;
 
             reusableBarRect.set(centerX - barWidth / 2f, barTop, centerX + barWidth / 2f, bottom);
-            canvas.drawRoundRect(reusableBarRect, dp(6f), dp(6f), barPaint);
 
-            String drawValueText = animationProgress >= 0.98f
-                    ? point.getValueText()
-                    : (animatedValue >= 10f
-                    ? String.format(Locale.getDefault(), "%.0f", animatedValue)
-                    : String.format(Locale.getDefault(), "%.1f", animatedValue));
-            canvas.drawText(drawValueText, centerX, barTop - dp(4f), valuePaint);
-            canvas.drawText(point.getLabel(), centerX, bottom + dp(14f), labelPaint);
+            // Gradient for bar
+            int endColor = adjustAlpha(barColor, 0.4f);
+            Shader shader = new LinearGradient(centerX, barTop, centerX, bottom, barColor, endColor, Shader.TileMode.CLAMP);
+            barPaint.setShader(shader);
+
+            canvas.drawRoundRect(reusableBarRect, dp(8f), dp(8f), barPaint);
+            barPaint.setShader(null); // Clear shader for next draws
+
+            // Value label on top of bar
+            if (animationProgress > 0.8f) {
+                canvas.drawText(point.getValueText(), centerX, barTop - dp(6f), valuePaint);
+            }
+
+            // X-Axis label (Month)
+            canvas.drawText(point.getLabel(), centerX, bottom + dp(18f), labelPaint);
         }
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        if (barAnimator != null) {
-            barAnimator.cancel();
-            barAnimator = null;
-        }
-        super.onDetachedFromWindow();
+    private int adjustAlpha(int color, float factor) {
+        int alpha = Math.round(Color.alpha(color) * factor);
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        return Color.argb(alpha, red, green, blue);
     }
 
     private float dp(float value) {
@@ -219,4 +227,3 @@ public class MonthlyBarChartView extends View {
         return value * getResources().getDisplayMetrics().scaledDensity;
     }
 }
-

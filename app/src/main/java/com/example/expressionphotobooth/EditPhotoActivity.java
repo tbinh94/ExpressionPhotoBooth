@@ -48,7 +48,6 @@ public class EditPhotoActivity extends AppCompatActivity {
     private ImageView ivEditingPhoto;
     private ImageView ivFrameOverlay;
     private Chip chipActiveEdit;
-    private TextView tvEditSummary;
     private TabLayout editTabLayout;
     private LinearLayout panelPresets, panelFilters, panelFrames, panelStickers;
     private LinearLayout filterIntensityRow;
@@ -233,14 +232,12 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         applyCurrentEditState();
         syncSelectionsToAdapters();
-        updateEditSummary();
     }
 
     private void bindViews() {
         ivEditingPhoto    = findViewById(R.id.ivEditingPhoto);
         ivFrameOverlay    = findViewById(R.id.ivFrameOverlay);
         chipActiveEdit    = findViewById(R.id.chipActiveEdit);
-        tvEditSummary     = findViewById(R.id.tvEditSummary);
         editTabLayout     = findViewById(R.id.editTabLayout);
         panelPresets      = findViewById(R.id.panelPresets);
         panelFilters      = findViewById(R.id.panelFilters);
@@ -424,7 +421,6 @@ public class EditPhotoActivity extends AppCompatActivity {
             currentEditState.setCustomStickerBase64(null);
         }
         applyCurrentEditState();
-        updateEditSummary();
     }
 
     private void setupIntensitySlider() {
@@ -579,7 +575,6 @@ public class EditPhotoActivity extends AppCompatActivity {
             currentEditState = undoStack.pop();
             applyCurrentEditState();
             syncSelectionsToAdapters();
-            updateEditSummary();
         } else {
             Toast.makeText(this, "Nothing to undo", Toast.LENGTH_SHORT).show();
         }
@@ -596,7 +591,6 @@ public class EditPhotoActivity extends AppCompatActivity {
         
         applyCurrentEditState();
         syncSelectionsToAdapters();
-        updateEditSummary();
     }
 
     private void updateFilter(EditState.FilterStyle filter) {
@@ -604,7 +598,6 @@ public class EditPhotoActivity extends AppCompatActivity {
         currentEditState.setFilterStyle(filter);
         applyFilterToAllPhotos(filter, currentEditState.getFilterIntensity());
         applyCurrentEditState();
-        updateEditSummary();
         filterIntensityRow.setVisibility(filter == EditState.FilterStyle.NONE ? View.GONE : View.VISIBLE);
         seekFilterIntensity.setProgress((int)(currentEditState.getFilterIntensity() * 100));
         tvIntensityValue.setText(String.valueOf((int)(currentEditState.getFilterIntensity() * 100)));
@@ -628,7 +621,6 @@ public class EditPhotoActivity extends AppCompatActivity {
         pushToUndoStack();
         currentEditState.setFrameStyle(frame);
         applyCurrentEditState();
-        updateEditSummary();
     }
 
     private void updateSticker(EditState.StickerStyle sticker) {
@@ -636,7 +628,6 @@ public class EditPhotoActivity extends AppCompatActivity {
         currentEditState.setStickerStyle(sticker);
         currentEditState.setCustomStickerBase64(null); // Clear custom if any
         applyCurrentEditState();
-        updateEditSummary();
     }
 
     private void applyCurrentEditState() {
@@ -644,6 +635,12 @@ public class EditPhotoActivity extends AppCompatActivity {
         editedBitmap = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState);
         ivEditingPhoto.setImageBitmap(editedBitmap);
         applyFrameOverlay();
+        
+        chipActiveEdit.setVisibility(
+                (currentEditState.getFilterStyle() != EditState.FilterStyle.NONE ||
+                        currentEditState.getStickerStyle() != EditState.StickerStyle.NONE)
+                        ? View.VISIBLE : View.GONE
+        );
     }
 
     private void syncSelectionsToAdapters() {
@@ -651,17 +648,6 @@ public class EditPhotoActivity extends AppCompatActivity {
         filtersAdapter.setSelectedByValue(currentEditState.getFilterStyle());
         framesAdapter.setSelectedByValue(currentEditState.getFrameStyle());
         stickersAdapter.setSelectedByValue(currentEditState.getStickerStyle());
-    }
-
-    private void updateEditSummary() {
-        String filter = currentEditState.getFilterStyle().name();
-        String sticker = currentEditState.getStickerStyle().name();
-        tvEditSummary.setText(String.format("Filter: %s | Sticker: %s", filter, sticker));
-        chipActiveEdit.setVisibility(
-                (currentEditState.getFilterStyle() != EditState.FilterStyle.NONE ||
-                        currentEditState.getStickerStyle() != EditState.StickerStyle.NONE)
-                        ? View.VISIBLE : View.GONE
-        );
     }
 
     private void saveAndFinish() {
