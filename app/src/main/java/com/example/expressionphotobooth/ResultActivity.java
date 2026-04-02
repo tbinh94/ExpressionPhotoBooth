@@ -24,6 +24,7 @@ import android.widget.RatingBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.example.expressionphotobooth.data.video.TimelapseVideoEncoder;
@@ -125,6 +126,9 @@ public class ResultActivity extends AppCompatActivity {
                     sessionState.setResultImageUri(resultUri != null ? resultUri.toString() : null);
                     sessionRepository.saveSession(sessionState);
 
+                    // Save to user's local gallery
+                    saveToUserLocalGallery(finalBitmap);
+
                     // Tự động bật popup đánh giá sau khi người dùng xem kết quả 1 lúc
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         if (!isFinishing()) showFeedbackBottomSheet(true);
@@ -138,6 +142,8 @@ public class ResultActivity extends AppCompatActivity {
         findViewById(R.id.btnSavePng).setOnClickListener(v -> saveCurrentResultAsPng());
         btnSaveVideo = findViewById(R.id.btnNext);
         btnSaveVideo.setOnClickListener(v -> exportTimelapseVideo());
+
+        findViewById(R.id.btnShare).setOnClickListener(v -> shareResult());
 
         View btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) {
@@ -286,6 +292,25 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
+    private void saveToUserLocalGallery(Bitmap bitmap) {
+        AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        String uid = authRepository.getCurrentUid();
+        if (uid == null) return;
+
+        File galleryDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "user_gallery/" + uid);
+        if (!galleryDir.exists()) {
+            galleryDir.mkdirs();
+        }
+
+        String fileName = "pose_" + System.currentTimeMillis() + ".png";
+        File file = new File(galleryDir, fileName);
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void exportTimelapseVideo() {
         if (sourceOriginalUris == null || sourceOriginalUris.isEmpty()) {
             Toast.makeText(this, R.string.no_images_for_video, Toast.LENGTH_SHORT).show();
@@ -379,6 +404,30 @@ public class ResultActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void shareResult() {
+        if (resultUri == null) {
+            Toast.makeText(this, R.string.no_result_to_save, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File file = new File(getCacheDir(), resultUri.getLastPathSegment());
+        if (!file.exists()) {
+            Toast.makeText(this, R.string.no_result_to_save, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Uri contentUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        shareIntent.setDataAndType(contentUri, getContentResolver().getType(contentUri));
+        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        shareIntent.setType("image/png");
+
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.result_share)));
     }
 
     private void showFeedbackBottomSheet(boolean autoTrigger) {

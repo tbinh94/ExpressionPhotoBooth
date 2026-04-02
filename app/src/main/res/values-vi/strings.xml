@@ -46,6 +46,7 @@
     <string name="result_subtitle">Lưu lại khoảnh khắc</string>
     <string name="result_save_image">Lưu ảnh</string>
     <string name="result_save_video">Lưu video</string>
+    <string name="result_share">Chia sẻ</string>
     <string name="result_rate_title">Bạn thấy thế nào?</string>
     <string name="result_rate_subtitle">Đánh giá giúp chúng mình nhé!</string>
     <string name="feedback_title">Đánh giá khoảnh khắc của bạn</string>
@@ -250,4 +251,10 @@
     <string name="auth_forgot_password_sending">Đang gửi liên kết thiết lập lại...</string>
     <string name="auth_forgot_password_success_title">Đã gửi Email</string>
     <string name="auth_forgot_password_success_message">Liên kết đặt lại mật khẩu đã được gửi đến Gmail của bạn. Vui lòng kiểm tra hộp thư đến.</string>
+    <string name="btn_gallery">✦ THƯ VIỆN ✦</string>
+    <string name="gallery_title">Khoảnh Khắc Của Tôi</string>
+    <string name="gallery_subtitle">Những tấm ảnh đã lưu tại máy</string>
+    <string name="gallery_empty">Chưa có kỷ niệm nào. Hãy bắt đầu chụp nhé!</string>
+    <string name="gallery_delete_confirm">Bạn có muốn xóa kỷ niệm này không?</string>
+    <string name="gallery_delete_success">Đã xóa kỷ niệm</string>
 </resources>

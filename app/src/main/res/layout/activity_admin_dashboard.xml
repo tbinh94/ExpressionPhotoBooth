@@ -70,14 +70,13 @@
                                 android:textColor="#B0BED4"
                                 android:textSize="14sp" />
 
-                            <TextView
-                                android:id="@+id/tvAdminEmail"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/admin_email_fallback"
-                                android:textColor="#FFFFFF"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                             <TextView
+                                 android:layout_width="wrap_content"
+                                 android:layout_height="wrap_content"
+                                 android:text="Administrator"
+                                 android:textColor="#FFFFFF"
+                                 android:textSize="12sp"
+                                 android:textStyle="bold" />
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton

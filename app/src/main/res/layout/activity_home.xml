@@ -86,6 +86,19 @@
             app:elevation="8dp" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGallery"
+            android:layout_width="250dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/btn_gallery"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:backgroundTint="#81c19b"
+            app:cornerRadius="40dp"
+            app:elevation="4dp" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAdmin"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"

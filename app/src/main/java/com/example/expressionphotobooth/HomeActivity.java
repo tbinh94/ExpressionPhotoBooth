@@ -25,6 +25,7 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButton btnAdmin;
     private MaterialButton btnStart;
     private MaterialButton btnLogout;
+    private MaterialButton btnGallery;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -73,6 +74,12 @@ public class HomeActivity extends AppCompatActivity {
                 @Override
                 public void onAnimationRepeat(Animation animation) {}
             });
+        });
+
+        btnGallery = findViewById(R.id.btnGallery);
+        btnGallery.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, GalleryActivity.class);
+            startActivity(intent);
         });
 
         MaterialButton btnVolumeToggle = findViewById(R.id.btnVolumeToggle);
@@ -128,6 +135,9 @@ public class HomeActivity extends AppCompatActivity {
         }
         if (btnAdmin != null) {
             btnAdmin.setText(LocaleManager.getString(this, R.string.admin_go_to_dashboard, languageTag));
+        }
+        if (btnGallery != null) {
+            btnGallery.setText(LocaleManager.getString(this, R.string.btn_gallery, languageTag));
         }
     }
 

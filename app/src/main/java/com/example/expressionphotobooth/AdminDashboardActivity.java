@@ -69,9 +69,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
         }
 
-        TextView tvAdminEmail = findViewById(R.id.tvAdminEmail);
+        // Email display removed
         String email = authRepository.getCurrentEmail();
-        tvAdminEmail.setText(email == null ? getString(R.string.admin_email_fallback) : email);
 
         tvAdminGreeting = findViewById(R.id.tvAdminGreeting);
         tvStatAccountsLabel = findViewById(R.id.tvStatAccountsLabel);
@@ -104,13 +103,14 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         AdminPagerAdapter adapter = new AdminPagerAdapter(this);
         viewPager.setAdapter(adapter);
 
-        // Update Nav Header email
+        // Handle drawer close from header
         View headerView = navigationView.getHeaderView(0);
-        TextView tvNavEmail = headerView.findViewById(R.id.tvNavHeaderSubtitle);
-        TextView tvNavAvatarInitials = headerView.findViewById(R.id.tvNavAvatarInitials);
-        if (tvNavEmail != null) {
-            tvNavEmail.setText(email == null ? getString(R.string.admin_email_fallback) : email);
+        View btnCloseDrawer = headerView.findViewById(R.id.btnCloseDrawer);
+        if (btnCloseDrawer != null) {
+            btnCloseDrawer.setOnClickListener(v -> drawerLayout.closeDrawer(GravityCompat.START));
         }
+
+        TextView tvNavAvatarInitials = headerView.findViewById(R.id.tvNavAvatarInitials);
         if (tvNavAvatarInitials != null) {
             tvNavAvatarInitials.setText(resolveAvatarInitial(email));
         }
