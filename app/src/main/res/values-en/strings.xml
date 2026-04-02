@@ -88,6 +88,7 @@
     <string name="result_subtitle">Save your memories</string>
     <string name="result_save_image">Save image</string>
     <string name="result_save_video">Save video</string>
+    <string name="result_share">Share</string>
     <string name="result_rate_title">How do you feel?</string>
     <string name="result_rate_subtitle">Please rate your experience!</string>
     <string name="feedback_title">Rate Your Memories</string>
@@ -208,4 +209,10 @@
     <string name="admin_sticker_error">Failed to upload sticker!</string>
     <string name="admin_sticker_empty">No custom stickers yet.</string>
     <string name="admin_go_to_dashboard">Admin Dashboard</string>
+    <string name="btn_gallery">✦ GALLERY ✦</string>
+    <string name="gallery_title">My Memories</string>
+    <string name="gallery_subtitle">Locally saved snapshots</string>
+    <string name="gallery_empty">No memories saved yet. Start capturing!</string>
+    <string name="gallery_delete_confirm">Do you want to delete this memory?</string>
+    <string name="gallery_delete_success">Memory deleted</string>
 </resources>

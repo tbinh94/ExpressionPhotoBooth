@@ -79,9 +79,7 @@ public class SetupActivity extends AppCompatActivity {
             int requiredSelectionCount = FrameConfig.getSlotCountForFrame(selectedFrame.getImageResId());
             session.setPhotoCount(requiredSelectionCount);
             session.setSelectedFrameResId(selectedFrame.getImageResId());
-            EditState editState = new EditState();
-            editState.setFrameStyle(selectedFrame.getFrameStyle());
-            session.setEditState(editState);
+            session.setEditState(new EditState());
             sessionRepository.saveSession(session);
 
             getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)

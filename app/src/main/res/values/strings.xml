@@ -63,6 +63,7 @@
     <string name="result_subtitle">Save your memories</string>
     <string name="result_save_image">Lưu ảnh</string>
     <string name="result_save_video">Lưu video</string>
+    <string name="result_share">Chia sẻ</string>
     <string name="result_rate_title">Bạn thấy thế nào?</string>
     <string name="result_rate_subtitle">Đánh giá giúp chúng mình nhé!</string>
     <string name="feedback_title">Rate Your Memories</string>
@@ -302,4 +303,11 @@
     <string name="auth_forgot_password_sending">Sending reset link...</string>
     <string name="auth_forgot_password_success_title">Email Sent</string>
     <string name="auth_forgot_password_success_message">A password reset link has been sent to your Gmail. Please check your inbox.</string>
+    <string name="btn_gallery">✦ GALLERY ✦</string>
+    <string name="gallery_title">My Memories</string>
+    <string name="gallery_subtitle">Locally saved snapshots</string>
+    <string name="gallery_empty">No memories saved yet. Start capturing!</string>
+    <string name="gallery_item_pose">Pose %1$s</string>
+    <string name="gallery_delete_confirm">Do you want to delete this memory?</string>
+    <string name="gallery_delete_success">Memory deleted</string>
 </resources>
