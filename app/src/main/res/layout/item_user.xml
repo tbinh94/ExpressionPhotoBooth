@@ -6,9 +6,9 @@
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
     app:cardBackgroundColor="#FFFFFF"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="3dp"
-    app:strokeColor="#E0E0E0"
+    app:cardCornerRadius="@dimen/admin_card_corner_radius_item"
+    app:cardElevation="@dimen/admin_card_elevation"
+    app:strokeColor="@color/admin_card_stroke"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -23,12 +23,24 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <TextView
+                android:id="@+id/tvUserAvatar"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_avatar_circle"
+                android:gravity="center"
+                android:text="A"
+                android:textColor="#1B2A5C"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
             <View
                 android:id="@+id/viewUserRoleIndicator"
                 android:layout_width="12dp"
                 android:layout_height="12dp"
                 android:background="@drawable/bg_avatar_circle"
-                android:backgroundTint="#FFC107" />
+                android:backgroundTint="#FFC107"
+                android:layout_marginStart="10dp" />
 
             <TextView
                 android:id="@+id/tvUserName"
@@ -64,7 +76,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="user@email.com"
-            android:textColor="#757575"
+            android:textColor="@color/admin_subtitle_color"
             android:textSize="14sp" />
 
         <TextView

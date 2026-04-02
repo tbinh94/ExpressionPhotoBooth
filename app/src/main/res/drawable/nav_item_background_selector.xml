@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#233A72" />
+                    <corners android:radius="@dimen/admin_nav_item_corner" />
+                </shape>
+            </item>
+            <item
+                android:width="28dp"
+                android:height="28dp"
+                android:gravity="start|center_vertical"
+                android:left="@dimen/admin_nav_item_inset_horizontal">
+                <shape android:shape="oval">
+                    <solid android:color="#2D4C8F" />
+                </shape>
+            </item>
+            <item
+                android:height="1dp"
+                android:gravity="bottom"
+                android:left="@dimen/admin_nav_item_divider_inset"
+                android:right="@dimen/admin_nav_item_divider_inset">
+                <shape android:shape="rectangle">
+                    <solid android:color="#33567EBB" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_pressed="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#1A2E5C" />
+                    <corners android:radius="@dimen/admin_nav_item_corner" />
+                </shape>
+            </item>
+            <item
+                android:height="1dp"
+                android:gravity="bottom"
+                android:left="@dimen/admin_nav_item_divider_inset"
+                android:right="@dimen/admin_nav_item_divider_inset">
+                <shape android:shape="rectangle">
+                    <solid android:color="#33567EBB" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item
+                android:height="1dp"
+                android:gravity="bottom"
+                android:left="@dimen/admin_nav_item_divider_inset"
+                android:right="@dimen/admin_nav_item_divider_inset">
+                <shape android:shape="rectangle">
+                    <solid android:color="#33567EBB" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>
+

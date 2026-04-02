@@ -14,11 +14,13 @@
 
         <!-- Chart Card -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardOverviewSummary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="2dp"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/admin_card_corner_radius"
+            app:cardElevation="@dimen/admin_card_elevation"
             app:cardBackgroundColor="#FFFFFF"
             app:strokeWidth="0dp">
 
@@ -54,7 +56,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/admin_overview_chart_subtitle_placeholder"
-                            android:textColor="#8A9BB8"
+                            android:textColor="@color/admin_subtitle_color"
                             android:textSize="12sp" />
 
                         <TextView
@@ -63,7 +65,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="@string/admin_overview_last_review_fallback"
-                            android:textColor="#8A9BB8"
+                            android:textColor="@color/admin_subtitle_color"
                             android:textSize="11sp" />
                     </LinearLayout>
 
@@ -88,10 +90,11 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvTotalReviewsLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/admin_overview_total_reviews"
-                            android:textColor="#8A9BB8"
+                            android:textColor="@color/admin_subtitle_color"
                             android:textSize="11sp" />
 
                         <TextView
@@ -105,10 +108,11 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvFiveStarLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/admin_overview_five_star_label"
-                            android:textColor="#8A9BB8"
+                            android:textColor="@color/admin_subtitle_color"
                             android:textSize="11sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -121,7 +125,7 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_five" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar5Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_five" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar5Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_green"/>
                     </FrameLayout>
@@ -135,7 +139,7 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_four" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar4Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_four" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar4Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_blue"/>
                     </FrameLayout>
@@ -149,7 +153,7 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_three" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar3Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_three" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar3Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_gold"/>
                     </FrameLayout>
@@ -163,7 +167,7 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_two" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar2Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_two" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar2Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_orange"/>
                     </FrameLayout>
@@ -176,7 +180,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
-                    <TextView android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_one" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar1Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_one" android:textSize="11sp" android:textColor="#4A5D77"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar1Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_red"/>
                     </FrameLayout>
@@ -193,11 +197,12 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tvRangeTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/admin_overview_range_title"
-                android:textColor="#5D6F89"
+                android:textColor="@color/admin_subtitle_color"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -249,11 +254,82 @@
         </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAiRatioMini"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="1dp"
+            app:cardCornerRadius="@dimen/admin_card_corner_radius_item"
+            app:cardElevation="@dimen/admin_card_elevation"
+            app:cardBackgroundColor="#FFFFFF"
+            app:strokeColor="@color/admin_card_stroke"
+            app:strokeWidth="1dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/admin_ai_mini_card_padding">
+
+                <com.example.expressionphotobooth.ui.chart.AiRatioPieChartView
+                    android:id="@+id/pieAiRatioMini"
+                    android:layout_width="@dimen/admin_ai_mini_pie_size"
+                    android:layout_height="@dimen/admin_ai_mini_pie_size"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvAiRatioMiniPercent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0%"
+                    android:textColor="#1B2A5C"
+                    android:textSize="@dimen/admin_ai_mini_percent_text"
+                    android:textStyle="bold"
+                    app:layout_constraintBaseline_toBaselineOf="@id/tvAiRatioMiniTitle"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/admin_ai_mini_gap"
+                    android:layout_marginEnd="@dimen/admin_ai_mini_gap"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="@id/pieAiRatioMini"
+                    app:layout_constraintEnd_toStartOf="@id/tvAiRatioMiniPercent"
+                    app:layout_constraintStart_toEndOf="@id/pieAiRatioMini"
+                    app:layout_constraintTop_toTopOf="@id/pieAiRatioMini">
+
+                    <TextView
+                        android:id="@+id/tvAiRatioMiniTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/admin_ai_pie_title"
+                        android:textColor="#1B2A5C"
+                        android:textSize="@dimen/admin_ai_mini_title_text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvAiRatioMiniMeta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/admin_ai_registered_with_count"
+                        android:textColor="@color/admin_subtitle_color"
+                        android:textSize="@dimen/admin_ai_mini_meta_text" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="@dimen/admin_card_corner_radius"
+            app:cardElevation="@dimen/admin_card_elevation"
             app:cardBackgroundColor="#FFFFFF">
 
             <LinearLayout
@@ -263,6 +339,7 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/tvUsersChartTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/admin_overview_users_chart_title"
@@ -271,11 +348,12 @@
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/tvUsersChartSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="@string/admin_overview_users_chart_subtitle"
-                    android:textColor="#8A9BB8"
+                    android:textColor="@color/admin_subtitle_color"
                     android:textSize="11sp" />
 
                 <com.example.expressionphotobooth.ui.chart.MonthlyBarChartView
@@ -291,7 +369,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="@string/admin_overview_trend_empty"
-                    android:textColor="#8A9BB8"
+                    android:textColor="@color/admin_subtitle_color"
                     android:textSize="11sp"
                     android:visibility="gone" />
             </LinearLayout>
@@ -301,8 +379,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="1dp"
+            app:cardCornerRadius="@dimen/admin_card_corner_radius"
+            app:cardElevation="@dimen/admin_card_elevation"
             app:cardBackgroundColor="#FFFFFF">
 
             <LinearLayout
@@ -312,6 +390,7 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/tvDownloadsChartTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/admin_overview_download_chart_title"
@@ -320,11 +399,12 @@
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/tvDownloadsChartSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="@string/admin_overview_download_chart_subtitle"
-                    android:textColor="#8A9BB8"
+                    android:textColor="@color/admin_subtitle_color"
                     android:textSize="11sp" />
 
                 <com.example.expressionphotobooth.ui.chart.MonthlyBarChartView
@@ -340,7 +420,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="@string/admin_overview_trend_empty"
-                    android:textColor="#8A9BB8"
+                    android:textColor="@color/admin_subtitle_color"
                     android:textSize="11sp"
                     android:visibility="gone" />
             </LinearLayout>
@@ -350,8 +430,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="1dp"
+            app:cardCornerRadius="@dimen/admin_card_corner_radius"
+            app:cardElevation="@dimen/admin_card_elevation"
             app:cardBackgroundColor="#FFFFFF">
 
             <LinearLayout
@@ -361,6 +441,7 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/tvReviewScoreChartTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/admin_overview_review_score_chart_title"
@@ -369,11 +450,12 @@
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/tvReviewScoreChartSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="@string/admin_overview_review_score_chart_subtitle"
-                    android:textColor="#8A9BB8"
+                    android:textColor="@color/admin_subtitle_color"
                     android:textSize="11sp" />
 
                 <com.example.expressionphotobooth.ui.chart.MonthlyBarChartView
@@ -389,7 +471,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="@string/admin_overview_trend_empty"
-                    android:textColor="#8A9BB8"
+                    android:textColor="@color/admin_subtitle_color"
                     android:textSize="11sp"
                     android:visibility="gone" />
             </LinearLayout>

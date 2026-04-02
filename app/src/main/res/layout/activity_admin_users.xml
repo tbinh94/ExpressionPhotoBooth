@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/app_bg_light"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="@color/white"
         app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -18,7 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_back_24"
             app:title="@string/admin_users_title"
-            app:titleTextColor="#212121" />
+            app:titleTextColor="#1B2A5C" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
@@ -45,7 +45,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="No users found"
+            android:text="@string/admin_users_empty"
+            android:textColor="@color/admin_subtitle_color"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>

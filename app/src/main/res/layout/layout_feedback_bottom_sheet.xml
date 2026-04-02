@@ -70,8 +70,10 @@
             android:layout_height="wrap_content"
             android:gravity="top|start"
             android:hint="@string/feedback_hint"
-            android:inputType="textMultiLine"
-            android:lines="3"
+            android:inputType="textCapSentences|textMultiLine|textAutoCorrect"
+            android:imeOptions="flagNoFullscreen"
+            android:minLines="3"
+            android:maxLines="5"
             android:textColor="#263238" />
     </com.google.android.material.textfield.TextInputLayout>
 

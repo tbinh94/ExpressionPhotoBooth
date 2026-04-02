@@ -1,6 +1,8 @@
 package com.example.expressionphotobooth;
 
 import android.content.Intent;
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.animation.Animation;
@@ -8,6 +10,7 @@ import android.view.animation.AnimationUtils;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.model.UserRole;
@@ -20,12 +23,21 @@ public class HomeActivity extends AppCompatActivity {
     private AuthRepository authRepository;
     private MaterialButton btnLanguageToggle;
     private MaterialButton btnAdmin;
+    private MaterialButton btnStart;
+    private MaterialButton btnLogout;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleManager.wrapContext(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.launcher_splash_bg)));
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+        overridePendingTransition(0, 0);
 
         authRepository = ((AppContainer) getApplication()).getAuthRepository();
         if (!authRepository.isLoggedIn()) {
@@ -37,13 +49,13 @@ public class HomeActivity extends AppCompatActivity {
         // Phát nhạc nền
         startBackgroundMusic();
 
-        MaterialButton btnLogout = findViewById(R.id.btnLogout);
+        btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> handleSignOut());
 
         btnAdmin = findViewById(R.id.btnAdmin);
         checkAdminAccess();
 
-        MaterialButton btnStart = findViewById(R.id.btnStart);
+        btnStart = findViewById(R.id.btnStart);
         btnStart.setOnClickListener(v -> {
             Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
             btnStart.startAnimation(press);
@@ -69,8 +81,8 @@ public class HomeActivity extends AppCompatActivity {
         btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
         updateLanguageButtonText();
         btnLanguageToggle.setOnClickListener(v -> {
-            LocaleManager.toggleLanguage(this);
-            recreate();
+            String lang = LocaleManager.toggleLanguageWithoutRecreate(this);
+            updateLocalizedUi(lang);
         });
 
         btnVolumeToggle.setOnClickListener(v -> {
@@ -96,10 +108,27 @@ public class HomeActivity extends AppCompatActivity {
         if (btnLanguageToggle == null) {
             return;
         }
-        int textRes = LocaleManager.isVietnamese()
+        int textRes = LocaleManager.isVietnamese(this)
                 ? R.string.home_switch_to_english
                 : R.string.home_switch_to_vietnamese;
         btnLanguageToggle.setText(textRes);
+    }
+
+    private void updateLocalizedUi(String languageTag) {
+        btnLanguageToggle.setText(LocaleManager.getString(this,
+                LocaleManager.LANG_VI.equals(languageTag)
+                        ? R.string.home_switch_to_english
+                        : R.string.home_switch_to_vietnamese,
+                languageTag));
+        if (btnStart != null) {
+            btnStart.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));
+        }
+        if (btnLogout != null) {
+            btnLogout.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
+        }
+        if (btnAdmin != null) {
+            btnAdmin.setText(LocaleManager.getString(this, R.string.admin_go_to_dashboard, languageTag));
+        }
     }
 
     private void startBackgroundMusic() {
@@ -165,5 +194,11 @@ public class HomeActivity extends AppCompatActivity {
         loginIntent.putExtra(IntentKeys.EXTRA_NOTICE_MESSAGE, getString(R.string.auth_sign_out_message));
         startActivity(loginIntent);
         finish();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(0, 0);
     }
 }

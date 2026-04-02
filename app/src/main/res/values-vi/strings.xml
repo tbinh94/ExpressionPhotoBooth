@@ -130,6 +130,18 @@
     <string name="auth_register_creating">Đang tạo tài khoản...</string>
 
     <string name="admin_dashboard_greeting">Xin chào Admin,</string>
+    <string name="admin_nav_title">Bảng quản trị</string>
+    <string name="admin_nav_version">v2.4.0</string>
+    <string name="admin_nav_avatar_initials">QT</string>
+    <string name="admin_nav_role">Quản trị viên</string>
+    <string name="admin_nav_logo_desc">Logo quản trị</string>
+    <string name="admin_nav_next_desc">Mở chi tiết tài khoản</string>
+    <string name="admin_menu_home">Trang chủ</string>
+    <string name="admin_menu_user_flow">Trải nghiệm người dùng</string>
+    <string name="admin_menu_reviews">Quản lý đánh giá</string>
+    <string name="admin_menu_stickers">Quản lý sticker</string>
+    <string name="admin_menu_users">Quản lý người dùng</string>
+    <string name="admin_menu_sign_out">Đăng xuất</string>
     <string name="admin_email_fallback">admin@photobooth.vn</string>
     <string name="admin_stat_accounts">Tài khoản</string>
     <string name="admin_stat_image_downloads">Tải ảnh</string>
@@ -186,6 +198,14 @@
     <string name="admin_reviews_summary_total">Tổng</string>
     <string name="admin_reviews_summary_five_star">5 sao</string>
     <string name="admin_reviews_summary_below_three">Dưới 3</string>
+    <string name="admin_ai_pie_title">Tỉ lệ đăng ký AI</string>
+    <string name="admin_ai_registered">Đã đăng ký AI</string>
+    <string name="admin_ai_not_registered">Chưa đăng ký</string>
+    <string name="admin_ai_registered_with_count">Đã đăng ký AI: %1$d</string>
+    <string name="admin_ai_not_registered_with_count">Chưa đăng ký: %1$d</string>
+    <string name="admin_ai_ratio_percent_format">%1$.0f%%</string>
+    <string name="admin_ai_overview_meta_compact">AI %1$d | Chưa %2$d</string>
+    <string name="admin_ai_overview_meta_format">Đã đăng ký: %1$d  •  Chưa đăng ký: %2$d</string>
     <string name="admin_reviews_filter_all">Tất cả</string>
     <string name="admin_reviews_filter_five_star">5 ⭐</string>
     <string name="admin_reviews_filter_four_star">4 ⭐</string>
@@ -221,6 +241,9 @@
     <string name="admin_users_title">Danh sách người dùng</string>
     <string name="admin_users_approve">Duyệt Premium</string>
     <string name="admin_users_revoke">Hủy Premium</string>
+    <string name="admin_users_unknown_name">Người dùng chưa đặt tên</string>
+    <string name="admin_users_expires_on_format">Hết hạn: %1$s</string>
+    <string name="admin_users_empty">Không tìm thấy người dùng</string>
     <string name="admin_users_save_success">Đã cập nhật quyền thành công!</string>
     <string name="admin_users_save_error">Lỗi khi cập nhật quyền</string>
     <string name="auth_forgot_password_email_required">Vui lòng nhập địa chỉ email để đặt lại mật khẩu.</string>

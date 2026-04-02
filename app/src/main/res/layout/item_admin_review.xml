@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
+    app:cardCornerRadius="@dimen/admin_card_corner_radius_item"
+    app:cardElevation="@dimen/admin_card_elevation"
     app:cardBackgroundColor="#FFFFFF">
 
     <LinearLayout
@@ -59,7 +59,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
                     android:text="@string/admin_review_time_placeholder"
-                    android:textColor="#8A9BB0"
+                    android:textColor="@color/admin_subtitle_color"
                     android:textSize="10sp" />
             </LinearLayout>
 

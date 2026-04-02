@@ -1,6 +1,8 @@
 package com.example.expressionphotobooth;
 
 import android.content.Intent;
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -8,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
@@ -24,18 +27,25 @@ public class LoginActivity extends AppCompatActivity {
     private boolean isRegisterMode = false;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(com.example.expressionphotobooth.utils.LocaleManager.wrapContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.launcher_splash_bg)));
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
+        overridePendingTransition(0, 0);
 
         authRepository = ((AppContainer) getApplication()).getAuthRepository();
         
         btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
         updateLanguageButtonText();
         btnLanguageToggle.setOnClickListener(v -> {
-            com.example.expressionphotobooth.utils.LocaleManager.toggleLanguage(this);
-            recreate();
+            String language = com.example.expressionphotobooth.utils.LocaleManager.toggleLanguageWithoutRecreate(this);
+            updateLocalizedUi(language);
         });
 
         String noticeTitle = getIntent().getStringExtra(IntentKeys.EXTRA_NOTICE_TITLE);
@@ -135,10 +145,49 @@ public class LoginActivity extends AppCompatActivity {
         if (btnLanguageToggle == null) {
             return;
         }
-        int textRes = com.example.expressionphotobooth.utils.LocaleManager.isVietnamese()
+        int textRes = com.example.expressionphotobooth.utils.LocaleManager.isVietnamese(this)
                 ? R.string.home_switch_to_english
                 : R.string.home_switch_to_vietnamese;
         btnLanguageToggle.setText(textRes);
+    }
+
+    private void updateLocalizedUi(String languageTag) {
+        btnLanguageToggle.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
+                com.example.expressionphotobooth.utils.LocaleManager.LANG_VI.equals(languageTag)
+                        ? R.string.home_switch_to_english
+                        : R.string.home_switch_to_vietnamese,
+                languageTag));
+
+        if (tvLoginTitle != null) {
+            tvLoginTitle.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
+                    isRegisterMode ? R.string.auth_register_title : R.string.auth_title,
+                    languageTag));
+        }
+        if (tvLoginSubtitle != null) {
+            tvLoginSubtitle.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
+                    isRegisterMode ? R.string.auth_register_subtitle : R.string.auth_subtitle,
+                    languageTag));
+        }
+        if (btnSignIn != null) {
+            btnSignIn.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
+                    isRegisterMode ? R.string.auth_confirm_register : R.string.auth_sign_in,
+                    languageTag));
+        }
+        if (btnRegister != null) {
+            btnRegister.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
+                    isRegisterMode ? R.string.auth_back_to_login : R.string.auth_register,
+                    languageTag));
+        }
+        if (btnGuest != null) {
+            btnGuest.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
+                    R.string.auth_sign_in_as_guest,
+                    languageTag));
+        }
+        if (tvForgotPassword instanceof TextView) {
+            ((TextView) tvForgotPassword).setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
+                    R.string.auth_forgot_password,
+                    languageTag));
+        }
     }
 
     private void showDatePicker() {
@@ -315,5 +364,11 @@ public class LoginActivity extends AppCompatActivity {
     private String getText(TextInputEditText editText) {
         CharSequence value = editText.getText();
         return value == null ? "" : value.toString().trim();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(0, 0);
     }
 }

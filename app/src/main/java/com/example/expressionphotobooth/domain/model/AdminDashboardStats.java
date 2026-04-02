@@ -11,6 +11,9 @@ public class AdminDashboardStats {
     private final int fiveStarCount;
     private final int imageDownloads;
     private final int videoDownloads;
+    private final int aiRegisteredUsers;
+    private final int aiNotRegisteredUsers;
+    private final double aiRegisteredPercent;
     private final long lastReviewAtMillis;
     private final int[] ratingCounts;
     private final LinkedHashMap<String, Integer> usersByMonth;
@@ -25,6 +28,9 @@ public class AdminDashboardStats {
             int fiveStarCount,
             int imageDownloads,
             int videoDownloads,
+            int aiRegisteredUsers,
+            int aiNotRegisteredUsers,
+            double aiRegisteredPercent,
             long lastReviewAtMillis,
             int[] ratingCounts,
             Map<String, Integer> usersByMonth,
@@ -38,6 +44,9 @@ public class AdminDashboardStats {
         this.fiveStarCount = fiveStarCount;
         this.imageDownloads = imageDownloads;
         this.videoDownloads = videoDownloads;
+        this.aiRegisteredUsers = aiRegisteredUsers;
+        this.aiNotRegisteredUsers = aiNotRegisteredUsers;
+        this.aiRegisteredPercent = aiRegisteredPercent;
         this.lastReviewAtMillis = lastReviewAtMillis;
         this.ratingCounts = ratingCounts == null ? new int[6] : ratingCounts.clone();
         this.usersByMonth = usersByMonth == null ? new LinkedHashMap<>() : new LinkedHashMap<>(usersByMonth);
@@ -71,6 +80,18 @@ public class AdminDashboardStats {
 
     public int getVideoDownloads() {
         return videoDownloads;
+    }
+
+    public int getAiRegisteredUsers() {
+        return aiRegisteredUsers;
+    }
+
+    public int getAiNotRegisteredUsers() {
+        return aiNotRegisteredUsers;
+    }
+
+    public double getAiRegisteredPercent() {
+        return aiRegisteredPercent;
     }
 
     public long getLastReviewAtMillis() {
