@@ -1,6 +1,7 @@
 package com.example.expressionphotobooth;
 
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -20,6 +21,9 @@ import com.example.expressionphotobooth.domain.model.AdminDashboardStats;
 import com.example.expressionphotobooth.domain.repository.AdminStatsRepository;
 import com.example.expressionphotobooth.ui.chart.MonthlyBarChartView;
 import com.example.expressionphotobooth.ui.chart.MonthlyChartPoint;
+import com.example.expressionphotobooth.utils.LocaleManager;
+import com.example.expressionphotobooth.ui.chart.AiRatioPieChartView;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class AdminOverviewFragment extends Fragment {
+public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUpdatable {
 
     private static final int RANGE_3M = 3;
     private static final int RANGE_6M = 6;
@@ -51,6 +55,20 @@ public class AdminOverviewFragment extends Fragment {
     private TextView tvBig5Star;
     private TextView tvChartSubtitle;
     private TextView tvLastReviewAt;
+    private TextView tvTotalReviewsLabel;
+    private TextView tvFiveStarLabel;
+    private TextView tvRangeTitle;
+    private TextView tvUsersChartTitle;
+    private TextView tvUsersChartSubtitle;
+    private TextView tvDownloadsChartTitle;
+    private TextView tvDownloadsChartSubtitle;
+    private TextView tvReviewScoreChartTitle;
+    private TextView tvReviewScoreChartSubtitle;
+    private TextView tvBar5Label;
+    private TextView tvBar4Label;
+    private TextView tvBar3Label;
+    private TextView tvBar2Label;
+    private TextView tvBar1Label;
 
     private TextView tvStatAccounts;
     private TextView tvStatImageDownloads;
@@ -63,6 +81,14 @@ public class AdminOverviewFragment extends Fragment {
     private TextView tvUsersByMonthEmpty;
     private TextView tvImageDownloadsByMonthEmpty;
     private TextView tvReviewScoreByMonthEmpty;
+
+    private MaterialButton btnRange3m;
+    private MaterialButton btnRange6m;
+    private MaterialButton btnRange12m;
+    private AiRatioPieChartView pieAiRatioMini;
+    private TextView tvAiRatioMiniTitle;
+    private TextView tvAiRatioMiniPercent;
+    private TextView tvAiRatioMiniMeta;
 
     private AdminStatsRepository adminStatsRepository;
     private AdminDashboardStats latestStats;
@@ -97,6 +123,20 @@ public class AdminOverviewFragment extends Fragment {
         tvBig5Star = view.findViewById(R.id.tvBig5Star);
         tvChartSubtitle = view.findViewById(R.id.tvChartSubtitle);
         tvLastReviewAt = view.findViewById(R.id.tvLastReviewAt);
+        tvTotalReviewsLabel = view.findViewById(R.id.tvTotalReviewsLabel);
+        tvFiveStarLabel = view.findViewById(R.id.tvFiveStarLabel);
+        tvRangeTitle = view.findViewById(R.id.tvRangeTitle);
+        tvUsersChartTitle = view.findViewById(R.id.tvUsersChartTitle);
+        tvUsersChartSubtitle = view.findViewById(R.id.tvUsersChartSubtitle);
+        tvDownloadsChartTitle = view.findViewById(R.id.tvDownloadsChartTitle);
+        tvDownloadsChartSubtitle = view.findViewById(R.id.tvDownloadsChartSubtitle);
+        tvReviewScoreChartTitle = view.findViewById(R.id.tvReviewScoreChartTitle);
+        tvReviewScoreChartSubtitle = view.findViewById(R.id.tvReviewScoreChartSubtitle);
+        tvBar5Label = view.findViewById(R.id.tvBar5Label);
+        tvBar4Label = view.findViewById(R.id.tvBar4Label);
+        tvBar3Label = view.findViewById(R.id.tvBar3Label);
+        tvBar2Label = view.findViewById(R.id.tvBar2Label);
+        tvBar1Label = view.findViewById(R.id.tvBar1Label);
 
         chartUsersByMonth = view.findViewById(R.id.chartUsersByMonth);
         chartImageDownloadsByMonth = view.findViewById(R.id.chartImageDownloadsByMonth);
@@ -106,7 +146,15 @@ public class AdminOverviewFragment extends Fragment {
         tvImageDownloadsByMonthEmpty = view.findViewById(R.id.tvImageDownloadsByMonthEmpty);
         tvReviewScoreByMonthEmpty = view.findViewById(R.id.tvReviewScoreByMonthEmpty);
 
-        bindRangeSelector(view);
+        btnRange3m = view.findViewById(R.id.btnRange3m);
+        btnRange6m = view.findViewById(R.id.btnRange6m);
+        btnRange12m = view.findViewById(R.id.btnRange12m);
+        pieAiRatioMini = view.findViewById(R.id.pieAiRatioMini);
+        tvAiRatioMiniTitle = view.findViewById(R.id.tvAiRatioMiniTitle);
+        tvAiRatioMiniPercent = view.findViewById(R.id.tvAiRatioMiniPercent);
+        tvAiRatioMiniMeta = view.findViewById(R.id.tvAiRatioMiniMeta);
+
+        bindRangeSelector();
 
         if (getActivity() != null) {
             tvStatAccounts = getActivity().findViewById(R.id.tvStatTotalAccounts);
@@ -117,19 +165,15 @@ public class AdminOverviewFragment extends Fragment {
         loadStats();
     }
 
-    private void bindRangeSelector(View root) {
-        View btn3m = root.findViewById(R.id.btnRange3m);
-        View btn6m = root.findViewById(R.id.btnRange6m);
-        View btn12m = root.findViewById(R.id.btnRange12m);
-
-        if (btn3m != null) {
-            btn3m.setOnClickListener(v -> applyRange(RANGE_3M));
+    private void bindRangeSelector() {
+        if (btnRange3m != null) {
+            btnRange3m.setOnClickListener(v -> applyRange(RANGE_3M));
         }
-        if (btn6m != null) {
-            btn6m.setOnClickListener(v -> applyRange(RANGE_6M));
+        if (btnRange6m != null) {
+            btnRange6m.setOnClickListener(v -> applyRange(RANGE_6M));
         }
-        if (btn12m != null) {
-            btn12m.setOnClickListener(v -> applyRange(RANGE_12M));
+        if (btnRange12m != null) {
+            btnRange12m.setOnClickListener(v -> applyRange(RANGE_12M));
         }
     }
 
@@ -139,7 +183,7 @@ public class AdminOverviewFragment extends Fragment {
         }
         selectedRangeMonths = months;
         if (latestStats != null) {
-            renderStats(latestStats);
+            renderStats(latestStats, true, LocaleManager.getCurrentLanguage(requireContext()));
         }
     }
 
@@ -150,7 +194,7 @@ public class AdminOverviewFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
-                renderStats(stats);
+                renderStats(stats, true, LocaleManager.getCurrentLanguage(requireContext()));
             }
 
             @Override
@@ -166,8 +210,9 @@ public class AdminOverviewFragment extends Fragment {
         });
     }
 
-    private void renderStats(AdminDashboardStats stats) {
+    private void renderStats(AdminDashboardStats stats, boolean animateVisuals, String languageTag) {
         latestStats = stats;
+        Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
 
         if (tvStatAccounts != null) tvStatAccounts.setText(String.valueOf(stats.getTotalAccounts()));
         if (tvStatImageDownloads != null) tvStatImageDownloads.setText(String.valueOf(stats.getImageDownloads()));
@@ -176,17 +221,31 @@ public class AdminOverviewFragment extends Fragment {
         if (tvBigAvg != null) tvBigAvg.setText(String.format(Locale.getDefault(), "%.1f", stats.getAverageRating()));
         if (tvBigTotal != null) tvBigTotal.setText(String.valueOf(stats.getTotalReviews()));
         if (tvBig5Star != null) tvBig5Star.setText(String.valueOf(stats.getFiveStarCount()));
+        if (pieAiRatioMini != null) {
+            pieAiRatioMini.setData(stats.getAiRegisteredUsers(), stats.getTotalAccounts());
+        }
+        if (tvAiRatioMiniPercent != null) {
+            tvAiRatioMiniPercent.setText(localized.getString(
+                    R.string.admin_ai_ratio_percent_format,
+                    stats.getAiRegisteredPercent()));
+        }
+        if (tvAiRatioMiniMeta != null) {
+            tvAiRatioMiniMeta.setText(localized.getString(
+                    R.string.admin_ai_overview_meta_compact,
+                    stats.getAiRegisteredUsers(),
+                    stats.getAiNotRegisteredUsers()));
+        }
         if (tvChartSubtitle != null) {
-            tvChartSubtitle.setText(getString(R.string.admin_overview_chart_subtitle_format, stats.getTotalReviews()));
+            tvChartSubtitle.setText(localized.getString(R.string.admin_overview_chart_subtitle_format, stats.getTotalReviews()));
         }
 
         if (tvLastReviewAt != null) {
             long lastReviewAt = stats.getLastReviewAtMillis();
             if (lastReviewAt > 0L) {
                 String formatted = DateFormat.format("dd/MM/yyyy - HH:mm", new Date(lastReviewAt)).toString();
-                tvLastReviewAt.setText(getString(R.string.admin_overview_last_review_format, formatted));
+                tvLastReviewAt.setText(localized.getString(R.string.admin_overview_last_review_format, formatted));
             } else {
-                tvLastReviewAt.setText(R.string.admin_overview_last_review_fallback);
+                tvLastReviewAt.setText(localized.getString(R.string.admin_overview_last_review_fallback));
             }
         }
 
@@ -197,11 +256,19 @@ public class AdminOverviewFragment extends Fragment {
         if (tv2 != null) tv2.setText(String.valueOf(counts[2]));
         if (tv1 != null) tv1.setText(String.valueOf(counts[1]));
 
-        animateBar(bar5, counts[5], stats.getTotalReviews());
-        animateBar(bar4, counts[4], stats.getTotalReviews());
-        animateBar(bar3, counts[3], stats.getTotalReviews());
-        animateBar(bar2, counts[2], stats.getTotalReviews());
-        animateBar(bar1, counts[1], stats.getTotalReviews());
+        if (animateVisuals) {
+            animateBar(bar5, counts[5], stats.getTotalReviews());
+            animateBar(bar4, counts[4], stats.getTotalReviews());
+            animateBar(bar3, counts[3], stats.getTotalReviews());
+            animateBar(bar2, counts[2], stats.getTotalReviews());
+            animateBar(bar1, counts[1], stats.getTotalReviews());
+        } else {
+            setBarWidthInstant(bar5, counts[5], stats.getTotalReviews());
+            setBarWidthInstant(bar4, counts[4], stats.getTotalReviews());
+            setBarWidthInstant(bar3, counts[3], stats.getTotalReviews());
+            setBarWidthInstant(bar2, counts[2], stats.getTotalReviews());
+            setBarWidthInstant(bar1, counts[1], stats.getTotalReviews());
+        }
 
         LinkedHashMap<String, Integer> usersSlice = keepLatest(stats.getUsersByMonth(), selectedRangeMonths);
         LinkedHashMap<String, Integer> imageSlice = keepLatest(stats.getImageDownloadsByMonth(), selectedRangeMonths);
@@ -212,7 +279,8 @@ public class AdminOverviewFragment extends Fragment {
                 tvUsersByMonthEmpty,
                 toIntChartPoints(usersSlice),
                 ContextCompat.getColor(requireContext(), R.color.app_blue),
-                getString(R.string.admin_overview_legend_users)
+                localized.getString(R.string.admin_overview_legend_users),
+                animateVisuals
         );
 
         bindChart(
@@ -220,7 +288,8 @@ public class AdminOverviewFragment extends Fragment {
                 tvImageDownloadsByMonthEmpty,
                 toIntChartPoints(imageSlice),
                 ContextCompat.getColor(requireContext(), R.color.app_pink),
-                getString(R.string.admin_overview_legend_downloads)
+                localized.getString(R.string.admin_overview_legend_downloads),
+                animateVisuals
         );
 
         bindChart(
@@ -228,7 +297,8 @@ public class AdminOverviewFragment extends Fragment {
                 tvReviewScoreByMonthEmpty,
                 toDoubleChartPoints(reviewSlice),
                 Color.parseColor("#F5A623"),
-                getString(R.string.admin_overview_legend_review_score)
+                localized.getString(R.string.admin_overview_legend_review_score),
+                animateVisuals
         );
     }
 
@@ -237,7 +307,8 @@ public class AdminOverviewFragment extends Fragment {
             TextView emptyView,
             List<MonthlyChartPoint> points,
             int color,
-            String legend
+            String legend,
+            boolean animate
     ) {
         if (chartView == null || emptyView == null) {
             return;
@@ -252,7 +323,7 @@ public class AdminOverviewFragment extends Fragment {
         chartView.setBarColor(color);
         chartView.setShowYAxis(true);
         chartView.setLegendText(legend);
-        chartView.setChartData(points, true);
+        chartView.setChartData(points, animate);
     }
 
     private List<MonthlyChartPoint> toIntChartPoints(LinkedHashMap<String, Integer> data) {
@@ -317,5 +388,53 @@ public class AdminOverviewFragment extends Fragment {
             });
             anim.start();
         });
+    }
+
+    private void setBarWidthInstant(View bar, int count, int total) {
+        if (bar == null || bar.getParent() == null) {
+            return;
+        }
+        bar.post(() -> {
+            int parentWidth = ((View) bar.getParent()).getWidth();
+            int targetWidth = total > 0 ? (int) ((count / (float) total) * parentWidth) : 0;
+            ViewGroup.LayoutParams lp = bar.getLayoutParams();
+            lp.width = targetWidth;
+            bar.setLayoutParams(lp);
+        });
+    }
+
+    @Override
+    public void onRuntimeLanguageChanged(@NonNull String languageTag) {
+        if (!isAdded()) {
+            return;
+        }
+
+        Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
+
+        if (tvTotalReviewsLabel != null) tvTotalReviewsLabel.setText(localized.getString(R.string.admin_overview_total_reviews));
+        if (tvFiveStarLabel != null) tvFiveStarLabel.setText(localized.getString(R.string.admin_overview_five_star_label));
+        if (tvRangeTitle != null) tvRangeTitle.setText(localized.getString(R.string.admin_overview_range_title));
+        if (tvAiRatioMiniTitle != null) tvAiRatioMiniTitle.setText(localized.getString(R.string.admin_ai_pie_title));
+        if (tvUsersChartTitle != null) tvUsersChartTitle.setText(localized.getString(R.string.admin_overview_users_chart_title));
+        if (tvUsersChartSubtitle != null) tvUsersChartSubtitle.setText(localized.getString(R.string.admin_overview_users_chart_subtitle));
+        if (tvDownloadsChartTitle != null) tvDownloadsChartTitle.setText(localized.getString(R.string.admin_overview_download_chart_title));
+        if (tvDownloadsChartSubtitle != null) tvDownloadsChartSubtitle.setText(localized.getString(R.string.admin_overview_download_chart_subtitle));
+        if (tvReviewScoreChartTitle != null) tvReviewScoreChartTitle.setText(localized.getString(R.string.admin_overview_review_score_chart_title));
+        if (tvReviewScoreChartSubtitle != null) tvReviewScoreChartSubtitle.setText(localized.getString(R.string.admin_overview_review_score_chart_subtitle));
+        if (tvBar5Label != null) tvBar5Label.setText(localized.getString(R.string.admin_overview_bar_five));
+        if (tvBar4Label != null) tvBar4Label.setText(localized.getString(R.string.admin_overview_bar_four));
+        if (tvBar3Label != null) tvBar3Label.setText(localized.getString(R.string.admin_overview_bar_three));
+        if (tvBar2Label != null) tvBar2Label.setText(localized.getString(R.string.admin_overview_bar_two));
+        if (tvBar1Label != null) tvBar1Label.setText(localized.getString(R.string.admin_overview_bar_one));
+        if (btnRange3m != null) btnRange3m.setText(localized.getString(R.string.admin_overview_range_3m));
+        if (btnRange6m != null) btnRange6m.setText(localized.getString(R.string.admin_overview_range_6m));
+        if (btnRange12m != null) btnRange12m.setText(localized.getString(R.string.admin_overview_range_12m));
+        if (tvUsersByMonthEmpty != null) tvUsersByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
+        if (tvImageDownloadsByMonthEmpty != null) tvImageDownloadsByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
+        if (tvReviewScoreByMonthEmpty != null) tvReviewScoreByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
+
+        if (latestStats != null) {
+            renderStats(latestStats, false, languageTag);
+        }
     }
 }

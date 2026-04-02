@@ -1,6 +1,7 @@
 package com.example.expressionphotobooth;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +18,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.Toast;
@@ -408,34 +410,45 @@ public class ResultActivity extends AppCompatActivity {
 
         btnSubmit.setOnClickListener(v -> {
             float rating = ratingBar.getRating();
-            String feedback = etFeedback.getText() != null ? etFeedback.getText().toString().trim() : "";
-            
-            AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
-            String uid = authRepository.getCurrentUid();
-            String email = authRepository.getCurrentEmail();
 
-            Map<String, Object> review = new HashMap<>();
-            review.put("userId", uid);
-            review.put("userEmail", email);
-            review.put("rating", rating);
-            review.put("feedback", feedback);
-            review.put("createdAt", FieldValue.serverTimestamp());
-            review.put("timestamp", System.currentTimeMillis());
-            review.put("date", new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
+            // Ensure Telex composing text is committed before reading the final feedback value.
+            etFeedback.clearComposingText();
+            etFeedback.clearFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(etFeedback.getWindowToken(), 0);
+            }
 
             btnSubmit.setEnabled(false);
-            FirebaseFirestore.getInstance().collection("reviews")
-                .add(review)
-                .addOnSuccessListener(doc -> {
-                    adminStatsRepository.recordReviewSubmitted();
-                    Toast.makeText(this, getString(R.string.feedback_thanks_with_rating, rating), Toast.LENGTH_SHORT).show();
-                    hasShownFeedback = true;
-                    bottomSheetDialog.dismiss();
-                })
-                .addOnFailureListener(e -> {
-                    btnSubmit.setEnabled(true);
-                    Toast.makeText(this, R.string.feedback_submit_failed, Toast.LENGTH_SHORT).show();
-                });
+            etFeedback.postDelayed(() -> {
+                String feedback = etFeedback.getText() != null ? etFeedback.getText().toString().trim() : "";
+
+                AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+                String uid = authRepository.getCurrentUid();
+                String email = authRepository.getCurrentEmail();
+
+                Map<String, Object> review = new HashMap<>();
+                review.put("userId", uid);
+                review.put("userEmail", email);
+                review.put("rating", rating);
+                review.put("feedback", feedback);
+                review.put("createdAt", FieldValue.serverTimestamp());
+                review.put("timestamp", System.currentTimeMillis());
+                review.put("date", new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
+
+                FirebaseFirestore.getInstance().collection("reviews")
+                    .add(review)
+                    .addOnSuccessListener(doc -> {
+                        adminStatsRepository.recordReviewSubmitted();
+                        Toast.makeText(this, getString(R.string.feedback_thanks_with_rating, rating), Toast.LENGTH_SHORT).show();
+                        hasShownFeedback = true;
+                        bottomSheetDialog.dismiss();
+                    })
+                    .addOnFailureListener(e -> {
+                        btnSubmit.setEnabled(true);
+                        Toast.makeText(this, R.string.feedback_submit_failed, Toast.LENGTH_SHORT).show();
+                    });
+            }, 90L);
         });
 
         bottomSheetDialog.show();

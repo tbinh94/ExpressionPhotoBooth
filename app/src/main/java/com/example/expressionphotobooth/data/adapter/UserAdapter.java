@@ -43,9 +43,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = users.get(position);
-        holder.tvName.setText(user.getDisplayName() != null ? user.getDisplayName() : "N/A");
+        String displayName = user.getDisplayName();
+        if (displayName == null || displayName.trim().isEmpty()) {
+            displayName = holder.itemView.getContext().getString(R.string.admin_users_unknown_name);
+        }
+        holder.tvName.setText(displayName);
         holder.tvEmail.setText(user.getEmail());
         holder.tvRole.setText(user.getRole().toFirestoreValue().toUpperCase());
+        holder.tvAvatar.setText(resolveInitial(user));
 
         if (user.getRole() == UserRole.ADMIN) {
             holder.roleIndicator.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#E91E63")));
@@ -59,7 +64,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             if (user.getPremiumUntil() > 0) {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
                 String dateStr = sdf.format(new Date(user.getPremiumUntil()));
-                holder.tvExpiration.setText("Expires: " + dateStr);
+                holder.tvExpiration.setText(holder.itemView.getContext().getString(R.string.admin_users_expires_on_format, dateStr));
                 holder.tvExpiration.setVisibility(View.VISIBLE);
             } else {
                 holder.tvExpiration.setVisibility(View.GONE);
@@ -74,18 +79,30 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         holder.btnApprove.setOnClickListener(v -> listener.onApprove(user));
     }
 
+    private String resolveInitial(User user) {
+        String source = user.getDisplayName();
+        if (source == null || source.trim().isEmpty()) {
+            source = user.getEmail();
+        }
+        if (source == null || source.trim().isEmpty()) {
+            return "U";
+        }
+        return source.trim().substring(0, 1).toUpperCase(Locale.getDefault());
+    }
+
     @Override
     public int getItemCount() {
         return users.size();
     }
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvEmail, tvRole, tvExpiration;
+        TextView tvAvatar, tvName, tvEmail, tvRole, tvExpiration;
         View roleIndicator;
         MaterialButton btnApprove;
 
         UserViewHolder(@NonNull View itemView) {
             super(itemView);
+            tvAvatar = itemView.findViewById(R.id.tvUserAvatar);
             tvName = itemView.findViewById(R.id.tvUserName);
             tvEmail = itemView.findViewById(R.id.tvUserEmail);
             tvRole = itemView.findViewById(R.id.tvUserRole);

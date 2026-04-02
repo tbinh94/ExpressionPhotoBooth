@@ -1,11 +1,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.ExpressionPhotoBooth" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/launcher_splash_bg</item>
+        <item name="android:windowAnimationStyle">@style/AnimationExpressionPhotoBoothNoAnimation</item>
         <item name="android:windowSplashScreenBackground">@color/launcher_splash_bg</item>
         <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@color/launcher_icon_bg</item>
     </style>
 
     <style name="Theme.ExpressionPhotoBooth" parent="Base.Theme.ExpressionPhotoBooth" />
+
+    <style name="Theme.ExpressionPhotoBooth.AdminDashboard" parent="Theme.ExpressionPhotoBooth">
+        <item name="android:windowBackground">@color/admin_dashboard_bg</item>
+    </style>
+
+    <style name="AnimationExpressionPhotoBoothNoAnimation">
+        <item name="android:activityOpenEnterAnimation">@anim/no_anim</item>
+        <item name="android:activityOpenExitAnimation">@anim/no_anim</item>
+        <item name="android:activityCloseEnterAnimation">@anim/no_anim</item>
+        <item name="android:activityCloseExitAnimation">@anim/no_anim</item>
+    </style>
 
 </resources>

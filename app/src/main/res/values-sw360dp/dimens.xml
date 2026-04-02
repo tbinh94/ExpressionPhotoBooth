@@ -30,5 +30,38 @@
 	<dimen name="camera_side_button_margin_start">10dp</dimen>
 	<dimen name="camera_side_button_spacing">6dp</dimen>
 	<dimen name="camera_last_capture_margin_start">12dp</dimen>
+
+	<dimen name="admin_ai_mini_card_padding">10dp</dimen>
+	<dimen name="admin_ai_mini_pie_size">46dp</dimen>
+	<dimen name="admin_ai_mini_gap">8dp</dimen>
+	<dimen name="admin_ai_mini_title_text">10sp</dimen>
+	<dimen name="admin_ai_mini_meta_text">9sp</dimen>
+	<dimen name="admin_ai_mini_percent_text">18sp</dimen>
+
+	<dimen name="admin_header_padding_horizontal">16dp</dimen>
+	<dimen name="admin_header_padding_top">46dp</dimen>
+	<dimen name="admin_header_padding_bottom">12dp</dimen>
+	<dimen name="admin_stats_padding_horizontal">12dp</dimen>
+	<dimen name="admin_stat_card_padding">12dp</dimen>
+	<dimen name="admin_stat_card_min_height">90dp</dimen>
+	<dimen name="admin_stat_card_spacing">5dp</dimen>
+	<dimen name="admin_stat_value_text">19sp</dimen>
+	<dimen name="admin_stat_label_text">10sp</dimen>
+	<dimen name="admin_nav_drawer_width">284dp</dimen>
+	<dimen name="admin_card_corner_radius">18dp</dimen>
+	<dimen name="admin_card_corner_radius_item">14dp</dimen>
+	<dimen name="admin_card_elevation">1dp</dimen>
+	<dimen name="admin_nav_header_padding_horizontal">14dp</dimen>
+	<dimen name="admin_nav_header_padding_top">30dp</dimen>
+	<dimen name="admin_nav_header_padding_bottom">12dp</dimen>
+	<dimen name="admin_nav_header_logo_gap">16dp</dimen>
+	<dimen name="admin_nav_item_icon_padding">12dp</dimen>
+	<dimen name="admin_nav_item_horizontal_padding">10dp</dimen>
+	<dimen name="admin_nav_item_vertical_padding">2dp</dimen>
+	<dimen name="admin_nav_item_corner">12dp</dimen>
+	<dimen name="admin_nav_item_inset_horizontal">8dp</dimen>
+	<dimen name="admin_nav_item_inset_vertical">0dp</dimen>
+	<dimen name="admin_nav_item_divider_inset">10dp</dimen>
+	<dimen name="admin_nav_icon_size">19dp</dimen>
 </resources>
 

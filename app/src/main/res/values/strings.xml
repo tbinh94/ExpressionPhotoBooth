@@ -174,6 +174,18 @@
     <string name="auth_register_creating">Creating account...</string>
 
     <string name="admin_dashboard_greeting">Welcome Admin,</string>
+    <string name="admin_nav_title">AdminPanel</string>
+    <string name="admin_nav_version">v2.4.0</string>
+    <string name="admin_nav_avatar_initials">AD</string>
+    <string name="admin_nav_role">Superadmin</string>
+    <string name="admin_nav_logo_desc">Admin app logo</string>
+    <string name="admin_nav_next_desc">Open account details</string>
+    <string name="admin_menu_home">Home</string>
+    <string name="admin_menu_user_flow">User Experience</string>
+    <string name="admin_menu_reviews">Review Management</string>
+    <string name="admin_menu_stickers">Manage Stickers</string>
+    <string name="admin_menu_users">User Management</string>
+    <string name="admin_menu_sign_out">Sign Out</string>
     <string name="admin_email_fallback">admin@photobooth.vn</string>
     <string name="admin_stat_accounts">Accounts</string>
     <string name="admin_stat_image_downloads">Image Downloads</string>
@@ -237,6 +249,14 @@
     <string name="admin_reviews_summary_total">Total</string>
     <string name="admin_reviews_summary_five_star">5-star</string>
     <string name="admin_reviews_summary_below_three">Below 3</string>
+    <string name="admin_ai_pie_title">AI registration ratio</string>
+    <string name="admin_ai_registered">AI registered</string>
+    <string name="admin_ai_not_registered">Not registered</string>
+    <string name="admin_ai_registered_with_count">AI registered: %1$d</string>
+    <string name="admin_ai_not_registered_with_count">Not registered: %1$d</string>
+    <string name="admin_ai_ratio_percent_format">%1$.0f%%</string>
+    <string name="admin_ai_overview_meta_compact">AI %1$d | Off %2$d</string>
+    <string name="admin_ai_overview_meta_format">Registered: %1$d  •  Not registered: %2$d</string>
     <string name="admin_reviews_filter_all">All</string>
     <string name="admin_reviews_filter_five_star">5 ⭐</string>
     <string name="admin_reviews_filter_four_star">4 ⭐</string>
@@ -273,6 +293,9 @@
     <string name="admin_users_title">User Accounts</string>
     <string name="admin_users_approve">Approve</string>
     <string name="admin_users_revoke">Revoke</string>
+    <string name="admin_users_unknown_name">Unknown user</string>
+    <string name="admin_users_expires_on_format">Expires: %1$s</string>
+    <string name="admin_users_empty">No users found</string>
     <string name="admin_users_save_success">Role updated successfully!</string>
     <string name="admin_users_save_error">Failed to update role</string>
     <string name="auth_forgot_password_email_required">Please enter your email address to reset password.</string>

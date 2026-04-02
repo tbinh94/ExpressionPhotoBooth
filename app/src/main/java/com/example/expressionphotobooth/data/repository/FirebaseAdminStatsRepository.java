@@ -53,6 +53,7 @@ public class FirebaseAdminStatsRepository implements AdminStatsRepository {
                     QuerySnapshot downloadsSnapshot = (QuerySnapshot) results.get(2);
 
                     int totalAccounts = usersSnapshot.size();
+                    int aiRegisteredUsers = 0;
                     int totalReviews = reviewsSnapshot.size();
 
                     int[] ratingCounts = new int[6];
@@ -68,6 +69,14 @@ public class FirebaseAdminStatsRepository implements AdminStatsRepository {
                         if (userCreatedAt > 0) {
                             String month = toMonthKey(userCreatedAt);
                             usersByMonth.put(month, usersByMonth.getOrDefault(month, 0) + 1);
+                        }
+
+                        String role = userDoc.getString("role");
+                        Long premiumUntil = userDoc.getLong("premiumUntil");
+                        boolean isPremiumRole = "premium".equalsIgnoreCase(role);
+                        boolean hasActivePremium = premiumUntil != null && premiumUntil > System.currentTimeMillis();
+                        if (isPremiumRole || hasActivePremium) {
+                            aiRegisteredUsers++;
                         }
                     }
 
@@ -109,6 +118,10 @@ public class FirebaseAdminStatsRepository implements AdminStatsRepository {
 
                     double averageRating = totalReviews > 0 ? scoreSum / totalReviews : 0d;
                     int lowRatingCount = ratingCounts[1] + ratingCounts[2];
+                    int aiNotRegisteredUsers = Math.max(0, totalAccounts - aiRegisteredUsers);
+                    double aiRegisteredPercent = totalAccounts > 0
+                            ? (aiRegisteredUsers * 100d) / totalAccounts
+                            : 0d;
 
                     AdminDashboardStats stats = new AdminDashboardStats(
                             totalAccounts,
@@ -118,6 +131,9 @@ public class FirebaseAdminStatsRepository implements AdminStatsRepository {
                             ratingCounts[5],
                             imageDownloads,
                             videoDownloads,
+                            aiRegisteredUsers,
+                            aiNotRegisteredUsers,
+                            aiRegisteredPercent,
                             lastReviewAt,
                             ratingCounts,
                             new LinkedHashMap<>(usersByMonth),

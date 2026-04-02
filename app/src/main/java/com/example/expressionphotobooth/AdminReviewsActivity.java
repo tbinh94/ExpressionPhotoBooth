@@ -1,5 +1,6 @@
 package com.example.expressionphotobooth;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,6 +17,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.example.expressionphotobooth.ui.chart.AiRatioPieChartView;
+import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -39,12 +42,19 @@ public class AdminReviewsActivity extends AppCompatActivity {
     private LinearLayout containerReviews;
     
     private TextView tvAvgScore, tvTotalCount, tvFiveStarCount, tvLowStarCount;
+    private TextView tvAiRatioTitle, tvAiRatioPercent, tvAiRegisteredLegend, tvAiNotRegisteredLegend;
+    private AiRatioPieChartView pieAiRatio;
     private EditText etSearch;
     private ChipGroup chipGroupFilters;
 
     private List<ReviewData> allReviews = new ArrayList<>();
     private String currentSearch = "";
     private int currentFilterId = R.id.chipAll;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleManager.wrapContext(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +75,18 @@ public class AdminReviewsActivity extends AppCompatActivity {
         tvTotalCount = findViewById(R.id.tvTotalCount);
         tvFiveStarCount = findViewById(R.id.tvFiveStarCount);
         tvLowStarCount = findViewById(R.id.tvLowStarCount);
+        tvAiRatioTitle = findViewById(R.id.tvAiRatioTitle);
+        tvAiRatioPercent = findViewById(R.id.tvAiRatioPercent);
+        tvAiRegisteredLegend = findViewById(R.id.tvAiRegisteredLegend);
+        tvAiNotRegisteredLegend = findViewById(R.id.tvAiNotRegisteredLegend);
+        pieAiRatio = findViewById(R.id.pieAiRatio);
         
         etSearch = findViewById(R.id.etSearchReview);
         chipGroupFilters = findViewById(R.id.chipGroupFilters);
 
         setupListeners();
         loadReviews();
+        loadAiRegistrationStats();
     }
 
     private void setupListeners() {
@@ -158,6 +174,53 @@ public class AdminReviewsActivity extends AppCompatActivity {
         tvLowStarCount.setText(String.valueOf(countLow));
         double avg = total > 0 ? sum / total : 0;
         tvAvgScore.setText(String.format(Locale.getDefault(), "%.1f", avg));
+    }
+
+    private void loadAiRegistrationStats() {
+        FirebaseFirestore.getInstance().collection("users")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    int totalUsers = queryDocumentSnapshots.size();
+                    int aiRegisteredUsers = 0;
+
+                    long now = System.currentTimeMillis();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        String role = doc.getString("role");
+                        Long premiumUntil = doc.getLong("premiumUntil");
+                        boolean isPremiumRole = "premium".equalsIgnoreCase(role);
+                        boolean hasValidPremiumTime = premiumUntil != null && premiumUntil > now;
+                        if (isPremiumRole || hasValidPremiumTime) {
+                            aiRegisteredUsers++;
+                        }
+                    }
+
+                    int notRegistered = Math.max(0, totalUsers - aiRegisteredUsers);
+                    double percent = totalUsers > 0 ? (aiRegisteredUsers * 100d) / totalUsers : 0d;
+
+                    if (pieAiRatio != null) {
+                        pieAiRatio.setData(aiRegisteredUsers, totalUsers);
+                    }
+                    if (tvAiRatioPercent != null) {
+                        tvAiRatioPercent.setText(getString(R.string.admin_ai_ratio_percent_format, percent));
+                    }
+                    if (tvAiRegisteredLegend != null) {
+                        tvAiRegisteredLegend.setText(getString(R.string.admin_ai_registered_with_count, aiRegisteredUsers));
+                    }
+                    if (tvAiNotRegisteredLegend != null) {
+                        tvAiNotRegisteredLegend.setText(getString(R.string.admin_ai_not_registered_with_count, notRegistered));
+                    }
+                    if (tvAiRatioTitle != null) {
+                        tvAiRatioTitle.setText(getString(R.string.admin_ai_pie_title));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (pieAiRatio != null) {
+                        pieAiRatio.setData(0, 0);
+                    }
+                    if (tvAiRatioPercent != null) {
+                        tvAiRatioPercent.setText(getString(R.string.admin_ai_ratio_percent_format, 0d));
+                    }
+                });
     }
 
     private void applyFilters() {
