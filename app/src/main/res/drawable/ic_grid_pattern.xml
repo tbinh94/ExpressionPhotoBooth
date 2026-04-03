@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="40"
+    android:viewportHeight="40">
+    <!-- Vẽ các điểm chấm nhỏ tạo thành lưới -->
+    <path
+        android:fillColor="#152A5298"
+        android:pathData="M2,2h1v1h-1z M22,22h1v1h-1z" />
+</vector>

@@ -215,4 +215,24 @@
     <string name="gallery_empty">No memories saved yet. Start capturing!</string>
     <string name="gallery_delete_confirm">Do you want to delete this memory?</string>
     <string name="gallery_delete_success">Memory deleted</string>
+
+    <string name="nav_history">History</string>
+    <string name="history_empty">No history yet</string>
+    <string name="history_date_value">Date: %1$s</string>
+    <string name="history_frame_value">Frame: %1$s</string>
+    <string name="history_has_video">Timelapse video available</string>
+    <string name="history_no_video">No video available</string>
+    <string name="history_save_photo">Save Photo</string>
+    <string name="history_save_video">Save Video</string>
+    <string name="history_view_feedback">View Feedback</string>
+    <string name="history_delete">Delete</string>
+    <string name="history_delete_title">Delete History</string>
+    <string name="history_delete_message">Are you sure you want to delete this session?</string>
+    <string name="history_popup_cancel">Cancel</string>
+    <string name="history_popup_ok">OK</string>
+    <string name="history_feedback_title">Your Feedback</string>
+    <string name="history_feedback_format">Rating: %1$s\nFeedback: %2$s</string>
+    <string name="history_not_available">N/A</string>
+    <string name="history_no_video_to_save">No video to save</string>
+    <string name="history_ratio_value">Ratio: %1$s</string>
 </resources>

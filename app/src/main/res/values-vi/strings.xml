@@ -257,4 +257,24 @@
     <string name="gallery_empty">Chưa có kỷ niệm nào. Hãy bắt đầu chụp nhé!</string>
     <string name="gallery_delete_confirm">Bạn có muốn xóa kỷ niệm này không?</string>
     <string name="gallery_delete_success">Đã xóa kỷ niệm</string>
+
+    <string name="nav_history">Lịch sử</string>
+    <string name="history_empty">Chưa có lịch sử nào</string>
+    <string name="history_date_value">Ngày: %1$s</string>
+    <string name="history_frame_value">Khung: %1$s</string>
+    <string name="history_has_video">Có video timelapse</string>
+    <string name="history_no_video">Không có video</string>
+    <string name="history_save_photo">Lưu ảnh</string>
+    <string name="history_save_video">Lưu video</string>
+    <string name="history_view_feedback">Xem feedback</string>
+    <string name="history_delete">Xóa</string>
+    <string name="history_delete_title">Xóa lịch sử</string>
+    <string name="history_delete_message">Bạn có chắc chắn muốn xóa phiên chụp này không?</string>
+    <string name="history_popup_cancel">Hủy</string>
+    <string name="history_popup_ok">Đồng ý</string>
+    <string name="history_feedback_title">Đánh giá của bạn</string>
+    <string name="history_feedback_format">Rating: %1$s\nFeedback: %2$s</string>
+    <string name="history_not_available">N/A</string>
+    <string name="history_no_video_to_save">Không có video để lưu</string>
+    <string name="history_ratio_value">Tỷ lệ: %1$s</string>
 </resources>
