@@ -83,96 +83,117 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Action Buttons - Wrapped in ScrollView to avoid navigation bar overlap -->
-        <ScrollView
+        <!-- Action Buttons - Circle Icon Style (Unique & Modern) -->
+        <LinearLayout
+            android:id="@+id/carouselActions"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="130dp"
-            app:layout_constraintTop_toBottomOf="@id/carouselIndicator"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/carouselIndicator">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+            <!-- Save Photo (Main Pink) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCarouselSavePhoto"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="8dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:backgroundTint="#F7A9D5"
+                app:cornerRadius="30dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_download_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="28dp"
+                app:iconTint="#333333" />
 
-                <GridLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
-                    android:columnCount="2"
-                    android:rowCount="2">
+            <!-- Share (Vibrant Purple) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCarouselShare"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="8dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:backgroundTint="#9C27B0"
+                app:cornerRadius="30dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_share_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="28dp"
+                app:iconTint="#FFFFFF" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCarouselSavePhoto"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="6dp"
-                        android:text="Save Photo"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        android:textColor="#333333"
-                        app:backgroundTint="#F7A9D5"
-                        app:cornerRadius="22dp" />
+            <!-- Save Video (Premium Blue) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCarouselSaveVideo"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="8dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:backgroundTint="#2A4EA1"
+                app:cornerRadius="30dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_movie_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="28dp"
+                app:iconTint="#FFFFFF" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCarouselShare"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="6dp"
-                        android:text="Share"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        android:textColor="#333333"
-                        app:backgroundTint="#F7A9D5"
-                        app:cornerRadius="22dp" />
+            <!-- Info/Feedback (Teal) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCarouselViewFeedback"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="8dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:backgroundTint="#009688"
+                app:cornerRadius="30dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_info_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="28dp"
+                app:iconTint="#FFFFFF" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCarouselSaveVideo"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="6dp"
-                        android:text="Save Video"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        app:backgroundTint="#2A4EA1"
-                        app:cornerRadius="22dp" />
+            <!-- Delete (Warning Red) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCarouselDelete"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="8dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:backgroundTint="#D32F2F"
+                app:cornerRadius="30dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_delete_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="28dp"
+                app:iconTint="#FFFFFF" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCarouselViewFeedback"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="6dp"
-                        android:text="View Feedback"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        app:backgroundTint="#2A4EA1"
-                        app:cornerRadius="22dp" />
-                </GridLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCarouselDelete"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginStart="22dp"
-                    android:layout_marginEnd="22dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="16dp"
-                    android:text="🗑  Delete Photo"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    app:backgroundTint="#CC3333"
-                    app:cornerRadius="22dp" />
-            </LinearLayout>
-        </ScrollView>
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
