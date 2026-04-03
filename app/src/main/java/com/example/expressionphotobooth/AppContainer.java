@@ -8,6 +8,8 @@ import com.example.expressionphotobooth.data.repository.SharedPrefsSessionReposi
 import com.example.expressionphotobooth.domain.repository.AdminStatsRepository;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
+import com.example.expressionphotobooth.data.repository.SharedPrefsHistoryRepository;
+import com.example.expressionphotobooth.domain.repository.HistoryRepository;
 import com.example.expressionphotobooth.utils.LocaleManager;
 
 // AppContainer dong vai tro noi giu cac dependency dung chung toan app.
@@ -15,6 +17,7 @@ public class AppContainer extends Application {
 	private SessionRepository sessionRepository;
 	private AuthRepository authRepository;
 	private AdminStatsRepository adminStatsRepository;
+	private HistoryRepository historyRepository;
 
 	@Override
 	public void onCreate() {
@@ -23,6 +26,7 @@ public class AppContainer extends Application {
 		sessionRepository = new SharedPrefsSessionRepository(this);
 		authRepository = new FirebaseAuthRepository();
 		adminStatsRepository = new FirebaseAdminStatsRepository();
+		historyRepository = new SharedPrefsHistoryRepository(this);
 	}
 
 	public SessionRepository getSessionRepository() {
@@ -35,6 +39,10 @@ public class AppContainer extends Application {
 
 	public AdminStatsRepository getAdminStatsRepository() {
 		return adminStatsRepository;
+	}
+
+	public HistoryRepository getHistoryRepository() {
+		return historyRepository;
 	}
 }
 
