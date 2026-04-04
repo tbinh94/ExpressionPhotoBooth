@@ -10,7 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:maxWidth="800dp"
+        android:layout_gravity="center">
 
         <!-- Chart Card -->
         <com.google.android.material.card.MaterialCardView
@@ -28,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="24dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -198,13 +200,20 @@
 
             <TextView
                 android:id="@+id/tvRangeTitle"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="@string/admin_overview_range_title"
                 android:textColor="@color/admin_subtitle_color"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:paddingEnd="12dp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/toggleRange"
@@ -218,37 +227,40 @@
                     android:id="@+id/btnRange3m"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="40dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:minWidth="0dp"
+                    android:paddingHorizontal="12dp"
                     android:text="@string/admin_overview_range_3m"
                     android:textAllCaps="false"
-                    android:textSize="12sp" />
+                    android:textSize="13sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRange6m"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="40dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:minWidth="0dp"
+                    android:paddingHorizontal="12dp"
                     android:text="@string/admin_overview_range_6m"
                     android:textAllCaps="false"
-                    android:textSize="12sp" />
+                    android:textSize="13sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRange12m"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="40dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:minWidth="0dp"
+                    android:paddingHorizontal="12dp"
                     android:text="@string/admin_overview_range_12m"
                     android:textAllCaps="false"
-                    android:textSize="12sp" />
+                    android:textSize="13sp" />
 
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </LinearLayout>
@@ -359,7 +371,7 @@
                 <com.example.expressionphotobooth.ui.chart.MonthlyBarChartView
                     android:id="@+id/chartUsersByMonth"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="200dp"
                     android:layout_marginTop="12dp"
                     android:paddingBottom="4dp" />
 
@@ -410,7 +422,7 @@
                 <com.example.expressionphotobooth.ui.chart.MonthlyBarChartView
                     android:id="@+id/chartImageDownloadsByMonth"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="200dp"
                     android:layout_marginTop="12dp"
                     android:paddingBottom="4dp" />
 
@@ -461,7 +473,7 @@
                 <com.example.expressionphotobooth.ui.chart.MonthlyBarChartView
                     android:id="@+id/chartReviewScoreByMonth"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="200dp"
                     android:layout_marginTop="12dp"
                     android:paddingBottom="4dp" />
 

@@ -1,6 +1,7 @@
 package com.example.expressionphotobooth;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.example.expressionphotobooth.utils.LocaleManager;
 
 import java.util.List;
 
@@ -72,6 +74,10 @@ public final class HelpDialogUtils {
     }
 
     public static void showCenteredNotice(Context context, String title, String message, boolean isPositive) {
+        showCenteredNotice(context, title, message, isPositive, null);
+    }
+
+    public static void showCenteredNotice(Context context, String title, String message, boolean isPositive, Runnable onDismiss) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_center_notice, null, false);
 
         ImageView ivIcon = dialogView.findViewById(R.id.ivNoticeIcon);
@@ -89,7 +95,111 @@ public final class HelpDialogUtils {
                 .setCancelable(true)
                 .create();
 
-        btnOk.setOnClickListener(v -> dialog.dismiss());
+        btnOk.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (onDismiss != null) {
+                onDismiss.run();
+            }
+        });
+
+        dialog.setOnCancelListener(d -> {
+            if (onDismiss != null) {
+                onDismiss.run();
+            }
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    public static void showHistoryGuestRegisterCta(Context context, String title, String message, Runnable onRegisterNow) {
+        showHistoryGuestRegisterCta(context, title, message, onRegisterNow, null);
+    }
+
+    public static void showHistoryGuestRegisterCta(Context context, String title, String message, Runnable onRegisterNow, Runnable onCancel) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_history_notice, null, false);
+
+        ImageView ivIcon = dialogView.findViewById(R.id.ivDialogIcon);
+        TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvDialogMessage);
+        MaterialButton btnSecondary = dialogView.findViewById(R.id.btnDialogSecondary);
+        MaterialButton btnPrimary = dialogView.findViewById(R.id.btnDialogPrimary);
+
+        ivIcon.setImageResource(R.drawable.ic_person_add_24);
+        ivIcon.setColorFilter(Color.parseColor("#2E58AE"));
+        tvTitle.setText(title);
+        tvMessage.setText(message);
+        btnSecondary.setText(R.string.history_popup_cancel);
+        btnPrimary.setText(LocaleManager.getString(
+                context,
+                R.string.home_guest_register_now,
+                LocaleManager.getCurrentLanguage(context)
+        ));
+        btnPrimary.setBackgroundResource(R.drawable.bg_history_pill_cta);
+        btnPrimary.setTextColor(Color.WHITE);
+        btnPrimary.setIconResource(R.drawable.ic_person_add_24);
+        btnPrimary.setIconTint(ColorStateList.valueOf(Color.WHITE));
+        btnPrimary.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+        btnPrimary.setIconSize(context.getResources().getDimensionPixelSize(R.dimen.home_guest_cta_icon_size));
+        btnPrimary.setIconPadding(context.getResources().getDimensionPixelSize(R.dimen.home_guest_cta_icon_padding));
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        btnSecondary.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (onCancel != null) {
+                onCancel.run();
+            }
+        });
+        btnPrimary.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (onRegisterNow != null) {
+                onRegisterNow.run();
+            }
+        });
+
+        dialog.setOnCancelListener(d -> {
+            if (onCancel != null) {
+                onCancel.run();
+            }
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    public static void showSelectionRequiredDialog(Context context, String title, String message) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_history_notice, null, false);
+
+        ImageView ivIcon = dialogView.findViewById(R.id.ivDialogIcon);
+        TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvDialogMessage);
+        MaterialButton btnSecondary = dialogView.findViewById(R.id.btnDialogSecondary);
+        MaterialButton btnPrimary = dialogView.findViewById(R.id.btnDialogPrimary);
+
+        ivIcon.setImageResource(R.drawable.ic_help_24);
+        ivIcon.setColorFilter(Color.parseColor("#2E58AE"));
+        tvTitle.setText(title);
+        tvMessage.setText(message);
+
+        btnSecondary.setVisibility(View.GONE);
+        btnPrimary.setText(R.string.selection_required_continue);
+        btnPrimary.setBackgroundResource(R.drawable.bg_history_pill_blue);
+        btnPrimary.setTextColor(Color.WHITE);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        btnPrimary.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
         if (dialog.getWindow() != null) {

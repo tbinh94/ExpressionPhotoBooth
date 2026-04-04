@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tối ưu cho màn hình lớn: iPhone 14+ Pro Max, Samsung S24 Ultra, Tablet -->
+    <!-- Setup Screen Optimization -->
+    <dimen name="setup_top_action_size">56dp</dimen>
+    <dimen name="setup_top_action_margin_horizontal">24dp</dimen>
+    <dimen name="setup_top_action_margin_top">40dp</dimen>
+    <dimen name="setup_title_margin_top">32dp</dimen>
+    <dimen name="setup_subtitle_margin_top">12dp</dimen>
+    <dimen name="setup_list_margin_top">20dp</dimen>
+    <dimen name="setup_list_margin_bottom">20dp</dimen>
+    <dimen name="setup_next_width">240dp</dimen>
+    <dimen name="setup_next_height">64dp</dimen>
+    <dimen name="setup_next_margin_bottom">32dp</dimen>
+    <dimen name="setup_concept_padding_horizontal">20dp</dimen>
+    <dimen name="setup_concept_padding_top">16dp</dimen>
+    <dimen name="setup_concept_title_margin_bottom">14dp</dimen>
+    <dimen name="setup_frame_item_width">200dp</dimen>
+    <dimen name="setup_frame_item_height">240dp</dimen>
+    <dimen name="setup_frame_item_spacing">12dp</dimen>
+
+    <!-- Camera Screen Optimization -->
+    <dimen name="camera_title_margin_top">12dp</dimen>
+    <dimen name="camera_subtitle_margin_top">8dp</dimen>
+    <dimen name="camera_preview_horizontal_margin">32dp</dimen>
+    <dimen name="camera_preview_margin_top">20dp</dimen>
+    <dimen name="camera_preview_max_height">520dp</dimen>
+    <dimen name="camera_controls_horizontal_margin">32dp</dimen>
+    <dimen name="camera_controls_margin_top">16dp</dimen>
+    <dimen name="camera_controls_margin_bottom">16dp</dimen>
+    <dimen name="camera_ratio_margin_top">20dp</dimen>
+    <dimen name="camera_capture_bottom_margin">32dp</dimen>
+    <dimen name="camera_side_button_margin_start">20dp</dimen>
+    <dimen name="camera_side_button_spacing">12dp</dimen>
+    <dimen name="camera_last_capture_margin_start">20dp</dimen>
+
+    <!-- History Screen Optimization -->
+    <dimen name="history_meta_text_size">18sp</dimen>
+    <dimen name="history_submeta_text_size">15sp</dimen>
+    <dimen name="history_pill_height">44dp</dimen>
+
+    <!-- Home Screen Optimization -->
+    <dimen name="home_top_action_size">52dp</dimen>
+    <dimen name="home_top_bar_margin_top">28dp</dimen>
+    <dimen name="home_top_action_icon_size">28dp</dimen>
+    <dimen name="home_drawer_item_icon_size">24dp</dimen>
+    <dimen name="home_guest_cta_icon_size">20dp</dimen>
+    <dimen name="home_guest_cta_icon_padding">8dp</dimen>
+
+    <!-- Admin Screen Optimization -->
+    <dimen name="admin_ai_mini_card_padding">16dp</dimen>
+    <dimen name="admin_ai_mini_pie_size">80dp</dimen>
+    <dimen name="admin_ai_mini_gap">16dp</dimen>
+    <dimen name="admin_ai_mini_title_text">14sp</dimen>
+    <dimen name="admin_ai_mini_meta_text">12sp</dimen>
+    <dimen name="admin_ai_mini_percent_text">28sp</dimen>
+    <dimen name="admin_card_corner_radius">16dp</dimen>
+    <dimen name="admin_card_corner_radius_item">12dp</dimen>
+    <dimen name="admin_card_elevation">6dp</dimen>
+</resources>
+

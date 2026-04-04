@@ -22,6 +22,9 @@
     <string name="btn_edit_with_count">CHỈNH SỬA (%1$d)</string>
     <string name="btn_result">KẾT QUẢ</string>
     <string name="btn_result_with_count">KẾT QUẢ (%1$d/%2$d)</string>
+    <string name="selection_required_title">Chưa đủ ảnh để tạo kết quả</string>
+    <string name="selection_required_message">Bạn cần chọn đúng %1$d ảnh trước khi bấm Kết quả.</string>
+    <string name="selection_required_continue">Chọn tiếp</string>
     <string name="selected_strip_title">Ảnh đã chọn</string>
     <string name="selected_strip_title_with_count">Ảnh đã chọn (%1$d/%2$d)</string>
     <string name="clear_selection">Xóa chọn</string>
@@ -41,6 +44,31 @@
     <string name="setup_frame_selected">Đã chọn: %1$s</string>
     <string name="home_switch_to_english">English</string>
     <string name="home_switch_to_vietnamese">Tiếng Việt</string>
+    <string name="home_drawer_our">OUR</string>
+    <string name="home_drawer_memories">MEMORIES</string>
+    <string name="home_drawer_show_history">Thư viện</string>
+    <string name="home_drawer_music">Âm nhạc:</string>
+    <string name="home_drawer_language">Ngôn ngữ:</string>
+    <string name="home_music_on">Bật</string>
+    <string name="home_music_off">Tắt</string>
+    <string name="home_history_user_only_title">Chỉ dành cho thành viên</string>
+    <string name="home_history_user_only_message">Lịch sử chỉ dành cho tài khoản đã đăng ký. Hãy đăng ký để lưu và xem lại phiên chụp.</string>
+    <string name="home_gallery_user_only_title">Chỉ dành cho thành viên</string>
+    <string name="home_gallery_user_only_message">Mở khóa Thư viện cá nhân bằng cách tạo tài khoản ngay. Đăng ký để lưu, quản lý và xem lại mọi khoảnh khắc của bạn bất cứ lúc nào.</string>
+    <string name="home_guest_register_now">Đăng ký ngay</string>
+
+    <string name="help_setup_content_desc">Hướng dẫn setup</string>
+    <string name="help_setup_title">Cách chọn khung ảnh</string>
+    <string name="help_setup_subtitle">Setup nhanh trước khi bật camera</string>
+    <string name="help_setup_bullet_1">Chọn một kiểu khung ảnh bạn thích để áp dụng vào kết quả cuối cùng.</string>
+    <string name="help_setup_bullet_2">Bấm TIẾP THEO để bật camera và bắt đầu chụp tự động.</string>
+    <string name="help_setup_bullet_3">App sẽ chụp 6 tấm với khung 4 ảnh, chụp 5 tấm với khung 3 ảnh. Sau đó bạn sẽ chọn những ảnh đẹp nhất để đưa vào khung.</string>
+    <string name="help_selection_title">Cách chọn ảnh</string>
+    <string name="help_selection_subtitle">Mẹo chọn nhanh và chính xác</string>
+    <string name="help_selection_bullet_1">Chọn đúng %1$d ảnh đẹp nhất từ danh sách ảnh đã chụp.</string>
+    <string name="help_selection_bullet_2">Bấm CHỈNH SỬA để chỉnh sửa hàng loạt, hoặc bỏ qua nếu xong.</string>
+    <string name="help_selection_bullet_3">Nút KẾT QUẢ chỉ bật khi bạn chọn đủ %1$d/%1$d ảnh.</string>
+    <string name="help_got_it">Hiểu rồi</string>
 
     <string name="result_title">Kết quả của bạn</string>
     <string name="result_subtitle">Lưu lại khoảnh khắc</string>
@@ -125,6 +153,7 @@
     <string name="auth_invalid_password_message">Mật khẩu tối thiểu 6 ký tự.</string>
     <string name="auth_invalid_name_message">Vui lòng nhập họ tên.</string>
     <string name="auth_invalid_birthday_message">Vui lòng chọn ngày sinh.</string>
+    <string name="auth_invalid_birth_year_message">Năm sinh không được lớn hơn năm hiện tại.</string>
     <string name="auth_sign_out">Đăng xuất</string>
     <string name="auth_sign_out_title">Đã đăng xuất</string>
     <string name="auth_sign_out_message">Bạn đã đăng xuất khỏi phiên hiện tại.</string>
@@ -266,6 +295,7 @@
     <string name="history_no_video">Không có video</string>
     <string name="history_save_photo">Lưu ảnh</string>
     <string name="history_save_video">Lưu video</string>
+    <string name="history_reload">Tải lại</string>
     <string name="history_view_feedback">Xem feedback</string>
     <string name="history_delete">Xóa</string>
     <string name="history_delete_title">Xóa lịch sử</string>
@@ -277,4 +307,7 @@
     <string name="history_not_available">N/A</string>
     <string name="history_no_video_to_save">Không có video để lưu</string>
     <string name="history_ratio_value">Tỷ lệ: %1$s</string>
+
+    <!-- Security & RBAC -->
+    <string name="permission_denied">Bạn không có quyền thực hiện hành động này</string>
 </resources>

@@ -105,7 +105,8 @@ public class PhotoSelectionActivity extends AppCompatActivity {
         rvSelectedPhotos.setAdapter(selectedPhotoPreviewAdapter);
         
         btnContinueToEdit.setEnabled(false);
-        btnDirectToResult.setEnabled(false);
+        // Keep RESULT clickable to show validation popup when selection is not enough.
+        btnDirectToResult.setEnabled(true);
 
         ArrayList<String> imageUriStrings = getIntent().getStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES);
         if (imageUriStrings != null && !imageUriStrings.isEmpty()) {
@@ -175,7 +176,11 @@ public class PhotoSelectionActivity extends AppCompatActivity {
             List<Uri> selectedDisplayUris = adapter.getSelectedUris();
             int required = getRequiredSelectionCount();
             if (selectedDisplayUris.size() != required) {
-                Toast.makeText(this, getString(R.string.select_enough_for_result, required), Toast.LENGTH_SHORT).show();
+                HelpDialogUtils.showSelectionRequiredDialog(
+                        this,
+                        getString(R.string.selection_required_title),
+                        getString(R.string.selection_required_message, required)
+                );
                 return;
             }
 
@@ -188,7 +193,11 @@ public class PhotoSelectionActivity extends AppCompatActivity {
             }
 
             if (selectedOriginalUris.size() != required) {
-                Toast.makeText(this, getString(R.string.select_enough_for_result, required), Toast.LENGTH_SHORT).show();
+                HelpDialogUtils.showSelectionRequiredDialog(
+                        this,
+                        getString(R.string.selection_required_title),
+                        getString(R.string.selection_required_message, required)
+                );
                 return;
             }
 
@@ -233,22 +242,17 @@ public class PhotoSelectionActivity extends AppCompatActivity {
 
     private void updateResultButtonState(int selectedCount) {
         int required = getRequiredSelectionCount();
-        boolean canExport = required > 0 && selectedCount == required;
-        btnDirectToResult.setEnabled(canExport);
+        // Always enabled: onClick handles exact-count validation and shows popup if invalid.
+        btnDirectToResult.setEnabled(true);
         btnDirectToResult.setText(getString(R.string.btn_result_with_count, selectedCount, required));
     }
 
     private int getRequiredSelectionCount() {
-        int requiredFromFrame = sessionState.getPhotoCount();
-        if (requiredFromFrame <= 0) {
-            requiredFromFrame = FALLBACK_SELECTION_COUNT;
-        }
-
         int capturedCount = sessionState.getCapturedImageUris().size();
         if (capturedCount <= 0) {
-            return requiredFromFrame;
+            return FALLBACK_SELECTION_COUNT;
         }
-        return Math.min(requiredFromFrame, capturedCount);
+        return Math.min(FALLBACK_SELECTION_COUNT, capturedCount);
     }
 
     private Uri getSelectedOriginalUri(Uri currentDisplayUri) {

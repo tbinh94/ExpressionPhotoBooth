@@ -31,6 +31,17 @@
     <dimen name="camera_side_button_spacing">8dp</dimen>
     <dimen name="camera_last_capture_margin_start">16dp</dimen>
 
+    <dimen name="history_meta_text_size">16sp</dimen>
+    <dimen name="history_submeta_text_size">13sp</dimen>
+    <dimen name="history_pill_height">36dp</dimen>
+
+    <dimen name="home_top_action_size">44dp</dimen>
+    <dimen name="home_top_bar_margin_top">20dp</dimen>
+    <dimen name="home_top_action_icon_size">22dp</dimen>
+    <dimen name="home_drawer_item_icon_size">18dp</dimen>
+    <dimen name="home_guest_cta_icon_size">16dp</dimen>
+    <dimen name="home_guest_cta_icon_padding">6dp</dimen>
+
     <dimen name="admin_ai_mini_card_padding">12dp</dimen>
     <dimen name="admin_ai_mini_pie_size">52dp</dimen>
     <dimen name="admin_ai_mini_gap">10dp</dimen>

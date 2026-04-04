@@ -79,7 +79,7 @@ public class HistoryDetailActivity extends AppCompatActivity {
 
         String date = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date(historySession.getCapturedAt()));
         tvDate.setText(getString(R.string.history_date_value, date));
-        tvFrame.setText(getString(R.string.history_frame_value, historySession.getFrameName()));
+        tvFrame.setText(getString(R.string.history_frame_value, resolveFrameDisplayName(historySession)));
         tvRatio.setText(getString(R.string.history_ratio_value, historySession.getAspectRatio()));
 
         String feedback = historySession.getFeedback();
@@ -135,6 +135,24 @@ public class HistoryDetailActivity extends AppCompatActivity {
         shareIntent.setType("image/png");
         shareIntent.putExtra(Intent.EXTRA_STREAM, shareUri);
         startActivity(Intent.createChooser(shareIntent, getString(R.string.result_share)));
+    }
+
+    private String resolveFrameDisplayName(HistorySession item) {
+        if (item.getFrameName() != null && !item.getFrameName().trim().isEmpty() && !"Unknown".equalsIgnoreCase(item.getFrameName())) {
+            return item.getFrameName();
+        }
+        if (item.getFrameResId() != -1) {
+            try {
+                String entry = getResources().getResourceEntryName(item.getFrameResId());
+                return entry.replace("frm_", "")
+                        .replace("frm3_", "")
+                        .replace("frm4_", "")
+                        .replace('_', ' ')
+                        .trim();
+            } catch (Exception ignored) {
+            }
+        }
+        return getString(R.string.history_not_available);
     }
 }
 

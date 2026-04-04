@@ -1,31 +1,58 @@
 package com.example.expressionphotobooth;
 
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.View;
+import android.widget.TextView;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 public class HomeActivity extends AppCompatActivity {
+    private static final String PREF_HOME = "home_preferences";
+    private static final String KEY_MUSIC_ENABLED = "music_enabled";
+
     private MediaPlayer mediaPlayer;
     private static boolean isMuted = false;
     private AuthRepository authRepository;
-    private MaterialButton btnLanguageToggle;
+    private DrawerLayout drawerLayout;
+    private MaterialButton btnMenu;
+    private MaterialButton btnDrawerSignOut;
     private MaterialButton btnAdmin;
     private MaterialButton btnStart;
-    private MaterialButton btnLogout;
     private MaterialButton btnGallery;
+    private View homeContentRoot;
+    private View drawerPanel;
+    private TextView tvDrawerOur;
+    private TextView tvDrawerMemories;
+    private TextView tvDrawerShowHistory;
+    private TextView tvDrawerAdminDashboard;
+    private TextView tvDrawerMusicLabel;
+    private TextView tvDrawerLanguageLabel;
+    private MaterialButtonToggleGroup groupMusicState;
+    private MaterialButtonToggleGroup groupLanguage;
+    private MaterialButton btnMusicOn;
+    private MaterialButton btnMusicOff;
+    private MaterialButton btnLangVi;
+    private MaterialButton btnLangEn;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -47,91 +74,218 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
 
-        // Phát nhạc nền
+        bindViews();
+        setupDrawerActions();
+        setupMainActions();
+
         startBackgroundMusic();
-
-        btnLogout = findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(v -> handleSignOut());
-
-        btnAdmin = findViewById(R.id.btnAdmin);
+        applyMusicPreference();
+        setupMusicControls();
+        setupLanguageControls();
+        updateLocalizedUi(LocaleManager.getCurrentLanguage(this));
         checkAdminAccess();
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    return;
+                }
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+                setEnabled(true);
+            }
+        });
+    }
+
+    private void bindViews() {
+        drawerLayout = findViewById(R.id.drawerLayout);
+        btnMenu = findViewById(R.id.btnMenu);
+        homeContentRoot = findViewById(R.id.homeContentRoot);
+        drawerPanel = findViewById(R.id.drawerPanel);
+        btnDrawerSignOut = findViewById(R.id.btnDrawerSignOut);
+        btnAdmin = findViewById(R.id.btnAdmin);
         btnStart = findViewById(R.id.btnStart);
+        btnGallery = findViewById(R.id.btnGallery);
+
+        tvDrawerOur = findViewById(R.id.tvDrawerOur);
+        tvDrawerMemories = findViewById(R.id.tvDrawerMemories);
+        tvDrawerShowHistory = findViewById(R.id.tvDrawerShowHistory);
+        tvDrawerAdminDashboard = findViewById(R.id.tvDrawerAdminDashboard);
+        tvDrawerMusicLabel = findViewById(R.id.tvDrawerMusicLabel);
+        tvDrawerLanguageLabel = findViewById(R.id.tvDrawerLanguageLabel);
+        groupMusicState = findViewById(R.id.groupMusicState);
+        groupLanguage = findViewById(R.id.groupLanguage);
+        btnMusicOn = findViewById(R.id.btnMusicOn);
+        btnMusicOff = findViewById(R.id.btnMusicOff);
+        btnLangVi = findViewById(R.id.btnLangVi);
+        btnLangEn = findViewById(R.id.btnLangEn);
+
+        resizeCompoundStartIcon(tvDrawerShowHistory, R.dimen.home_drawer_item_icon_size);
+        resizeCompoundStartIcon(tvDrawerAdminDashboard, R.dimen.home_drawer_item_icon_size);
+    }
+
+    private void setupDrawerActions() {
+        drawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                if (drawerView != drawerPanel || homeContentRoot == null) {
+                    return;
+                }
+                float translationX = dpToPx(14f) * slideOffset;
+                homeContentRoot.setTranslationX(translationX);
+                homeContentRoot.setAlpha(1f - (0.12f * slideOffset));
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                if (homeContentRoot != null) {
+                    homeContentRoot.animate().translationX(0f).alpha(1f).setDuration(140L).start();
+                }
+            }
+        });
+
+        btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
+        tvDrawerShowHistory.setOnClickListener(v -> {
+            openGalleryIfAllowed();
+        });
+
+        tvDrawerAdminDashboard.setOnClickListener(v -> {
+            startActivity(new Intent(HomeActivity.this, AdminDashboardActivity.class));
+            drawerLayout.closeDrawer(GravityCompat.START);
+            finish();
+        });
+
+        btnDrawerSignOut.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            handleSignOut();
+        });
+    }
+
+    private void setupMainActions() {
         btnStart.setOnClickListener(v -> {
             Animation press = AnimationUtils.loadAnimation(this, R.anim.btn_press);
             btnStart.startAnimation(press);
 
             press.setAnimationListener(new Animation.AnimationListener() {
                 @Override
-                public void onAnimationStart(Animation animation) {}
+                public void onAnimationStart(Animation animation) {
+                }
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    Intent intent = new Intent(HomeActivity.this, SetupActivity.class);
-                    startActivity(intent);
+                    startActivity(new Intent(HomeActivity.this, SetupActivity.class));
                 }
 
                 @Override
-                public void onAnimationRepeat(Animation animation) {}
+                public void onAnimationRepeat(Animation animation) {
+                }
             });
         });
 
-        btnGallery = findViewById(R.id.btnGallery);
-        btnGallery.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, GalleryActivity.class);
-            startActivity(intent);
-        });
+        btnGallery.setOnClickListener(v -> openGalleryIfAllowed());
+    }
 
-        MaterialButton btnVolumeToggle = findViewById(R.id.btnVolumeToggle);
-        updateVolumeIcon(btnVolumeToggle);
-
-        btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
-        updateLanguageButtonText();
-        btnLanguageToggle.setOnClickListener(v -> {
-            String lang = LocaleManager.toggleLanguageWithoutRecreate(this);
-            updateLocalizedUi(lang);
-        });
-
-        btnVolumeToggle.setOnClickListener(v -> {
-            isMuted = !isMuted;
-            if (isMuted) {
-                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
-                }
-            } else {
-                if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
-                    mediaPlayer.start();
-                }
+    private void setupMusicControls() {
+        groupMusicState.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
             }
-            updateVolumeIcon(btnVolumeToggle);
+            if (checkedId == R.id.btnMusicOn) {
+                setMusicEnabled(true);
+            } else if (checkedId == R.id.btnMusicOff) {
+                setMusicEnabled(false);
+            }
+            updateMusicControls();
         });
+        updateMusicControls();
     }
 
-    private void updateVolumeIcon(MaterialButton button) {
-        button.setIconResource(isMuted ? R.drawable.ic_volume_off : R.drawable.ic_volume_up);
+    private void setupLanguageControls() {
+        groupLanguage.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            String targetLang = checkedId == R.id.btnLangVi ? LocaleManager.LANG_VI : LocaleManager.LANG_EN;
+            String current = LocaleManager.getCurrentLanguage(HomeActivity.this);
+            if (!targetLang.equals(current)) {
+                String updated = LocaleManager.switchLanguageWithoutRecreate(HomeActivity.this, targetLang);
+                updateLocalizedUi(updated);
+            }
+        });
+        updateLanguageControls(LocaleManager.getCurrentLanguage(this));
     }
 
-    private void updateLanguageButtonText() {
-        if (btnLanguageToggle == null) {
-            return;
+    private void applyMusicPreference() {
+        SharedPreferences prefs = getSharedPreferences(PREF_HOME, MODE_PRIVATE);
+        boolean musicEnabled = prefs.getBoolean(KEY_MUSIC_ENABLED, true);
+        isMuted = !musicEnabled;
+        if (musicEnabled) {
+            if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+                mediaPlayer.start();
+            }
+        } else if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
         }
-        int textRes = LocaleManager.isVietnamese(this)
-                ? R.string.home_switch_to_english
-                : R.string.home_switch_to_vietnamese;
-        btnLanguageToggle.setText(textRes);
     }
+
+    private void setMusicEnabled(boolean enabled) {
+        isMuted = !enabled;
+        getSharedPreferences(PREF_HOME, MODE_PRIVATE)
+                .edit()
+                .putBoolean(KEY_MUSIC_ENABLED, enabled)
+                .apply();
+
+        if (enabled) {
+            if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+                mediaPlayer.start();
+            }
+        } else if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+    }
+
+    private void updateMusicControls() {
+        int checkedId = isMuted ? R.id.btnMusicOff : R.id.btnMusicOn;
+        if (groupMusicState.getCheckedButtonId() != checkedId) {
+            groupMusicState.check(checkedId);
+        }
+        boolean onChecked = !isMuted;
+        btnMusicOn.setBackgroundTintList(ContextCompat.getColorStateList(this, onChecked ? R.color.white : android.R.color.transparent));
+        btnMusicOff.setBackgroundTintList(ContextCompat.getColorStateList(this, onChecked ? android.R.color.transparent : R.color.white));
+    }
+
+    private void updateLanguageControls(String languageTag) {
+        int checkedId = LocaleManager.LANG_VI.equals(languageTag) ? R.id.btnLangVi : R.id.btnLangEn;
+        if (groupLanguage.getCheckedButtonId() != checkedId) {
+            groupLanguage.check(checkedId);
+        }
+        boolean viChecked = LocaleManager.LANG_VI.equals(languageTag);
+        btnLangVi.setBackgroundTintList(ContextCompat.getColorStateList(this, viChecked ? R.color.white : android.R.color.transparent));
+        btnLangEn.setBackgroundTintList(ContextCompat.getColorStateList(this, viChecked ? android.R.color.transparent : R.color.white));
+    }
+
 
     private void updateLocalizedUi(String languageTag) {
-        btnLanguageToggle.setText(LocaleManager.getString(this,
-                LocaleManager.LANG_VI.equals(languageTag)
-                        ? R.string.home_switch_to_english
-                        : R.string.home_switch_to_vietnamese,
-                languageTag));
+        tvDrawerOur.setText(LocaleManager.getString(this, R.string.home_drawer_our, languageTag));
+        tvDrawerMemories.setText(LocaleManager.getString(this, R.string.home_drawer_memories, languageTag));
+        tvDrawerShowHistory.setText(LocaleManager.getString(this, R.string.home_drawer_show_history, languageTag));
+        tvDrawerAdminDashboard.setText(LocaleManager.getString(this, R.string.admin_go_to_dashboard, languageTag));
+        tvDrawerMusicLabel.setText(LocaleManager.getString(this, R.string.home_drawer_music, languageTag));
+        tvDrawerLanguageLabel.setText(LocaleManager.getString(this, R.string.home_drawer_language, languageTag));
+        btnMusicOn.setText(LocaleManager.getString(this, R.string.home_music_on, languageTag));
+        btnMusicOff.setText(LocaleManager.getString(this, R.string.home_music_off, languageTag));
+        btnLangVi.setText(LocaleManager.getString(this, R.string.home_switch_to_vietnamese, languageTag));
+        btnLangEn.setText(LocaleManager.getString(this, R.string.home_switch_to_english, languageTag));
+        btnDrawerSignOut.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
+
+        updateMusicControls();
+        updateLanguageControls(languageTag);
+
         if (btnStart != null) {
             btnStart.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));
-        }
-        if (btnLogout != null) {
-            btnLogout.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
         }
         if (btnAdmin != null) {
             btnAdmin.setText(LocaleManager.getString(this, R.string.admin_go_to_dashboard, languageTag));
@@ -162,7 +316,6 @@ public class HomeActivity extends AppCompatActivity {
             mediaPlayer.pause();
         }
     }
-//DucNT183-26.03.2026
     @Override
     protected void onResume() {
         super.onResume();
@@ -185,12 +338,10 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UserRole role) {
                 if (role == UserRole.ADMIN) {
-                    btnAdmin.setVisibility(android.view.View.VISIBLE);
-                    btnAdmin.setOnClickListener(v -> {
-                        startActivity(new Intent(HomeActivity.this, AdminDashboardActivity.class));
-                        finish();
-                    });
+                    tvDrawerAdminDashboard.setVisibility(View.VISIBLE);
+                    return;
                 }
+                tvDrawerAdminDashboard.setVisibility(View.GONE);
             }
             @Override
             public void onError(String message) {}
@@ -206,9 +357,54 @@ public class HomeActivity extends AppCompatActivity {
         finish();
     }
 
+    private void openGalleryIfAllowed() {
+        if (authRepository.isGuest()) {
+            String languageTag = LocaleManager.getCurrentLanguage(this);
+            HelpDialogUtils.showHistoryGuestRegisterCta(
+                    this,
+                    LocaleManager.getString(this, R.string.home_gallery_user_only_title, languageTag),
+                    LocaleManager.getString(this, R.string.home_gallery_user_only_message, languageTag),
+                    this::openRegisterFromGuest,
+                    () -> drawerLayout.closeDrawer(GravityCompat.START)
+            );
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return;
+        }
+        startActivity(new Intent(HomeActivity.this, GalleryActivity.class));
+        drawerLayout.closeDrawer(GravityCompat.START);
+    }
+
+    private void openRegisterFromGuest() {
+        authRepository.signOut();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra(IntentKeys.EXTRA_OPEN_REGISTER, true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(0, 0);
+    }
+
+    private float dpToPx(float dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
+    private void resizeCompoundStartIcon(TextView view, int sizeDimenRes) {
+        if (view == null) {
+            return;
+        }
+        Drawable[] drawables = view.getCompoundDrawablesRelative();
+        Drawable start = drawables[0];
+        if (start == null) {
+            return;
+        }
+        int size = getResources().getDimensionPixelSize(sizeDimenRes);
+        start = start.mutate();
+        start.setBounds(0, 0, size, size);
+        view.setCompoundDrawablesRelative(start, drawables[1], drawables[2], drawables[3]);
     }
 }

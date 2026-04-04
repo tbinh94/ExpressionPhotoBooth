@@ -3,9 +3,11 @@ package com.example.expressionphotobooth;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.ContentValues;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,13 +30,19 @@ import android.widget.LinearLayout;
 import android.widget.FrameLayout;
 
 import com.bumptech.glide.Glide;
+import com.example.expressionphotobooth.data.security.RBACService;
+import com.example.expressionphotobooth.data.security.SecureImageStorageService;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
+import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import android.net.Uri;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -52,6 +60,10 @@ public class GalleryActivity extends AppCompatActivity {
     private com.example.expressionphotobooth.domain.repository.HistoryRepository historyRepository;
     private List<File> galleryFiles = new ArrayList<>();
     private boolean isStamp = true;
+    
+    // Security components
+    private RBACService rbacService;
+    private SecureImageStorageService secureImageStorageService;
     
     // Multi-Book Scrapbook State
     public static class BookItem {
@@ -106,8 +118,41 @@ public class GalleryActivity extends AppCompatActivity {
         AppContainer appContainer = (AppContainer) getApplication();
         authRepository = appContainer.getAuthRepository();
         historyRepository = appContainer.getHistoryRepository();
+
+        if (authRepository != null && authRepository.isGuest()) {
+            String languageTag = LocaleManager.getCurrentLanguage(this);
+            HelpDialogUtils.showHistoryGuestRegisterCta(
+                    this,
+                    LocaleManager.getString(this, R.string.home_gallery_user_only_title, languageTag),
+                    LocaleManager.getString(this, R.string.home_gallery_user_only_message, languageTag),
+                    this::openRegisterFromGuest,
+                    this::returnHomeWhenGuestBlocked
+            );
+            return;
+        }
         
-        // 2. Lấy dữ liệu an toàn
+        // 2. Initialize security services (RBAC + Secure Storage)
+        try {
+            secureImageStorageService = new SecureImageStorageService(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        String currentUid = authRepository.getCurrentUid();
+        authRepository.fetchCurrentRole(new AuthRepository.RoleCallback() {
+            @Override
+            public void onSuccess(UserRole role) {
+                rbacService = new RBACService(currentUid, role, false);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Fallback to USER role
+                rbacService = new RBACService(currentUid, UserRole.USER, false);
+            }
+        });
+        
+        // 3. Lấy dữ liệu an toàn
         prefs = getSharedPreferences("ExpressionGallery", MODE_PRIVATE);
         loadMemoryBooks();
         
@@ -116,6 +161,24 @@ public class GalleryActivity extends AppCompatActivity {
         if (authRepository != null) {
             loadGallery();
         }
+    }
+
+    private void returnHomeWhenGuestBlocked() {
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    private void openRegisterFromGuest() {
+        if (authRepository != null) {
+            authRepository.signOut();
+        }
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra(IntentKeys.EXTRA_OPEN_REGISTER, true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
 
@@ -331,16 +394,7 @@ public class GalleryActivity extends AppCompatActivity {
         File currentFile = galleryFiles.get(vpCarousel.getCurrentItem());
         
         String uid = authRepository.getCurrentUid();
-        com.example.expressionphotobooth.domain.model.HistorySession session = null;
-        if (historyRepository != null && uid != null) {
-            List<com.example.expressionphotobooth.domain.model.HistorySession> sessions = historyRepository.getSessions(uid);
-            for (com.example.expressionphotobooth.domain.model.HistorySession s : sessions) {
-                if (currentFile.getName().contains(String.valueOf(s.getCapturedAt()))) {
-                    session = s;
-                    break;
-                }
-            }
-        }
+        com.example.expressionphotobooth.domain.model.HistorySession session = findSessionForFile(currentFile, uid);
 
         if (currentFile == null) return;
         switch (action) {
@@ -353,10 +407,10 @@ public class GalleryActivity extends AppCompatActivity {
                 shareFile(currentFile);
                 break;
             case "save_video":
-                if (session != null && session.getVideoUri() != null) {
-                    Toast.makeText(this, "Video saving (Placeholder)", Toast.LENGTH_SHORT).show();
+                if (session != null && session.getVideoUri() != null && !session.getVideoUri().trim().isEmpty()) {
+                    saveVideoToGallery(session.getVideoUri());
                 } else {
-                    Toast.makeText(this, "No video for this session", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.history_no_video_to_save, Toast.LENGTH_SHORT).show();
                 }
                 break;
             case "view_feedback":
@@ -370,6 +424,137 @@ public class GalleryActivity extends AppCompatActivity {
                 int pos = vpCarousel.getCurrentItem();
                 deleteFile(currentFile, pos, true);
                 break;
+        }
+    }
+
+    private com.example.expressionphotobooth.domain.model.HistorySession findSessionForFile(File currentFile, String uid) {
+        if (historyRepository == null || uid == null || currentFile == null) {
+            return null;
+        }
+        List<com.example.expressionphotobooth.domain.model.HistorySession> sessions = historyRepository.getSessions(uid);
+        if (sessions == null || sessions.isEmpty()) {
+            return null;
+        }
+
+        // 1st: Try to extract sessionId from filename (100% accurate matching).
+        // Expected format: pose_<sessionId>_<timestamp>.png
+        String sessionIdFromFilename = extractSessionIdFromFilename(currentFile.getName());
+        if (sessionIdFromFilename != null && !sessionIdFromFilename.isEmpty()) {
+            for (com.example.expressionphotobooth.domain.model.HistorySession s : sessions) {
+                if (sessionIdFromFilename.equals(s.getId())) {
+                    // RBAC Check: Verify user can access this session
+                    if (rbacService != null && !rbacService.canAccessSession(s.getUserId())) {
+                        return null; // Access denied
+                    }
+                    return s;
+                }
+            }
+        }
+
+        // 2nd: Try exact filename match with result image URI.
+        for (com.example.expressionphotobooth.domain.model.HistorySession s : sessions) {
+            String resultUri = s.getResultImageUri();
+            if (resultUri == null || resultUri.trim().isEmpty()) {
+                continue;
+            }
+            try {
+                Uri uri = Uri.parse(resultUri);
+                String lastPath = uri.getLastPathSegment();
+                if (lastPath != null && lastPath.equals(currentFile.getName())) {
+                    // RBAC Check: Verify user can access this session
+                    if (rbacService != null && !rbacService.canAccessSession(s.getUserId())) {
+                        return null; // Access denied
+                    }
+                    return s;
+                }
+                if ("file".equals(uri.getScheme()) && uri.getPath() != null) {
+                    File sessionFile = new File(uri.getPath());
+                    if (sessionFile.getName().equals(currentFile.getName())) {
+                        // RBAC Check: Verify user can access this session
+                        if (rbacService != null && !rbacService.canAccessSession(s.getUserId())) {
+                            return null; // Access denied
+                        }
+                        return s;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        // 3rd (Fallback): nearest capture timestamp (local gallery file is saved right after result).
+        com.example.expressionphotobooth.domain.model.HistorySession closest = null;
+        long bestDiff = Long.MAX_VALUE;
+        long fileTime = currentFile.lastModified();
+        for (com.example.expressionphotobooth.domain.model.HistorySession s : sessions) {
+            long diff = Math.abs(fileTime - s.getCapturedAt());
+            if (diff < bestDiff) {
+                bestDiff = diff;
+                closest = s;
+            }
+        }
+
+        // Accept nearest only when reasonably close (2 minutes).
+        return bestDiff <= 120_000L ? closest : null;
+    }
+
+    /**
+     * Extract sessionId from filename.
+     * Expected format: pose_<sessionId>_<timestamp>.png
+     * Example: pose_abc123def456_1712234567890.png -> abc123def456
+     */
+    private String extractSessionIdFromFilename(String filename) {
+        if (filename == null || !filename.startsWith("pose_")) {
+            return null;
+        }
+        
+        // Remove extension and prefix
+        String nameWithoutExt = filename.endsWith(".png") ? filename.substring(0, filename.length() - 4) : filename;
+        String withoutPrefix = nameWithoutExt.startsWith("pose_") ? nameWithoutExt.substring(5) : nameWithoutExt;
+        
+        // Split by underscore to find parts: <sessionId>_<timestamp>
+        String[] parts = withoutPrefix.split("_");
+        if (parts.length >= 2) {
+            // The first part should be sessionId, last part should be timestamp
+            // Check if last part is numeric (timestamp)
+            String lastPart = parts[parts.length - 1];
+            if (lastPart.matches("\\d+")) {
+                // Reconstruct sessionId (handle IDs with underscores)
+                return String.join("_", java.util.Arrays.copyOfRange(parts, 0, parts.length - 1));
+            }
+        }
+        
+        return null;
+    }
+
+    private void saveVideoToGallery(String sourceUriString) {
+        try {
+            Uri sourceUri = Uri.parse(sourceUriString);
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Video.Media.DISPLAY_NAME, "memory_video_" + System.currentTimeMillis() + ".mp4");
+            values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+            values.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/Photobooth");
+            Uri outputUri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+            if (outputUri == null) {
+                Toast.makeText(this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try (InputStream in = getContentResolver().openInputStream(sourceUri);
+                 OutputStream out = getContentResolver().openOutputStream(outputUri)) {
+                if (in == null || out == null) {
+                    Toast.makeText(this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                byte[] buffer = new byte[8 * 1024];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                }
+                out.flush();
+            }
+            Toast.makeText(this, R.string.video_saved_success, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.failed_save_video, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -747,11 +932,29 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     private void deleteFile(File file, int position, boolean isCarousel) {
+        // RBAC Check: Verify user can delete this file
+        String uid = authRepository.getCurrentUid();
+        if (rbacService != null && !rbacService.canDeleteImage(uid)) {
+            Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         new AlertDialog.Builder(this)
             .setTitle("Delete Photo")
             .setMessage("Delete this photo permanently?")
             .setPositiveButton("Delete", (dialog, which) -> {
-                if (file.delete()) {
+                boolean deleted = file.delete();
+                
+                // Try to delete from secure storage if applicable
+                if (secureImageStorageService != null && deleted) {
+                    try {
+                        secureImageStorageService.deleteSecureImage(file.getAbsolutePath());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                
+                if (deleted) {
                     galleryFiles.remove(position);
                     if (isCarousel) {
                         if (carouselAdapter != null) carouselAdapter.notifyItemRemoved(position);

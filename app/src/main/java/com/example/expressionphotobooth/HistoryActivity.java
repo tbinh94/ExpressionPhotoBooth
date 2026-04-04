@@ -23,8 +23,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.expressionphotobooth.domain.model.HistorySession;
+import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.repository.HistoryRepository;
+import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.button.MaterialButton;
 
@@ -44,6 +46,7 @@ public class HistoryActivity extends AppCompatActivity {
     private HistoryAdapter adapter;
     private final List<HistorySession> sessions = new ArrayList<>();
     private HistoryRepository historyRepository;
+    private SessionRepository sessionRepository;
     private AuthRepository authRepository;
 
     @Override
@@ -57,7 +60,19 @@ public class HistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_history);
 
         historyRepository = ((AppContainer) getApplication()).getHistoryRepository();
+        sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
         authRepository = ((AppContainer) getApplication()).getAuthRepository();
+
+        if (authRepository.isGuest()) {
+            HelpDialogUtils.showHistoryGuestRegisterCta(
+                    this,
+                    getString(R.string.home_history_user_only_title),
+                    getString(R.string.home_history_user_only_message),
+                    this::openRegisterFromGuest,
+                    this::returnHomeForGuestCancel
+            );
+            return;
+        }
 
         rvHistory = findViewById(R.id.rvHistory);
         emptyState = findViewById(R.id.emptyState);
@@ -101,7 +116,7 @@ public class HistoryActivity extends AppCompatActivity {
             HistorySession item = sessions.get(position);
 
             holder.tvDate.setText(getString(R.string.history_date_value, dateFormat.format(new Date(item.getCapturedAt()))));
-            holder.tvFrame.setText(getString(R.string.history_frame_value, item.getFrameName()));
+            holder.tvFrame.setText(getString(R.string.history_frame_value, resolveFrameDisplayName(item)));
             holder.tvVideoState.setText(item.hasVideo() ? R.string.history_has_video : R.string.history_no_video);
 
             Glide.with(holder.ivThumb)
@@ -112,6 +127,7 @@ public class HistoryActivity extends AppCompatActivity {
             holder.ivThumb.setOnClickListener(v -> openDetail(item));
             holder.btnSavePhoto.setOnClickListener(v -> saveImageToGallery(item.getResultImageUri()));
             holder.btnSaveVideo.setOnClickListener(v -> saveVideoToGallery(item.getVideoUri()));
+            holder.btnReload.setOnClickListener(v -> reloadSession(item));
             holder.btnShare.setOnClickListener(v -> shareImage(item.getResultImageUri()));
             holder.btnViewFeedback.setOnClickListener(v -> showFeedback(item));
             holder.btnDelete.setOnClickListener(v -> deleteSession(item));
@@ -129,6 +145,7 @@ public class HistoryActivity extends AppCompatActivity {
             TextView tvVideoState;
             MaterialButton btnSavePhoto;
             MaterialButton btnSaveVideo;
+            MaterialButton btnReload;
             MaterialButton btnShare;
             MaterialButton btnViewFeedback;
             MaterialButton btnDelete;
@@ -141,6 +158,7 @@ public class HistoryActivity extends AppCompatActivity {
                 tvVideoState = itemView.findViewById(R.id.tvHistoryVideoState);
                 btnSavePhoto = itemView.findViewById(R.id.btnHistorySavePhoto);
                 btnSaveVideo = itemView.findViewById(R.id.btnHistorySaveVideo);
+                btnReload = itemView.findViewById(R.id.btnHistoryReload);
                 btnShare = itemView.findViewById(R.id.btnHistoryShare);
                 btnViewFeedback = itemView.findViewById(R.id.btnHistoryFeedback);
                 btnDelete = itemView.findViewById(R.id.btnHistoryDelete);
@@ -287,6 +305,67 @@ public class HistoryActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {
         }
+    }
+
+    private String resolveFrameDisplayName(HistorySession item) {
+        if (item == null) {
+            return getString(R.string.history_not_available);
+        }
+        if (item.getFrameName() != null && !item.getFrameName().trim().isEmpty() && !"Unknown".equalsIgnoreCase(item.getFrameName())) {
+            return item.getFrameName();
+        }
+
+        int frameResId = item.getFrameResId();
+        if (frameResId != -1) {
+            try {
+                String entry = getResources().getResourceEntryName(frameResId);
+                return entry.replace("frm_", "")
+                        .replace("frm3_", "")
+                        .replace("frm4_", "")
+                        .replace('_', ' ')
+                        .trim();
+            } catch (Exception ignored) {
+            }
+        }
+        return getString(R.string.history_not_available);
+    }
+
+    private void reloadSession(HistorySession item) {
+        if (item == null || item.getSelectedImageUris() == null || item.getSelectedImageUris().isEmpty()) {
+            Toast.makeText(this, R.string.no_photo_to_continue, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        SessionState state = new SessionState();
+        state.setCapturedImageUris(item.getSelectedImageUris());
+        if (item.getFrameResId() != -1) {
+            state.setSelectedFrameResId(item.getFrameResId());
+            getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
+                    .edit()
+                    .putInt("SELECTED_FRAME_ID", item.getFrameResId())
+                    .apply();
+        }
+        sessionRepository.saveSession(state);
+
+        Intent intent = new Intent(this, ResultActivity.class);
+        intent.putStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES, new ArrayList<>(item.getSelectedImageUris()));
+        startActivity(intent);
+    }
+
+    private void openRegisterFromGuest() {
+        authRepository.signOut();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra(IntentKeys.EXTRA_OPEN_REGISTER, true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void returnHomeForGuestCancel() {
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
     }
 }
 
