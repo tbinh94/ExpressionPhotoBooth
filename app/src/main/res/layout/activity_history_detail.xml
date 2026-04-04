@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient"
-    android:padding="16dp">
+    android:background="#F7F9FF"
+    android:padding="14dp">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnBack"
@@ -26,8 +26,10 @@
         android:id="@+id/ivHistoryResult"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
         android:adjustViewBounds="true"
+        android:background="@drawable/bg_rounded_white"
+        android:padding="3dp"
         android:scaleType="fitCenter"
         app:layout_constraintDimensionRatio="3:4"
         app:layout_constraintEnd_toEndOf="parent"
@@ -38,9 +40,9 @@
         android:id="@+id/tvHistoryDate"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="10dp"
         android:textColor="#2A4EA1"
-        android:textSize="17sp"
+        android:textSize="@dimen/history_meta_text_size"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -50,9 +52,9 @@
         android:id="@+id/tvHistoryFrame"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
         android:textColor="#2A4EA1"
-        android:textSize="17sp"
+        android:textSize="@dimen/history_meta_text_size"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -62,9 +64,9 @@
         android:id="@+id/tvHistoryRatio"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
         android:textColor="#2A4EA1"
-        android:textSize="16sp"
+        android:textSize="@dimen/history_submeta_text_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvHistoryFrame" />
@@ -73,10 +75,10 @@
         android:id="@+id/tvHistoryFeedback"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
         android:maxLines="3"
         android:textColor="#2A4EA1"
-        android:textSize="15sp"
+        android:textSize="@dimen/history_submeta_text_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvHistoryRatio" />
@@ -84,34 +86,36 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSavePhoto"
         android:layout_width="0dp"
-        android:layout_height="44dp"
-        android:layout_marginTop="14dp"
+        android:layout_height="@dimen/history_pill_height"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="6dp"
         android:text="@string/history_save_photo"
         android:textAllCaps="false"
         android:textColor="#000000"
+        android:textSize="12sp"
         android:textStyle="bold"
         app:backgroundTint="#F7A9D5"
-        app:cornerRadius="22dp"
+        app:cornerRadius="18dp"
         app:layout_constraintEnd_toStartOf="@id/btnShare"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvHistoryFeedback"
-        app:layout_constraintWidth_percent="0.48" />
+        app:layout_constraintTop_toBottomOf="@id/tvHistoryFeedback" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnShare"
         android:layout_width="0dp"
-        android:layout_height="44dp"
-        android:layout_marginTop="14dp"
+        android:layout_height="@dimen/history_pill_height"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="12dp"
         android:text="@string/result_share"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
+        android:textSize="12sp"
         android:textStyle="bold"
         app:backgroundTint="#2A4EA1"
-        app:cornerRadius="22dp"
+        app:cornerRadius="18dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btnSavePhoto"
-        app:layout_constraintTop_toBottomOf="@id/tvHistoryFeedback"
-        app:layout_constraintWidth_percent="0.48" />
+        app:layout_constraintTop_toBottomOf="@id/tvHistoryFeedback" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

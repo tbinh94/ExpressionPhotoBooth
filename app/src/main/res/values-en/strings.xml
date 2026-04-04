@@ -33,6 +33,7 @@
     <string name="auth_invalid_password_message">Password must be at least 6 characters.</string>
     <string name="auth_invalid_name_message">Please enter your full name.</string>
     <string name="auth_invalid_birthday_message">Please select your date of birth.</string>
+    <string name="auth_invalid_birth_year_message">Birth year cannot be greater than the current year.</string>
     <string name="auth_back_to_login">Back to Sign In</string>
     <string name="auth_sign_out">Sign Out</string>
     <string name="auth_sign_out_title">Signed Out</string>
@@ -49,6 +50,9 @@
     <string name="batch_edit_completed">Batch edit completed</string>
     <string name="batch_edit_cancelled">Batch edit cancelled</string>
     <string name="selection_limit_reached">You can select up to %1$d photos only</string>
+    <string name="selection_required_title">Not enough photos selected</string>
+    <string name="selection_required_message">Please select exactly %1$d photos before tapping Result.</string>
+    <string name="selection_required_continue">Continue selecting</string>
 
     <string name="capture_status_ready">Ready to capture</string>
     <string name="capture_status_starting">Starting capture sequence (%1$d photos)</string>
@@ -61,6 +65,18 @@
 
     <string name="home_switch_to_english">English</string>
     <string name="home_switch_to_vietnamese">Vietnamese</string>
+    <string name="home_drawer_our">OUR</string>
+    <string name="home_drawer_memories">MEMORIES</string>
+    <string name="home_drawer_show_history">Gallery</string>
+    <string name="home_drawer_music">Music:</string>
+    <string name="home_drawer_language">Language:</string>
+    <string name="home_music_on">ON</string>
+    <string name="home_music_off">OFF</string>
+    <string name="home_history_user_only_title">Members only</string>
+    <string name="home_history_user_only_message">History is available for registered users. Please sign up to save and view your sessions.</string>
+    <string name="home_gallery_user_only_title">Members only</string>
+    <string name="home_gallery_user_only_message">Unlock your personal Gallery by creating an account. Sign up now to save, manage, and revisit your memories anytime.</string>
+    <string name="home_guest_register_now">Register now</string>
 
     <string name="setup_title">Choose Your Frame</string>
     <string name="setup_subtitle">Select a frame for your photo</string>
@@ -73,7 +89,7 @@
     <string name="help_setup_subtitle">Quick setup before opening camera</string>
     <string name="help_setup_bullet_1">Choose one frame style to apply to the final result.</string>
     <string name="help_setup_bullet_2">Tap NEXT to enter camera and start automatic capture.</string>
-    <string name="help_setup_bullet_3">The app captures 6 photos, then you choose the best 4 for RESULT.</string>
+    <string name="help_setup_bullet_3">The app captures 6 photos for 4-photo frames and 5 photos for 3-photo frames. Then you select the best photos to fit into your frame.</string>
     <string name="help_selection_title">How to select photos</string>
     <string name="help_selection_subtitle">Tips for quick and correct selection</string>
     <string name="help_selection_bullet_1">Select exactly %1$d best photos from your captured list.</string>
@@ -224,6 +240,7 @@
     <string name="history_no_video">No video available</string>
     <string name="history_save_photo">Save Photo</string>
     <string name="history_save_video">Save Video</string>
+    <string name="history_reload">Reload</string>
     <string name="history_view_feedback">View Feedback</string>
     <string name="history_delete">Delete</string>
     <string name="history_delete_title">Delete History</string>
@@ -235,4 +252,7 @@
     <string name="history_not_available">N/A</string>
     <string name="history_no_video_to_save">No video to save</string>
     <string name="history_ratio_value">Ratio: %1$s</string>
+
+    <!-- Security & RBAC -->
+    <string name="permission_denied">You don\'t have permission to perform this action</string>
 </resources>

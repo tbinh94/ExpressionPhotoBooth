@@ -8,6 +8,7 @@ public class HistorySession {
     private String userId;
     private long capturedAt;
     private String frameName;
+    private int frameResId = -1;
     private String aspectRatio;
     private final List<String> selectedImageUris = new ArrayList<>();
     private String resultImageUri;
@@ -45,6 +46,14 @@ public class HistorySession {
 
     public void setFrameName(String frameName) {
         this.frameName = frameName;
+    }
+
+    public int getFrameResId() {
+        return frameResId;
+    }
+
+    public void setFrameResId(int frameResId) {
+        this.frameResId = frameResId;
     }
 
     public String getAspectRatio() {

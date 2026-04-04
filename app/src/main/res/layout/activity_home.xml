@@ -1,140 +1,360 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Background -->
-    <ImageView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:contentDescription="@null"
-        android:scaleType="centerCrop"
-        android:src="@drawable/photo_banner"
-        tools:ignore="ContentDescription"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/homeContentRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <!-- Volume Toggle Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnVolumeToggle"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="16dp"
-        android:insetLeft="0dp"
-        android:insetTop="0dp"
-        android:insetRight="0dp"
-        android:insetBottom="0dp"
-        app:icon="@drawable/ic_volume_up"
-        app:iconGravity="textStart"
-        app:iconPadding="0dp"
-        app:iconSize="28dp"
-        app:iconTint="#FFFFFF"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            android:src="@drawable/photo_banner"
+            tools:ignore="ContentDescription"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLanguageToggle"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:minWidth="0dp"
-        android:text="@string/home_switch_to_english"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp"
-        app:backgroundTint="#40FFFFFF"
-        app:cornerRadius="20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:strokeColor="#99FFFFFF"
-        app:strokeWidth="1dp" />
+        <LinearLayout
+            android:id="@+id/topBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/home_top_bar_margin_top"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <!-- Main content: Start + Logout xếp dọc -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMenu"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="@dimen/home_top_action_size"
+                android:layout_height="@dimen/home_top_action_size"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:gravity="center"
+                app:backgroundTint="#3B4D82"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_menu_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="@dimen/home_top_action_icon_size"
+                app:iconTint="#FFFFFF" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/mainContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="500dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.86">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStart"
+                android:layout_width="280dp"
+                android:layout_height="70dp"
+                android:text="@string/btn_start_decorated"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:backgroundTint="#FF99BE"
+                app:cornerRadius="40dp"
+                app:elevation="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGallery"
+                android:layout_width="280dp"
+                android:layout_height="70dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/btn_gallery"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:backgroundTint="#81C19B"
+                app:cornerRadius="40dp"
+                app:elevation="4dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAdmin"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_marginTop="12dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="@string/admin_go_to_dashboard"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:icon="@drawable/ic_settings_24"
+                app:iconTint="#FFFFFF"
+                app:backgroundTint="#40FFFFFF"
+                app:cornerRadius="20dp" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <LinearLayout
-        android:id="@+id/mainContent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:id="@+id/drawerPanel"
+        android:layout_width="@dimen/admin_nav_drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#042B66"
         android:orientation="vertical"
-        android:spacing="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.882">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="24dp">
 
-        <!-- Button Start -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnStart"
-            android:layout_width="250dp"
-            android:layout_height="60dp"
-            android:text="@string/btn_start_decorated"
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            app:backgroundTint="#ff99be"
-            app:cornerRadius="40dp"
-            app:elevation="8dp" />
+        <TextView
+            android:id="@+id/tvDrawerOur"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:fontFamily="serif"
+            android:gravity="center"
+            android:text="@string/home_drawer_our"
+            android:textAllCaps="true"
+            android:textColor="#F7A9D5"
+            android:textSize="30sp"
+            android:textStyle="bold" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGallery"
-            android:layout_width="250dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="12dp"
-            android:text="@string/btn_gallery"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:backgroundTint="#81c19b"
-            app:cornerRadius="40dp"
-            app:elevation="4dp" />
+        <TextView
+            android:id="@+id/tvDrawerMemories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:includeFontPadding="false"
+            android:fontFamily="serif"
+            android:gravity="center"
+            android:text="@string/home_drawer_memories"
+            android:textAllCaps="true"
+            android:textColor="#F7A9D5"
+            android:textSize="30sp"
+            android:textStyle="bold" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAdmin"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_marginTop="12dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:text="@string/admin_go_to_dashboard"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            app:icon="@drawable/ic_settings_24"
-            app:iconTint="#FFFFFF"
-            app:backgroundTint="#40FFFFFF"
-            app:cornerRadius="20dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="14dp"
+            android:background="#CCFFFFFF" />
 
-        <!-- Button Logout - ngay bên dưới btnStart -->
+        <TextView
+            android:id="@+id/tvDrawerShowHistory"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_drawer_item_clickable"
+            android:drawableStart="@drawable/ic_grid_view_24"
+            android:drawablePadding="8dp"
+            android:drawableTint="#F7A9D5"
+            android:fontFamily="serif"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="10dp"
+            android:text="@string/home_drawer_show_history"
+            android:textColor="#F7A9D5"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogout"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
+        <TextView
+            android:id="@+id/tvDrawerAdminDashboard"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
             android:layout_marginTop="8dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
+            android:background="@drawable/bg_drawer_item_clickable"
+            android:drawableStart="@drawable/ic_settings_24"
+            android:drawablePadding="8dp"
+            android:drawableTint="#F7A9D5"
+            android:fontFamily="serif"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="10dp"
+            android:text="@string/admin_go_to_dashboard"
+            android:textColor="#F7A9D5"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvDrawerMusicLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="serif"
+                android:text="@string/home_drawer_music"
+                android:textColor="#F7A9D5"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/groupMusicState"
+                android:layout_width="122dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_drawer_spinner"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnMusicOn"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:text="@string/home_music_on"
+                    android:textAllCaps="false"
+                    android:textColor="#1B2559"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#00000000"
+                    app:cornerRadius="15dp"
+                    app:rippleColor="#22F7A9D5" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnMusicOff"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:text="@string/home_music_off"
+                    android:textAllCaps="false"
+                    android:textColor="#1B2559"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#00000000"
+                    app:cornerRadius="15dp"
+                    app:rippleColor="#22F7A9D5" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvDrawerLanguageLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="serif"
+                android:text="@string/home_drawer_language"
+                android:textColor="#F7A9D5"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/groupLanguage"
+                android:layout_width="122dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_drawer_spinner"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLangVi"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:text="@string/home_switch_to_vietnamese"
+                    android:textAllCaps="false"
+                    android:textColor="#1B2559"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#00000000"
+                    app:cornerRadius="15dp"
+                    app:rippleColor="#22F7A9D5" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLangEn"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:text="@string/home_switch_to_english"
+                    android:textAllCaps="false"
+                    android:textColor="#1B2559"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#00000000"
+                    app:cornerRadius="15dp"
+                    app:rippleColor="#22F7A9D5" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="10dp"
+            android:background="#CCFFFFFF" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDrawerSignOut"
+            android:layout_width="174dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="6dp"
             android:text="@string/auth_sign_out"
             android:textAllCaps="false"
-            android:textColor="#CCFFFFFF"
-            android:textSize="18sp"
-            android:textStyle="normal"
-            app:backgroundTint="@android:color/transparent"
-            app:rippleColor="#33FFFFFF" />
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:backgroundTint="#F7A9D5"
+            app:cornerRadius="24dp" />
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

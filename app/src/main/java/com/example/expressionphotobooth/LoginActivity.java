@@ -17,6 +17,12 @@ import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword, etName, etBirthday;
@@ -96,6 +102,10 @@ public class LoginActivity extends AppCompatActivity {
                 setRegisterMode(false);
             }
         });
+
+        if (getIntent().getBooleanExtra(IntentKeys.EXTRA_OPEN_REGISTER, false)) {
+            setRegisterMode(true);
+        }
     }
 
     private void doForgotPassword() {
@@ -323,8 +333,30 @@ public class LoginActivity extends AppCompatActivity {
                HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_invalid_input_title), getString(R.string.auth_invalid_birthday_message), false);
                return false;
            }
+           if (!isBirthYearValid(getText(etBirthday))) {
+               HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_invalid_input_title), getString(R.string.auth_invalid_birth_year_message), false);
+               return false;
+           }
         }
         return true;
+    }
+
+    private boolean isBirthYearValid(String birthdayText) {
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+        format.setLenient(false);
+        try {
+            Date birthday = format.parse(birthdayText);
+            if (birthday == null) {
+                return false;
+            }
+            Calendar birthCal = Calendar.getInstance();
+            birthCal.setTime(birthday);
+            int birthYear = birthCal.get(Calendar.YEAR);
+            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+            return birthYear <= currentYear;
+        } catch (ParseException e) {
+            return false;
+        }
     }
 
     private void routeByRole() {

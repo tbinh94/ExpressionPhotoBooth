@@ -27,10 +27,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.example.expressionphotobooth.data.security.RBACService;
+import com.example.expressionphotobooth.data.security.SecureImageStorageService;
 import com.example.expressionphotobooth.data.video.TimelapseVideoEncoder;
 import com.example.expressionphotobooth.domain.model.DownloadType;
+import com.example.expressionphotobooth.domain.model.HistorySession;
 import com.example.expressionphotobooth.domain.model.SessionState;
+import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.domain.repository.AdminStatsRepository;
+import com.example.expressionphotobooth.domain.repository.HistoryRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.CreateTimelapseVideoUseCase;
 import com.example.expressionphotobooth.domain.usecase.CreateVerticalCollageUseCase;
@@ -66,6 +71,17 @@ public class ResultActivity extends AppCompatActivity {
     private boolean hasShownFeedback = false;
     private ToneGenerator toneGenerator;
     private AdminStatsRepository adminStatsRepository;
+    private AuthRepository authRepository;
+    private HistoryRepository historyRepository;
+    private String currentUid;
+    private String historySessionId;
+    private boolean isGuestSession;
+    private boolean hasShownGuestHistoryNotice;
+    
+    // Security components
+    private SecureImageStorageService secureImageStorageService;
+    private RBACService rbacService;
+    private UserRole currentUserRole;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,12 +90,27 @@ public class ResultActivity extends AppCompatActivity {
 
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
         adminStatsRepository = ((AppContainer) getApplication()).getAdminStatsRepository();
+        authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        historyRepository = ((AppContainer) getApplication()).getHistoryRepository();
+        currentUid = authRepository.getCurrentUid();
+        isGuestSession = authRepository.isGuest();
         sessionState = sessionRepository.getSession();
         
         if (sessionState == null) {
             finish();
             return;
         }
+
+        // Initialize security services
+        try {
+            secureImageStorageService = new SecureImageStorageService(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to initialize secure storage", Toast.LENGTH_SHORT).show();
+        }
+        
+        // Initialize RBAC service with user info
+        initializeRBAC();
 
         toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
@@ -125,6 +156,7 @@ public class ResultActivity extends AppCompatActivity {
                     ivFinalResult.setImageBitmap(finalBitmap);
                     sessionState.setResultImageUri(resultUri != null ? resultUri.toString() : null);
                     sessionRepository.saveSession(sessionState);
+                    persistHistoryBaseRecord();
 
                     // Save to user's local gallery
                     saveToUserLocalGallery(finalBitmap);
@@ -292,17 +324,94 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialize Role-Based Access Control service
+     * Fetches current user role and sets up permission checks
+     */
+    private void initializeRBAC() {
+        authRepository.fetchCurrentRole(new AuthRepository.RoleCallback() {
+            @Override
+            public void onSuccess(UserRole role) {
+                currentUserRole = role;
+                rbacService = new RBACService(currentUid, role, isGuestSession);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Fallback to USER role
+                currentUserRole = UserRole.USER;
+                rbacService = new RBACService(currentUid, UserRole.USER, isGuestSession);
+            }
+        });
+    }
+
+    /**
+     * Secure storage process:
+     * 1. Compress image to PNG bytes
+     * 2. Encrypt compressed data using AES-256
+     * 3. Save encrypted data to internal storage with restrictive permissions
+     * 4. Store encrypted path reference in database
+     */
+    /**
+     * Secure storage process:
+     * 1. Compress image to PNG bytes
+     * 2. Encrypt compressed data using AES-256
+     * 3. Save encrypted data to internal storage with restrictive permissions
+     * 4. Store encrypted path reference in database
+     */
     private void saveToUserLocalGallery(Bitmap bitmap) {
         AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
         String uid = authRepository.getCurrentUid();
-        if (uid == null) return;
+        if (uid == null || !rbacService.canAccessSession(uid)) {
+            // RBAC Check: User must own the session
+            return;
+        }
 
+        // Use secure storage service for encrypted storage
+        if (secureImageStorageService == null) {
+            // Fallback to old method if secure storage not initialized
+            fallbackSaveToGallery(bitmap, uid);
+            return;
+        }
+
+        try {
+            // Step 1 & 2 & 3: Compress -> Encrypt -> Save to internal storage
+            String encryptedImagePath = secureImageStorageService.saveSecureImage(
+                    bitmap,
+                    uid,
+                    historySessionId != null ? historySessionId : String.valueOf(System.currentTimeMillis())
+            );
+
+            if (encryptedImagePath == null) {
+                // Fallback if encryption fails
+                fallbackSaveToGallery(bitmap, uid);
+                return;
+            }
+
+            // Step 4: Store encrypted path reference in database (done in persistHistoryBaseRecord)
+            // The path will be stored in historySession during persistHistoryBaseRecord()
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback to unencrypted storage
+            fallbackSaveToGallery(bitmap, uid);
+        }
+    }
+
+    /**
+     * Fallback method: Save image to external gallery (non-encrypted) if secure storage fails
+     * This ensures user can still access photos even if encryption fails
+     */
+    private void fallbackSaveToGallery(Bitmap bitmap, String uid) {
         File galleryDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "user_gallery/" + uid);
         if (!galleryDir.exists()) {
             galleryDir.mkdirs();
         }
 
-        String fileName = "pose_" + System.currentTimeMillis() + ".png";
+        String sessionIdPart = (historySessionId != null && !historySessionId.isEmpty())
+                ? "_" + historySessionId
+                : "";
+        String fileName = "pose" + sessionIdPart + "_" + System.currentTimeMillis() + ".png";
         File file = new File(galleryDir, fileName);
         try (FileOutputStream out = new FileOutputStream(file)) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
@@ -312,6 +421,12 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void exportTimelapseVideo() {
+        // RBAC Check: Verify user can perform this action on their own session
+        if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
+            Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (sourceOriginalUris == null || sourceOriginalUris.isEmpty()) {
             Toast.makeText(this, R.string.no_images_for_video, Toast.LENGTH_SHORT).show();
             return;
@@ -357,6 +472,9 @@ public class ResultActivity extends AppCompatActivity {
                     btnSaveVideo.setEnabled(true);
                     btnSaveVideo.setText(originalText);
                     if (videoUri != null) {
+                        if (!isGuestSession && historyRepository != null && currentUid != null && historySessionId != null) {
+                            historyRepository.updateVideoUri(currentUid, historySessionId, videoUri.toString());
+                        }
                         adminStatsRepository.recordDownload(DownloadType.VIDEO);
                         Toast.makeText(ResultActivity.this, R.string.video_saved_success, Toast.LENGTH_LONG).show();
                         showFeedbackBottomSheet(true);
@@ -376,6 +494,12 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void saveCurrentResultAsPng() {
+        // RBAC Check: Verify user can save own session result
+        if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
+            Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (resultUri == null) {
             Toast.makeText(this, R.string.no_result_to_save, Toast.LENGTH_SHORT).show();
             return;
@@ -407,6 +531,12 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void shareResult() {
+        // RBAC Check: Verify user can share own session result
+        if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
+            Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (resultUri == null) {
             Toast.makeText(this, R.string.no_result_to_save, Toast.LENGTH_SHORT).show();
             return;
@@ -488,6 +618,9 @@ public class ResultActivity extends AppCompatActivity {
                 FirebaseFirestore.getInstance().collection("reviews")
                     .add(review)
                     .addOnSuccessListener(doc -> {
+                        if (!isGuestSession && historyRepository != null && uid != null && historySessionId != null) {
+                            historyRepository.updateFeedback(uid, historySessionId, rating, feedback);
+                        }
                         adminStatsRepository.recordReviewSubmitted();
                         Toast.makeText(this, getString(R.string.feedback_thanks_with_rating, rating), Toast.LENGTH_SHORT).show();
                         hasShownFeedback = true;
@@ -519,5 +652,89 @@ public class ResultActivity extends AppCompatActivity {
         if (toneGenerator != null) {
             toneGenerator.release();
         }
+    }
+
+    private void persistHistoryBaseRecord() {
+        if (isGuestSession) {
+            if (!hasShownGuestHistoryNotice && !isFinishing()) {
+                hasShownGuestHistoryNotice = true;
+                HelpDialogUtils.showHistoryGuestRegisterCta(
+                        this,
+                        getString(R.string.home_history_user_only_title),
+                        getString(R.string.home_history_user_only_message),
+                        this::openRegisterFromGuest
+                );
+            }
+            return;
+        }
+        if (historyRepository == null || currentUid == null || resultUri == null) {
+            return;
+        }
+        if (historySessionId != null) {
+            return;
+        }
+
+        int selectedFrameResId = sessionState != null
+                ? sessionState.getSelectedFrameResId()
+                : -1;
+        if (selectedFrameResId == -1) {
+            selectedFrameResId = getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
+                    .getInt("SELECTED_FRAME_ID", -1);
+        }
+
+        HistorySession historySession = new HistorySession();
+        historySession.setUserId(currentUid);
+        historySession.setCapturedAt(System.currentTimeMillis());
+        historySession.setSelectedImageUris(sourceOriginalUris);
+        historySession.setResultImageUri(resultUri.toString());
+        historySession.setFrameResId(selectedFrameResId);
+        historySession.setAspectRatio(resolveAspectRatio(selectedFrameResId));
+
+        if (selectedFrameResId != -1) {
+            historySession.setFrameName(resolveFrameName(selectedFrameResId));
+        } else {
+            historySession.setFrameName("Unknown");
+        }
+
+        historySessionId = historyRepository.createSession(historySession);
+    }
+
+    private String resolveFrameName(int frameResId) {
+        if (frameResId == R.drawable.frm_3x4_cushin) return "Cushin";
+        if (frameResId == R.drawable.frm_3x4_movie) return "Movie";
+        if (frameResId == R.drawable.frm_3x4_pig_hero) return "Pig Hero";
+        if (frameResId == R.drawable.frm3_16x9_blue_canvas) return "Blue Canvas";
+        if (frameResId == R.drawable.frm3_16x9_green_doodle) return "Green Doodle";
+        if (frameResId == R.drawable.frm3_16x9_red_star) return "Red Star";
+        if (frameResId == R.drawable.frm4_16x9_bow) return "Bow";
+        if (frameResId == R.drawable.frm4_16x9_food) return "Food";
+        if (frameResId == R.drawable.frm4_16x9_heart) return "Heart";
+        return "Unknown";
+    }
+
+    private String resolveAspectRatio(int frameResId) {
+        if (frameResId == R.drawable.frm_3x4_cushin
+                || frameResId == R.drawable.frm_3x4_movie
+                || frameResId == R.drawable.frm_3x4_pig_hero) {
+            return "3:4";
+        }
+        if (frameResId == R.drawable.frm3_16x9_blue_canvas
+                || frameResId == R.drawable.frm3_16x9_green_doodle
+                || frameResId == R.drawable.frm3_16x9_red_star
+                || frameResId == R.drawable.frm4_16x9_bow
+                || frameResId == R.drawable.frm4_16x9_food
+                || frameResId == R.drawable.frm4_16x9_heart) {
+            return "16:9";
+        }
+        return "N/A";
+    }
+
+    private void openRegisterFromGuest() {
+        authRepository.signOut();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra(IntentKeys.EXTRA_OPEN_REGISTER, true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

@@ -129,6 +129,7 @@ public class SharedPrefsHistoryRepository implements HistoryRepository {
             json.put("userId", session.getUserId());
             json.put("capturedAt", session.getCapturedAt());
             json.put("frameName", session.getFrameName());
+            json.put("frameResId", session.getFrameResId());
             json.put("aspectRatio", session.getAspectRatio());
             json.put("resultImageUri", session.getResultImageUri());
             json.put("videoUri", session.getVideoUri());
@@ -151,6 +152,7 @@ public class SharedPrefsHistoryRepository implements HistoryRepository {
         session.setUserId(json.optString("userId", null));
         session.setCapturedAt(json.optLong("capturedAt", System.currentTimeMillis()));
         session.setFrameName(json.optString("frameName", "Unknown"));
+        session.setFrameResId(json.optInt("frameResId", -1));
         session.setAspectRatio(json.optString("aspectRatio", "N/A"));
         session.setResultImageUri(json.optString("resultImageUri", null));
         session.setVideoUri(json.optString("videoUri", null));

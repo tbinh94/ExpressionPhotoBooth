@@ -10,6 +10,7 @@ public final class IntentKeys {
     public static final String EXTRA_NOTICE_MESSAGE = "notice_message";
     public static final String EXTRA_NOTICE_TITLE = "notice_title";
     public static final String EXTRA_HISTORY_ID = "history_id";
+    public static final String EXTRA_OPEN_REGISTER = "open_register";
 
     private IntentKeys() {
     }

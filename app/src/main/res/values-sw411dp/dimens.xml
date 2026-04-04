@@ -31,6 +31,10 @@
     <dimen name="camera_side_button_spacing">8dp</dimen>
     <dimen name="camera_last_capture_margin_start">16dp</dimen>
 
+    <dimen name="history_meta_text_size">16sp</dimen>
+    <dimen name="history_submeta_text_size">13sp</dimen>
+    <dimen name="history_pill_height">37dp</dimen>
+
     <dimen name="admin_ai_mini_card_padding">14dp</dimen>
     <dimen name="admin_ai_mini_pie_size">58dp</dimen>
     <dimen name="admin_ai_mini_gap">12dp</dimen>
