@@ -36,40 +36,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Navigation Arrows -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPrev"
-            style="@style/Widget.MaterialComponents.Button.Icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="16dp"
-            app:backgroundTint="#F7A9D5"
-            app:cornerRadius="20dp"
-            app:icon="@drawable/ic_arrow_back_24"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconSize="20dp"
-            app:iconTint="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="@id/vpCarousel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/vpCarousel" />
+        <!-- Removed Navigation Arrows as requested -->
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnNext"
-            style="@style/Widget.MaterialComponents.Button.Icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="16dp"
-            app:backgroundTint="#F7A9D5"
-            app:cornerRadius="20dp"
-            app:icon="@drawable/ic_arrow_forward_24"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconSize="20dp"
-            app:iconTint="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="@id/vpCarousel"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/vpCarousel" />
 
         <!-- Dots Indicator -->
         <LinearLayout
