@@ -160,11 +160,15 @@ public class ResultActivity extends AppCompatActivity {
 
                     // Save to user's local gallery
                     saveToUserLocalGallery(finalBitmap);
+                    
+                    // Auto-save to public device gallery (Pictures/Photobooth)
+                    autoSaveToPublicGallery(finalBitmap);
 
                     // Tự động bật popup đánh giá sau khi người dùng xem kết quả 1 lúc
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         if (!isFinishing()) showFeedbackBottomSheet(true);
                     }, 1500);
+
                 } else {
                     Toast.makeText(ResultActivity.this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
                 }
@@ -197,10 +201,14 @@ public class ResultActivity extends AppCompatActivity {
             });
         }
 
-        View btnRate = findViewById(R.id.btnRate);
-        if (btnRate != null) {
-            btnRate.setOnClickListener(v -> showFeedbackBottomSheet(false));
+        View cardRate = findViewById(R.id.cardRate);
+        if (cardRate != null) {
+            cardRate.setOnClickListener(v -> showFeedbackBottomSheet(false));
+            // Ensure child views don't block clicks from reachng the card
+            cardRate.setFocusable(true);
+            cardRate.setClickable(true);
         }
+
     }
 
     private Bitmap createFramedCollage(List<String> photoUris, int frameResId) {
@@ -353,13 +361,35 @@ public class ResultActivity extends AppCompatActivity {
      * 4. Store encrypted path reference in database
      */
     /**
-     * Secure storage process:
-     * 1. Compress image to PNG bytes
-     * 2. Encrypt compressed data using AES-256
-     * 3. Save encrypted data to internal storage with restrictive permissions
-     * 4. Store encrypted path reference in database
+     * Automatically save the final bitmap to the device's public gallery
      */
+    private void autoSaveToPublicGallery(Bitmap bitmap) {
+        if (bitmap == null) return;
+        
+        try {
+            String name = "photobooth_" + System.currentTimeMillis() + ".png";
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, name);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Photobooth");
+
+            Uri outputUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (outputUri != null) {
+                try (OutputStream out = getContentResolver().openOutputStream(outputUri)) {
+                    if (out != null) {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                        // Record stats (not strictly necessary for auto-save but good to track)
+                        if (adminStatsRepository != null) adminStatsRepository.recordDownload(DownloadType.IMAGE);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void saveToUserLocalGallery(Bitmap bitmap) {
+
         AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
         String uid = authRepository.getCurrentUid();
         if (uid == null || !rbacService.canAccessSession(uid)) {
@@ -367,34 +397,21 @@ public class ResultActivity extends AppCompatActivity {
             return;
         }
 
-        // Use secure storage service for encrypted storage
-        if (secureImageStorageService == null) {
-            // Fallback to old method if secure storage not initialized
-            fallbackSaveToGallery(bitmap, uid);
-            return;
-        }
+        // Always save to standard Gallery format (.png) so it can be loaded by GalleryActivity
+        fallbackSaveToGallery(bitmap, uid);
 
-        try {
-            // Step 1 & 2 & 3: Compress -> Encrypt -> Save to internal storage
-            String encryptedImagePath = secureImageStorageService.saveSecureImage(
-                    bitmap,
-                    uid,
-                    historySessionId != null ? historySessionId : String.valueOf(System.currentTimeMillis())
-            );
-
-            if (encryptedImagePath == null) {
-                // Fallback if encryption fails
-                fallbackSaveToGallery(bitmap, uid);
-                return;
+        // Also use secure storage service for encrypted storage if available
+        if (secureImageStorageService != null) {
+            try {
+                // Step 1 & 2 & 3: Compress -> Encrypt -> Save to internal storage
+                String encryptedImagePath = secureImageStorageService.saveSecureImage(
+                        bitmap,
+                        uid,
+                        historySessionId != null ? historySessionId : String.valueOf(System.currentTimeMillis())
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            // Step 4: Store encrypted path reference in database (done in persistHistoryBaseRecord)
-            // The path will be stored in historySession during persistHistoryBaseRecord()
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Fallback to unencrypted storage
-            fallbackSaveToGallery(bitmap, uid);
         }
     }
 
@@ -420,6 +437,30 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
+    private void saveVideoToUserLocalGallery(Uri videoUri, String uid) {
+        if (videoUri == null || uid == null) return;
+        try {
+            File galleryDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "user_gallery/" + uid);
+            if (!galleryDir.exists()) galleryDir.mkdirs();
+
+            String sessionIdPart = (historySessionId != null && !historySessionId.isEmpty()) ? "_" + historySessionId : "";
+            String fileName = "pose" + sessionIdPart + "_" + System.currentTimeMillis() + ".mp4";
+            File file = new File(galleryDir, fileName);
+
+            try (java.io.InputStream in = getContentResolver().openInputStream(videoUri);
+                 FileOutputStream out = new FileOutputStream(file)) {
+                if (in == null) return;
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void exportTimelapseVideo() {
         // RBAC Check: Verify user can perform this action on their own session
         if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
@@ -432,11 +473,9 @@ public class ResultActivity extends AppCompatActivity {
             return;
         }
 
-        // UI/UX Improvement: Disable button and show loading text
         btnSaveVideo.setEnabled(false);
         String originalText = btnSaveVideo.getText().toString();
         btnSaveVideo.setText(R.string.video_exporting_btn);
-        
         Toast.makeText(this, R.string.exporting_video, Toast.LENGTH_SHORT).show();
 
         new Thread(() -> {
@@ -462,11 +501,14 @@ public class ResultActivity extends AppCompatActivity {
                 finalFrames.addAll(loopSequence);
                 finalFrames.addAll(loopSequence);
 
-                // UI update before saving
                 runOnUiThread(() -> btnSaveVideo.setText(R.string.video_saving_btn));
 
                 // Encode at 6 Frames Per Second
                 Uri videoUri = createTimelapseVideoUseCase.execute(ResultActivity.this, finalFrames, 6);
+                
+                if (videoUri != null && currentUid != null) {
+                    saveVideoToUserLocalGallery(videoUri, currentUid);
+                }
 
                 runOnUiThread(() -> {
                     btnSaveVideo.setEnabled(true);

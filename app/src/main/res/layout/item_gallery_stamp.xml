@@ -42,6 +42,19 @@
         app:layout_constraintEnd_toEndOf="@id/ivStampBorder"
         app:layout_constraintTop_toTopOf="@id/ivStampBorder" />
 
+    <ImageView
+        android:id="@+id/ivPlayIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_movie_24"
+        android:visibility="gone"
+        android:alpha="0.8"
+        app:tint="#FFFFFF"
+        app:layout_constraintTop_toTopOf="@id/ivGalleryPhoto"
+        app:layout_constraintBottom_toBottomOf="@id/ivGalleryPhoto"
+        app:layout_constraintStart_toStartOf="@id/ivGalleryPhoto"
+        app:layout_constraintEnd_toEndOf="@id/ivGalleryPhoto" />
+
     <TextView
         android:id="@+id/tvDate"
         android:layout_width="wrap_content"

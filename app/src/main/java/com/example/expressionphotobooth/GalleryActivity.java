@@ -73,8 +73,36 @@ public class GalleryActivity extends AppCompatActivity {
     public static class MemoryBook {
         public String id;
         public String name;
+        public int backgroundColor = 0xFFFDFCF2; // Default aged paper
+        public int borderColor = 0xFFD2B48C;     // Default tan
+        public int textColor = 0xFF4A3728;      // Default brown
+        public int padding = 24;                 // Default padding
+        public int strokeWidth = 6;              // Default stroke width
+        public float cornerRadius = 8f;          // Default corner radius
+        public String coverStyle = "vintage";
         public List<BookItem> items = new ArrayList<>();
     }
+
+    public static class BookStylePreset {
+        public String name;
+        public int bgColor;
+        public int strokeColor;
+        public int textColor;
+        public int padding;
+        public int strokeWidth;
+        public float cornerRadius;
+
+        public BookStylePreset(String name, int bgColor, int strokeColor, int textColor, int padding, int strokeWidth, float cornerRadius) {
+            this.name = name;
+            this.bgColor = bgColor;
+            this.strokeColor = strokeColor;
+            this.textColor = textColor;
+            this.padding = padding;
+            this.strokeWidth = strokeWidth;
+            this.cornerRadius = cornerRadius;
+        }
+    }
+
     
     private List<MemoryBook> memoryBooks = new ArrayList<>();
     private MemoryBook currentActiveBook = null;
@@ -201,6 +229,8 @@ public class GalleryActivity extends AppCompatActivity {
             saveMemoryBooks();
             Toast.makeText(this, "Book saved successfully!", Toast.LENGTH_SHORT).show();
         });
+        bookView.findViewById(R.id.btnChangeStyle).setOnClickListener(v -> showChooseStyleDialog());
+
 
         tabStamp = findViewById(R.id.tabStamp);
         tabBook = findViewById(R.id.tabBook);
@@ -235,14 +265,8 @@ public class GalleryActivity extends AppCompatActivity {
         stampView.findViewById(R.id.btnCarouselViewFeedback).setOnClickListener(v -> performCarouselAction("view_feedback"));
         stampView.findViewById(R.id.btnCarouselDelete).setOnClickListener(v -> performCarouselAction("delete"));
 
-        stampView.findViewById(R.id.btnPrev).setOnClickListener(v -> {
-            if (vpCarousel.getCurrentItem() > 0) vpCarousel.setCurrentItem(vpCarousel.getCurrentItem() - 1);
-        });
-        stampView.findViewById(R.id.btnNext).setOnClickListener(v -> {
-            if (carouselAdapter != null && vpCarousel.getCurrentItem() < carouselAdapter.getItemCount() - 1) {
-                vpCarousel.setCurrentItem(vpCarousel.getCurrentItem() + 1);
-            }
-        });
+        // Removed btnPrev/btnNext handlers as requested
+
 
         findViewById(R.id.btnBack).setOnClickListener(v -> {
             if (!isStamp && currentActiveBook != null) {
@@ -362,6 +386,15 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     private void toggleViewMode() {
+        if (galleryFiles.isEmpty()) {
+            Toast.makeText(this, "Chưa có ảnh hiển thị", Toast.LENGTH_SHORT).show();
+            // Optional: ensure we stay in grid view if empty
+            if (!isGridView) {
+                isGridView = true;
+                updateViewModeUi();
+            }
+            return;
+        }
         isGridView = !isGridView;
         updateViewModeUi();
     }
@@ -372,6 +405,7 @@ public class GalleryActivity extends AppCompatActivity {
         try {
             View gridContainer = stampView.findViewById(R.id.gridViewContainer);
             View carouselContainer = stampView.findViewById(R.id.carouselViewContainer);
+            View carouselActions = stampView.findViewById(R.id.carouselActions);
             
             if (gridContainer != null) gridContainer.setVisibility(isGridView ? View.VISIBLE : View.GONE);
             if (carouselContainer != null) carouselContainer.setVisibility(isGridView ? View.GONE : View.VISIBLE);
@@ -380,7 +414,14 @@ public class GalleryActivity extends AppCompatActivity {
             btnViewModeToggle.setImageResource(isGridView ? R.drawable.ic_view_carousel : R.drawable.ic_grid_view_24);
             
             if (!isGridView) {
-                vpCarousel.post(this::setupCarousel);
+                if (galleryFiles.isEmpty()) {
+                    if (carouselActions != null) carouselActions.setVisibility(View.GONE);
+                    if (carouselIndicator != null) carouselIndicator.setVisibility(View.GONE);
+                } else {
+                    if (carouselActions != null) carouselActions.setVisibility(View.VISIBLE);
+                    if (carouselIndicator != null) carouselIndicator.setVisibility(View.VISIBLE);
+                    vpCarousel.post(this::setupCarousel);
+                }
             } else {
                 if (adapter != null) adapter.notifyDataSetChanged();
             }
@@ -407,8 +448,17 @@ public class GalleryActivity extends AppCompatActivity {
                 shareFile(currentFile);
                 break;
             case "save_video":
-                if (session != null && session.getVideoUri() != null && !session.getVideoUri().trim().isEmpty()) {
-                    saveVideoToGallery(session.getVideoUri());
+                if (session != null) {
+                    long limit24h = 24 * 60 * 60 * 1000L;
+                    if (System.currentTimeMillis() - session.getCapturedAt() > limit24h) {
+                        Toast.makeText(this, "Video tải lại đã hết hạn sau 24h.", Toast.LENGTH_LONG).show();
+                        break;
+                    }
+                    if (session.getVideoUri() != null && !session.getVideoUri().trim().isEmpty()) {
+                        saveVideoToGallery(session.getVideoUri());
+                    } else {
+                        Toast.makeText(this, R.string.history_no_video_to_save, Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(this, R.string.history_no_video_to_save, Toast.LENGTH_SHORT).show();
                 }
@@ -507,8 +557,14 @@ public class GalleryActivity extends AppCompatActivity {
             return null;
         }
         
-        // Remove extension and prefix
-        String nameWithoutExt = filename.endsWith(".png") ? filename.substring(0, filename.length() - 4) : filename;
+        // Remove extension
+        String nameWithoutExt = filename;
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex > 0) {
+            nameWithoutExt = filename.substring(0, dotIndex);
+        }
+        
+        // Remove prefix
         String withoutPrefix = nameWithoutExt.startsWith("pose_") ? nameWithoutExt.substring(5) : nameWithoutExt;
         
         // Split by underscore to find parts: <sessionId>_<timestamp>
@@ -633,12 +689,26 @@ public class GalleryActivity extends AppCompatActivity {
         galleryFiles.clear();
 
         if (galleryDir.exists() && galleryDir.isDirectory()) {
-            File[] files = galleryDir.listFiles((dir, name) -> name.endsWith(".png"));
+            // Include both .png and .mp4
+            File[] files = galleryDir.listFiles((dir, name) -> name.endsWith(".png") || name.endsWith(".mp4"));
             if (files != null) {
-                Collections.addAll(galleryFiles, files);
+                long now = System.currentTimeMillis();
+                long limit24h = 24 * 60 * 60 * 1000L;
+                
+                for (File f : files) {
+                    // Cleanup Video: if it's a video and older than 24h, delete it.
+                    if (f.getName().endsWith(".mp4")) {
+                        if (now - f.lastModified() > limit24h) {
+                            f.delete();
+                        }
+                        continue; // Don't add to list
+                    }
+                    galleryFiles.add(f);
+                }
                 Collections.sort(galleryFiles, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
             }
         }
+
 
         if (galleryFiles.isEmpty()) {
             emptyState.setVisibility(View.VISIBLE);
@@ -691,6 +761,60 @@ public class GalleryActivity extends AppCompatActivity {
         renderActiveBook();
     }
 
+    private void showChooseStyleDialog() {
+        if (currentActiveBook == null) return;
+        
+        List<BookStylePreset> presets = new ArrayList<>();
+        presets.add(new BookStylePreset("Vintage", 0xFFFDFCF2, 0xFFD2B48C, 0xFF4A3728, 24, 6, 8f));
+        presets.add(new BookStylePreset("Modern", 0xFFFFFFFF, 0xFFE0E0E0, 0xFF121212, 32, 2, 0f));
+        presets.add(new BookStylePreset("Night", 0xFF141E30, 0xFF34495E, 0xFFFFFFFF, 16, 4, 16f));
+        presets.add(new BookStylePreset("Royal", 0xFF800000, 0xFFFFD700, 0xFFFFD700, 40, 12, 24f));
+        presets.add(new BookStylePreset("Sakura", 0xFFFFF0F5, 0xFFFFB7C5, 0xFFB44D5E, 24, 6, 20f));
+        presets.add(new BookStylePreset("Forest", 0xFFF0FFF0, 0xFF2E8B57, 0xFF006400, 24, 8, 12f));
+        presets.add(new BookStylePreset("Ocean", 0xFFF0F8FF, 0xFF4682B4, 0xFF003366, 24, 6, 30f));
+        presets.add(new BookStylePreset("Sunset", 0xFFFFF5E6, 0xFFFF8C00, 0xFFB22222, 24, 10, 10f));
+        presets.add(new BookStylePreset("Clean", 0xFFF9F9F9, 0xFF333333, 0xFF333333, 0, 0, 0f));
+
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_dialog_book_style, null);
+        RecyclerView rv = view.findViewById(R.id.rvStyles);
+        rv.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
+        
+        view.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
+        
+        rv.setAdapter(new RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+
+            @NonNull @Override public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup p, int t) {
+                return new RecyclerView.ViewHolder(getLayoutInflater().inflate(R.layout.item_book_style_preset, p, false)) {};
+            }
+            @Override public void onBindViewHolder(@NonNull RecyclerView.ViewHolder h, int p) {
+                BookStylePreset s = presets.get(p);
+                h.itemView.findViewById(R.id.viewColor).setBackgroundColor(s.bgColor);
+                ((TextView)h.itemView.findViewById(R.id.tvStyleName)).setText(s.name);
+                ((com.google.android.material.card.MaterialCardView)h.itemView.findViewById(R.id.cardColor)).setStrokeColor(s.strokeColor);
+                
+                h.itemView.setOnClickListener(v -> {
+                    currentActiveBook.backgroundColor = s.bgColor;
+                    currentActiveBook.borderColor = s.strokeColor;
+                    currentActiveBook.textColor = s.textColor;
+                    currentActiveBook.padding = s.padding;
+                    currentActiveBook.strokeWidth = s.strokeWidth;
+                    currentActiveBook.cornerRadius = s.cornerRadius;
+                    currentActiveBook.coverStyle = s.name.toLowerCase();
+                    renderActiveBook();
+                    // Removed dialog.dismiss() to allow live preview as requested
+                });
+
+            }
+            @Override public int getItemCount() { return presets.size(); }
+        });
+        
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+
     private void renderActiveBook() {
         bookView.findViewById(R.id.bookListContainer).setVisibility(View.GONE);
         bookView.findViewById(R.id.bookEditorContainer).setVisibility(View.VISIBLE);
@@ -701,7 +825,24 @@ public class GalleryActivity extends AppCompatActivity {
         FrameLayout surface = bookView.findViewById(R.id.bookSurface);
         surface.removeAllViews();
         
+        // Apply Style (Colors & Frame/Stroke)
+        tvName.setTextColor(currentActiveBook.textColor);
+        surface.setPadding(
+            (int)(currentActiveBook.padding * getResources().getDisplayMetrics().density),
+            (int)(currentActiveBook.padding * getResources().getDisplayMetrics().density),
+            (int)(currentActiveBook.padding * getResources().getDisplayMetrics().density),
+            (int)(currentActiveBook.padding * getResources().getDisplayMetrics().density)
+        );
+
+        android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+        gd.setColor(currentActiveBook.backgroundColor);
+        gd.setStroke((int)(currentActiveBook.strokeWidth * getResources().getDisplayMetrics().density), currentActiveBook.borderColor);
+        gd.setCornerRadius(currentActiveBook.cornerRadius * getResources().getDisplayMetrics().density);
+        surface.setBackground(gd);
+
+        
         for (BookItem item : currentActiveBook.items) {
+
             ImageView iv = new ImageView(this);
             iv.setLayoutParams(new FrameLayout.LayoutParams(400, 500));
             Glide.with(this).load(item.imagePath).into(iv);
@@ -790,9 +931,14 @@ public class GalleryActivity extends AppCompatActivity {
             h.title.setText(b.name);
             h.count.setText(b.items.size() + " photos");
             
-            String[] colors = {"#5E81AC", "#BF616A", "#D08770", "#EBCB8B", "#A3BE8C", "#B48EAD"};
-            int color = android.graphics.Color.parseColor(colors[Math.abs(b.name.hashCode()) % colors.length]);
-            ((com.google.android.material.card.MaterialCardView)h.itemView).setCardBackgroundColor(color);
+            // Set cover color and text color based on saved colors
+            ((com.google.android.material.card.MaterialCardView)h.itemView).setCardBackgroundColor(b.backgroundColor);
+            ((com.google.android.material.card.MaterialCardView)h.itemView).setStrokeColor(b.borderColor);
+            h.title.setTextColor(b.textColor);
+            h.count.setTextColor(b.textColor);
+            h.count.setAlpha(0.6f);
+
+
 
             if (!b.items.isEmpty()) {
                 Glide.with(h.cover).load(b.items.get(0).imagePath).centerCrop().into(h.cover);
@@ -894,13 +1040,26 @@ public class GalleryActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             File file = files.get(position);
-            Glide.with(holder.ivPhoto).load(file).centerCrop().into(holder.ivPhoto);
+            boolean isVideo = file.getName().endsWith(".mp4");
+            
+            Glide.with(holder.ivPhoto)
+                .load(file)
+                .centerCrop()
+                .into(holder.ivPhoto);
+                
+            // If it's a video, show a play overlay or hint
+            View playIcon = holder.itemView.findViewById(R.id.ivPlayIcon);
+            if (playIcon != null) {
+                playIcon.setVisibility(isVideo ? View.VISIBLE : View.GONE);
+            }
+            
             holder.tvDate.setText(dateFormat.format(new Date(file.lastModified())));
 
             // Show X button
             holder.btnDelete.setVisibility(View.VISIBLE);
             holder.btnDelete.setOnClickListener(v -> {
                 int pos = holder.getBindingAdapterPosition();
+
                 if (pos != RecyclerView.NO_POSITION) {
                     deleteFile(galleryFiles.get(pos), pos, false);
                 }
@@ -965,7 +1124,10 @@ public class GalleryActivity extends AppCompatActivity {
                     if (galleryFiles.isEmpty()) {
                         emptyState.setVisibility(View.VISIBLE);
                         rvGallery.setVisibility(View.GONE);
-                        if (vpCarousel != null) vpCarousel.setVisibility(View.GONE);
+                        
+                        // Switch back to grid view state smoothly
+                        isGridView = true;
+                        updateViewModeUi();
                     }
                     Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
                 }
