@@ -38,6 +38,14 @@ public class EditState {
     private float filterIntensity = 0.8f;
     private float stickerX = -1f;
     private float stickerY = -1f;
+    // Canonical placement inside frame crop rect (0..1), independent from raw bitmap size.
+    private float stickerCropX = -1f;
+    private float stickerCropY = -1f;
+    // Normalized crop bounds in source bitmap (0..1) used by both preview and export rendering.
+    private float stickerCropLeftNorm = -1f;
+    private float stickerCropTopNorm = -1f;
+    private float stickerCropRightNorm = -1f;
+    private float stickerCropBottomNorm = -1f;
 
     public EditState() {
     }
@@ -53,6 +61,12 @@ public class EditState {
         this.filterIntensity = other.filterIntensity;
         this.stickerX = other.stickerX;
         this.stickerY = other.stickerY;
+        this.stickerCropX = other.stickerCropX;
+        this.stickerCropY = other.stickerCropY;
+        this.stickerCropLeftNorm = other.stickerCropLeftNorm;
+        this.stickerCropTopNorm = other.stickerCropTopNorm;
+        this.stickerCropRightNorm = other.stickerCropRightNorm;
+        this.stickerCropBottomNorm = other.stickerCropBottomNorm;
     }
 
     public EditState copy() {
@@ -113,5 +127,53 @@ public class EditState {
 
     public void setStickerY(float stickerY) {
         this.stickerY = stickerY;
+    }
+
+    public float getStickerCropX() {
+        return stickerCropX;
+    }
+
+    public void setStickerCropX(float stickerCropX) {
+        this.stickerCropX = stickerCropX;
+    }
+
+    public float getStickerCropY() {
+        return stickerCropY;
+    }
+
+    public void setStickerCropY(float stickerCropY) {
+        this.stickerCropY = stickerCropY;
+    }
+
+    public float getStickerCropLeftNorm() {
+        return stickerCropLeftNorm;
+    }
+
+    public void setStickerCropLeftNorm(float stickerCropLeftNorm) {
+        this.stickerCropLeftNorm = stickerCropLeftNorm;
+    }
+
+    public float getStickerCropTopNorm() {
+        return stickerCropTopNorm;
+    }
+
+    public void setStickerCropTopNorm(float stickerCropTopNorm) {
+        this.stickerCropTopNorm = stickerCropTopNorm;
+    }
+
+    public float getStickerCropRightNorm() {
+        return stickerCropRightNorm;
+    }
+
+    public void setStickerCropRightNorm(float stickerCropRightNorm) {
+        this.stickerCropRightNorm = stickerCropRightNorm;
+    }
+
+    public float getStickerCropBottomNorm() {
+        return stickerCropBottomNorm;
+    }
+
+    public void setStickerCropBottomNorm(float stickerCropBottomNorm) {
+        this.stickerCropBottomNorm = stickerCropBottomNorm;
     }
 }

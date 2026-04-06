@@ -73,26 +73,12 @@ public class SharedPrefsSessionRepository implements SessionRepository {
             json.put("editedImageUris", edited);
 
             EditState editState = state.getEditState();
-            JSONObject editJson = new JSONObject();
-            editJson.put("filterStyle", editState.getFilterStyle().name());
-            editJson.put("frameStyle", editState.getFrameStyle().name());
-            editJson.put("stickerStyle", editState.getStickerStyle().name());
-            editJson.put("filterIntensity", editState.getFilterIntensity());
-            editJson.put("stickerX", editState.getStickerX());
-            editJson.put("stickerY", editState.getStickerY());
+            JSONObject editJson = toEditStateJson(editState);
             json.put("editState", editJson);
 
             JSONObject photoEditsJson = new JSONObject();
             for (Map.Entry<String, EditState> entry : state.getPhotoEditStates().entrySet()) {
-                EditState photoEdit = entry.getValue();
-                JSONObject onePhotoJson = new JSONObject();
-                onePhotoJson.put("filterStyle", photoEdit.getFilterStyle().name());
-                onePhotoJson.put("frameStyle", photoEdit.getFrameStyle().name());
-                onePhotoJson.put("stickerStyle", photoEdit.getStickerStyle().name());
-                onePhotoJson.put("filterIntensity", photoEdit.getFilterIntensity());
-                onePhotoJson.put("stickerX", photoEdit.getStickerX());
-                onePhotoJson.put("stickerY", photoEdit.getStickerY());
-                photoEditsJson.put(entry.getKey(), onePhotoJson);
+                photoEditsJson.put(entry.getKey(), toEditStateJson(entry.getValue()));
             }
             json.put("photoEditStates", photoEditsJson);
         } catch (JSONException ignored) {}
@@ -127,15 +113,7 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         }
 
         JSONObject editJson = json.optJSONObject("editState");
-        EditState editState = new EditState();
-        if (editJson != null) {
-            editState.setFilterStyle(parseEnum(EditState.FilterStyle.class, editJson.optString("filterStyle"), EditState.FilterStyle.NONE));
-            editState.setFrameStyle(parseEnum(EditState.FrameStyle.class, editJson.optString("frameStyle"), EditState.FrameStyle.NONE));
-            editState.setStickerStyle(parseEnum(EditState.StickerStyle.class, editJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
-            editState.setFilterIntensity((float) editJson.optDouble("filterIntensity", 0.8));
-            editState.setStickerX((float) editJson.optDouble("stickerX", -1.0));
-            editState.setStickerY((float) editJson.optDouble("stickerY", -1.0));
-        }
+        EditState editState = fromEditStateJson(editJson);
         state.setEditState(editState);
 
         JSONObject photoEditsJson = json.optJSONObject("photoEditStates");
@@ -147,17 +125,50 @@ public class SharedPrefsSessionRepository implements SessionRepository {
                 if (onePhotoJson == null) {
                     continue;
                 }
-                EditState onePhotoState = new EditState();
-                onePhotoState.setFilterStyle(parseEnum(EditState.FilterStyle.class, onePhotoJson.optString("filterStyle"), EditState.FilterStyle.NONE));
-                onePhotoState.setFrameStyle(parseEnum(EditState.FrameStyle.class, onePhotoJson.optString("frameStyle"), EditState.FrameStyle.NONE));
-                onePhotoState.setStickerStyle(parseEnum(EditState.StickerStyle.class, onePhotoJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
-                onePhotoState.setFilterIntensity((float) onePhotoJson.optDouble("filterIntensity", 0.8));
-                onePhotoState.setStickerX((float) onePhotoJson.optDouble("stickerX", -1.0));
-                onePhotoState.setStickerY((float) onePhotoJson.optDouble("stickerY", -1.0));
+                EditState onePhotoState = fromEditStateJson(onePhotoJson);
                 state.setPhotoEditState(originalUri, onePhotoState);
             }
         }
         return state;
+    }
+
+    private JSONObject toEditStateJson(EditState editState) throws JSONException {
+        JSONObject editJson = new JSONObject();
+        editJson.put("filterStyle", editState.getFilterStyle().name());
+        editJson.put("frameStyle", editState.getFrameStyle().name());
+        editJson.put("stickerStyle", editState.getStickerStyle().name());
+        editJson.put("customStickerBase64", editState.getCustomStickerBase64());
+        editJson.put("filterIntensity", editState.getFilterIntensity());
+        editJson.put("stickerX", editState.getStickerX());
+        editJson.put("stickerY", editState.getStickerY());
+        editJson.put("stickerCropX", editState.getStickerCropX());
+        editJson.put("stickerCropY", editState.getStickerCropY());
+        editJson.put("stickerCropLeftNorm", editState.getStickerCropLeftNorm());
+        editJson.put("stickerCropTopNorm", editState.getStickerCropTopNorm());
+        editJson.put("stickerCropRightNorm", editState.getStickerCropRightNorm());
+        editJson.put("stickerCropBottomNorm", editState.getStickerCropBottomNorm());
+        return editJson;
+    }
+
+    private EditState fromEditStateJson(JSONObject editJson) {
+        EditState editState = new EditState();
+        if (editJson == null) {
+            return editState;
+        }
+        editState.setFilterStyle(parseEnum(EditState.FilterStyle.class, editJson.optString("filterStyle"), EditState.FilterStyle.NONE));
+        editState.setFrameStyle(parseEnum(EditState.FrameStyle.class, editJson.optString("frameStyle"), EditState.FrameStyle.NONE));
+        editState.setStickerStyle(parseEnum(EditState.StickerStyle.class, editJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
+        editState.setCustomStickerBase64(editJson.optString("customStickerBase64", null));
+        editState.setFilterIntensity((float) editJson.optDouble("filterIntensity", 0.8));
+        editState.setStickerX((float) editJson.optDouble("stickerX", -1.0));
+        editState.setStickerY((float) editJson.optDouble("stickerY", -1.0));
+        editState.setStickerCropX((float) editJson.optDouble("stickerCropX", -1.0));
+        editState.setStickerCropY((float) editJson.optDouble("stickerCropY", -1.0));
+        editState.setStickerCropLeftNorm((float) editJson.optDouble("stickerCropLeftNorm", -1.0));
+        editState.setStickerCropTopNorm((float) editJson.optDouble("stickerCropTopNorm", -1.0));
+        editState.setStickerCropRightNorm((float) editJson.optDouble("stickerCropRightNorm", -1.0));
+        editState.setStickerCropBottomNorm((float) editJson.optDouble("stickerCropBottomNorm", -1.0));
+        return editState;
     }
 
     private <T extends Enum<T>> T parseEnum(Class<T> enumClass, String value, T fallback) {

@@ -9,6 +9,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
@@ -17,6 +19,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
@@ -24,13 +27,16 @@ import android.widget.RatingBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.example.expressionphotobooth.data.security.RBACService;
 import com.example.expressionphotobooth.data.security.SecureImageStorageService;
 import com.example.expressionphotobooth.data.video.TimelapseVideoEncoder;
+import com.example.expressionphotobooth.data.graphics.BitmapEditRenderer;
 import com.example.expressionphotobooth.domain.model.DownloadType;
+import com.example.expressionphotobooth.domain.model.EditState;
 import com.example.expressionphotobooth.domain.model.HistorySession;
 import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.model.UserRole;
@@ -39,7 +45,9 @@ import com.example.expressionphotobooth.domain.repository.HistoryRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.CreateTimelapseVideoUseCase;
 import com.example.expressionphotobooth.domain.usecase.CreateVerticalCollageUseCase;
+import com.example.expressionphotobooth.domain.usecase.RenderEditedBitmapUseCase;
 import com.example.expressionphotobooth.utils.FrameConfig;
+import com.example.expressionphotobooth.utils.StickerPlacementMapper;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -66,6 +74,7 @@ public class ResultActivity extends AppCompatActivity {
     private SessionState sessionState;
     private CreateTimelapseVideoUseCase createTimelapseVideoUseCase;
     private CreateVerticalCollageUseCase createVerticalCollageUseCase;
+    private RenderEditedBitmapUseCase renderEditedBitmapUseCase;
     private MaterialButton btnSaveVideo;
     private List<String> sourceOriginalUris;
     private boolean hasShownFeedback = false;
@@ -116,6 +125,7 @@ public class ResultActivity extends AppCompatActivity {
 
         createTimelapseVideoUseCase = new CreateTimelapseVideoUseCase(new TimelapseVideoEncoder());
         createVerticalCollageUseCase = new CreateVerticalCollageUseCase();
+        renderEditedBitmapUseCase = new RenderEditedBitmapUseCase(new BitmapEditRenderer());
         sourceOriginalUris = resolveSourceOriginalUris();
 
         if (sourceOriginalUris.isEmpty()) {
@@ -136,14 +146,12 @@ public class ResultActivity extends AppCompatActivity {
                 imageUrisToCollage.add(editedUri != null ? editedUri : originalUri);
             }
 
-            // Lấy Frame ID từ SharedPreferences
-            int selectedFrameResId = getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
-                    .getInt("SELECTED_FRAME_ID", -1);
+            int selectedFrameResId = sessionState != null ? sessionState.getSelectedFrameResId() : -1;
 
             Bitmap finalBitmap;
             if (selectedFrameResId != -1) {
-                // TRƯỜNG HỢP CÓ CHỌN FRAME
-                finalBitmap = createFramedCollage(imageUrisToCollage, selectedFrameResId);
+                // Use source originals so export can apply sticker in hole-space deterministically.
+                finalBitmap = createFramedCollage(new ArrayList<>(sourceOriginalUris), selectedFrameResId);
             } else {
                 // TRƯỜNG HỢP LỖI HOẶC KHÔNG CHỌN FRAME -> Fallback về Collage dọc
                 finalBitmap = createVerticalCollageUseCase.execute(ResultActivity.this, imageUrisToCollage);
@@ -229,17 +237,39 @@ public class ResultActivity extends AppCompatActivity {
 
         // 3. VẼ CÁC ẢNH CHỤP NẰM DƯỚI FRAME
         for (int i = 0; i < Math.min(photoUris.size(), holes.size()); i++) {
-            Bitmap photo = decodeBitmap(Uri.parse(photoUris.get(i)));
-            if (photo != null) {
-                Rect targetHole = holes.get(i);
-
-                // Thuật toán CENTER CROP để ảnh vừa khít lỗ hổng không bị méo
-                Rect srcRect = calculateCenterCrop(photo.getWidth(), photo.getHeight(), targetHole.width(), targetHole.height());
-
-                // Vẽ ảnh chụp vào đúng vị trí lỗ hổng
-                canvas.drawBitmap(photo, srcRect, targetHole, paint);
-                photo.recycle(); // Giải phóng ngay để tránh tràn RAM
+            String originalUri = photoUris.get(i);
+            Bitmap originalPhoto = decodeBitmap(Uri.parse(originalUri));
+            if (originalPhoto == null) {
+                continue;
             }
+
+            EditState photoState = sessionState != null
+                    ? sessionState.getPhotoEditState(originalUri).copy()
+                    : new EditState();
+
+            Bitmap photoNoSticker = renderPhotoWithoutSticker(originalPhoto, photoState);
+            originalPhoto.recycle();
+            if (photoNoSticker == null) {
+                continue;
+            }
+
+            Rect targetHole = holes.get(i);
+            RectF srcRectF = StickerPlacementMapper.calculateCenterCropRect(
+                    photoNoSticker.getWidth(),
+                    photoNoSticker.getHeight(),
+                    targetHole.width(),
+                    targetHole.height()
+            );
+            Rect srcRect = new Rect(
+                    Math.round(srcRectF.left),
+                    Math.round(srcRectF.top),
+                    Math.round(srcRectF.right),
+                    Math.round(srcRectF.bottom)
+            );
+
+            canvas.drawBitmap(photoNoSticker, srcRect, targetHole, paint);
+            drawStickerForHole(canvas, targetHole, srcRectF, photoNoSticker.getWidth(), photoNoSticker.getHeight(), photoState);
+            photoNoSticker.recycle();
         }
 
         // 4. VẼ FRAME LÊN TRÊN CÙNG (ĐÈ LÊN ẢNH CHỤP)
@@ -252,29 +282,131 @@ public class ResultActivity extends AppCompatActivity {
         return resultBitmap;
     }
 
-    /**
-     * Thuật toán tính toán vùng cắt Center Crop
-     */
-    private Rect calculateCenterCrop(int srcW, int srcH, int dstW, int dstH) {
-        float srcAspect = (float) srcW / srcH;
-        float dstAspect = (float) dstW / dstH;
-
-        int cropW, cropH, left, top;
-
-        if (srcAspect > dstAspect) {
-            // Ảnh gốc rộng hơn mục tiêu -> Cắt hai bên
-            cropH = srcH;
-            cropW = (int) (srcH * dstAspect);
-            left = (srcW - cropW) / 2;
-            top = 0;
-        } else {
-            // Ảnh gốc cao hơn mục tiêu -> Cắt trên dưới
-            cropW = srcW;
-            cropH = (int) (srcW / dstAspect);
-            left = 0;
-            top = (srcH - cropH) / 2;
+    private Bitmap renderPhotoWithoutSticker(Bitmap source, EditState state) {
+        if (source == null) {
+            return null;
         }
-        return new Rect(left, top, left + cropW, top + cropH);
+        if (state == null) {
+            return source;
+        }
+        EditState noSticker = state.copy();
+        noSticker.setStickerStyle(EditState.StickerStyle.NONE);
+        noSticker.setCustomStickerBase64(null);
+        return renderEditedBitmapUseCase.execute(this, source, noSticker);
+    }
+
+    private void drawStickerForHole(
+            Canvas canvas,
+            Rect targetHole,
+            RectF srcRect,
+            int sourceWidth,
+            int sourceHeight,
+            EditState state
+    ) {
+        if (state == null || state.getStickerStyle() == EditState.StickerStyle.NONE) {
+            return;
+        }
+
+        RectF stickerCropRect = resolveStickerCropRect(state, sourceWidth, sourceHeight, srcRect);
+        float sourceCenterX;
+        float sourceCenterY;
+
+        if (state.getStickerCropX() >= 0f && state.getStickerCropY() >= 0f) {
+            sourceCenterX = stickerCropRect.left + StickerPlacementMapper.clamp01(state.getStickerCropX()) * stickerCropRect.width();
+            sourceCenterY = stickerCropRect.top + StickerPlacementMapper.clamp01(state.getStickerCropY()) * stickerCropRect.height();
+        } else if (state.getStickerX() >= 0f && state.getStickerY() >= 0f) {
+            sourceCenterX = state.getStickerX() * sourceWidth;
+            sourceCenterY = state.getStickerY() * sourceHeight;
+        } else {
+            sourceCenterX = stickerCropRect.left + 0.84f * stickerCropRect.width();
+            sourceCenterY = stickerCropRect.top + 0.18f * stickerCropRect.height();
+        }
+
+        float relX = StickerPlacementMapper.clamp01((sourceCenterX - srcRect.left) / Math.max(1f, srcRect.width()));
+        float relY = StickerPlacementMapper.clamp01((sourceCenterY - srcRect.top) / Math.max(1f, srcRect.height()));
+
+        float targetCenterX = targetHole.left + relX * targetHole.width();
+        float targetCenterY = targetHole.top + relY * targetHole.height();
+
+        int sourceSize = Math.max(72, Math.min(sourceWidth, sourceHeight) / 5);
+        float scale = Math.min(
+                targetHole.width() / Math.max(1f, srcRect.width()),
+                targetHole.height() / Math.max(1f, srcRect.height())
+        );
+        int targetSize = Math.max(22, Math.round(sourceSize * scale));
+
+        int left = Math.round(targetCenterX - (targetSize / 2f));
+        int top = Math.round(targetCenterY - (targetSize / 2f));
+        Rect dest = new Rect(left, top, left + targetSize, top + targetSize);
+
+        Bitmap customStickerBitmap = null;
+        try {
+            if (state.getStickerStyle() == EditState.StickerStyle.CUSTOM && state.getCustomStickerBase64() != null) {
+                byte[] bytes = Base64.decode(state.getCustomStickerBase64(), Base64.DEFAULT);
+                customStickerBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            }
+        } catch (Exception ignored) {
+            customStickerBitmap = null;
+        }
+
+        if (customStickerBitmap != null) {
+            canvas.drawBitmap(customStickerBitmap, null, dest, new Paint(Paint.FILTER_BITMAP_FLAG));
+            customStickerBitmap.recycle();
+            return;
+        }
+
+        int drawableId = resolveStickerDrawable(state.getStickerStyle());
+        if (drawableId == 0) {
+            return;
+        }
+        Drawable drawable = ContextCompat.getDrawable(this, drawableId);
+        if (drawable == null) {
+            return;
+        }
+        drawable.setBounds(dest);
+        drawable.draw(canvas);
+    }
+
+    private RectF resolveStickerCropRect(EditState state, int sourceWidth, int sourceHeight, RectF fallbackCropRect) {
+        if (state.getStickerCropLeftNorm() >= 0f
+                && state.getStickerCropTopNorm() >= 0f
+                && state.getStickerCropRightNorm() > state.getStickerCropLeftNorm()
+                && state.getStickerCropBottomNorm() > state.getStickerCropTopNorm()) {
+            return StickerPlacementMapper.fromNormalizedRect(
+                    new RectF(
+                            state.getStickerCropLeftNorm(),
+                            state.getStickerCropTopNorm(),
+                            state.getStickerCropRightNorm(),
+                            state.getStickerCropBottomNorm()
+                    ),
+                    sourceWidth,
+                    sourceHeight
+            );
+        }
+        return new RectF(fallbackCropRect);
+    }
+
+    private int resolveStickerDrawable(EditState.StickerStyle stickerStyle) {
+        switch (stickerStyle) {
+            case STAR:
+                return R.drawable.ic_star_24;
+            case FLASH:
+                return R.drawable.ic_flash_on_24;
+            case CAMERA:
+                return R.drawable.ic_videocam_24;
+            case HEART:
+                return R.drawable.ic_sticker_heart;
+            case CROWN:
+                return R.drawable.ic_sticker_crown;
+            case SMILE:
+                return R.drawable.ic_sticker_smile;
+            case FLOWER:
+                return R.drawable.ic_sticker_flower;
+            case NONE:
+            case CUSTOM:
+            default:
+                return 0;
+        }
     }
 
     private Bitmap decodeBitmap(Uri uri) {
@@ -716,13 +848,7 @@ public class ResultActivity extends AppCompatActivity {
             return;
         }
 
-        int selectedFrameResId = sessionState != null
-                ? sessionState.getSelectedFrameResId()
-                : -1;
-        if (selectedFrameResId == -1) {
-            selectedFrameResId = getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
-                    .getInt("SELECTED_FRAME_ID", -1);
-        }
+        int selectedFrameResId = sessionState != null ? sessionState.getSelectedFrameResId() : -1;
 
         HistorySession historySession = new HistorySession();
         historySession.setUserId(currentUid);
