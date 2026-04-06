@@ -229,4 +229,16 @@ public final class HelpDialogUtils {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
     }
+
+    public static void showHelpDialog(Context context) {
+        String title = context.getString(R.string.help_title);
+        String subtitle = context.getString(R.string.help_subtitle);
+        List<String> bullets = java.util.Arrays.asList(
+                context.getString(R.string.help_tip_1),
+                context.getString(R.string.help_tip_2),
+                context.getString(R.string.help_tip_3),
+                context.getString(R.string.help_tip_4)
+        );
+        showPhotoboothHelp(context, title, subtitle, bullets);
+    }
 }

@@ -25,7 +25,7 @@ import java.util.List;
 public class GestureAnalyzer {
 
     public interface OnGestureDetected {
-        void onResult(String gesture, Rect handBox);
+        void onResult(AnalysisResult result);
     }
 
     private static final String TAG = "GestureAnalyzer";
@@ -68,7 +68,7 @@ public class GestureAnalyzer {
     }
 
     @OptIn(markerClass = ExperimentalGetImage.class)
-    public void analyzeImageProxy(ImageProxy imageProxy, OnGestureDetected listener) {
+    public void analyze(ImageProxy imageProxy, String targetExpression, OnGestureDetected listener) {
         if (handLandmarker == null || isProcessing || imageProxy.getImage() == null) {
             imageProxy.close();
             return;
@@ -76,8 +76,6 @@ public class GestureAnalyzer {
 
         isProcessing = true;
         try {
-            // Conver image to Bitmap first as MediaPipe MPImageBuilder from Bitmap is most stable in Java
-            // We can also use MediaImageBuilder if memory is tight but Bitmap is easier for rotation/flipping
             MPImage mpImage = new BitmapImageBuilder(imageProxy.toBitmap()).build();
 
             HandLandmarkerResult result = handLandmarker.detect(mpImage);
@@ -88,16 +86,11 @@ public class GestureAnalyzer {
             if (result != null && !result.landmarks().isEmpty()) {
                 List<NormalizedLandmark> landmarks = result.landmarks().get(0);
                 
-                // 1. Detect Hand Features
                 boolean[] isFingerRaised = checkFingersRaised(landmarks);
-                Log.d(TAG, String.format("Fingers: T:%b I:%b M:%b R:%b P:%b", 
-                    isFingerRaised[0], isFingerRaised[1], isFingerRaised[2], isFingerRaised[3], isFingerRaised[4]));
                 
-                // HI (V-Sign): Index and Middle up, Ring and Pinky down
                 if (isFingerRaised[1] && isFingerRaised[2] && !isFingerRaised[3] && !isFingerRaised[4]) {
                     rawGesture = "HI";
                 }
-                // HEART (Finger heart): Index and Thumb tips cross
                 else if (checkFingerHeart(landmarks)) {
                     rawGesture = "HEART";
                 }
@@ -105,7 +98,6 @@ public class GestureAnalyzer {
                 handBox = calculateHandBox(landmarks, mpImage.getWidth(), mpImage.getHeight());
             }
 
-            // Smoothing
             gestureHistory.addLast(rawGesture);
             if (gestureHistory.size() > HISTORY_SIZE) gestureHistory.pollFirst();
 
@@ -118,10 +110,12 @@ public class GestureAnalyzer {
             if (hiVotes >= CONFIRM_THRESHOLD) confirmed = "HI";
             else if (heartVotes >= CONFIRM_THRESHOLD) confirmed = "HEART";
 
-            listener.onResult(confirmed, handBox);
+            boolean matched = confirmed.equals(targetExpression);
+            listener.onResult(new AnalysisResult(matched, handBox, confirmed));
 
         } catch (Exception e) {
             Log.e(TAG, "Analysis error: " + e.getMessage());
+            listener.onResult(new AnalysisResult(false, null, "ERROR"));
         } finally {
             isProcessing = false;
             imageProxy.close();

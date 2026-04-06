@@ -15,9 +15,7 @@ import com.google.mlkit.vision.face.FaceDetectorOptions;
 public class ExpressionAnalyzer {
 
     public interface OnExpressionDetected {
-        // expression: SMILE / WINK_LEFT / WINK_RIGHT / NEUTRAL
-        // faceBox: bounding box khuôn mặt trên ảnh gốc (null nếu không thấy)
-        void onResult(String expression, Rect faceBox);
+        void onResult(AnalysisResult result);
     }
 
     private final FaceDetector detector;
@@ -36,7 +34,7 @@ public class ExpressionAnalyzer {
     }
 
     @OptIn(markerClass = ExperimentalGetImage.class)
-    public void analyzeImageProxy(ImageProxy imageProxy, OnExpressionDetected listener) {
+    public void analyze(ImageProxy imageProxy, String targetExpression, OnExpressionDetected listener) {
         if (isProcessing || imageProxy.getImage() == null) {
             imageProxy.close();
             return;
@@ -49,10 +47,10 @@ public class ExpressionAnalyzer {
         detector.process(image)
                 .addOnSuccessListener(faces -> {
                     if (faces.isEmpty()) {
-                        listener.onResult("NEUTRAL", null);
+                        listener.onResult(new AnalysisResult(false, null, "NONE"));
                     } else {
                         Face face = faces.get(0);
-                        Rect rawBox = face.getBoundingBox(); // <-- ML Kit trả về Rect thật
+                        Rect rawBox = face.getBoundingBox(); 
                         Rect faceBox = smoothFaceBox(rawBox);
 
                         float smileProb = face.getSmilingProbability() != null ? face.getSmilingProbability() : -1f;
@@ -70,10 +68,11 @@ public class ExpressionAnalyzer {
                             expression = "NEUTRAL";
                         }
 
-                        listener.onResult(expression, faceBox);
+                        boolean matched = expression.equals(targetExpression);
+                        listener.onResult(new AnalysisResult(matched, faceBox, expression));
                     }
                 })
-                .addOnFailureListener(e -> listener.onResult("ERROR", null))
+                .addOnFailureListener(e -> listener.onResult(new AnalysisResult(false, null, "ERROR")))
                 .addOnCompleteListener(task -> {
                     isProcessing = false;
                     imageProxy.close();

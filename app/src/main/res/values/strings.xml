@@ -187,6 +187,9 @@
     <string name="main_capture_prompt_face_wink">Shot %1$d: Give a wink!</string>
     <string name="main_sound_on">Sound enabled</string>
     <string name="main_sound_off">Sound disabled</string>
+    <string name="main_mode_voice">Voice</string>
+    <string name="main_ai_voice_selected">Switched to: Voice trigger (Say \'Cheese\'!)</string>
+    <string name="main_capture_prompt_voice">Shot %1$d: Say \'Cheese\' to capture!</string>
 
     <string name="auth_register_creating">Creating account...</string>
 
@@ -350,4 +353,25 @@
 
     <!-- Security & RBAC -->
     <string name="permission_denied">Bạn không có quyền thực hiện hành động này</string>
+
+    <string name="flash_strong_on">Screen flash: Strong</string>
+    <string name="flash_strong_off">Screen flash: Normal</string>
+    <string name="capture_status_done_shot">Captured %1$d/%2$d photos</string>
+    <string name="help_title">Camera Guide</string>
+    <string name="help_subtitle">Tips for best photos</string>
+    <string name="help_tip_1">Select a frame style first in the previous screen.</string>
+    <string name="help_tip_2">Use AI Detect mode for pose or expression triggers.</string>
+    <string name="help_tip_3">Long press flash icon to toggle flash strength.</string>
+    <string name="help_tip_4">Captured photos will be saved locally in Gallery.</string>
+
+    <string name="main_capture_prompt_voice_v2">🎙️ Shout \"Cheese\" loudly to capture!</string>
+    <string name="main_mic_error_format">🎤 Mic error: %1$s</string>
+    <string name="main_mic_active_toast">Mic active: Say Cheese!</string>
+
+    <!-- Portrait Mode -->
+    <string name="main_portrait_mode">Portrait</string>
+    <string name="main_portrait_on">Portrait mode ON — background will be blurred</string>
+    <string name="main_portrait_off">Portrait mode OFF</string>
+    <string name="main_portrait_processing">Applying portrait effect…</string>
+    <string name="main_portrait_failed">Portrait effect failed, saved original</string>
 </resources>

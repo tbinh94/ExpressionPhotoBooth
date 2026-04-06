@@ -125,6 +125,9 @@
     <string name="main_capture_prompt_face_wink">Chụp %1$d: Nháy mắt cái nào!</string>
     <string name="main_sound_on">Đã bật âm thanh</string>
     <string name="main_sound_off">Đã tắt âm thanh</string>
+    <string name="main_mode_voice">Giọng nói</string>
+    <string name="main_ai_voice_selected">Đã chuyển sang: Chụp bằng giọng nói (Hãy nói \'Cheese\'!)</string>
+    <string name="main_capture_prompt_voice">Chụp %1$d: Hãy nói \'Cheese\' để chụp!</string>
 
     <string name="auth_title">Chào mừng trở lại</string>
     <string name="auth_subtitle">Hãy đăng nhập để tiếp tục</string>
@@ -310,4 +313,25 @@
 
     <!-- Security & RBAC -->
     <string name="permission_denied">Bạn không có quyền thực hiện hành động này</string>
+
+    <string name="flash_strong_on">Flash màn hình: Mạnh</string>
+    <string name="flash_strong_off">Flash màn hình: Thường</string>
+    <string name="capture_status_done_shot">Đã chụp %1$d/%2$d ảnh</string>
+    <string name="help_title">Hướng dẫn chụp</string>
+    <string name="help_subtitle">Mẹo để có ảnh đẹp</string>
+    <string name="help_tip_1">Chọn kiểu khung hình trước ở màn hình ngoài.</string>
+    <string name="help_tip_2">Dùng AI Detect để chụp tự động bằng hành động hoặc gương mặt.</string>
+    <string name="help_tip_3">Nhấn giữ biểu tượng Flash để đổi độ sáng đèn flash selfie.</string>
+    <string name="help_tip_4">Ảnh đã chụp sẽ được lưu vào Thư viện của thiết bị.</string>
+
+    <string name="main_capture_prompt_voice_v2">🎙️ Hô to \"Cheese\" để chụp!</string>
+    <string name="main_mic_error_format">🎤 Lỗi mic: %1$s</string>
+    <string name="main_mic_active_toast">Đang lắng nghe: Hãy hô Cheese!</string>
+
+    <!-- Portrait Mode -->
+    <string name="main_portrait_mode">Chân dung</string>
+    <string name="main_portrait_on">Chế độ chân dung BẬT — hậu cảnh sẽ được làm mờ</string>
+    <string name="main_portrait_off">Chế độ chân dung TẮT</string>
+    <string name="main_portrait_processing">Đang áp dụng hiệu ứng chân dung…</string>
+    <string name="main_portrait_failed">Hiệu ứng chân dung thất bại, đã lưu ảnh gốc</string>
 </resources>
