@@ -8,12 +8,14 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorInt;
 import androidx.core.content.ContextCompat;
 
 import com.example.expressionphotobooth.domain.model.EditState;
+import com.example.expressionphotobooth.utils.StickerPlacementMapper;
 
 // Renderer thuc hien toan bo xu ly anh theo EditState (filter -> frame -> sticker).
 public class BitmapEditRenderer {
@@ -170,28 +172,32 @@ public class BitmapEditRenderer {
         // Size của sticker dựa trên kích thước nhỏ nhất
         int size = Math.max(72, minL / 5);
 
-        float sx = state.getStickerX();
-        float sy = state.getStickerY();
+        RectF cropRect = resolveCropRect(state, width, height);
+        float cropX = state.getStickerCropX();
+        float cropY = state.getStickerCropY();
 
-        int left, top;
-        if (sx < 0 || sy < 0) {
-            // Tính toán vùng an toàn (Safe Area) với tỷ lệ 3:4 để chống việc ResultActivity cắt mất rìa
-            int safeW = (int) (minL * 0.75f);
-            int safeH = (int) (minL * 0.75f);
-
-            int centerX = width / 2;
-            int centerY = height / 2;
-
-            int padding = 24;
-            
-            // Đặt sticker ở góc trên - phải của vùng an toàn
-            left = centerX + (safeW / 2) - size - padding;
-            top = centerY - (safeH / 2) + padding;
-        } else {
-            // Sử dụng tọa độ do người dùng di chuyển (sx, sy là tâm của sticker)
-            left = (int) (sx * width - size / 2f);
-            top = (int) (sy * height - size / 2f);
+        // Backward compatibility for older sessions that only stored full-image normalized coordinates.
+        if (cropX < 0f || cropY < 0f) {
+            float legacyX = state.getStickerX();
+            float legacyY = state.getStickerY();
+            if (legacyX >= 0f && legacyY >= 0f) {
+                float cx = legacyX * width;
+                float cy = legacyY * height;
+                cropX = StickerPlacementMapper.clamp01((cx - cropRect.left) / Math.max(1f, cropRect.width()));
+                cropY = StickerPlacementMapper.clamp01((cy - cropRect.top) / Math.max(1f, cropRect.height()));
+            }
         }
+
+        if (cropX < 0f || cropY < 0f) {
+            cropX = 0.84f;
+            cropY = 0.18f;
+        }
+
+        float centerX = cropRect.left + StickerPlacementMapper.clamp01(cropX) * cropRect.width();
+        float centerY = cropRect.top + StickerPlacementMapper.clamp01(cropY) * cropRect.height();
+
+        int left = Math.round(centerX - (size / 2f));
+        int top = Math.round(centerY - (size / 2f));
 
         if (stickerBitmap != null) {
             Rect dest = new Rect(left, top, left + size, top + size);
@@ -200,6 +206,22 @@ public class BitmapEditRenderer {
             drawable.setBounds(left, top, left + size, top + size);
             drawable.draw(canvas);
         }
+    }
+
+    private RectF resolveCropRect(EditState state, int width, int height) {
+        float leftNorm = state.getStickerCropLeftNorm();
+        float topNorm = state.getStickerCropTopNorm();
+        float rightNorm = state.getStickerCropRightNorm();
+        float bottomNorm = state.getStickerCropBottomNorm();
+
+        if (leftNorm >= 0f && topNorm >= 0f && rightNorm > leftNorm && bottomNorm > topNorm) {
+            return StickerPlacementMapper.fromNormalizedRect(
+                    new RectF(leftNorm, topNorm, rightNorm, bottomNorm),
+                    width,
+                    height
+            );
+        }
+        return new RectF(0f, 0f, width, height);
     }
 
     @ColorInt

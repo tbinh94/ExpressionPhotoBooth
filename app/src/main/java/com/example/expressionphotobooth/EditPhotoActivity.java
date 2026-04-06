@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -28,6 +30,8 @@ import com.example.expressionphotobooth.domain.model.EditState;
 import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.RenderEditedBitmapUseCase;
+import com.example.expressionphotobooth.utils.FrameConfig;
+import com.example.expressionphotobooth.utils.StickerPlacementMapper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
@@ -38,6 +42,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Stack;
 
 public class EditPhotoActivity extends AppCompatActivity {
@@ -228,6 +233,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         }
 
         selectedFrameResId = resolveSelectedFrameResId();
+        applyPreviewAspectForSelectedFrame();
         applyFrameOverlay();
 
         applyCurrentEditState();
@@ -256,15 +262,21 @@ public class EditPhotoActivity extends AppCompatActivity {
         if (sessionState != null && sessionState.getSelectedFrameResId() != -1) {
             return sessionState.getSelectedFrameResId();
         }
-        return getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
+        // Legacy bridge: old sessions may still rely on this pref value.
+        int legacyFrameResId = getSharedPreferences("PhotoboothPrefs", MODE_PRIVATE)
                 .getInt("SELECTED_FRAME_ID", -1);
+        if (legacyFrameResId != -1 && sessionState != null) {
+            sessionState.setSelectedFrameResId(legacyFrameResId);
+            sessionRepository.saveSession(sessionState);
+        }
+        return legacyFrameResId;
     }
 
     private void applyFrameOverlay() {
         if (ivFrameOverlay == null) {
             return;
         }
-        int overlayResId = resolveOverlayFrameResId(currentEditState.getFrameStyle());
+        int overlayResId = resolveOverlayFrameResId();
         if (overlayResId == -1) {
             ivFrameOverlay.setVisibility(View.GONE);
             ivFrameOverlay.setImageDrawable(null);
@@ -274,7 +286,11 @@ public class EditPhotoActivity extends AppCompatActivity {
         ivFrameOverlay.setVisibility(View.VISIBLE);
     }
 
-    private int resolveOverlayFrameResId(EditState.FrameStyle frameStyle) {
+    private int resolveOverlayFrameResId() {
+        if (selectedFrameResId != -1) {
+            return selectedFrameResId;
+        }
+        EditState.FrameStyle frameStyle = currentEditState != null ? currentEditState.getFrameStyle() : null;
         if (frameStyle == null) {
             return -1;
         }
@@ -482,18 +498,20 @@ public class EditPhotoActivity extends AppCompatActivity {
                     return false;
                 }
 
-                float scaleX = viewWidth / imgWidth;
-                float scaleY = viewHeight / imgHeight;
-                float scale = Math.min(scaleX, scaleY);
-
-                float drawLeft = (viewWidth - (imgWidth * scale)) / 2f;
-                float drawTop = (viewHeight - (imgHeight * scale)) / 2f;
+                RectF contentRect = StickerPlacementMapper.calculateCenterCropViewContentRect(viewWidth, viewHeight, imgWidth, imgHeight);
+                float scale = Math.max(viewWidth / imgWidth, viewHeight / imgHeight);
+                float drawLeft = contentRect.left;
+                float drawTop = contentRect.top;
 
                 float bX = (event.getX() - drawLeft) / scale;
                 float bY = (event.getY() - drawTop) / scale;
 
+                RectF cropRect = resolveFrameCropRectForBitmap(imgWidth, imgHeight);
+
                 float sx = currentEditState.getStickerX();
                 float sy = currentEditState.getStickerY();
+                float cropX = currentEditState.getStickerCropX();
+                float cropY = currentEditState.getStickerCropY();
 
                 float bw = imgWidth;
                 float bh = imgHeight;
@@ -501,17 +519,11 @@ public class EditPhotoActivity extends AppCompatActivity {
                 int minL = Math.min((int)bw, (int)bh);
                 int size = Math.max(72, minL / 5);
 
-                if (sx < 0 || sy < 0) {
-                    int safeW = (int) (minL * 0.75f);
-                    int safeH = (int) (minL * 0.75f);
-                    int centerX = (int)(bw / 2f);
-                    int centerY = (int)(bh / 2f);
-                    int padding = 24;
-
-                    float left = centerX + (safeW / 2f) - size - padding;
-                    float top = centerY - (safeH / 2f) + padding;
-                    sx = (left + size / 2f) / bw;
-                    sy = (top + size / 2f) / bh;
+                if (cropX < 0f || cropY < 0f) {
+                    cropX = 0.84f;
+                    cropY = 0.18f;
+                    sx = (cropRect.left + cropRect.width() * cropX) / bw;
+                    sy = (cropRect.top + cropRect.height() * cropY) / bh;
                 }
 
                 float scX = sx * bw;
@@ -542,8 +554,16 @@ public class EditPhotoActivity extends AppCompatActivity {
                             newCenterX = Math.max(0, Math.min(newCenterX, bw));
                             newCenterY = Math.max(0, Math.min(newCenterY, bh));
 
-                            currentEditState.setStickerX(newCenterX / bw);
-                            currentEditState.setStickerY(newCenterY / bh);
+                            float clampedCenterX = Math.max(cropRect.left, Math.min(newCenterX, cropRect.right));
+                            float clampedCenterY = Math.max(cropRect.top, Math.min(newCenterY, cropRect.bottom));
+
+                            float normCropX = StickerPlacementMapper.clamp01((clampedCenterX - cropRect.left) / Math.max(1f, cropRect.width()));
+                            float normCropY = StickerPlacementMapper.clamp01((clampedCenterY - cropRect.top) / Math.max(1f, cropRect.height()));
+
+                            currentEditState.setStickerX(clampedCenterX / bw);
+                            currentEditState.setStickerY(clampedCenterY / bh);
+                            currentEditState.setStickerCropX(normCropX);
+                            currentEditState.setStickerCropY(normCropY);
                             applyCurrentEditState();
                             return true;
                         }
@@ -632,6 +652,7 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     private void applyCurrentEditState() {
         if (originalBitmap == null) return;
+        ensureStickerPlacementAlignedToSelectedFrame();
         editedBitmap = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState);
         ivEditingPhoto.setImageBitmap(editedBitmap);
         applyFrameOverlay();
@@ -776,5 +797,68 @@ public class EditPhotoActivity extends AppCompatActivity {
         Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
         img.recycle();
         return rotatedImg;
+    }
+
+    private RectF resolveFrameCropRectForBitmap(float bitmapWidth, float bitmapHeight) {
+        if (selectedFrameResId == -1) {
+            return new RectF(0f, 0f, bitmapWidth, bitmapHeight);
+        }
+        return StickerPlacementMapper.resolveFrameCropRect(selectedFrameResId, bitmapWidth, bitmapHeight);
+    }
+
+    private void ensureStickerPlacementAlignedToSelectedFrame() {
+        if (currentEditState == null || originalBitmap == null) {
+            return;
+        }
+        RectF cropRect = resolveFrameCropRectForBitmap(originalBitmap.getWidth(), originalBitmap.getHeight());
+        RectF cropNorm = StickerPlacementMapper.toNormalizedRect(cropRect, originalBitmap.getWidth(), originalBitmap.getHeight());
+
+        currentEditState.setStickerCropLeftNorm(cropNorm.left);
+        currentEditState.setStickerCropTopNorm(cropNorm.top);
+        currentEditState.setStickerCropRightNorm(cropNorm.right);
+        currentEditState.setStickerCropBottomNorm(cropNorm.bottom);
+
+        float cropX = currentEditState.getStickerCropX();
+        float cropY = currentEditState.getStickerCropY();
+        if (cropX < 0f || cropY < 0f) {
+            float legacyX = currentEditState.getStickerX();
+            float legacyY = currentEditState.getStickerY();
+            if (legacyX >= 0f && legacyY >= 0f) {
+                float absX = legacyX * originalBitmap.getWidth();
+                float absY = legacyY * originalBitmap.getHeight();
+                cropX = StickerPlacementMapper.clamp01((absX - cropRect.left) / Math.max(1f, cropRect.width()));
+                cropY = StickerPlacementMapper.clamp01((absY - cropRect.top) / Math.max(1f, cropRect.height()));
+            } else {
+                cropX = 0.84f;
+                cropY = 0.18f;
+            }
+            currentEditState.setStickerCropX(cropX);
+            currentEditState.setStickerCropY(cropY);
+        }
+
+        float mappedAbsX = cropRect.left + StickerPlacementMapper.clamp01(cropX) * cropRect.width();
+        float mappedAbsY = cropRect.top + StickerPlacementMapper.clamp01(cropY) * cropRect.height();
+        currentEditState.setStickerX(mappedAbsX / originalBitmap.getWidth());
+        currentEditState.setStickerY(mappedAbsY / originalBitmap.getHeight());
+    }
+
+    private void applyPreviewAspectForSelectedFrame() {
+        View previewCard = findViewById(R.id.photoPreviewCard);
+        if (!(previewCard.getLayoutParams() instanceof androidx.constraintlayout.widget.ConstraintLayout.LayoutParams)) {
+            return;
+        }
+
+        Rect primaryHole = selectedFrameResId != -1 ? FrameConfig.getPrimaryHoleForFrame(selectedFrameResId) : null;
+        int ratioW = 3;
+        int ratioH = 4;
+        if (primaryHole != null && primaryHole.width() > 0 && primaryHole.height() > 0) {
+            ratioW = primaryHole.width();
+            ratioH = primaryHole.height();
+        }
+
+        androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params =
+                (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) previewCard.getLayoutParams();
+        params.dimensionRatio = String.format(Locale.US, "%d:%d", ratioW, ratioH);
+        previewCard.setLayoutParams(params);
     }
 }

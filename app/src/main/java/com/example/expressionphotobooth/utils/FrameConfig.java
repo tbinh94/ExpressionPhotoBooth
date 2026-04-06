@@ -82,5 +82,14 @@ public class FrameConfig {
         return holes;
     }
 
+    public static Rect getPrimaryHoleForFrame(int frameResId) {
+        List<Rect> holes = getHolesForFrame(frameResId);
+        if (holes.isEmpty()) {
+            return null;
+        }
+        Rect hole = holes.get(0);
+        return new Rect(hole.left, hole.top, hole.right, hole.bottom);
+    }
+
 
 }

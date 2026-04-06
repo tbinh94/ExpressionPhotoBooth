@@ -176,6 +176,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
+                    pauseBackgroundMusicForCaptureFlow();
                     startActivity(new Intent(HomeActivity.this, SetupActivity.class));
                 }
 
@@ -309,12 +310,16 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
+    private void pauseBackgroundMusicForCaptureFlow() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pauseBackgroundMusicForCaptureFlow();
     }
     @Override
     protected void onResume() {
