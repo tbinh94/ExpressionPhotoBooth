@@ -140,6 +140,19 @@
                     android:src="@drawable/ic_flip_camera"
                     android:contentDescription="@string/camera_switch_lens"
                     app:tint="#2A5298" />
+
+                <ImageButton
+                    android:id="@+id/btnPortraitMode"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/bg_flash_pill"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_person_24"
+                    android:contentDescription="@string/main_portrait_mode"
+                    app:tint="#3D68E8" />
             </FrameLayout>
         </androidx.cardview.widget.CardView>
 
@@ -164,84 +177,128 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
                 android:text="@string/main_capture_mode_label"
-                android:textColor="#1F618D"
+                android:textColor="#3D68E8"
                 android:textSize="11sp"
                 android:letterSpacing="0.08"
                 android:textStyle="bold" />
 
             <!-- Mode toggle: Tự động / AI Detect — dạng segment rõ ràng -->
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/modeContainer"
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_toggle_group"
+                android:padding="4dp">
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/modeContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    app:checkedButton="@+id/btnModeCountdown">
+
+                    <Button
+                        android:id="@+id/btnModeCountdown"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/main_mode_auto"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/selector_mode_text"
+                        app:backgroundTint="@color/selector_mode_bg"
+                        app:cornerRadius="20dp"
+                        app:strokeWidth="0dp" />
+
+                    <Button
+                        android:id="@+id/btnModeExpression"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/main_mode_ai_detect"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/selector_mode_text"
+                        app:backgroundTint="@color/selector_mode_bg"
+                        app:cornerRadius="20dp"
+                        app:strokeWidth="0dp" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+            </FrameLayout>
+
+            <!-- AI sub-toggle: scrollable carousel centered -->
+            <HorizontalScrollView
+                android:id="@+id/aiScrollContainer"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                app:singleSelection="true"
-                app:selectionRequired="true"
-                app:checkedButton="@+id/btnModeCountdown">
-
-                <Button
-                    android:id="@+id/btnModeCountdown"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/main_mode_auto"
-                    android:textSize="13sp"
-                    android:textColor="@color/selector_mode_text"
-                    app:backgroundTint="@color/selector_mode_bg"
-                    app:strokeColor="#2A5298"
-                    app:cornerRadius="10dp" />
-
-                <Button
-                    android:id="@+id/btnModeExpression"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/main_mode_ai_detect"
-                    android:textSize="13sp"
-                    android:textColor="@color/selector_mode_text"
-                    app:backgroundTint="@color/selector_mode_bg"
-                    app:strokeColor="#2A5298"
-                    app:cornerRadius="10dp" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-            <!-- AI sub-toggle: Face / Gesture — chỉ hiện khi chọn AI Detect -->
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/aiSelectionContainer"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:visibility="gone"
-                app:singleSelection="true"
-                app:selectionRequired="true"
-                app:checkedButton="@+id/btnAiFace">
+                android:scrollbars="none"
+                android:overScrollMode="never"
+                android:fillViewport="true">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAiFace"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/aiSelectionContainer"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/main_mode_face"
-                    android:textSize="12sp"
-                    android:textColor="@color/selector_ai_btn_text"
-                    app:backgroundTint="@color/selector_ai_btn_bg"
-                    app:strokeColor="#1F618D"
-                    app:cornerRadius="8dp" />
+                    android:layout_gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:gravity="center"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    app:checkedButton="@+id/btnAiFace"
+                    app:strokeWidth="0dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAiHand"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/main_mode_action"
-                    android:textSize="12sp"
-                    android:textColor="@color/selector_ai_btn_text"
-                    app:backgroundTint="@color/selector_ai_btn_bg"
-                    app:strokeColor="#1F618D"
-                    app:cornerRadius="8dp" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAiFace"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="38dp"
+                        android:minWidth="90dp"
+                        android:text="😊 FACE"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/selector_ai_btn_text"
+                        app:backgroundTint="@color/selector_ai_btn_bg"
+                        app:cornerRadius="19dp"
+                        app:strokeWidth="0dp"
+                        android:layout_marginEnd="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAiHand"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="38dp"
+                        android:minWidth="100dp"
+                        android:text="✋ GESTURE"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/selector_ai_btn_text"
+                        app:backgroundTint="@color/selector_ai_btn_bg"
+                        app:cornerRadius="19dp"
+                        app:strokeWidth="0dp"
+                        android:layout_marginEnd="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAiVoice"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="38dp"
+                        android:minWidth="90dp"
+                        android:text="🎤 VOICE"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/selector_ai_btn_text"
+                        app:backgroundTint="@color/selector_ai_btn_bg"
+                        app:cornerRadius="19dp"
+                        app:strokeWidth="0dp" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+            </HorizontalScrollView>
 
             <!-- Status + Dot counter trên cùng 1 hàng -->
             <LinearLayout
@@ -295,17 +352,6 @@
             app:layout_constraintBottom_toTopOf="@id/btnCapture"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
-
-            <Button
-                android:id="@+id/btnRatioSquare"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="@string/ratio_square"
-                android:textSize="11sp"
-                android:textColor="#2A5298"
-                app:strokeColor="#2A5298"
-                app:cornerRadius="8dp" />
 
             <Button
                 android:id="@+id/btnRatioWide"

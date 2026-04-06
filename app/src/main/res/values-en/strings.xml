@@ -255,4 +255,11 @@
 
     <!-- Security & RBAC -->
     <string name="permission_denied">You don\'t have permission to perform this action</string>
+
+    <!-- Portrait Mode -->
+    <string name="main_portrait_mode">Portrait</string>
+    <string name="main_portrait_on">Portrait mode ON — background will be blurred</string>
+    <string name="main_portrait_off">Portrait mode OFF</string>
+    <string name="main_portrait_processing">Applying portrait effect…</string>
+    <string name="main_portrait_failed">Portrait effect failed, saved original</string>
 </resources>

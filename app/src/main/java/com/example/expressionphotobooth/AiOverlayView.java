@@ -56,6 +56,15 @@ public class AiOverlayView extends View {
         updateOverlay(newBoxes, newLabel, Color.parseColor("#00E676"));
     }
 
+    /**
+     * Cập nhật overlay cho 1 detection duy nhất (tiện lợi cho analyze callback)
+     */
+    public void setDetection(Rect box, String label) {
+        List<Rect> boxes = new ArrayList<>();
+        if (box != null) boxes.add(box);
+        updateOverlay(boxes, label);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);

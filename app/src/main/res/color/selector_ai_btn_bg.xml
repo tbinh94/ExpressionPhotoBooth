@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Khi nút đang được chọn (active): nền xanh đậm -->
-    <item android:state_checked="true" android:color="#2A5298" />
-    <!-- Khi không được chọn: nền trong suốt -->
-    <item android:color="@android:color/transparent" />
+    <item android:state_checked="true" android:color="#3D68E8" />
+    <item android:color="#F0F4FF" />
 </selector>

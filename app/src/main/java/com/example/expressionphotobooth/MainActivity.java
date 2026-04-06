@@ -58,6 +58,9 @@ import java.util.concurrent.Executors;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.model.UserRole;
+import com.example.expressionphotobooth.domain.usecase.VoiceTriggerAnalyzer;
+import com.example.expressionphotobooth.domain.usecase.PortraitProcessor;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -91,7 +94,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageAnalysis imageAnalysis;
     private ExpressionAnalyzer expressionAnalyzer;
     private GestureAnalyzer gestureAnalyzer;
+    private VoiceTriggerAnalyzer voiceTriggerAnalyzer;
     private boolean isWaitingForExpression = false;
+    private boolean isWaitingForVoice = false;
     private String targetExpression = "HI"; // Default to Hi gesture
     private int maxPhotos;
     private int capturedCount = 0;
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isExpressionMode = false; // Main AI Mode flag
     private boolean isHandGestureMode = false; // Sub AI Mode: Hand (default = false, Face is default)
     private boolean isFaceExpressionMode = true; // Sub AI Mode: Face (default = true)
+    private boolean isVoiceTriggerMode = false; // Sub AI Mode: Voice
     private boolean isFlashPreferredOn = false;
     private boolean isScreenFlashStrong = false;
     private boolean isSoundEnabled = true;
@@ -117,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isHandAnalyzerAvailable = false;
     private UserRole currentUserRole = UserRole.USER; // Default to normal User
     private long premiumUntil = 0L;
+    private boolean isPortraitMode = false;
+    private PortraitProcessor portraitProcessor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
         shutterSound.load(MediaActionSound.SHUTTER_CLICK);
         
         expressionAnalyzer = new ExpressionAnalyzer();
+        voiceTriggerAnalyzer = new VoiceTriggerAnalyzer(this);
+        portraitProcessor = new PortraitProcessor();
         initOptionalGestureAnalyzer();
 
         // Fetch current user info to handle premium features and expiration logic
@@ -204,6 +214,16 @@ public class MainActivity extends AppCompatActivity {
             soundButton.setOnClickListener(v -> toggleSound());
         }
 
+        // Portrait Mode toggle button (icon-only)
+        ImageButton btnPortrait = findViewById(R.id.btnPortraitMode);
+        if (btnPortrait != null) {
+            btnPortrait.setOnClickListener(v -> {
+                isPortraitMode = !isPortraitMode;
+                updatePortraitButtonState(btnPortrait);
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+            });
+        }
+
         squareRatioButton.setOnClickListener(v -> {
             if (!isSquareRatio) {
                 isSquareRatio = true;
@@ -221,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         com.google.android.material.button.MaterialButtonToggleGroup modeGroup = findViewById(R.id.modeContainer);
-        View aiSubGroup = findViewById(R.id.aiSelectionContainer);
+        View aiSubGroup = findViewById(R.id.aiScrollContainer);
         modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
@@ -251,91 +271,199 @@ public class MainActivity extends AppCompatActivity {
                 }
                 
                 isExpressionMode = (checkedId == R.id.btnModeExpression);
+                android.transition.TransitionManager.beginDelayedTransition((android.view.ViewGroup) aiSubGroup.getParent());
                 aiSubGroup.setVisibility(isExpressionMode ? View.VISIBLE : View.GONE);
-                if (isExpressionMode) {
-                    Toast.makeText(this, R.string.main_mode_ai_selected, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, R.string.main_mode_auto_selected, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = findViewById(R.id.aiSelectionContainer);
+        aiSubSelector.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                isHandGestureMode = (checkedId == R.id.btnAiHand);
+                isVoiceTriggerMode = (checkedId == R.id.btnAiVoice);
+                isFaceExpressionMode = (checkedId == R.id.btnAiFace);
+                
+                if (isHandGestureMode && !isHandAnalyzerAvailable) {
+                    Toast.makeText(this, "Hand tracking models downloading...", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = 
-            (com.google.android.material.button.MaterialButtonToggleGroup) findViewById(R.id.aiSelectionContainer);
-        com.google.android.material.button.MaterialButton btnAiHand = findViewById(R.id.btnAiHand);
-        if (btnAiHand != null && !isHandAnalyzerAvailable) {
-            btnAiHand.setEnabled(false);
-            btnAiHand.setAlpha(0.45f);
-        }
-        
-        // Đồng bộ trạng thái ban đầu theo nút đang được check trong XML (btnAiFace)
-        isHandGestureMode = false;
-        isFaceExpressionMode = true;
-        
-        aiSubSelector.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) return; // chỉ xử lý khi nút được chọn
-            if (checkedId == R.id.btnAiHand && !isHandAnalyzerAvailable) {
-                group.check(R.id.btnAiFace);
-                Toast.makeText(this, R.string.main_ai_hand_unavailable, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            isHandGestureMode = (checkedId == R.id.btnAiHand);
-            isFaceExpressionMode = (checkedId == R.id.btnAiFace);
-            if (isFaceExpressionMode) {
-                Toast.makeText(this, R.string.main_ai_face_selected, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, R.string.main_ai_action_selected, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        applyPreviewRatio();
-
-        View mainView = findViewById(R.id.main);
-        if (mainView != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (allPermissionsGranted()) {
             startCamera();
         } else {
-            requestCameraPermission();
+            requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, CAMERA_PERMISSION_CODE);
         }
-    }
 
-    private void requestCameraPermission() {
-        requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
     }
 
     private void initOptionalGestureAnalyzer() {
-        if (!isMediaPipeHandSupportedAbi()) {
-            Log.w(TAG, "Hand analyzer disabled on this ABI: " + java.util.Arrays.toString(Build.SUPPORTED_ABIS));
-            isHandAnalyzerAvailable = false;
-            gestureAnalyzer = null;
-            return;
-        }
-
         try {
             gestureAnalyzer = new GestureAnalyzer(this);
-            isHandAnalyzerAvailable = (gestureAnalyzer != null);
-        } catch (Throwable throwable) {
-            // Prevent app crash if MediaPipe native library is missing on current device.
-            Log.e(TAG, "Failed to initialize hand analyzer", throwable);
-            isHandAnalyzerAvailable = false;
-            gestureAnalyzer = null;
+            isHandAnalyzerAvailable = true;
+        } catch (Exception e) {
+            Log.w(TAG, "GestureAnalyzer not yet ready: " + e.getMessage());
         }
     }
 
-    private boolean isMediaPipeHandSupportedAbi() {
-        for (String abi : Build.SUPPORTED_ABIS) {
-            if (abi != null && abi.startsWith("arm64")) {
+    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        toolbar.inflateMenu(R.menu.camera_menu);
+        toolbar.setNavigationOnClickListener(v -> finish());
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_help) {
+                HelpDialogUtils.showHelpDialog(this);
                 return true;
             }
+            return false;
+        });
+    }
+
+    private void toggleFlash() {
+        isFlashPreferredOn = !isFlashPreferredOn;
+        sessionState.setFlashEnabled(isFlashPreferredOn);
+        sessionRepository.saveSession(sessionState);
+        updateFlashIcon();
+        if (camera != null) {
+            camera.getCameraControl().enableTorch(isFlashPreferredOn && cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA);
         }
-        return false;
+    }
+
+    private void toggleScreenFlashStrength() {
+        isScreenFlashStrong = !isScreenFlashStrong;
+        sessionState.setScreenFlashStrong(isScreenFlashStrong);
+        sessionRepository.saveSession(sessionState);
+        updateFlashIcon();
+    }
+
+    private void updateFlashIcon() {
+        if (flashButton == null) return;
+        if (isFlashPreferredOn) {
+            flashButton.setImageResource(isScreenFlashStrong ? R.drawable.ic_flash_on_strong : R.drawable.ic_flash_on);
+            flashButton.setColorFilter(ContextCompat.getColor(this, R.color.flash_active));
+        } else {
+            flashButton.setImageResource(R.drawable.ic_flash_off);
+            flashButton.setColorFilter(ContextCompat.getColor(this, R.color.white));
+        }
+    }
+
+    private void toggleSound() {
+        isSoundEnabled = !isSoundEnabled;
+        sessionState.setSoundEnabled(isSoundEnabled);
+        sessionRepository.saveSession(sessionState);
+        updateSoundIcon();
+    }
+
+    private void updateSoundIcon() {
+        if (soundButton == null) return;
+        soundButton.setImageResource(isSoundEnabled ? R.drawable.ic_volume_up : R.drawable.ic_volume_off);
+    }
+
+    private void applyPreviewRatio() {
+        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) previewCard.getLayoutParams();
+        if (isSquareRatio) {
+            lp.dimensionRatio = "1:1";
+            squareRatioButton.setAlpha(1.0f);
+            wideRatioButton.setAlpha(0.5f);
+        } else {
+            lp.dimensionRatio = "3:4";
+            squareRatioButton.setAlpha(0.5f);
+            wideRatioButton.setAlpha(1.0f);
+        }
+        previewCard.setLayoutParams(lp);
+    }
+
+    private void initCaptureUi() {
+        capturedCount = 0;
+        savedImageUris.clear();
+        isCapturingSequence = false;
+        isWaitingForExpression = false;
+        isWaitingForVoice = false;
+        
+        dotContainer.removeAllViews();
+        for (int i = 0; i < maxPhotos; i++) {
+            View dot = new View(this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(24, 24);
+            params.setMargins(8, 0, 8, 0);
+            dot.setLayoutParams(params);
+            dot.setBackgroundResource(R.drawable.dot_inactive);
+            dotContainer.addView(dot);
+        }
+        
+        captureProgress.setProgress(0);
+        captureProgress.setMax(maxPhotos);
+        tvCaptureStatus.setText(R.string.capture_status_ready);
+        cardLastCapture.setVisibility(View.GONE);
+        updateFlashIcon();
+    }
+
+    private void updateCaptureStatus(String text) {
+        tvCaptureStatus.setText(text);
+        captureProgress.setProgress(capturedCount);
+        for (int i = 0; i < dotContainer.getChildCount(); i++) {
+            dotContainer.getChildAt(i).setBackgroundResource(i < capturedCount ? R.drawable.dot_active : R.drawable.dot_inactive);
+        }
+    }
+
+    private void updatePortraitButtonState(ImageButton btnPortrait) {
+        if (isPortraitMode) {
+            // Active: glow effect — blue background, white icon
+            btnPortrait.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF3D68E8));
+            btnPortrait.setImageTintList(android.content.res.ColorStateList.valueOf(0xFFFFFFFF));
+            btnPortrait.animate().scaleX(1.1f).scaleY(1.1f).setDuration(150).start();
+        } else {
+            // Inactive: default pill
+            btnPortrait.setBackgroundTintList(null);
+            btnPortrait.setImageTintList(android.content.res.ColorStateList.valueOf(0xFF3D68E8));
+            btnPortrait.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+        }
+    }
+
+    private void startPhotoSequence() {
+        if (isCapturingSequence) return;
+        
+        // Check for premium if needed (extra safety)
+        if (isExpressionMode) {
+            AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
+            boolean isPremium = (currentUserRole == UserRole.PREMIUM && premiumUntil > System.currentTimeMillis());
+            if (authRepo.isGuest() || (currentUserRole != UserRole.ADMIN && !isPremium)) {
+                 Toast.makeText(this, "Subscription required", Toast.LENGTH_SHORT).show();
+                 return;
+            }
+        }
+
+        isCapturingSequence = true;
+        capturedCount = 0;
+        savedImageUris.clear();
+        captureButton.setEnabled(false);
+        findViewById(R.id.modeContainer).setEnabled(false);
+        findViewById(R.id.aiSelectionContainer).setEnabled(false);
+        
+        updateCaptureStatus(getString(R.string.capture_status_starting));
+        startCountdownAndCapture();
+    }
+
+    private boolean allPermissionsGranted() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+               ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (allPermissionsGranted()) {
+                startCamera();
+            } else {
+                Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
     }
 
     private void startCamera() {
@@ -344,8 +472,9 @@ public class MainActivity extends AppCompatActivity {
             try {
                 cameraProvider = cameraProviderFuture.get();
                 bindCameraUseCases();
+                captureButton.setEnabled(true);
             } catch (ExecutionException | InterruptedException e) {
-                Log.e(TAG, "Failed to start camera", e);
+                Log.e(TAG, "Use case binding failed", e);
             }
         }, ContextCompat.getMainExecutor(this));
     }
@@ -353,185 +482,67 @@ public class MainActivity extends AppCompatActivity {
     private void bindCameraUseCases() {
         if (cameraProvider == null) return;
 
-        Preview preview = new Preview.Builder().build();
-        imageCapture = buildImageCaptureUseCase();
-        imageAnalysis = new ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                // Reduce ML load to keep preview smooth on mid-range devices.
-                .setTargetResolution(new Size(640, 480))
-                .build();
-        
-        imageAnalysis.setAnalyzer(analysisExecutor, imageProxy -> {
-            boolean isWaiting = isWaitingForExpression;
+        cameraProvider.unbindAll();
 
-            // Throttle AI analyzer frequency to reduce CPU spikes and UI jank.
-            long now = SystemClock.elapsedRealtime();
-            if ((now - lastAiAnalysisAtMs) < AI_ANALYSIS_MIN_INTERVAL_MS) {
-                imageProxy.close();
+        Preview preview = new Preview.Builder().build();
+        preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
+
+        imageCapture = new ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation())
+                .build();
+
+        imageAnalysis = new ImageAnalysis.Builder()
+                .setTargetResolution(new Size(480, 640))
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                .build();
+
+        imageAnalysis.setAnalyzer(analysisExecutor, image -> {
+            long now = System.currentTimeMillis();
+            if (now - lastAiAnalysisAtMs < AI_ANALYSIS_MIN_INTERVAL_MS) {
+                image.close();
                 return;
             }
             lastAiAnalysisAtMs = now;
-            
-            if (isExpressionMode) {
+
+            if (isCapturingSequence && isExpressionMode) {
                 if (isHandGestureMode && gestureAnalyzer != null) {
-                    gestureAnalyzer.analyzeImageProxy(imageProxy, (gesture, box) -> {
-                        // Luôn hiện khung xanh để test kể cả khi không trong mode capture
-                        updateAiOverlay(box, gesture, android.graphics.Color.parseColor("#00E676"),
-                                imageProxy.getWidth(), imageProxy.getHeight(),
-                                imageProxy.getImageInfo().getRotationDegrees());
-                        // Chỉ trigger nếu gesture nằm trong phần HIỂN THỊ của camera
-                        if (isWaiting && targetExpression.equals(gesture)
-                                && isBoxVisibleInPreview(box, imageProxy.getWidth(), imageProxy.getHeight(),
-                                                        imageProxy.getImageInfo().getRotationDegrees())) {
-                            triggerImmediateCapture();
+                    gestureAnalyzer.analyze(image, targetExpression, result -> {
+                        if (isWaitingForExpression && result.isMatched()) {
+                            isWaitingForExpression = false;
+                            runOnUiThread(this::triggerImmediateCapture);
+                        }
+                        if (aiOverlayView != null) {
+                            runOnUiThread(() -> aiOverlayView.setDetection(result.getBoundingBox(), result.getLabel()));
                         }
                     });
-                } else if (isFaceExpressionMode && expressionAnalyzer != null) {
-                    expressionAnalyzer.analyzeImageProxy(imageProxy, (expression, faceBox) -> {
-                        updateAiOverlay(faceBox, expression, android.graphics.Color.parseColor("#00B0FF"),
-                                imageProxy.getWidth(), imageProxy.getHeight(),
-                                imageProxy.getImageInfo().getRotationDegrees());
-                        if (isWaiting && targetExpression.equals(expression)
-                                && isBoxVisibleInPreview(faceBox, imageProxy.getWidth(), imageProxy.getHeight(),
-                                                        imageProxy.getImageInfo().getRotationDegrees())) {
-                            triggerImmediateCapture();
+                } else if (!isVoiceTriggerMode) {
+                    // Face Expression Analysis
+                    expressionAnalyzer.analyze(image, targetExpression, result -> {
+                        if (isWaitingForExpression && result.isMatched()) {
+                            isWaitingForExpression = false;
+                            runOnUiThread(this::triggerImmediateCapture);
+                        }
+                        if (aiOverlayView != null) {
+                            runOnUiThread(() -> aiOverlayView.setDetection(result.getBoundingBox(), result.getLabel()));
                         }
                     });
                 } else {
-                    imageProxy.close();
+                    image.close();
                 }
             } else {
-                // Tắt hoàn toàn overlay và detector khi đang ở Tự động
-                updateAiOverlay(null, "");
-                imageProxy.close();
+                image.close();
             }
         });
-        
-        preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
 
         try {
-            cameraProvider.unbindAll();
             camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalysis);
-            captureButton.setEnabled(true);
-            applyFlashMode();
-            updateFlashAvailability();
         } catch (Exception e) {
-            Log.e(TAG, "Failed to bind camera use cases", e);
-            captureButton.setEnabled(false);
-            if (flashButton != null) flashButton.setEnabled(false);
-            Toast.makeText(this, R.string.camera_not_ready, Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Binding failed", e);
         }
     }
 
-    private ImageCapture buildImageCaptureUseCase() {
-        ImageCapture.Builder builder = new ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY);
-
-        if (isSquareRatio) {
-            builder.setTargetResolution(new Size(1080, 1080));
-        } else {
-            builder.setTargetAspectRatio(androidx.camera.core.AspectRatio.RATIO_16_9);
-        }
-        return builder.build();
-    }
-
-    private void applyPreviewRatio() {
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) previewCard.getLayoutParams();
-        params.dimensionRatio = isSquareRatio ? "1:1" : "16:9";
-        previewCard.setLayoutParams(params);
-    }
-
-    private void startPhotoSequence() {
-        if (isCapturingSequence) return;
-
-        capturedCount = 0;
-        savedImageUris.clear();
-        cardLastCapture.setVisibility(View.GONE);
-        isCapturingSequence = true;
-        captureButton.setEnabled(false);
-        squareRatioButton.setEnabled(false);
-        wideRatioButton.setEnabled(false);
-        findViewById(R.id.modeContainer).setEnabled(false);
-        if (flashButton != null) flashButton.setEnabled(false);
-        updateCaptureProgressUi();
-        updateCaptureStatus(getString(R.string.capture_status_starting, maxPhotos));
-        
-        // Bắt đầu chuỗi chụp
-        startCountdownAndCapture();
-    }
-
-    private void triggerImmediateCapture() {
-        if (fallbackCountDownTimer != null) {
-            fallbackCountDownTimer.cancel();
-            fallbackCountDownTimer = null;
-        }
-        isWaitingForExpression = false;
-        tvCountdown.post(() -> {
-            if (aiOverlayView != null) aiOverlayView.updateOverlay(null, "");
-            tvCountdown.setVisibility(View.GONE);
-            updateCaptureStatus(getString(R.string.capture_status_captured, capturedCount + 1, maxPhotos));
-            takePhoto();
-        });
-    }
-
-    private void updateAiOverlay(Rect box, String label, int color, int imgW, int imgH, int rotation) {
-        if (aiOverlayView == null) return;
-        aiOverlayView.post(() -> {
-            java.util.List<Rect> boxes = new java.util.ArrayList<>();
-            int viewW = aiOverlayView.getWidth();
-            int viewH = aiOverlayView.getHeight();
-
-            if (box != null && viewW > 0 && viewH > 0) {
-                // Sau khi rotation, portrait device: imgW/imgH có thể được đảo
-                float srcW = (rotation == 90 || rotation == 270) ? (float) imgH : (float) imgW;
-                float srcH = (rotation == 90 || rotation == 270) ? (float) imgW : (float) imgH;
-
-                // Tính CENTER_CROP: tìm scale để cả 2 chiều đều >= view (giống scaleType=centerCrop)
-                float scaleX = viewW / srcW;
-                float scaleY = viewH / srcH;
-                float scale = Math.max(scaleX, scaleY); // CENTER_CROP lấy scale lớn nhất
-
-                // Phần thừa bị crop ở giữa
-                float cropOffsetX = (srcW * scale - viewW) / 2f;
-                float cropOffsetY = (srcH * scale - viewH) / 2f;
-
-                // Chuyển đổi: pixel ảnh -> pixel view (sau crop)
-                int left   = (int)(box.left   * scale - cropOffsetX);
-                int top    = (int)(box.top    * scale - cropOffsetY);
-                int right  = (int)(box.right  * scale - cropOffsetX);
-                int bottom = (int)(box.bottom * scale - cropOffsetY);
-
-                // Mirror X cho camera trước
-                if (cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) {
-                    int newLeft = viewW - right;
-                    right = viewW - left;
-                    left = newLeft;
-                }
-
-                // Clip vào phần hiển thị thực tế của overlay
-                left   = Math.max(0, left);
-                top    = Math.max(0, top);
-                right  = Math.min(viewW, right);
-                bottom = Math.min(viewH, bottom);
-
-                // Chỉ vẽ nếu hộp hợp lệ
-                if (left < right && top < bottom) {
-                    boxes.add(new Rect(left, top, right, bottom));
-                }
-            }
-            aiOverlayView.updateOverlay(boxes, label, color);
-        });
-    }
-
-    // Overload for calls without images (e.g. clearing)
-    private void updateAiOverlay(Rect box, String label) {
-        updateAiOverlay(box, label, android.graphics.Color.parseColor("#00E676"), 640, 480, 90);
-    }
-
-    /**
-     * Kiểm tra xem trung tâm bounding box có nằm trong phần hiển thị thực tế
-     * (sau CENTER_CROP) của camera preview không.
-     */
     private boolean isBoxVisibleInPreview(Rect box, int imgW, int imgH, int rotation) {
         if (box == null || aiOverlayView == null) return false;
         int viewW = aiOverlayView.getWidth();
@@ -581,6 +592,9 @@ public class MainActivity extends AppCompatActivity {
                     tvCountdown.setText("❤️");
                     updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot));
                 }
+            } else if (isVoiceTriggerMode) {
+                tvCountdown.setText("🎤");
+                updateCaptureStatus(getString(R.string.main_capture_prompt_voice, nextShot));
             } else {
                 // Face mode
                 if (nextShot % 2 != 0) {
@@ -598,19 +612,56 @@ public class MainActivity extends AppCompatActivity {
             captureHandler.postDelayed(() -> {
                 if (isCapturingSequence) {
                     if (gestureAnalyzer != null) gestureAnalyzer.reset();
-                    isWaitingForExpression = true;
+                    
+                    if (isVoiceTriggerMode) {
+                        isWaitingForVoice = true;
+                        // Hiển thị trạng thái rõ ràng hơn
+                        tvCountdown.setText("🎤");
+                        tvCountdown.setVisibility(View.VISIBLE);
+                        // Nhấp nháy countdown icon để báo hiệu đang lắng nghe
+                        tvCountdown.animate().alpha(0.3f).setDuration(600)
+                                .withEndAction(() -> tvCountdown.animate().alpha(1f).setDuration(600).start())
+                                .start();
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_voice_v2));
+                        
+                        voiceTriggerAnalyzer.start(new VoiceTriggerAnalyzer.OnVoiceTriggerDetected() {
+                            @Override
+                            public void onTrigger() {
+                                if (isWaitingForVoice) {
+                                    isWaitingForVoice = false;
+                                    runOnUiThread(() -> {
+                                        vibrate(50); // Mượt mà báo hiệu đã nhận lệnh voice
+                                        tvCountdown.setAlpha(1f);
+                                        tvCountdown.animate().cancel();
+                                        triggerImmediateCapture();
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.e(TAG, "Voice error: " + error);
+                                runOnUiThread(() ->
+                                    Toast.makeText(MainActivity.this, getString(R.string.main_mic_error_format, error), Toast.LENGTH_SHORT).show()
+                                );
+                            }
+                        });
+                    } else {
+                        isWaitingForExpression = true;
+                    }
+
                     // Fallback 10s (hiển thị countdown trên màn hình để người dùng biết là tính năng)
                     if (fallbackCountDownTimer != null) fallbackCountDownTimer.cancel();
                     
                     fallbackCountDownTimer = new android.os.CountDownTimer(10000, 1000) {
                         public void onTick(long millisUntilFinished) {
-                            if (isCapturingSequence && isWaitingForExpression) {
+                            if (isCapturingSequence && (isWaitingForExpression || isWaitingForVoice)) {
                                 String msg = String.format(getString(R.string.fallback_countdown_msg), millisUntilFinished / 1000);
                                 tvCaptureStatus.setText(msg);
                             }
                         }
                         public void onFinish() {
-                            if (isCapturingSequence && isWaitingForExpression) {
+                            if (isCapturingSequence && (isWaitingForExpression || isWaitingForVoice)) {
                                 triggerImmediateCapture();
                             }
                         }
@@ -658,231 +709,208 @@ public class MainActivity extends AppCompatActivity {
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                        capturedCount++;
-                        Uri savedUri = Uri.fromFile(photoFile);
-                        savedImageUris.add(savedUri);
-                        showLastCapturePreview(savedUri);
-                        if (!shouldUseScreenFlash()) {
-                            playCaptureFlash();
+                        if (isPortraitMode) {
+                            // ── Portrait post-processing ──
+                            applyPortraitEffect(photoFile);
+                        } else {
+                            onPhotoReady(photoFile);
                         }
-                        
-                        // Phát âm thanh chụp hình
-                        if (shutterSound != null && isSoundEnabled) {
-                            shutterSound.play(MediaActionSound.SHUTTER_CLICK);
-                        }
-
-                        updateCaptureProgressUi();
-                        updateCaptureStatus(getString(R.string.capture_status_captured, capturedCount, maxPhotos));
-                        
-                        // Sau khi chụp xong 1 tấm, đợi 1 chút rồi đếm ngược cho tấm tiếp theo
-                        // Tăng delay lên 2.5s nếu dùng flash để flash kịp hồi và ổn định ánh sáng
-                        long nextCaptureDelay = isFlashPreferredOn ? 2500L : 1000L;
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> startCountdownAndCapture(), nextCaptureDelay);
                     }
 
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
+                        Log.e(TAG, "Photo capture failed: " + exception.getMessage(), exception);
                         isCapturingSequence = false;
-                        isWaitingForExpression = false;
-                        captureButton.setEnabled(true);
-                        squareRatioButton.setEnabled(true);
-                        wideRatioButton.setEnabled(true);
-                        findViewById(R.id.modeContainer).setEnabled(true);
-                        updateFlashAvailability();
-                        updateCaptureStatus(getString(R.string.capture_status_error));
-                        Toast.makeText(MainActivity.this, R.string.capture_failed, Toast.LENGTH_SHORT).show();
+                        runOnUiThread(() -> captureButton.setEnabled(true));
                     }
                 });
 
-        if (shouldUseScreenFlash()) {
-            playScreenFlashThenCapture(performCapture);
+        if (isFlashPreferredOn) {
+            performScreenFlash(() -> {
+                vibrate(80);
+                performCapture.run();
+            });
         } else {
+            vibrate(80);
+            if (isSoundEnabled) shutterSound.play(MediaActionSound.SHUTTER_CLICK);
             performCapture.run();
         }
     }
 
-    private void goToSelectionPage() {
-        if (cameraProvider != null) cameraProvider.unbindAll();
-
-        squareRatioButton.setEnabled(true);
-        wideRatioButton.setEnabled(true);
-
-        ArrayList<String> uriStrings = new ArrayList<>();
-        for (Uri uri : savedImageUris) uriStrings.add(uri.toString());
-        
-        sessionState.setCapturedImageUris(uriStrings);
-        sessionRepository.saveSession(sessionState);
-
-        Intent intent = new Intent(MainActivity.this, PhotoSelectionActivity.class);
-        intent.putStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES, uriStrings);
-        startActivity(intent);
-        finish();
-    }
-
-    private void initCaptureUi() {
-        captureProgress.setMax(Math.max(maxPhotos, 1));
-        captureProgress.setProgress(0);
-        dotContainer.removeAllViews();
-        for (int i = 0; i < maxPhotos; i++) {
-            View dot = new View(this);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dpToPx(10), dpToPx(10));
-            params.setMargins(dpToPx(4), 0, dpToPx(4), 0);
-            params.gravity = Gravity.CENTER_VERTICAL;
-            dot.setLayoutParams(params);
-            dot.setBackgroundResource(R.drawable.bg_capture_dot_inactive);
-            dotContainer.addView(dot);
-        }
-        updateCaptureStatus(getString(R.string.capture_status_ready));
-    }
-
-    private void updateCaptureProgressUi() {
-        captureProgress.setProgressCompat(capturedCount, true);
-        for (int i = 0; i < dotContainer.getChildCount(); i++) {
-            View dot = dotContainer.getChildAt(i);
-            dot.setBackgroundResource(i < capturedCount ? R.drawable.bg_capture_dot_active : R.drawable.bg_capture_dot_inactive);
-        }
-    }
-
-    private void updateCaptureStatus(String message) {
-        tvCaptureStatus.setText(message);
-    }
-
-    private void showLastCapturePreview(Uri uri) {
-        cardLastCapture.setVisibility(View.VISIBLE);
-        Glide.with(this)
-                .load(uri)
-                .centerCrop()
-                .into(ivLastCapturePreview);
-    }
-
-    private void playCaptureFlash() {
-        captureFlashOverlay.setVisibility(View.VISIBLE);
-        captureFlashOverlay.setAlpha(0.6f);
-        captureFlashOverlay.animate()
-                .alpha(0f)
-                .setDuration(220)
-                .withEndAction(() -> captureFlashOverlay.setVisibility(View.GONE))
-                .start();
-    }
-
-    private void toggleFlash() {
-        if (camera == null || imageCapture == null) {
-            Toast.makeText(this, R.string.camera_not_ready, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        isFlashPreferredOn = !isFlashPreferredOn;
-        sessionState.setFlashEnabled(isFlashPreferredOn);
-        sessionRepository.saveSession(sessionState);
-        applyFlashMode();
-        updateFlashAvailability();
-        Toast.makeText(this, isFlashPreferredOn ? R.string.camera_flash_on : R.string.camera_flash_off, Toast.LENGTH_SHORT).show();
-    }
-
-    private void toggleScreenFlashStrength() {
-        isScreenFlashStrong = !isScreenFlashStrong;
-        sessionState.setScreenFlashStrong(isScreenFlashStrong);
-        sessionRepository.saveSession(sessionState);
-        int levelRes = isScreenFlashStrong ? R.string.camera_screen_flash_level_strong : R.string.camera_screen_flash_level_normal;
-        Toast.makeText(this, getString(R.string.camera_screen_flash_level_changed, getString(levelRes)), Toast.LENGTH_SHORT).show();
-    }
-
-    private void applyFlashMode() {
-        if (imageCapture == null) return;
-        imageCapture.setFlashMode(shouldUseHardwareFlash() ? ImageCapture.FLASH_MODE_ON : ImageCapture.FLASH_MODE_OFF);
-    }
-
-    private void updateFlashAvailability() {
-        if (flashButton == null) return;
-
-        boolean canToggleFlash = camera != null && !isCapturingSequence;
-        flashButton.setEnabled(canToggleFlash);
-        flashButton.setAlpha(canToggleFlash ? 1f : 0.35f);
-        flashButton.setImageResource(isFlashPreferredOn ? R.drawable.ic_flash_on_24 : R.drawable.ic_flash_off_24);
-    }
-
-    private void toggleSound() {
-        isSoundEnabled = !isSoundEnabled;
-        sessionState.setSoundEnabled(isSoundEnabled);
-        sessionRepository.saveSession(sessionState);
-        updateSoundIcon();
-        Toast.makeText(this, isSoundEnabled ? R.string.main_sound_on : R.string.main_sound_off, Toast.LENGTH_SHORT).show();
-    }
-
-    private void updateSoundIcon() {
-        if (soundButton != null) {
-            soundButton.setImageResource(isSoundEnabled ? R.drawable.ic_sound_on : R.drawable.ic_sound_off);
-        }
-    }
-
-    private boolean shouldUseHardwareFlash() {
-        return isFlashPreferredOn
-                && camera != null
-                && camera.getCameraInfo().hasFlashUnit()
-                && cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA;
-    }
-
-    private boolean shouldUseScreenFlash() {
-        return isFlashPreferredOn && cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA;
-    }
-
-    private void playScreenFlashThenCapture(Runnable onFlashPeak) {
-        float flashPeakAlpha = 1.0f; // Luôn dùng độ sáng tối đa cho flash màn hình
-        long fadeInDuration = isScreenFlashStrong ? SCREEN_FLASH_FADE_IN_STRONG_MS : SCREEN_FLASH_FADE_IN_NORMAL_MS;
-        long flashHoldDuration = isScreenFlashStrong ? SCREEN_FLASH_HOLD_STRONG_MS : SCREEN_FLASH_HOLD_NORMAL_MS;
-        long fadeOutDuration = isScreenFlashStrong ? SCREEN_FLASH_FADE_OUT_STRONG_MS : SCREEN_FLASH_FADE_OUT_NORMAL_MS;
-
-        captureFlashOverlay.animate().cancel();
+    private void performScreenFlash(Runnable onFlashMidpoint) {
         captureFlashOverlay.setVisibility(View.VISIBLE);
         captureFlashOverlay.setAlpha(0f);
+        
+        long fadeIn = isScreenFlashStrong ? SCREEN_FLASH_FADE_IN_STRONG_MS : SCREEN_FLASH_FADE_IN_NORMAL_MS;
+        long hold = isScreenFlashStrong ? SCREEN_FLASH_HOLD_STRONG_MS : SCREEN_FLASH_HOLD_NORMAL_MS;
+        long fadeOut = isScreenFlashStrong ? SCREEN_FLASH_FADE_OUT_STRONG_MS : SCREEN_FLASH_FADE_OUT_NORMAL_MS;
+
         captureFlashOverlay.animate()
-                .alpha(flashPeakAlpha)
-                .setDuration(fadeInDuration)
+                .alpha(1f)
+                .setDuration(fadeIn)
                 .withEndAction(() -> {
-                    onFlashPeak.run();
-                    captureFlashOverlay.animate()
-                            .alpha(0f)
-                            .setStartDelay(flashHoldDuration)
-                            .setDuration(fadeOutDuration)
-                            .withEndAction(() -> captureFlashOverlay.setVisibility(View.GONE))
-                            .start();
+                    if (isSoundEnabled) shutterSound.play(MediaActionSound.SHUTTER_CLICK);
+                    onFlashMidpoint.run();
+                    captureFlashOverlay.postDelayed(() -> {
+                        captureFlashOverlay.animate()
+                                .alpha(0f)
+                                .setDuration(fadeOut)
+                                .withEndAction(() -> captureFlashOverlay.setVisibility(View.GONE))
+                                .start();
+                    }, hold);
                 })
                 .start();
     }
 
-    private int dpToPx(int dp) {
-        return Math.round(dp * getResources().getDisplayMetrics().density);
+    /**
+     * Gọi khi ảnh đã sẵn sàng (gốc hoặc đã qua portrait processing).
+     * Cập nhật UI, count, và tiếp tục chuỗi chụp.
+     */
+    private void onPhotoReady(File photoFile) {
+        capturedCount++;
+        Uri savedUri = Uri.fromFile(photoFile);
+        savedImageUris.add(savedUri);
+
+        runOnUiThread(() -> {
+            showLastCapture(savedUri);
+            updateCaptureStatus(getString(R.string.capture_status_done_shot, capturedCount, maxPhotos));
+            if (isCapturingSequence) {
+                startCountdownAndCapture();
+            }
+        });
     }
 
-    private void setupToolbar() {
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
+    /**
+     * Áp dụng hiệu ứng Portrait (blur background) lên ảnh đã lưu.
+     * Chạy trên background thread, ghi đè file JPEG gốc khi hoàn thành.
+     */
+    private void applyPortraitEffect(File photoFile) {
+        runOnUiThread(() -> updateCaptureStatus(getString(R.string.main_portrait_processing)));
+
+        try {
+            android.graphics.Bitmap decoded = android.graphics.BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+            if (decoded == null) {
+                Log.e(TAG, "Portrait: cannot decode " + photoFile);
+                onPhotoReady(photoFile);
+                return;
+            }
+
+            // Đọc EXIF và xoay bitmap trước khi xử lý segmentation
+            android.graphics.Bitmap original = applyExifRotation(decoded, photoFile.getAbsolutePath());
+
+            portraitProcessor.process(original,
+                    portraitBitmap -> {
+                        // Ghi đè file gốc với ảnh portrait (đã xoay đúng chiều)
+                        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(photoFile)) {
+                            portraitBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, fos);
+                            // Xóa EXIF rotation vì pixel đã được xoay đúng rồi
+                            try {
+                                androidx.exifinterface.media.ExifInterface exif =
+                                        new androidx.exifinterface.media.ExifInterface(photoFile.getAbsolutePath());
+                                exif.setAttribute(
+                                        androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
+                                        String.valueOf(androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL));
+                                exif.saveAttributes();
+                            } catch (Exception ignored) {}
+                            Log.d(TAG, "✅ Portrait saved: " + photoFile.getName());
+                        } catch (Exception e) {
+                            Log.e(TAG, "Portrait save failed", e);
+                        }
+                        portraitBitmap.recycle();
+                        if (original != decoded) original.recycle();
+                        onPhotoReady(photoFile);
+                    },
+                    error -> {
+                        Log.e(TAG, "Portrait processing failed: " + error);
+                        if (original != decoded) original.recycle();
+                        runOnUiThread(() ->
+                                Toast.makeText(this, R.string.main_portrait_failed, Toast.LENGTH_SHORT).show()
+                        );
+                        // Fallback: dùng ảnh gốc không blur
+                        onPhotoReady(photoFile);
+                    }
+            );
+        } catch (Exception e) {
+            Log.e(TAG, "Portrait exception", e);
+            onPhotoReady(photoFile);
         }
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24);
-        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_PERMISSION_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startCamera();
-        } else if (requestCode == CAMERA_PERMISSION_CODE) {
-            Toast.makeText(this, R.string.camera_permission_required, Toast.LENGTH_SHORT).show();
+    /**
+     * Đọc EXIF orientation từ file và xoay bitmap cho đúng chiều.
+     */
+    private android.graphics.Bitmap applyExifRotation(android.graphics.Bitmap bitmap, String filePath) {
+        try {
+            androidx.exifinterface.media.ExifInterface exif =
+                    new androidx.exifinterface.media.ExifInterface(filePath);
+            int orientation = exif.getAttributeInt(
+                    androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
+                    androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL);
+
+            int degrees = 0;
+            switch (orientation) {
+                case androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90: degrees = 90; break;
+                case androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180: degrees = 180; break;
+                case androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270: degrees = 270; break;
+            }
+            if (degrees == 0) return bitmap;
+
+            android.graphics.Matrix matrix = new android.graphics.Matrix();
+            matrix.postRotate(degrees);
+            android.graphics.Bitmap rotated = android.graphics.Bitmap.createBitmap(
+                    bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            bitmap.recycle();
+            return rotated;
+        } catch (Exception e) {
+            Log.w(TAG, "Could not read EXIF: " + e.getMessage());
+            return bitmap;
         }
+    }
+
+    private void triggerImmediateCapture() {
+        if (!isCapturingSequence) return;
+        if (fallbackCountDownTimer != null) fallbackCountDownTimer.cancel();
+        isWaitingForExpression = false;
+        isWaitingForVoice = false;
+        voiceTriggerAnalyzer.stop();
+        tvCountdown.setVisibility(View.GONE);
+        takePhoto();
+    }
+
+    private void showLastCapture(Uri uri) {
+        cardLastCapture.setVisibility(View.VISIBLE);
+        Glide.with(this).load(uri).into(ivLastCapturePreview);
+        cardLastCapture.setAlpha(0f);
+        cardLastCapture.animate().alpha(1f).setDuration(300).start();
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            cardLastCapture.animate().alpha(0f).setDuration(300).withEndAction(() -> cardLastCapture.setVisibility(View.GONE)).start();
+        }, 2000);
+    }
+
+    private void goToSelectionPage() {
+        Intent intent = new Intent(this, PhotoSelectionActivity.class);
+        ArrayList<String> uriStrings = new ArrayList<>();
+        for (Uri u : savedImageUris) uriStrings.add(u.toString());
+        intent.putStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES, uriStrings);
+        startActivity(intent);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (cameraProvider != null) {
-            cameraProvider.unbindAll();
-        }
-        analysisExecutor.shutdown();
-        if (shutterSound != null) {
-            shutterSound.release();
+        if (analysisExecutor != null) analysisExecutor.shutdown();
+        if (shutterSound != null) shutterSound.release();
+        if (voiceTriggerAnalyzer != null) voiceTriggerAnalyzer.stop();
+    }
+
+    private void vibrate(long durationMs) {
+        android.os.Vibrator v = (android.os.Vibrator) getSystemService(android.content.Context.VIBRATOR_SERVICE);
+        if (v != null && v.hasVibrator()) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                v.vibrate(android.os.VibrationEffect.createOneShot(durationMs, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                v.vibrate(durationMs);
+            }
         }
     }
 }
