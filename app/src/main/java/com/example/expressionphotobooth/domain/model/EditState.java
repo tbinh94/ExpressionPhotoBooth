@@ -28,6 +28,11 @@ public class EditState {
         CROWN,
         SMILE,
         FLOWER,
+        BOW,
+        SPARKLE,
+        BUTTERFLY,
+        CHERRY,
+        MUSIC,
         CUSTOM // Added CUSTOM type
     }
 

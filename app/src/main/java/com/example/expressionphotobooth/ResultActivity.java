@@ -402,6 +402,16 @@ public class ResultActivity extends AppCompatActivity {
                 return R.drawable.ic_sticker_smile;
             case FLOWER:
                 return R.drawable.ic_sticker_flower;
+            case BOW:
+                return R.drawable.ic_sticker_bow;
+            case SPARKLE:
+                return R.drawable.ic_sticker_sparkle;
+            case BUTTERFLY:
+                return R.drawable.ic_sticker_butterfly;
+            case CHERRY:
+                return R.drawable.ic_sticker_cherry;
+            case MUSIC:
+                return R.drawable.ic_sticker_music;
             case NONE:
             case CUSTOM:
             default:

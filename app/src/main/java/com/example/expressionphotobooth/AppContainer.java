@@ -11,6 +11,7 @@ import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.data.repository.SharedPrefsHistoryRepository;
 import com.example.expressionphotobooth.domain.repository.HistoryRepository;
 import com.example.expressionphotobooth.utils.LocaleManager;
+import com.example.expressionphotobooth.utils.ThemeManager;
 
 // AppContainer dong vai tro noi giu cac dependency dung chung toan app.
 public class AppContainer extends Application {
@@ -22,6 +23,7 @@ public class AppContainer extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		ThemeManager.applySavedTheme(this);
 		LocaleManager.applySavedLocale(this);
 		sessionRepository = new SharedPrefsSessionRepository(this);
 		authRepository = new FirebaseAuthRepository();

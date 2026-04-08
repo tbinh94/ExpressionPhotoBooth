@@ -2,6 +2,7 @@ package com.example.expressionphotobooth;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,6 +30,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.exifinterface.media.ExifInterface;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expressionphotobooth.data.graphics.BitmapEditRenderer;
@@ -42,19 +44,27 @@ import com.example.expressionphotobooth.utils.StickerPlacementMapper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.tabs.TabLayout;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Stack;
 
 public class EditPhotoActivity extends AppCompatActivity {
 
     private static final int MAX_EDIT_BITMAP_SIZE = 1600;
+    private static final float MIN_STICKER_SCALE = 0.3f;
+    private static final float MAX_STICKER_SCALE = 5.0f;
+    private static final float STICKER_SCALE_PRESET_S = 0.8f;
+    private static final float STICKER_SCALE_PRESET_M = 1.0f;
+    private static final float STICKER_SCALE_PRESET_L = 1.3f;
 
     // Views
     private View btnCompare;
@@ -66,6 +76,16 @@ public class EditPhotoActivity extends AppCompatActivity {
     private LinearLayout filterIntensityRow;
     private SeekBar seekFilterIntensity;
     private TextView tvIntensityValue;
+    private LinearLayout stickerSizeRow;
+    private SeekBar seekStickerSize;
+    private TextView tvStickerSizeValue;
+    private ChipGroup stickerSizePresetGroup;
+    private Chip chipStickerSizeSmall;
+    private Chip chipStickerSizeMedium;
+    private Chip chipStickerSizeLarge;
+    private View stickerQuickActionsRow;
+    private View btnStickerCenter;
+    private View btnStickerReset;
 
     // RecyclerViews
     private RecyclerView rvFilters, rvFrames, rvStickers;
@@ -137,6 +157,13 @@ public class EditPhotoActivity extends AppCompatActivity {
             }
         }
 
+        void submitItems(List<ThumbItem> newItems) {
+            items.clear();
+            items.addAll(newItems);
+            selectedPos = 0;
+            notifyDataSetChanged();
+        }
+
         @NonNull
         @Override
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -203,6 +230,19 @@ public class EditPhotoActivity extends AppCompatActivity {
     private ThumbAdapter filtersAdapter;
     private ThumbAdapter framesAdapter;
     private ThumbAdapter stickersAdapter;
+    private TabLayout stickerCategoryTabLayout;
+
+    private enum StickerCategory {
+        CUTE,
+        Y2K,
+        KPOP,
+        CAMERA
+    }
+
+    private StickerCategory currentStickerCategory = StickerCategory.CUTE;
+    private final Map<StickerCategory, int[]> stickerScrollState = new HashMap<>();
+    private long stickerFadeOutDurationMs = 100L;
+    private long stickerFadeInDurationMs = 130L;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -227,10 +267,13 @@ public class EditPhotoActivity extends AppCompatActivity {
         currentEditState = sessionState.getPhotoEditState(currentPhotoUri.toString()).copy();
 
         bindViews();
+        configureStickerTabAnimationDurations();
         setupToolbar();
         setupTabs();
+        setupStickerCategoryTabs();
         setupAdapters();
         setupIntensitySlider();
+        setupStickerSizeSlider();
         setupActionButtons();
         setupStickerDrag();
 
@@ -261,9 +304,53 @@ public class EditPhotoActivity extends AppCompatActivity {
         filterIntensityRow = findViewById(R.id.filterIntensityRow);
         seekFilterIntensity = findViewById(R.id.seekFilterIntensity);
         tvIntensityValue  = findViewById(R.id.tvIntensityValue);
+        stickerSizeRow = findViewById(R.id.stickerSizeRow);
+        seekStickerSize = findViewById(R.id.seekStickerSize);
+        tvStickerSizeValue = findViewById(R.id.tvStickerSizeValue);
+        stickerSizePresetGroup = findViewById(R.id.stickerSizePresetGroup);
+        chipStickerSizeSmall = findViewById(R.id.chipStickerSizeSmall);
+        chipStickerSizeMedium = findViewById(R.id.chipStickerSizeMedium);
+        chipStickerSizeLarge = findViewById(R.id.chipStickerSizeLarge);
+        stickerQuickActionsRow = findViewById(R.id.stickerQuickActionsRow);
+        btnStickerCenter = findViewById(R.id.btnStickerCenter);
+        btnStickerReset = findViewById(R.id.btnStickerReset);
         rvFilters         = findViewById(R.id.rvFilters);
         rvFrames          = findViewById(R.id.rvFrames);
         rvStickers        = findViewById(R.id.rvStickers);
+        stickerCategoryTabLayout = findViewById(R.id.stickerCategoryTabLayout);
+    }
+
+    private void setupStickerCategoryTabs() {
+        if (stickerCategoryTabLayout == null) {
+            return;
+        }
+        stickerCategoryTabLayout.removeAllTabs();
+        stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_cute)));
+        stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_y2k)));
+        stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_kpop)));
+        stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_camera)));
+
+        stickerCategoryTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                saveCurrentStickerScrollState();
+                StickerCategory nextCategory = StickerCategory.values()[Math.max(0, Math.min(tab.getPosition(), StickerCategory.values().length - 1))];
+                if (nextCategory == currentStickerCategory) {
+                    restoreStickerScrollState(nextCategory);
+                    return;
+                }
+                currentStickerCategory = nextCategory;
+                animateStickerCategorySwitch();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                onTabSelected(tab);
+            }
+        });
     }
 
     private int resolveSelectedFrameResId() {
@@ -334,6 +421,9 @@ public class EditPhotoActivity extends AppCompatActivity {
         panelFilters.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         panelFrames.setVisibility(View.GONE);
         panelStickers.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        if (index == 1) {
+            updateStickerSizeUi();
+        }
     }
 
     // ── Adapters setup ────────────────────────────────────────────────────────
@@ -373,31 +463,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         });
         rvFrames.setAdapter(framesAdapter);
 
-        // STICKERS
-        List<ThumbItem> stickerItems = new ArrayList<>();
-        
-        // Add "+" button for local upload (empty label as requested)
-        stickerItems.add(new ThumbItem("", R.drawable.ic_add_24, R.color.edit_accent, "ADD_NEW"));
-
-        stickerItems.addAll(Arrays.asList(
-                new ThumbItem(getString(R.string.edit_option_none),     0, R.color.thumb_none,             EditState.StickerStyle.NONE),
-                new ThumbItem(getString(R.string.edit_sticker_star),    R.drawable.ic_star_24, R.color.thumb_sticker_star, EditState.StickerStyle.STAR),
-                new ThumbItem(getString(R.string.edit_sticker_heart),   R.drawable.ic_sticker_heart, R.color.thumb_pink, EditState.StickerStyle.HEART),
-                new ThumbItem(getString(R.string.edit_sticker_crown),   R.drawable.ic_sticker_crown, R.color.thumb_gold, EditState.StickerStyle.CROWN),
-                new ThumbItem(getString(R.string.edit_sticker_smile),   R.drawable.ic_sticker_smile, R.color.thumb_yellow, EditState.StickerStyle.SMILE),
-                new ThumbItem(getString(R.string.edit_sticker_flower),  R.drawable.ic_sticker_flower, R.color.thumb_pink, EditState.StickerStyle.FLOWER),
-                new ThumbItem(getString(R.string.edit_sticker_camera),  R.drawable.ic_videocam_24, R.color.thumb_blue_grey, EditState.StickerStyle.CAMERA),
-                new ThumbItem(getString(R.string.edit_sticker_flash),   R.drawable.ic_flash_on_24, R.color.thumb_blue_grey, EditState.StickerStyle.FLASH)
-        ));
-
-        // Fetch local user-scoped custom stickers
-        AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
-        List<String> localStickers = getLocalCustomStickers(authRepository.getCurrentUid());
-        for (String base64 : localStickers) {
-            stickerItems.add(new ThumbItem("Me", base64, EditState.StickerStyle.CUSTOM));
-        }
-
-        stickersAdapter = new ThumbAdapter(stickerItems, item -> {
+        stickersAdapter = new ThumbAdapter(new ArrayList<>(), item -> {
             if ("ADD_NEW".equals(item.value)) {
                 openStickerPicker();
             } else {
@@ -405,24 +471,171 @@ public class EditPhotoActivity extends AppCompatActivity {
             }
         });
         rvStickers.setAdapter(stickersAdapter);
+        updateStickerCategorySelectionFromCurrentState();
+        refreshStickerAdapter();
     }
 
-    private final androidx.activity.result.ActivityResultLauncher<Intent> stickerPickerLauncher = 
-        registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(), result -> {
-        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-            handleCustomStickerPicked(result.getData().getData());
+    private void refreshStickerAdapter() {
+        if (rvStickers == null) {
+            return;
         }
-    });
+        List<ThumbItem> stickerItems = buildStickerItemsForCategory(currentStickerCategory);
+        stickersAdapter.submitItems(stickerItems);
+        stickersAdapter.setSelectedByValue(currentEditState.getStickerStyle());
+        restoreStickerScrollState(currentStickerCategory);
+        updateStickerSizeUi();
+    }
+
+    private void animateStickerCategorySwitch() {
+        if (rvStickers == null) {
+            refreshStickerAdapter();
+            return;
+        }
+        rvStickers.animate().cancel();
+        rvStickers.animate()
+                .alpha(0f)
+                .setDuration(stickerFadeOutDurationMs)
+                .withEndAction(() -> {
+                    refreshStickerAdapter();
+                    rvStickers.animate().alpha(1f).setDuration(stickerFadeInDurationMs).start();
+                })
+                .start();
+    }
+
+    private void configureStickerTabAnimationDurations() {
+        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        boolean isLowRam = activityManager != null && activityManager.isLowRamDevice();
+        // Keep transitions subtle and cheaper on low-end devices.
+        stickerFadeOutDurationMs = isLowRam ? 70L : 100L;
+        stickerFadeInDurationMs = isLowRam ? 90L : 130L;
+    }
+
+    private void saveCurrentStickerScrollState() {
+        if (rvStickers == null) {
+            return;
+        }
+        RecyclerView.LayoutManager lm = rvStickers.getLayoutManager();
+        if (!(lm instanceof GridLayoutManager)) {
+            return;
+        }
+        GridLayoutManager glm = (GridLayoutManager) lm;
+        int first = glm.findFirstVisibleItemPosition();
+        if (first == RecyclerView.NO_POSITION) {
+            return;
+        }
+        View firstView = glm.findViewByPosition(first);
+        int offset = firstView != null ? firstView.getTop() - rvStickers.getPaddingTop() : 0;
+        stickerScrollState.put(currentStickerCategory, new int[]{first, offset});
+    }
+
+    private void restoreStickerScrollState(StickerCategory category) {
+        if (rvStickers == null) {
+            return;
+        }
+        int[] state = stickerScrollState.get(category);
+        if (state == null) {
+            return;
+        }
+        RecyclerView.LayoutManager lm = rvStickers.getLayoutManager();
+        if (!(lm instanceof GridLayoutManager)) {
+            return;
+        }
+        GridLayoutManager glm = (GridLayoutManager) lm;
+        rvStickers.post(() -> glm.scrollToPositionWithOffset(state[0], state[1]));
+    }
+
+    private List<ThumbItem> buildStickerItemsForCategory(StickerCategory category) {
+        List<ThumbItem> stickerItems = new ArrayList<>();
+        stickerItems.add(new ThumbItem("", R.drawable.ic_add_24, R.color.edit_accent, "ADD_NEW"));
+        stickerItems.add(new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none, EditState.StickerStyle.NONE));
+
+        switch (category) {
+            case CUTE:
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_heart), R.drawable.ic_sticker_heart, R.color.thumb_pink, EditState.StickerStyle.HEART));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_smile), R.drawable.ic_sticker_smile, R.color.thumb_yellow, EditState.StickerStyle.SMILE));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_flower), R.drawable.ic_sticker_flower, R.color.thumb_pink, EditState.StickerStyle.FLOWER));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_bow), R.drawable.ic_sticker_bow, R.color.thumb_pink, EditState.StickerStyle.BOW));
+                break;
+            case Y2K:
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_star), R.drawable.ic_star_24, R.color.thumb_sticker_star, EditState.StickerStyle.STAR));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_sparkle), R.drawable.ic_sticker_sparkle, R.color.thumb_sticker_star, EditState.StickerStyle.SPARKLE));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_butterfly), R.drawable.ic_sticker_butterfly, R.color.thumb_filter_cool, EditState.StickerStyle.BUTTERFLY));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_cherry), R.drawable.ic_sticker_cherry, R.color.thumb_filter_warm, EditState.StickerStyle.CHERRY));
+                break;
+            case KPOP:
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_crown), R.drawable.ic_sticker_crown, R.color.thumb_gold, EditState.StickerStyle.CROWN));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_music), R.drawable.ic_sticker_music, R.color.thumb_blue_grey, EditState.StickerStyle.MUSIC));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_sparkle), R.drawable.ic_sticker_sparkle, R.color.thumb_sticker_star, EditState.StickerStyle.SPARKLE));
+                break;
+            case CAMERA:
+            default:
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_camera), R.drawable.ic_videocam_24, R.color.thumb_blue_grey, EditState.StickerStyle.CAMERA));
+                stickerItems.add(new ThumbItem(getString(R.string.edit_sticker_flash), R.drawable.ic_flash_on_24, R.color.thumb_blue_grey, EditState.StickerStyle.FLASH));
+                break;
+        }
+
+        AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        List<String> localStickers = getLocalCustomStickers(authRepository.getCurrentUid());
+        for (String base64 : localStickers) {
+            stickerItems.add(new ThumbItem("Me", base64, EditState.StickerStyle.CUSTOM));
+        }
+        return stickerItems;
+    }
+
+    private StickerCategory resolveStickerCategoryForStyle(EditState.StickerStyle style) {
+        if (style == null) {
+            return StickerCategory.CUTE;
+        }
+        switch (style) {
+            case STAR:
+            case SPARKLE:
+            case BUTTERFLY:
+            case CHERRY:
+                return StickerCategory.Y2K;
+            case CROWN:
+            case MUSIC:
+                return StickerCategory.KPOP;
+            case CAMERA:
+            case FLASH:
+                return StickerCategory.CAMERA;
+            case HEART:
+            case SMILE:
+            case FLOWER:
+            case BOW:
+            case NONE:
+            case CUSTOM:
+            default:
+                return StickerCategory.CUTE;
+        }
+    }
+
+    private void updateStickerCategorySelectionFromCurrentState() {
+        currentStickerCategory = resolveStickerCategoryForStyle(currentEditState.getStickerStyle());
+        if (stickerCategoryTabLayout != null) {
+            int tabIndex = currentStickerCategory.ordinal();
+            TabLayout.Tab tab = stickerCategoryTabLayout.getTabAt(tabIndex);
+            if (tab != null && !tab.isSelected()) {
+                tab.select();
+            }
+        }
+    }
+
+    private final androidx.activity.result.ActivityResultLauncher<Intent> stickerPickerLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    handleCustomStickerPicked(result.getData().getData());
+                }
+            });
 
     private void openStickerPicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        stickerPickerLauncher.launch(Intent.createChooser(intent, "Select Sticker Image"));
+        stickerPickerLauncher.launch(Intent.createChooser(intent, getString(R.string.edit_sticker_picker_title)));
     }
 
     private void handleCustomStickerPicked(Uri uri) {
         if (uri == null) return;
-        Toast.makeText(this, "Processing sticker...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.edit_sticker_processing, Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             try (InputStream is = getContentResolver().openInputStream(uri)) {
                 Bitmap bitmap = BitmapFactory.decodeStream(is);
@@ -462,18 +675,18 @@ public class EditPhotoActivity extends AppCompatActivity {
             // Normalize size
             int size = 400;
             float ratio = (float) bitmap.getWidth() / bitmap.getHeight();
-            int w = (ratio > 1) ? size : (int)(size * ratio);
-            int h = (ratio > 1) ? (int)(size / ratio) : size;
-            
+            int w = (ratio > 1) ? size : (int) (size * ratio);
+            int h = (ratio > 1) ? (int) (size / ratio) : size;
+
             Bitmap scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
             java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
             scaled.compress(Bitmap.CompressFormat.PNG, 95, baos);
             String base64 = android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.DEFAULT);
-            
+
             runOnUiThread(() -> {
                 AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
                 saveLocalCustomSticker(authRepository.getCurrentUid(), base64);
-                setupAdapters(); // Refresh list
+                refreshStickerAdapter();
                 updateSticker(new ThumbItem("Me", base64, EditState.StickerStyle.CUSTOM));
             });
             scaled.recycle();
@@ -510,6 +723,7 @@ public class EditPhotoActivity extends AppCompatActivity {
             currentEditState.setCustomStickerBase64(null);
         }
         applyCurrentEditState();
+        updateStickerSizeUi();
     }
 
     private void setupIntensitySlider() {
@@ -524,11 +738,139 @@ public class EditPhotoActivity extends AppCompatActivity {
                     applyCurrentEditState();
                 }
             }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
                 pushToUndoStack();
             }
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
+    }
+
+    private void setupStickerSizeSlider() {
+        if (seekStickerSize == null) {
+            return;
+        }
+        seekStickerSize.setMax(Math.round((MAX_STICKER_SCALE - MIN_STICKER_SCALE) * 100f));
+        seekStickerSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (!fromUser) {
+                    return;
+                }
+                float scale = MIN_STICKER_SCALE + (progress / 100f);
+                currentEditState.setStickerScale(scale);
+                applyCurrentEditState();
+                tvStickerSizeValue.setText(getString(R.string.edit_sticker_size_format, Math.round(scale * 100f)));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                if (currentEditState.getStickerStyle() != EditState.StickerStyle.NONE) {
+                    pushToUndoStack();
+                }
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        if (chipStickerSizeSmall != null) {
+            chipStickerSizeSmall.setOnClickListener(v -> applyStickerSizePreset(STICKER_SCALE_PRESET_S));
+        }
+        if (chipStickerSizeMedium != null) {
+            chipStickerSizeMedium.setOnClickListener(v -> applyStickerSizePreset(STICKER_SCALE_PRESET_M));
+        }
+        if (chipStickerSizeLarge != null) {
+            chipStickerSizeLarge.setOnClickListener(v -> applyStickerSizePreset(STICKER_SCALE_PRESET_L));
+        }
+        if (btnStickerCenter != null) {
+            btnStickerCenter.setOnClickListener(v -> centerStickerInFrame());
+        }
+        if (btnStickerReset != null) {
+            btnStickerReset.setOnClickListener(v -> resetStickerTransform());
+        }
+
+        updateStickerSizeUi();
+    }
+
+    private void centerStickerInFrame() {
+        if (currentEditState == null || currentEditState.getStickerStyle() == EditState.StickerStyle.NONE || originalBitmap == null) {
+            return;
+        }
+        pushToUndoStack();
+        centerStickerInFrameInternal();
+        applyCurrentEditState();
+        updateStickerSizeUi();
+    }
+
+    private void centerStickerInFrameInternal() {
+        if (currentEditState == null || originalBitmap == null) {
+            return;
+        }
+        RectF cropRect = resolveFrameCropRectForBitmap(originalBitmap.getWidth(), originalBitmap.getHeight());
+        currentEditState.setStickerCropX(0.5f);
+        currentEditState.setStickerCropY(0.5f);
+        float centerX = cropRect.left + (cropRect.width() * 0.5f);
+        float centerY = cropRect.top + (cropRect.height() * 0.5f);
+        currentEditState.setStickerX(centerX / originalBitmap.getWidth());
+        currentEditState.setStickerY(centerY / originalBitmap.getHeight());
+    }
+
+    private void resetStickerTransform() {
+        if (currentEditState == null || currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) {
+            return;
+        }
+        pushToUndoStack();
+        currentEditState.setStickerScale(STICKER_SCALE_PRESET_M);
+        centerStickerInFrameInternal();
+        applyCurrentEditState();
+        updateStickerSizeUi();
+    }
+
+    private void applyStickerSizePreset(float presetScale) {
+        if (currentEditState == null || currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) {
+            return;
+        }
+        pushToUndoStack();
+        float clamped = Math.max(MIN_STICKER_SCALE, Math.min(presetScale, MAX_STICKER_SCALE));
+        currentEditState.setStickerScale(clamped);
+        applyCurrentEditState();
+        updateStickerSizeUi();
+    }
+
+    private void updateStickerSizeUi() {
+        if (stickerSizeRow == null || seekStickerSize == null || tvStickerSizeValue == null || currentEditState == null) {
+            return;
+        }
+        boolean show = currentEditState.getStickerStyle() != EditState.StickerStyle.NONE;
+        stickerSizeRow.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (stickerSizePresetGroup != null) {
+            stickerSizePresetGroup.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+        if (stickerQuickActionsRow != null) {
+            stickerQuickActionsRow.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+        float clamped = Math.max(MIN_STICKER_SCALE, Math.min(currentEditState.getStickerScale(), MAX_STICKER_SCALE));
+        int progress = Math.round((clamped - MIN_STICKER_SCALE) * 100f);
+        seekStickerSize.setProgress(progress);
+        tvStickerSizeValue.setText(getString(R.string.edit_sticker_size_format, Math.round(clamped * 100f)));
+        if (chipStickerSizeSmall != null && chipStickerSizeMedium != null && chipStickerSizeLarge != null) {
+            float deltaToSmall = Math.abs(clamped - STICKER_SCALE_PRESET_S);
+            float deltaToMedium = Math.abs(clamped - STICKER_SCALE_PRESET_M);
+            float deltaToLarge = Math.abs(clamped - STICKER_SCALE_PRESET_L);
+            if (deltaToSmall <= deltaToMedium && deltaToSmall <= deltaToLarge) {
+                stickerSizePresetGroup.check(chipStickerSizeSmall.getId());
+            } else if (deltaToMedium <= deltaToLarge) {
+                stickerSizePresetGroup.check(chipStickerSizeMedium.getId());
+            } else {
+                stickerSizePresetGroup.check(chipStickerSizeLarge.getId());
+            }
+        }
     }
 
     private void setupToolbar() {
@@ -572,9 +914,10 @@ public class EditPhotoActivity extends AppCompatActivity {
                 float currentScale = currentEditState.getStickerScale();
                 float factor = detector.getScaleFactor();
                 float newScale = currentScale * factor;
-                newScale = Math.max(0.3f, Math.min(newScale, 5.0f));
+                newScale = Math.max(MIN_STICKER_SCALE, Math.min(newScale, MAX_STICKER_SCALE));
                 currentEditState.setStickerScale(newScale);
                 applyCurrentEditState();
+                updateStickerSizeUi();
                 return true;
             }
         });
@@ -589,12 +932,12 @@ public class EditPhotoActivity extends AppCompatActivity {
                 if (currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) {
                     return false;
                 }
-                
+
                 // Scale always handled
                 scaleGestureDetector.onTouchEvent(event);
-                
+
                 if (event.getPointerCount() > 1) {
-                    isDragging = false; // Stop dragging if second finger touched
+                    isDragging = false;
                     return true;
                 }
 
@@ -627,7 +970,7 @@ public class EditPhotoActivity extends AppCompatActivity {
                 float bw = imgWidth;
                 float bh = imgHeight;
 
-                int minL = Math.min((int)bw, (int)bh);
+                int minL = Math.min((int) bw, (int) bh);
                 int size = Math.max(72, minL / 5);
 
                 if (cropX < 0f || cropY < 0f) {
@@ -642,14 +985,14 @@ public class EditPhotoActivity extends AppCompatActivity {
 
                 float dx = bX - scX;
                 float dy = bY - scY;
-                float distSq = dx*dx + dy*dy;
+                float distSq = dx * dx + dy * dy;
 
                 float radius = size / 2f;
                 float radiusSq = (radius * 1.5f) * (radius * 1.5f);
 
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        if (distSq < radiusSq * 3.0f) { // Cung cấp vùng chạm rộng
+                        if (distSq < radiusSq * 3.0f) {
                             pushToUndoStack();
                             isDragging = true;
                             offsetX = bX - scX;
@@ -707,7 +1050,7 @@ public class EditPhotoActivity extends AppCompatActivity {
             applyCurrentEditState();
             syncSelectionsToAdapters();
         } else {
-            Toast.makeText(this, "Nothing to undo", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.edit_nothing_to_undo, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -765,7 +1108,10 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void syncSelectionsToAdapters() {
         filtersAdapter.setSelectedByValue(currentEditState.getFilterStyle());
         framesAdapter.setSelectedByValue(currentEditState.getFrameStyle());
+        updateStickerCategorySelectionFromCurrentState();
+        refreshStickerAdapter();
         stickersAdapter.setSelectedByValue(currentEditState.getStickerStyle());
+        updateStickerSizeUi();
     }
 
     private void saveAndFinish() {
@@ -830,7 +1176,7 @@ public class EditPhotoActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (progressView != null) progressView.setVisibility(View.GONE);
                     findViewById(R.id.btnFinishEdit).setEnabled(true);
-                    Toast.makeText(this, "Error saving edits: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.edit_save_error_format, e.getMessage()), Toast.LENGTH_SHORT).show();
                 });
             }
         }).start();
@@ -959,3 +1305,13 @@ public class EditPhotoActivity extends AppCompatActivity {
         previewCard.setLayoutParams(params);
     }
 }
+
+
+
+
+
+
+
+
+
+

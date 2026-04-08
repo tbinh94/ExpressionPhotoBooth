@@ -53,8 +53,11 @@
     <string name="home_drawer_show_history">Thư viện</string>
     <string name="home_drawer_music">Âm nhạc:</string>
     <string name="home_drawer_language">Ngôn ngữ:</string>
+    <string name="home_drawer_theme">Giao diện:</string>
     <string name="home_music_on">Bật</string>
     <string name="home_music_off">Tắt</string>
+    <string name="home_theme_light">Sáng</string>
+    <string name="home_theme_dark">Tối</string>
     <string name="home_history_user_only_title">Chỉ dành cho thành viên</string>
     <string name="home_history_user_only_message">Lịch sử chỉ dành cho tài khoản đã đăng ký. Hãy đăng ký để lưu và xem lại phiên chụp.</string>
     <string name="home_gallery_user_only_title">Chỉ dành cho thành viên</string>
@@ -95,6 +98,10 @@
     <string name="edit_section_presets">Mẫu nhanh</string>
     <string name="edit_section_filters">Bộ lọc</string>
     <string name="edit_section_stickers">Nhãn dán</string>
+    <string name="edit_sticker_tab_cute">Cute</string>
+    <string name="edit_sticker_tab_y2k">Y2K</string>
+    <string name="edit_sticker_tab_kpop">K-pop</string>
+    <string name="edit_sticker_tab_camera">Camera</string>
     <string name="edit_preset_classic">Cổ điển</string>
 
     <string name="btn_save_return">LƯU &amp; QUAY LẠI</string>
@@ -352,4 +359,35 @@
     <string name="main_portrait_off">Chế độ chân dung TẮT</string>
     <string name="main_portrait_processing">Đang áp dụng hiệu ứng chân dung…</string>
     <string name="main_portrait_failed">Hiệu ứng chân dung thất bại, đã lưu ảnh gốc</string>
+
+    <string name="edit_sticker_star">Ngôi sao</string>
+    <string name="edit_sticker_flash">Flash</string>
+    <string name="edit_sticker_camera">Camera</string>
+    <string name="edit_sticker_heart">Trái tim</string>
+    <string name="edit_sticker_crown">Vương miện</string>
+    <string name="edit_sticker_smile">Nụ cười</string>
+    <string name="edit_sticker_flower">Hoa</string>
+    <string name="edit_sticker_bow">Nơ</string>
+    <string name="edit_sticker_sparkle">Lấp lánh</string>
+    <string name="edit_sticker_butterfly">Bươm bướm</string>
+    <string name="edit_sticker_cherry">Cherry</string>
+    <string name="edit_sticker_music">Âm nhạc</string>
+    <string name="edit_sticker_size">Kích thước</string>
+    <string name="edit_sticker_size_small">S</string>
+    <string name="edit_sticker_size_medium">M</string>
+    <string name="edit_sticker_size_large">L</string>
+    <string name="edit_sticker_center">Căn giữa</string>
+    <string name="edit_sticker_reset">Đặt lại</string>
+    <string name="edit_sticker_size_format">%1$d%%</string>
+    <string name="edit_sticker_picker_title">Chọn ảnh sticker</string>
+    <string name="edit_sticker_processing">Đang xử lý sticker...</string>
+    <string name="edit_nothing_to_undo">Không có thao tác để hoàn tác</string>
+    <string name="edit_save_error_format">Lỗi khi lưu chỉnh sửa: %1$s</string>
+    <string name="edit_photo_preview_content_desc">Xem trước ảnh đang chỉnh sửa</string>
+    <string name="edit_chip_original">Gốc</string>
+    <string name="edit_select_filter">Chọn bộ lọc</string>
+    <string name="edit_apply">Áp dụng</string>
+    <string name="edit_fine_tune_selection">Tinh chỉnh lựa chọn của bạn</string>
+    <string name="edit_intensity">Cường độ</string>
+    <string name="edit_default_intensity_value">80</string>
 </resources>

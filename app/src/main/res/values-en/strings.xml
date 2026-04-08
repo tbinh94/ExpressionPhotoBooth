@@ -70,8 +70,11 @@
     <string name="home_drawer_show_history">Gallery</string>
     <string name="home_drawer_music">Music:</string>
     <string name="home_drawer_language">Language:</string>
+    <string name="home_drawer_theme">Theme:</string>
     <string name="home_music_on">ON</string>
     <string name="home_music_off">OFF</string>
+    <string name="home_theme_light">Light</string>
+    <string name="home_theme_dark">Dark</string>
     <string name="home_history_user_only_title">Members only</string>
     <string name="home_history_user_only_message">History is available for registered users. Please sign up to save and view your sessions.</string>
     <string name="home_gallery_user_only_title">Members only</string>
@@ -99,6 +102,10 @@
 
     <string name="title_selection">OUR MEMORIES</string>
     <string name="title_edit">Edit Photo</string>
+    <string name="edit_sticker_tab_cute">Cute</string>
+    <string name="edit_sticker_tab_y2k">Y2K</string>
+    <string name="edit_sticker_tab_kpop">K-pop</string>
+    <string name="edit_sticker_tab_camera">Camera</string>
 
     <string name="result_title">Your Result</string>
     <string name="result_subtitle">Save your memories</string>
@@ -276,4 +283,36 @@
     <string name="main_portrait_off">Portrait mode OFF</string>
     <string name="main_portrait_processing">Applying portrait effect…</string>
     <string name="main_portrait_failed">Portrait effect failed, saved original</string>
+
+    <!-- Stickers -->
+    <string name="edit_sticker_star">Star</string>
+    <string name="edit_sticker_flash">Flash</string>
+    <string name="edit_sticker_camera">Camera</string>
+    <string name="edit_sticker_heart">Heart</string>
+    <string name="edit_sticker_crown">Crown</string>
+    <string name="edit_sticker_smile">Smile</string>
+    <string name="edit_sticker_flower">Flower</string>
+    <string name="edit_sticker_bow">Bow</string>
+    <string name="edit_sticker_sparkle">Sparkle</string>
+    <string name="edit_sticker_butterfly">Butterfly</string>
+    <string name="edit_sticker_cherry">Cherry</string>
+    <string name="edit_sticker_music">Music</string>
+    <string name="edit_sticker_size">Size</string>
+    <string name="edit_sticker_size_small">S</string>
+    <string name="edit_sticker_size_medium">M</string>
+    <string name="edit_sticker_size_large">L</string>
+    <string name="edit_sticker_center">Center</string>
+    <string name="edit_sticker_reset">Reset</string>
+    <string name="edit_sticker_size_format">%1$d%%</string>
+    <string name="edit_sticker_picker_title">Select Sticker Image</string>
+    <string name="edit_sticker_processing">Processing sticker...</string>
+    <string name="edit_nothing_to_undo">Nothing to undo</string>
+    <string name="edit_save_error_format">Error saving edits: %1$s</string>
+    <string name="edit_photo_preview_content_desc">Editing photo preview</string>
+    <string name="edit_chip_original">Original</string>
+    <string name="edit_select_filter">Select a Filter</string>
+    <string name="edit_apply">Apply</string>
+    <string name="edit_fine_tune_selection">Fine-tune your selection</string>
+    <string name="edit_intensity">Intensity</string>
+    <string name="edit_default_intensity_value">80</string>
 </resources>
