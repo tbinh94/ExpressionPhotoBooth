@@ -41,6 +41,10 @@
     <string name="setup_title">Chọn khung ảnh</string>
     <string name="setup_subtitle">Chọn một khung cho ảnh của bạn</string>
     <string name="btn_next_decorated">✦ TIẾP THEO ✦</string>
+    <string name="setup_trending_frames">Top 3 thịnh hành</string>
+    <string name="setup_concept_shin">Cậu bé bút chì Shin</string>
+    <string name="setup_concept_cute">Chủ đề Dễ thương</string>
+    <string name="setup_concept_theme">Chủ đề Đặc biệt</string>
     <string name="setup_frame_selected">Đã chọn: %1$s</string>
     <string name="home_switch_to_english">English</string>
     <string name="home_switch_to_vietnamese">Tiếng Việt</string>

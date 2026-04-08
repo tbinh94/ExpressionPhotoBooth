@@ -196,16 +196,31 @@ public class BitmapEditRenderer {
         float centerX = cropRect.left + StickerPlacementMapper.clamp01(cropX) * cropRect.width();
         float centerY = cropRect.top + StickerPlacementMapper.clamp01(cropY) * cropRect.height();
 
-        int left = Math.round(centerX - (size / 2f));
-        int top = Math.round(centerY - (size / 2f));
+        canvas.save();
+        canvas.translate(centerX, centerY);
+        canvas.scale(state.getStickerScale(), state.getStickerScale());
+        canvas.rotate(state.getStickerRotation());
 
         if (stickerBitmap != null) {
-            Rect dest = new Rect(left, top, left + size, top + size);
+            float ratio = (float) stickerBitmap.getWidth() / stickerBitmap.getHeight();
+            int w, h;
+            if (ratio > 1) {
+                w = size;
+                h = (int) (size / ratio);
+            } else {
+                h = size;
+                w = (int) (size * ratio);
+            }
+            int hw = w / 2;
+            int hh = h / 2;
+            Rect dest = new Rect(-hw, -hh, hw, hh);
             canvas.drawBitmap(stickerBitmap, null, dest, new Paint(Paint.FILTER_BITMAP_FLAG));
         } else {
-            drawable.setBounds(left, top, left + size, top + size);
+            int halfSize = size / 2;
+            drawable.setBounds(-halfSize, -halfSize, halfSize, halfSize);
             drawable.draw(canvas);
         }
+        canvas.restore();
     }
 
     private RectF resolveCropRect(EditState state, int width, int height) {

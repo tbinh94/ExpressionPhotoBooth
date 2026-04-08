@@ -13,11 +13,17 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ScaleGestureDetector;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenter;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -28,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.expressionphotobooth.data.graphics.BitmapEditRenderer;
 import com.example.expressionphotobooth.domain.model.EditState;
 import com.example.expressionphotobooth.domain.model.SessionState;
+import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.RenderEditedBitmapUseCase;
 import com.example.expressionphotobooth.utils.FrameConfig;
@@ -54,13 +61,13 @@ public class EditPhotoActivity extends AppCompatActivity {
     private ImageView ivFrameOverlay;
     private Chip chipActiveEdit;
     private TabLayout editTabLayout;
-    private LinearLayout panelPresets, panelFilters, panelFrames, panelStickers;
+    private LinearLayout panelFilters, panelFrames, panelStickers;
     private LinearLayout filterIntensityRow;
     private SeekBar seekFilterIntensity;
     private TextView tvIntensityValue;
 
     // RecyclerViews
-    private RecyclerView rvPresets, rvFilters, rvFrames, rvStickers;
+    private RecyclerView rvFilters, rvFrames, rvStickers;
 
     // State
     private Bitmap originalBitmap;
@@ -72,6 +79,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private RenderEditedBitmapUseCase renderEditedBitmapUseCase;
     private Uri currentPhotoUri;
     private int selectedFrameResId = -1;
+    private ScaleGestureDetector scaleGestureDetector;
 
     // ── Thumbnail item model ──────────────────────────────────────────────────
 
@@ -142,6 +150,7 @@ public class EditPhotoActivity extends AppCompatActivity {
             boolean selected = (position == selectedPos);
 
             h.label.setText(item.label);
+            h.label.setVisibility(item.label.isEmpty() ? View.INVISIBLE : View.VISIBLE);
 
             if (item.base64 != null) {
                 byte[] bytes = android.util.Base64.decode(item.base64, android.util.Base64.DEFAULT);
@@ -190,7 +199,6 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     // ── Adapters ──────────────────────────────────────────────────────────────
 
-    private ThumbAdapter presetsAdapter;
     private ThumbAdapter filtersAdapter;
     private ThumbAdapter framesAdapter;
     private ThumbAdapter stickersAdapter;
@@ -245,14 +253,12 @@ public class EditPhotoActivity extends AppCompatActivity {
         ivFrameOverlay    = findViewById(R.id.ivFrameOverlay);
         chipActiveEdit    = findViewById(R.id.chipActiveEdit);
         editTabLayout     = findViewById(R.id.editTabLayout);
-        panelPresets      = findViewById(R.id.panelPresets);
         panelFilters      = findViewById(R.id.panelFilters);
         panelFrames       = findViewById(R.id.panelFrames);
         panelStickers     = findViewById(R.id.panelStickers);
         filterIntensityRow = findViewById(R.id.filterIntensityRow);
         seekFilterIntensity = findViewById(R.id.seekFilterIntensity);
         tvIntensityValue  = findViewById(R.id.tvIntensityValue);
-        rvPresets         = findViewById(R.id.rvPresets);
         rvFilters         = findViewById(R.id.rvFilters);
         rvFrames          = findViewById(R.id.rvFrames);
         rvStickers        = findViewById(R.id.rvStickers);
@@ -307,7 +313,6 @@ public class EditPhotoActivity extends AppCompatActivity {
     // ── Tab setup ─────────────────────────────────────────────────────────────
 
     private void setupTabs() {
-        editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_presets)));
         editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_filters)));
         editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_stickers)));
 
@@ -320,43 +325,18 @@ public class EditPhotoActivity extends AppCompatActivity {
             @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        showPanel(0); // start on Presets
+        showPanel(0); // start on Filters
     }
 
     private void showPanel(int index) {
-        panelPresets.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
-        panelFilters.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        panelFilters.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         panelFrames.setVisibility(View.GONE);
-        panelStickers.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        panelStickers.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
     }
 
     // ── Adapters setup ────────────────────────────────────────────────────────
 
     private void setupAdapters() {
-
-        // PRESETS
-        List<ThumbItem> presetItems = Arrays.asList(
-                new ThumbItem(getString(R.string.edit_option_none),     R.drawable.ic_filter_none, R.color.thumb_none,             "none"),
-                new ThumbItem(getString(R.string.edit_preset_cute),    R.drawable.ic_preset_cute, R.color.thumb_preset_cute,    "cute"),
-                new ThumbItem(getString(R.string.edit_preset_kpop),    R.drawable.ic_preset_kpop, R.color.thumb_preset_kpop,    "kpop"),
-                new ThumbItem(getString(R.string.edit_preset_classic), R.drawable.ic_preset_classic, R.color.thumb_preset_classic, "classic"),
-                new ThumbItem(getString(R.string.edit_preset_retro),   R.drawable.ic_preset_retro, R.color.thumb_preset_retro,   "retro"),
-                new ThumbItem(getString(R.string.edit_preset_cinematic), R.drawable.ic_preset_cinematic, R.color.thumb_preset_cinematic, "cinematic")
-        );
-        presetsAdapter = new ThumbAdapter(presetItems, item -> {
-            switch ((String) item.value) {
-                case "cute":    applyPreset(EditState.FilterStyle.SOFT, EditState.FrameStyle.AESPA, EditState.StickerStyle.STAR);    break;
-                case "kpop":    applyPreset(EditState.FilterStyle.NONE, EditState.FrameStyle.T1,    EditState.StickerStyle.FLASH);   break;
-                case "classic": applyPreset(EditState.FilterStyle.BW,   EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE);   break;
-                case "retro":   applyPreset(EditState.FilterStyle.VINTAGE, EditState.FrameStyle.CORTIS, EditState.StickerStyle.CAMERA); break;
-                case "cinematic": applyPreset(EditState.FilterStyle.COOL, EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE); break;
-                default:        applyPreset(EditState.FilterStyle.NONE, EditState.FrameStyle.NONE,  EditState.StickerStyle.NONE);   break;
-            }
-            if (item.value != null && !item.value.equals("none")) {
-                Toast.makeText(this, R.string.edit_filter_applied_all, Toast.LENGTH_SHORT).show();
-            }
-        });
-        rvPresets.setAdapter(presetsAdapter);
 
         // FILTERS
         List<ThumbItem> filterItems = Arrays.asList(
@@ -392,7 +372,12 @@ public class EditPhotoActivity extends AppCompatActivity {
         rvFrames.setAdapter(framesAdapter);
 
         // STICKERS
-        List<ThumbItem> stickerItems = new ArrayList<>(Arrays.asList(
+        List<ThumbItem> stickerItems = new ArrayList<>();
+        
+        // Add "+" button for local upload (empty label as requested)
+        stickerItems.add(new ThumbItem("", R.drawable.ic_add_24, R.color.edit_accent, "ADD_NEW"));
+
+        stickerItems.addAll(Arrays.asList(
                 new ThumbItem(getString(R.string.edit_option_none),     0, R.color.thumb_none,             EditState.StickerStyle.NONE),
                 new ThumbItem(getString(R.string.edit_sticker_star),    R.drawable.ic_star_24, R.color.thumb_sticker_star, EditState.StickerStyle.STAR),
                 new ThumbItem(getString(R.string.edit_sticker_heart),   R.drawable.ic_sticker_heart, R.color.thumb_pink, EditState.StickerStyle.HEART),
@@ -403,24 +388,114 @@ public class EditPhotoActivity extends AppCompatActivity {
                 new ThumbItem(getString(R.string.edit_sticker_flash),   R.drawable.ic_flash_on_24, R.color.thumb_blue_grey, EditState.StickerStyle.FLASH)
         ));
 
-        stickersAdapter = new ThumbAdapter(stickerItems, item -> updateSticker(item));
-        rvStickers.setAdapter(stickersAdapter);
+        // Fetch local user-scoped custom stickers
+        AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        List<String> localStickers = getLocalCustomStickers(authRepository.getCurrentUid());
+        for (String base64 : localStickers) {
+            stickerItems.add(new ThumbItem("Me", base64, EditState.StickerStyle.CUSTOM));
+        }
 
-        // Fetch custom stickers from Firestore
-        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("custom_stickers")
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(snap -> {
-                    if (snap.isEmpty()) return;
-                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : snap) {
-                        String label = doc.getString("label");
-                        String base64 = doc.getString("base64");
-                        if (label != null && base64 != null) {
-                            stickerItems.add(new ThumbItem(label, base64, EditState.StickerStyle.CUSTOM));
-                        }
+        stickersAdapter = new ThumbAdapter(stickerItems, item -> {
+            if ("ADD_NEW".equals(item.value)) {
+                openStickerPicker();
+            } else {
+                updateSticker(item);
+            }
+        });
+        rvStickers.setAdapter(stickersAdapter);
+    }
+
+    private final androidx.activity.result.ActivityResultLauncher<Intent> stickerPickerLauncher = 
+        registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+            handleCustomStickerPicked(result.getData().getData());
+        }
+    });
+
+    private void openStickerPicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        stickerPickerLauncher.launch(Intent.createChooser(intent, "Select Sticker Image"));
+    }
+
+    private void handleCustomStickerPicked(Uri uri) {
+        if (uri == null) return;
+        Toast.makeText(this, "Processing sticker...", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            try (InputStream is = getContentResolver().openInputStream(uri)) {
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                if (bitmap != null) {
+                    removeBackgroundAndSave(bitmap);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void removeBackgroundAndSave(Bitmap bitmap) {
+        InputImage image = InputImage.fromBitmap(bitmap, 0);
+        SubjectSegmenterOptions options = new SubjectSegmenterOptions.Builder()
+                .enableForegroundBitmap()
+                .build();
+        SubjectSegmenter segmenter = SubjectSegmentation.getClient(options);
+
+        segmenter.process(image)
+                .addOnSuccessListener(result -> {
+                    Bitmap foreground = result.getForegroundBitmap();
+                    if (foreground != null) {
+                        finalizeStickerCreation(foreground);
+                    } else {
+                        // Fallback if no foreground subject detected
+                        finalizeStickerCreation(bitmap);
                     }
-                    stickersAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> {
+                    finalizeStickerCreation(bitmap);
                 });
+    }
+
+    private void finalizeStickerCreation(Bitmap bitmap) {
+        new Thread(() -> {
+            // Normalize size
+            int size = 400;
+            float ratio = (float) bitmap.getWidth() / bitmap.getHeight();
+            int w = (ratio > 1) ? size : (int)(size * ratio);
+            int h = (ratio > 1) ? (int)(size / ratio) : size;
+            
+            Bitmap scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            scaled.compress(Bitmap.CompressFormat.PNG, 95, baos);
+            String base64 = android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.DEFAULT);
+            
+            runOnUiThread(() -> {
+                AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+                saveLocalCustomSticker(authRepository.getCurrentUid(), base64);
+                setupAdapters(); // Refresh list
+                updateSticker(new ThumbItem("Me", base64, EditState.StickerStyle.CUSTOM));
+            });
+            scaled.recycle();
+        }).start();
+    }
+
+    private void saveLocalCustomSticker(String uid, String base64) {
+        String key = (uid != null) ? uid : "guest";
+        android.content.SharedPreferences prefs = getSharedPreferences("UserStickers_" + key, MODE_PRIVATE);
+        String current = prefs.getString("stickers", "");
+        if (current.isEmpty()) {
+            current = base64;
+        } else {
+            current = base64 + "|||" + current;
+        }
+        prefs.edit().putString("stickers", current).apply();
+    }
+
+    private List<String> getLocalCustomStickers(String uid) {
+        String key = (uid != null) ? uid : "guest";
+        android.content.SharedPreferences prefs = getSharedPreferences("UserStickers_" + key, MODE_PRIVATE);
+        String saved = prefs.getString("stickers", "");
+        if (saved.isEmpty()) return new ArrayList<>();
+        return new ArrayList<>(Arrays.asList(saved.split("\\|\\|\\|")));
     }
 
     private void updateSticker(ThumbItem item) {
@@ -473,6 +548,20 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupStickerDrag() {
+        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public boolean onScale(@NonNull ScaleGestureDetector detector) {
+                if (currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) return false;
+                float currentScale = currentEditState.getStickerScale();
+                float factor = detector.getScaleFactor();
+                float newScale = currentScale * factor;
+                newScale = Math.max(0.3f, Math.min(newScale, 5.0f));
+                currentEditState.setStickerScale(newScale);
+                applyCurrentEditState();
+                return true;
+            }
+        });
+
         ivEditingPhoto.setOnTouchListener(new View.OnTouchListener() {
             private boolean isDragging = false;
             private float offsetX = 0f;
@@ -483,6 +572,15 @@ public class EditPhotoActivity extends AppCompatActivity {
                 if (currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) {
                     return false;
                 }
+                
+                // Scale always handled
+                scaleGestureDetector.onTouchEvent(event);
+                
+                if (event.getPointerCount() > 1) {
+                    isDragging = false; // Stop dragging if second finger touched
+                    return true;
+                }
+
                 if (originalBitmap == null) return false;
 
                 float viewWidth = ivEditingPhoto.getWidth();
@@ -596,19 +694,6 @@ public class EditPhotoActivity extends AppCompatActivity {
         }
     }
 
-    private void applyPreset(EditState.FilterStyle filter, EditState.FrameStyle frame, EditState.StickerStyle sticker) {
-        pushToUndoStack();
-        currentEditState.setFilterStyle(filter);
-        currentEditState.setFrameStyle(frame);
-        currentEditState.setStickerStyle(sticker);
-        
-        // Filter áp dụng cho tất cả
-        applyFilterToAllPhotos(filter, currentEditState.getFilterIntensity());
-        
-        applyCurrentEditState();
-        syncSelectionsToAdapters();
-    }
-
     private void updateFilter(EditState.FilterStyle filter) {
         pushToUndoStack();
         currentEditState.setFilterStyle(filter);
@@ -661,7 +746,6 @@ public class EditPhotoActivity extends AppCompatActivity {
     }
 
     private void syncSelectionsToAdapters() {
-        presetsAdapter.setSelectedByValue(null);
         filtersAdapter.setSelectedByValue(currentEditState.getFilterStyle());
         framesAdapter.setSelectedByValue(currentEditState.getFrameStyle());
         stickersAdapter.setSelectedByValue(currentEditState.getStickerStyle());

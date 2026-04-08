@@ -187,35 +187,13 @@
 
                     <!-- CONTENT PANELS -->
 
-                    <!-- ── PRESETS PANEL ── -->
-                    <LinearLayout
-                        android:id="@+id/panelPresets"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="visible">
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rvPresets"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:clipToPadding="false"
-                            android:paddingHorizontal="12dp"
-                            android:paddingTop="4dp"
-                            android:paddingBottom="4dp"
-                            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                            app:spanCount="4" />
-
-                    </LinearLayout>
-
                     <!-- ── FILTERS PANEL ── -->
                     <LinearLayout
                         android:id="@+id/panelFilters"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:visibility="gone">
+                        android:visibility="visible">
 
                         <LinearLayout
                             android:layout_width="match_parent"

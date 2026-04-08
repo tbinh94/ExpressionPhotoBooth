@@ -1,48 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="@dimen/setup_frame_item_width"
-    android:layout_height="@dimen/setup_frame_item_height"
-    android:layout_marginEnd="@dimen/setup_frame_item_spacing"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="4dp">
 
-
-    <FrameLayout
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardFrame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="H,1:2.2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp">
 
-
-        <ImageView
-            android:id="@+id/imgFrame"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/sample_frame" />
+            android:layout_height="match_parent">
 
+            <ImageView
+                android:id="@+id/imgFrame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/sample_frame" />
 
-        <View
-            android:id="@+id/selectionOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#663498DB"
-            android:visibility="gone" />
+            <View
+                android:id="@+id/selectionOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#663498DB"
+                android:visibility="gone" />
 
+            <!-- Rank badge (top-left) -->
+            <TextView
+                android:id="@+id/tvRankBadge"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="top|start"
+                android:layout_margin="5dp"
+                android:background="@drawable/bg_rank_badge"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:text="#1"
+                android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/tvFrameName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="#AA000000"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="4dp"
-            android:text="@string/item_frame_placeholder"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-    </FrameLayout>
-</androidx.cardview.widget.CardView>
+            <TextView
+                android:id="@+id/tvFrameName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#AA000000"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="4dp"
+                android:text="@string/item_frame_placeholder"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:gravity="center" />
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
 
+</androidx.constraintlayout.widget.ConstraintLayout>

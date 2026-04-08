@@ -4,8 +4,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expressionphotobooth.R;
@@ -13,6 +14,7 @@ import com.example.expressionphotobooth.domain.model.Concept;
 import com.example.expressionphotobooth.domain.model.Frame;
 
 import java.util.List;
+import java.util.Map;
 
 public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptViewHolder> {
 
@@ -24,10 +26,23 @@ public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptV
     private final OnFrameSelectedListener onFrameSelectedListener;
     private int selectedFrameId;
 
-    public ConceptAdapter(List<Concept> conceptList, int selectedFrameId, OnFrameSelectedListener onFrameSelectedListener) {
+    /**
+     * Optional: map of frameId -> rank for the trending section.
+     * When the concept name matches TRENDING_LABEL this map is injected
+     * into the FrameAdapter so badges are shown.
+     */
+    private Map<Integer, Integer> rankMap;
+    public static final String TRENDING_LABEL_KEY = "__trending__";
+
+    public ConceptAdapter(List<Concept> conceptList, int selectedFrameId,
+                          OnFrameSelectedListener onFrameSelectedListener) {
         this.conceptList = conceptList;
         this.selectedFrameId = selectedFrameId;
         this.onFrameSelectedListener = onFrameSelectedListener;
+    }
+
+    public void setRankMap(Map<Integer, Integer> rankMap) {
+        this.rankMap = rankMap;
     }
 
     @NonNull
@@ -42,6 +57,11 @@ public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptV
         Concept concept = conceptList.get(position);
         holder.tvConceptName.setText(concept.getConceptName());
 
+        // Hide divider for the first item (position 0)
+        if (holder.dividerView != null) {
+            holder.dividerView.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
+        }
+
         FrameAdapter frameAdapter = new FrameAdapter(concept.getFrames(), selectedFrameId, frame -> {
             selectedFrameId = frame.getId();
             notifyDataSetChanged();
@@ -49,7 +69,13 @@ public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptV
                 onFrameSelectedListener.onFrameSelected(frame);
             }
         });
-        LinearLayoutManager layoutManager = new LinearLayoutManager(holder.itemView.getContext(), RecyclerView.HORIZONTAL, false);
+
+        // Inject rank badges only for the trending row
+        if (rankMap != null && concept.isTrending()) {
+            frameAdapter.setRankMap(rankMap);
+        }
+
+        GridLayoutManager layoutManager = new GridLayoutManager(holder.itemView.getContext(), 3);
         holder.rvFrames.setLayoutManager(layoutManager);
         holder.rvFrames.setAdapter(frameAdapter);
     }
@@ -62,11 +88,13 @@ public class ConceptAdapter extends RecyclerView.Adapter<ConceptAdapter.ConceptV
     static class ConceptViewHolder extends RecyclerView.ViewHolder {
         TextView tvConceptName;
         RecyclerView rvFrames;
+        View dividerView;
 
         public ConceptViewHolder(@NonNull View itemView) {
             super(itemView);
             tvConceptName = itemView.findViewById(R.id.tvConceptName);
             rvFrames = itemView.findViewById(R.id.rvFrames);
+            dividerView = itemView.findViewById(R.id.conceptDivider);
         }
     }
 }

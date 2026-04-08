@@ -238,7 +238,7 @@
             app:strokeWidth="0dp"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnNext"
+            android:id="@+id/btnSaveVideo"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="48dp"

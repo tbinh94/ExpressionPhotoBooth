@@ -60,6 +60,10 @@
     <string name="btn_next_decorated">✦ NEXT ✦</string>
     <string name="setup_select_frame_required">Bạn phải chọn một khung hình trước khi tiếp tục!</string>
     <string name="setup_frame_selected">Đã chọn: %1$s</string>
+    <string name="setup_trending_frames">Top 3 of the month</string>
+    <string name="setup_concept_shin">Shin Crayon Chan</string>
+    <string name="setup_concept_cute">Cute Concept</string>
+    <string name="setup_concept_theme">Theme Concept</string>
     <string name="home_switch_to_english">English</string>
     <string name="home_switch_to_vietnamese">Tiếng Việt</string>
     <string name="home_drawer_our">OUR</string>
