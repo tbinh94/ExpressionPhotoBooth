@@ -65,6 +65,7 @@ import com.example.expressionphotobooth.domain.usecase.PortraitProcessor;
 public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_CODE = 100;
+    private static final int AUDIO_PERMISSION_CODE = 101;
     private static final int CAPTURE_COUNT = 6;
     private static final String TAG = "CameraX";
     private static final long AI_ANALYSIS_MIN_INTERVAL_MS = 120L;
@@ -119,12 +120,14 @@ public class MainActivity extends AppCompatActivity {
     private final Handler captureHandler = new Handler(Looper.getMainLooper());
     private android.os.CountDownTimer fallbackCountDownTimer;
     private final ExecutorService analysisExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService cameraExecutor = Executors.newSingleThreadExecutor();
     private volatile long lastAiAnalysisAtMs = 0L;
     private boolean isHandAnalyzerAvailable = false;
     private UserRole currentUserRole = UserRole.USER; // Default to normal User
     private long premiumUntil = 0L;
     private boolean isPortraitMode = false;
     private PortraitProcessor portraitProcessor;
+    private boolean isNavigatingToSelection = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -224,21 +227,25 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        squareRatioButton.setOnClickListener(v -> {
-            if (!isSquareRatio) {
-                isSquareRatio = true;
-                applyPreviewRatio();
-                if (cameraProvider != null) bindCameraUseCases();
-            }
-        });
+        if (squareRatioButton != null) {
+            squareRatioButton.setOnClickListener(v -> {
+                if (!isSquareRatio) {
+                    isSquareRatio = true;
+                    applyPreviewRatio();
+                    if (cameraProvider != null) bindCameraUseCases();
+                }
+            });
+        }
 
-        wideRatioButton.setOnClickListener(v -> {
-            if (isSquareRatio) {
-                isSquareRatio = false;
-                applyPreviewRatio();
-                if (cameraProvider != null) bindCameraUseCases();
-            }
-        });
+        if (wideRatioButton != null) {
+            wideRatioButton.setOnClickListener(v -> {
+                if (isSquareRatio) {
+                    isSquareRatio = false;
+                    applyPreviewRatio();
+                    if (cameraProvider != null) bindCameraUseCases();
+                }
+            });
+        }
 
         com.google.android.material.button.MaterialButtonToggleGroup modeGroup = findViewById(R.id.modeContainer);
         View aiSubGroup = findViewById(R.id.aiScrollContainer);
@@ -279,6 +286,13 @@ public class MainActivity extends AppCompatActivity {
         com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = findViewById(R.id.aiSelectionContainer);
         aiSubSelector.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
+                if (checkedId == R.id.btnAiVoice && !hasAudioPermission()) {
+                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_CODE);
+                    group.check(R.id.btnAiFace);
+                    Toast.makeText(this, "Microphone permission is required for Voice mode.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 isHandGestureMode = (checkedId == R.id.btnAiHand);
                 isVoiceTriggerMode = (checkedId == R.id.btnAiVoice);
                 isFaceExpressionMode = (checkedId == R.id.btnAiFace);
@@ -289,10 +303,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (allPermissionsGranted()) {
+        if (hasCameraPermission()) {
             startCamera();
         } else {
-            requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, CAMERA_PERMISSION_CODE);
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -306,7 +320,13 @@ public class MainActivity extends AppCompatActivity {
         try {
             gestureAnalyzer = new GestureAnalyzer(this);
             isHandAnalyzerAvailable = true;
+        } catch (UnsatisfiedLinkError e) {
+            gestureAnalyzer = null;
+            isHandAnalyzerAvailable = false;
+            Log.w(TAG, "Gesture analyzer native lib missing: " + e.getMessage());
         } catch (Exception e) {
+            gestureAnalyzer = null;
+            isHandAnalyzerAvailable = false;
             Log.w(TAG, "GestureAnalyzer not yet ready: " + e.getMessage());
         }
     }
@@ -365,15 +385,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void applyPreviewRatio() {
+        if (previewCard == null) {
+            return;
+        }
         ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) previewCard.getLayoutParams();
         if (isSquareRatio) {
             lp.dimensionRatio = "1:1";
-            squareRatioButton.setAlpha(1.0f);
-            wideRatioButton.setAlpha(0.5f);
+            if (squareRatioButton != null) {
+                squareRatioButton.setAlpha(1.0f);
+            }
+            if (wideRatioButton != null) {
+                wideRatioButton.setAlpha(0.5f);
+            }
         } else {
             lp.dimensionRatio = "3:4";
-            squareRatioButton.setAlpha(0.5f);
-            wideRatioButton.setAlpha(1.0f);
+            if (squareRatioButton != null) {
+                squareRatioButton.setAlpha(0.5f);
+            }
+            if (wideRatioButton != null) {
+                wideRatioButton.setAlpha(1.0f);
+            }
         }
         previewCard.setLayoutParams(lp);
     }
@@ -448,20 +479,30 @@ public class MainActivity extends AppCompatActivity {
         startCountdownAndCapture();
     }
 
-    private boolean allPermissionsGranted() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
-               ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+    private boolean hasCameraPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean hasAudioPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (allPermissionsGranted()) {
+            if (hasCameraPermission()) {
                 startCamera();
             } else {
                 Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
                 finish();
+            }
+            return;
+        }
+
+        if (requestCode == AUDIO_PERMISSION_CODE) {
+            if (!hasAudioPermission()) {
+                Toast.makeText(this, "Voice mode remains disabled without microphone permission.", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -499,6 +540,10 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         imageAnalysis.setAnalyzer(analysisExecutor, image -> {
+            if (isNavigatingToSelection) {
+                image.close();
+                return;
+            }
             long now = System.currentTimeMillis();
             if (now - lastAiAnalysisAtMs < AI_ANALYSIS_MIN_INTERVAL_MS) {
                 image.close();
@@ -705,7 +750,7 @@ public class MainActivity extends AppCompatActivity {
                 .setMetadata(captureMetadata)
                 .build();
 
-        Runnable performCapture = () -> imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(this),
+        Runnable performCapture = () -> imageCapture.takePicture(outputOptions, cameraExecutor,
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
@@ -888,6 +933,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToSelectionPage() {
+        isNavigatingToSelection = true;
+        stopRealtimeProcessingAndReleaseCamera();
+
         Intent intent = new Intent(this, PhotoSelectionActivity.class);
         ArrayList<String> uriStrings = new ArrayList<>();
         for (Uri u : savedImageUris) uriStrings.add(u.toString());
@@ -895,21 +943,71 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void stopRealtimeProcessingAndReleaseCamera() {
+        if (fallbackCountDownTimer != null) {
+            fallbackCountDownTimer.cancel();
+            fallbackCountDownTimer = null;
+        }
+        captureHandler.removeCallbacksAndMessages(null);
+        isWaitingForExpression = false;
+        isWaitingForVoice = false;
+        if (voiceTriggerAnalyzer != null) {
+            voiceTriggerAnalyzer.stop();
+        }
+
+        if (imageAnalysis != null) {
+            imageAnalysis.clearAnalyzer();
+        }
+
+        if (cameraProvider != null) {
+            try {
+                cameraProvider.unbindAll();
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to unbind camera use cases", e);
+            }
+        }
+
+        imageAnalysis = null;
+        imageCapture = null;
+        camera = null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!isNavigatingToSelection && hasCameraPermission()) {
+            if (cameraProvider != null && imageCapture == null) {
+                bindCameraUseCases();
+                captureButton.setEnabled(true);
+            } else if (cameraProvider == null) {
+                startCamera();
+            }
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopRealtimeProcessingAndReleaseCamera();
+        isNavigatingToSelection = false;
         if (analysisExecutor != null) analysisExecutor.shutdown();
+        if (cameraExecutor != null) cameraExecutor.shutdown();
         if (shutterSound != null) shutterSound.release();
         if (voiceTriggerAnalyzer != null) voiceTriggerAnalyzer.stop();
+        if (portraitProcessor != null) portraitProcessor.close();
     }
 
     private void vibrate(long durationMs) {
         android.os.Vibrator v = (android.os.Vibrator) getSystemService(android.content.Context.VIBRATOR_SERVICE);
         if (v != null && v.hasVibrator()) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                v.vibrate(android.os.VibrationEffect.createOneShot(durationMs, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                v.vibrate(durationMs);
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    v.vibrate(android.os.VibrationEffect.createOneShot(durationMs, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+                } else {
+                    v.vibrate(durationMs);
+                }
+            } catch (SecurityException ex) {
+                Log.w(TAG, "Vibrate permission missing at runtime: " + ex.getMessage());
             }
         }
     }

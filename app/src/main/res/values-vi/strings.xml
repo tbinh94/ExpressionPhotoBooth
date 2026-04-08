@@ -289,6 +289,20 @@
     <string name="gallery_empty">Chưa có kỷ niệm nào. Hãy bắt đầu chụp nhé!</string>
     <string name="gallery_delete_confirm">Bạn có muốn xóa kỷ niệm này không?</string>
     <string name="gallery_delete_success">Đã xóa kỷ niệm</string>
+    <string name="gallery_delete_title">Xóa ảnh</string>
+    <string name="gallery_delete_message">Xóa vĩnh viễn ảnh này?</string>
+    <string name="gallery_book_saved">Đã lưu album thành công!</string>
+    <string name="gallery_book_name_hint">Tên album</string>
+    <string name="gallery_book_create_title">Tạo album kỷ niệm</string>
+    <string name="gallery_book_create_action">Tạo</string>
+    <string name="gallery_book_add_photo_title">Thêm ảnh vào %1$s</string>
+    <string name="gallery_no_photo_to_show">Chưa có ảnh để hiển thị</string>
+    <string name="gallery_video_expired_24h">Video tải lại đã hết hạn sau 24 giờ.</string>
+    <string name="gallery_no_feedback_data">Chưa có dữ liệu đánh giá</string>
+    <string name="gallery_share_memory_chooser">Chia sẻ kỷ niệm</string>
+    <string name="gallery_book_photo_count">%1$d ảnh</string>
+    <string name="gallery_book_delete_title">Xóa album</string>
+    <string name="gallery_book_delete_message">Xóa "%1$s"?</string>
 
     <string name="nav_history">Lịch sử</string>
     <string name="history_empty">Chưa có lịch sử nào</string>

@@ -231,6 +231,20 @@
     <string name="gallery_empty">No memories saved yet. Start capturing!</string>
     <string name="gallery_delete_confirm">Do you want to delete this memory?</string>
     <string name="gallery_delete_success">Memory deleted</string>
+    <string name="gallery_delete_title">Delete Photo</string>
+    <string name="gallery_delete_message">Delete this photo permanently?</string>
+    <string name="gallery_book_saved">Book saved successfully!</string>
+    <string name="gallery_book_name_hint">Book name</string>
+    <string name="gallery_book_create_title">New Memory Book</string>
+    <string name="gallery_book_create_action">Create</string>
+    <string name="gallery_book_add_photo_title">Add Photo to %1$s</string>
+    <string name="gallery_no_photo_to_show">No photos to display</string>
+    <string name="gallery_video_expired_24h">Video reload has expired after 24 hours.</string>
+    <string name="gallery_no_feedback_data">No feedback data</string>
+    <string name="gallery_share_memory_chooser">Share Memory</string>
+    <string name="gallery_book_photo_count">%1$d photos</string>
+    <string name="gallery_book_delete_title">Delete Book</string>
+    <string name="gallery_book_delete_message">Delete "%1$s"?</string>
 
     <string name="nav_history">History</string>
     <string name="history_empty">No history yet</string>
