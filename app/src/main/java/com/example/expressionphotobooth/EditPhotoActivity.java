@@ -57,6 +57,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private static final int MAX_EDIT_BITMAP_SIZE = 1600;
 
     // Views
+    private View btnCompare;
     private ImageView ivEditingPhoto;
     private ImageView ivFrameOverlay;
     private Chip chipActiveEdit;
@@ -253,6 +254,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         ivFrameOverlay    = findViewById(R.id.ivFrameOverlay);
         chipActiveEdit    = findViewById(R.id.chipActiveEdit);
         editTabLayout     = findViewById(R.id.editTabLayout);
+        btnCompare        = findViewById(R.id.btnCompare);
         panelFilters      = findViewById(R.id.panelFilters);
         panelFrames       = findViewById(R.id.panelFrames);
         panelStickers     = findViewById(R.id.panelStickers);
@@ -538,6 +540,21 @@ public class EditPhotoActivity extends AppCompatActivity {
         View btnUndo = findViewById(R.id.btnUndo);
         if (btnUndo != null) {
             btnUndo.setOnClickListener(v -> undo());
+        }
+
+        if (btnCompare != null) {
+            btnCompare.setOnTouchListener((v, event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        ivEditingPhoto.setImageBitmap(originalBitmap);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        ivEditingPhoto.setImageBitmap(editedBitmap != null ? editedBitmap : originalBitmap);
+                        break;
+                }
+                return true;
+            });
         }
     }
 

@@ -171,8 +171,7 @@
                 app:tabSelectedTextColor="#FFFFFF"
                 app:tabTextColor="#8899A6"
                 app:tabRippleColor="@android:color/transparent"
-                app:tabPaddingStart="8dp"
-                app:tabPaddingEnd="8dp" />
+                app:tabMaxWidth="0dp" />
 
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
