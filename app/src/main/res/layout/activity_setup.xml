@@ -48,32 +48,37 @@
         app:layout_constraintTop_toTopOf="parent"
         app:cornerRadius="24dp" />
 
-    <!-- PHẦN CỐ ĐỊNH PHÍA TRÊN -->
+    <!-- HEADING SECTION -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/setup_title_margin_top"
+        android:layout_marginTop="20dp"
         android:text="@string/setup_title"
         android:fontFamily="@font/pacifico_regular"
-        android:textColor="#2A5298"
-        android:textSize="30sp"
+        android:textColor="#3B5998"
+        android:textSize="32sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:shadowColor="#FFFFFF"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="2"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/tvSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/setup_subtitle_margin_top"
+        android:layout_marginTop="0dp"
         android:text="@string/setup_subtitle"
-        android:textColor="#1F618D"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="#004A99"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- PHẦN CHỈ ĐỊNH CUỘN: RecyclerView -->
     <!-- Quan trọng: layout_height="0dp" để nó chiếm khoảng không ở giữa và tự scroll -->

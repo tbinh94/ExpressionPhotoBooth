@@ -184,7 +184,7 @@ public class ResultActivity extends AppCompatActivity {
         }).start();
 
         findViewById(R.id.btnSavePng).setOnClickListener(v -> saveCurrentResultAsPng());
-        btnSaveVideo = findViewById(R.id.btnNext);
+        btnSaveVideo = findViewById(R.id.btnSaveVideo);
         btnSaveVideo.setOnClickListener(v -> exportTimelapseVideo());
 
         findViewById(R.id.btnShare).setOnClickListener(v -> shareResult());

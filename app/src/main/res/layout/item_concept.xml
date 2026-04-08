@@ -3,18 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingHorizontal="@dimen/setup_concept_padding_horizontal"
-    android:paddingTop="@dimen/setup_concept_padding_top">
+    android:paddingHorizontal="8dp"
+    android:paddingTop="8dp">
+
+    <include
+        android:id="@+id/conceptDivider"
+        layout="@layout/layout_setup_divider" />
 
     <TextView
         android:id="@+id/tvConceptName"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/item_concept_placeholder"
         android:textColor="#1A5276"
-        android:textSize="16sp"
+        android:textSize="17sp"
         android:textStyle="bold"
-        android:layout_marginBottom="@dimen/setup_concept_title_margin_bottom" />
+        android:gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFrames"

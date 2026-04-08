@@ -46,6 +46,8 @@ public class EditState {
     private float stickerCropTopNorm = -1f;
     private float stickerCropRightNorm = -1f;
     private float stickerCropBottomNorm = -1f;
+    private float stickerScale = 1.0f;
+    private float stickerRotation = 0f;
 
     public EditState() {
     }
@@ -67,6 +69,8 @@ public class EditState {
         this.stickerCropTopNorm = other.stickerCropTopNorm;
         this.stickerCropRightNorm = other.stickerCropRightNorm;
         this.stickerCropBottomNorm = other.stickerCropBottomNorm;
+        this.stickerScale = other.stickerScale;
+        this.stickerRotation = other.stickerRotation;
     }
 
     public EditState copy() {
@@ -175,5 +179,21 @@ public class EditState {
 
     public void setStickerCropBottomNorm(float stickerCropBottomNorm) {
         this.stickerCropBottomNorm = stickerCropBottomNorm;
+    }
+
+    public float getStickerScale() {
+        return stickerScale;
+    }
+
+    public void setStickerScale(float stickerScale) {
+        this.stickerScale = stickerScale;
+    }
+
+    public float getStickerRotation() {
+        return stickerRotation;
+    }
+
+    public void setStickerRotation(float stickerRotation) {
+        this.stickerRotation = stickerRotation;
     }
 }
