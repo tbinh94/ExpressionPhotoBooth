@@ -54,4 +54,22 @@
     <color name="primary_alpha_10">#1A3D68E8</color>
     <color name="pink_alpha_12">#1EFF4081</color>
     <color name="flash_active">#FFD600</color>
+
+    <!-- Home / Drawer -->
+    <color name="home_top_action_bg">#3B4D82</color>
+    <color name="home_drawer_bg">#042B66</color>
+    <color name="home_drawer_text">#F7A9D5</color>
+    <color name="home_drawer_divider">#CCFFFFFF</color>
+    <color name="home_gallery_button_bg">#81C19B</color>
+    <color name="home_admin_chip_bg">#40FFFFFF</color>
+    <color name="home_toggle_text">#1B2559</color>
+    <color name="home_toggle_ripple">#22F7A9D5</color>
+
+    <!-- History UI -->
+    <color name="history_screen_bg">#F7F9FF</color>
+    <color name="history_primary_text">#2A4EA1</color>
+    <color name="history_pill_pink">#F7A9D5</color>
+    <color name="history_danger">#FF3D3D</color>
+    <color name="history_card_surface">#73FFFFFF</color>
+    <color name="history_card_stroke">#443A57C4</color>
 </resources>

@@ -3,31 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="#73FFFFFF"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="2dp"
-    app:strokeColor="#443A57C4"
-    app:strokeWidth="1dp">
+    android:layout_marginBottom="@dimen/history_item_card_margin_bottom"
+    app:cardBackgroundColor="@color/history_card_surface"
+    app:cardCornerRadius="@dimen/history_item_card_corner_radius"
+    app:cardElevation="@dimen/history_item_card_elevation"
+    app:strokeColor="@color/history_card_stroke"
+    app:strokeWidth="@dimen/history_item_card_stroke_width">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="@dimen/history_item_content_padding">
 
         <ImageView
             android:id="@+id/ivHistoryThumb"
-            android:layout_width="124dp"
-            android:layout_height="212dp"
+            android:layout_width="@dimen/history_item_thumb_width"
+            android:layout_height="@dimen/history_item_thumb_height"
             android:background="@drawable/bg_rounded_white"
-            android:padding="2dp"
+            android:padding="@dimen/history_item_thumb_padding"
             android:scaleType="centerCrop" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="@dimen/history_item_content_gap"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -35,7 +35,7 @@
                 android:id="@+id/tvHistoryDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#2A4EA1"
+                android:textColor="@color/history_primary_text"
                 android:textSize="@dimen/history_meta_text_size"
                 android:textStyle="bold" />
 
@@ -43,8 +43,8 @@
                 android:id="@+id/tvHistoryFrame"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:textColor="#2A4EA1"
+                android:layout_marginTop="@dimen/history_item_meta_gap_small"
+                android:textColor="@color/history_primary_text"
                 android:textSize="@dimen/history_meta_text_size"
                 android:textStyle="bold" />
 
@@ -52,14 +52,14 @@
                 android:id="@+id/tvHistoryVideoState"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:textColor="#2A4EA1"
+                android:layout_marginTop="@dimen/history_item_meta_gap_small"
+                android:textColor="@color/history_primary_text"
                 android:textSize="@dimen/history_submeta_text_size" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/history_item_row_gap"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
@@ -69,31 +69,31 @@
                     android:layout_weight="1"
                     android:text="@string/history_save_photo"
                     android:textAllCaps="false"
-                    android:textColor="#000000"
-                    android:textSize="12sp"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/history_pill_text_size"
                     android:textStyle="bold"
-                    app:backgroundTint="#F7A9D5"
-                    app:cornerRadius="18dp" />
+                    app:backgroundTint="@color/history_pill_pink"
+                    app:cornerRadius="@dimen/history_pill_corner_radius" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnHistoryReload"
                     android:layout_width="0dp"
                     android:layout_height="@dimen/history_pill_height"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="@dimen/history_item_button_gap"
                     android:layout_weight="1"
                     android:text="@string/history_reload"
                     android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/history_pill_text_size"
                     android:textStyle="bold"
-                    app:backgroundTint="#2A4EA1"
-                    app:cornerRadius="18dp" />
+                    app:backgroundTint="@color/history_primary_text"
+                    app:cornerRadius="@dimen/history_pill_corner_radius" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="@dimen/history_item_button_gap"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
@@ -103,52 +103,52 @@
                     android:layout_weight="1"
                     android:text="@string/history_save_video"
                     android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/history_pill_text_size"
                     android:textStyle="bold"
-                    app:backgroundTint="#2A4EA1"
-                    app:cornerRadius="18dp" />
+                    app:backgroundTint="@color/history_primary_text"
+                    app:cornerRadius="@dimen/history_pill_corner_radius" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnHistoryShare"
                     android:layout_width="0dp"
                     android:layout_height="@dimen/history_pill_height"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="@dimen/history_item_button_gap"
                     android:layout_weight="1"
                     android:text="@string/result_share"
                     android:textAllCaps="false"
-                    android:textColor="#000000"
-                    android:textSize="12sp"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/history_pill_text_size"
                     android:textStyle="bold"
-                    app:backgroundTint="#F7A9D5"
-                    app:cornerRadius="18dp" />
+                    app:backgroundTint="@color/history_pill_pink"
+                    app:cornerRadius="@dimen/history_pill_corner_radius" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHistoryFeedback"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/history_pill_height"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="@dimen/history_item_button_gap"
                 android:text="@string/history_view_feedback"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/history_pill_text_size"
                 android:textStyle="bold"
-                app:backgroundTint="#2A4EA1"
-                app:cornerRadius="18dp" />
+                app:backgroundTint="@color/history_primary_text"
+                app:cornerRadius="@dimen/history_pill_corner_radius" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHistoryDelete"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/history_pill_height"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="@dimen/history_item_button_gap"
                 android:text="@string/history_delete"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/history_pill_text_size"
                 android:textStyle="bold"
-                app:backgroundTint="#FF3D3D"
-                app:cornerRadius="18dp" />
+                app:backgroundTint="@color/history_danger"
+                app:cornerRadius="@dimen/history_pill_corner_radius" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -179,11 +178,14 @@ public class HistoryActivity extends AppCompatActivity {
                 : item.getFeedback();
 
         String message = getString(R.string.history_feedback_format, ratingText, feedbackText);
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.history_feedback_title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null)
-                .show();
+        HelpDialogUtils.showHistoryStyledNotice(
+                this,
+                R.drawable.ic_info_24,
+                getString(R.string.history_feedback_title),
+                message,
+                getString(R.string.common_ok),
+                null
+        );
     }
 
     private void deleteSession(HistorySession item) {
@@ -192,16 +194,20 @@ public class HistoryActivity extends AppCompatActivity {
             return;
         }
 
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.history_delete_title)
-                .setMessage(R.string.history_delete_message)
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+        HelpDialogUtils.showHistoryStyledConfirm(
+                this,
+                R.drawable.ic_help_24,
+                getString(R.string.history_delete_title),
+                getString(R.string.history_delete_message),
+                getString(R.string.history_popup_ok),
+                getString(R.string.history_popup_cancel),
+                () -> {
                     deleteLocalFileIfExists(item.getResultImageUri());
                     historyRepository.deleteSession(uid, item.getId());
                     loadData();
-                })
-                .setNegativeButton(android.R.string.no, null)
-                .show();
+                },
+                null
+        );
     }
 
     private void saveImageToGallery(String sourceUriString) {

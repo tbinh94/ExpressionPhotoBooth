@@ -65,6 +65,14 @@ public class PortraitProcessor {
         segmenter = SubjectSegmentation.getClient(options);
     }
 
+    public void close() {
+        try {
+            segmenter.close();
+        } catch (Exception ignored) {
+        }
+        executor.shutdownNow();
+    }
+
     /**
      * Xử lý ảnh thành portrait mode (background blur).
      * Callback luôn được gọi trên background thread — caller cần tự chuyển về UI thread.

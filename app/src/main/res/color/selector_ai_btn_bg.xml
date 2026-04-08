@@ -2,5 +2,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Khi nút đang được chọn (active): nền xanh đậm -->
     <item android:state_checked="true" android:color="@color/camera_mode_primary" />
-    <item android:color="#F0F4FF" />
+    <!-- Khi không được chọn: nền trong suốt -->
+    <item android:color="@android:color/transparent" />
 </selector>

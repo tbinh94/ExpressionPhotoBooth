@@ -35,6 +35,7 @@ import com.example.expressionphotobooth.data.security.SecureImageStorageService;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.utils.LocaleManager;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.net.Uri;
 
 import java.io.File;
@@ -227,7 +228,7 @@ public class GalleryActivity extends AppCompatActivity {
 
         bookView.findViewById(R.id.btnSaveBook).setOnClickListener(v -> {
             saveMemoryBooks();
-            Toast.makeText(this, "Book saved successfully!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.gallery_book_saved, Toast.LENGTH_SHORT).show();
         });
         bookView.findViewById(R.id.btnChangeStyle).setOnClickListener(v -> showChooseStyleDialog());
 
@@ -324,11 +325,11 @@ public class GalleryActivity extends AppCompatActivity {
 
     private void showCreateBookDialog() {
         android.widget.EditText input = new android.widget.EditText(this);
-        input.setHint("Book Name");
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("New Memory Book")
+        input.setHint(R.string.gallery_book_name_hint);
+        new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.gallery_book_create_title)
             .setView(input)
-            .setPositiveButton("Create", (d, w) -> {
+            .setPositiveButton(R.string.gallery_book_create_action, (d, w) -> {
                 String name = input.getText().toString();
                 if (!name.isEmpty()) {
                     MemoryBook book = new MemoryBook();
@@ -339,7 +340,7 @@ public class GalleryActivity extends AppCompatActivity {
                     openBook(book);
                 }
             })
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.history_popup_cancel, null)
             .show();
     }
 
@@ -350,10 +351,10 @@ public class GalleryActivity extends AppCompatActivity {
         RecyclerView rv = dialogView.findViewById(R.id.rvDialogPhotos);
         rv.setLayoutManager(new GridLayoutManager(this, 3));
         
-        AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Add Photo to " + currentActiveBook.name)
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.gallery_book_add_photo_title, currentActiveBook.name))
             .setView(dialogView)
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.history_popup_cancel, null)
             .create();
 
         rv.setAdapter(new RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -387,7 +388,7 @@ public class GalleryActivity extends AppCompatActivity {
 
     private void toggleViewMode() {
         if (galleryFiles.isEmpty()) {
-            Toast.makeText(this, "Chưa có ảnh hiển thị", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.gallery_no_photo_to_show, Toast.LENGTH_SHORT).show();
             // Optional: ensure we stay in grid view if empty
             if (!isGridView) {
                 isGridView = true;
@@ -451,7 +452,7 @@ public class GalleryActivity extends AppCompatActivity {
                 if (session != null) {
                     long limit24h = 24 * 60 * 60 * 1000L;
                     if (System.currentTimeMillis() - session.getCapturedAt() > limit24h) {
-                        Toast.makeText(this, "Video tải lại đã hết hạn sau 24h.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, R.string.gallery_video_expired_24h, Toast.LENGTH_LONG).show();
                         break;
                     }
                     if (session.getVideoUri() != null && !session.getVideoUri().trim().isEmpty()) {
@@ -467,7 +468,7 @@ public class GalleryActivity extends AppCompatActivity {
                 if (session != null) {
                     showFeedbackDialog(session);
                 } else {
-                    Toast.makeText(this, "No feedback data", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.gallery_no_feedback_data, Toast.LENGTH_SHORT).show();
                 }
                 break;
             case "delete":
@@ -620,15 +621,26 @@ public class GalleryActivity extends AppCompatActivity {
         intent.setType("image/png");
         intent.putExtra(Intent.EXTRA_STREAM, uri);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(Intent.createChooser(intent, "Share Memory"));
+        startActivity(Intent.createChooser(intent, getString(R.string.gallery_share_memory_chooser)));
     }
 
     private void showFeedbackDialog(com.example.expressionphotobooth.domain.model.HistorySession session) {
-        new AlertDialog.Builder(this)
-            .setTitle("History Feedback")
-            .setMessage("Rating: " + session.getRating() + " ⭐\nFeedback: " + session.getFeedback())
-            .setPositiveButton("OK", null)
-            .show();
+        String ratingText = session.getRating() >= 0
+                ? String.format(Locale.getDefault(), "%.1f", session.getRating())
+                : getString(R.string.history_not_available);
+        String feedbackText = (session.getFeedback() == null || session.getFeedback().trim().isEmpty())
+                ? getString(R.string.history_not_available)
+                : session.getFeedback();
+        String message = getString(R.string.history_feedback_format, ratingText, feedbackText);
+
+        HelpDialogUtils.showHistoryStyledNotice(
+                this,
+                R.drawable.ic_info_24,
+                getString(R.string.history_feedback_title),
+                message,
+                getString(R.string.common_ok),
+                null
+        );
     }
 
     private void setupCarousel() {
@@ -929,7 +941,7 @@ public class GalleryActivity extends AppCompatActivity {
         @Override public void onBindViewHolder(@NonNull ViewHolder h, int p) {
             MemoryBook b = books.get(p);
             h.title.setText(b.name);
-            h.count.setText(b.items.size() + " photos");
+            h.count.setText(getString(R.string.gallery_book_photo_count, b.items.size()));
             
             // Set cover color and text color based on saved colors
             ((com.google.android.material.card.MaterialCardView)h.itemView).setCardBackgroundColor(b.backgroundColor);
@@ -950,13 +962,20 @@ public class GalleryActivity extends AppCompatActivity {
             h.itemView.setOnLongClickListener(v -> {
                 int currentPos = h.getBindingAdapterPosition();
                 if (currentPos == RecyclerView.NO_POSITION) return true;
-                new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
-                    .setMessage("Delete '" + b.name + "'?")
-                    .setPositiveButton("Delete", (d, w) -> {
+                HelpDialogUtils.showHistoryStyledConfirm(
+                    GalleryActivity.this,
+                    R.drawable.ic_help_24,
+                    getString(R.string.gallery_book_delete_title),
+                    getString(R.string.gallery_book_delete_message, b.name),
+                    getString(R.string.history_delete),
+                    getString(R.string.history_popup_cancel),
+                    () -> {
                         books.remove(currentPos);
                         saveMemoryBooks();
                         renderBookList();
-                    }).setNegativeButton("Cancel", null).show();
+                    },
+                    null
+                );
                 return true;
             });
         }
@@ -964,10 +983,10 @@ public class GalleryActivity extends AppCompatActivity {
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView title, count;
             ImageView cover;
-            ViewHolder(View v) { 
-                super(v); 
-                title = v.findViewById(R.id.tvBookTitle); 
-                count = v.findViewById(R.id.tvPhotoCount); 
+            ViewHolder(View v) {
+                super(v);
+                title = v.findViewById(R.id.tvBookTitle);
+                count = v.findViewById(R.id.tvPhotoCount);
                 cover = v.findViewById(R.id.ivBookCover);
             }
         }
@@ -1098,10 +1117,14 @@ public class GalleryActivity extends AppCompatActivity {
             return;
         }
 
-        new AlertDialog.Builder(this)
-            .setTitle("Delete Photo")
-            .setMessage("Delete this photo permanently?")
-            .setPositiveButton("Delete", (dialog, which) -> {
+        HelpDialogUtils.showHistoryStyledConfirm(
+            this,
+            R.drawable.ic_help_24,
+            getString(R.string.gallery_delete_title),
+            getString(R.string.gallery_delete_message),
+            getString(R.string.history_delete),
+            getString(R.string.history_popup_cancel),
+            () -> {
                 boolean deleted = file.delete();
                 
                 // Try to delete from secure storage if applicable
@@ -1129,10 +1152,10 @@ public class GalleryActivity extends AppCompatActivity {
                         isGridView = true;
                         updateViewModeUi();
                     }
-                    Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.gallery_delete_success, Toast.LENGTH_SHORT).show();
                 }
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
+            },
+            null
+        );
     }
 }

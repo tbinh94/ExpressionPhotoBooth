@@ -207,6 +207,103 @@ public final class HelpDialogUtils {
         }
     }
 
+    public static void showHistoryStyledNotice(
+            Context context,
+            int iconRes,
+            String title,
+            String message,
+            String primaryText,
+            Runnable onPrimary
+    ) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_history_notice, null, false);
+
+        ImageView ivIcon = dialogView.findViewById(R.id.ivDialogIcon);
+        TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvDialogMessage);
+        MaterialButton btnSecondary = dialogView.findViewById(R.id.btnDialogSecondary);
+        MaterialButton btnPrimary = dialogView.findViewById(R.id.btnDialogPrimary);
+
+        ivIcon.setImageResource(iconRes);
+        ivIcon.setColorFilter(Color.parseColor("#2E58AE"));
+        tvTitle.setText(title);
+        tvMessage.setText(message);
+        btnSecondary.setVisibility(View.GONE);
+        btnPrimary.setText(primaryText);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        btnPrimary.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (onPrimary != null) {
+                onPrimary.run();
+            }
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    public static void showHistoryStyledConfirm(
+            Context context,
+            int iconRes,
+            String title,
+            String message,
+            String primaryText,
+            String secondaryText,
+            Runnable onPrimary,
+            Runnable onSecondary
+    ) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_history_notice, null, false);
+
+        ImageView ivIcon = dialogView.findViewById(R.id.ivDialogIcon);
+        TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvDialogMessage);
+        MaterialButton btnSecondary = dialogView.findViewById(R.id.btnDialogSecondary);
+        MaterialButton btnPrimary = dialogView.findViewById(R.id.btnDialogPrimary);
+
+        ivIcon.setImageResource(iconRes);
+        ivIcon.setColorFilter(Color.parseColor("#2E58AE"));
+        tvTitle.setText(title);
+        tvMessage.setText(message);
+        btnSecondary.setVisibility(View.VISIBLE);
+        btnSecondary.setText(secondaryText);
+        btnPrimary.setText(primaryText);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        btnSecondary.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (onSecondary != null) {
+                onSecondary.run();
+            }
+        });
+        btnPrimary.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (onPrimary != null) {
+                onPrimary.run();
+            }
+        });
+
+        dialog.setOnCancelListener(d -> {
+            if (onSecondary != null) {
+                onSecondary.run();
+            }
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
     public static void showSubscriptionQR(Context context, String qrUrl) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_subscription_qr, null, false);
         ImageView ivQr = dialogView.findViewById(R.id.ivQrCode);

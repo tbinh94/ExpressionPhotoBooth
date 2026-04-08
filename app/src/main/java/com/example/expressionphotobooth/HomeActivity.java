@@ -18,6 +18,8 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
@@ -40,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButton btnStart;
     private MaterialButton btnGallery;
     private View homeContentRoot;
+    private View topBar;
     private View drawerPanel;
     private TextView tvDrawerOur;
     private TextView tvDrawerMemories;
@@ -75,6 +78,7 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         bindViews();
+        applySystemInsets();
         setupDrawerActions();
         setupMainActions();
 
@@ -103,6 +107,7 @@ public class HomeActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         btnMenu = findViewById(R.id.btnMenu);
         homeContentRoot = findViewById(R.id.homeContentRoot);
+        topBar = findViewById(R.id.topBar);
         drawerPanel = findViewById(R.id.drawerPanel);
         btnDrawerSignOut = findViewById(R.id.btnDrawerSignOut);
         btnAdmin = findViewById(R.id.btnAdmin);
@@ -124,6 +129,37 @@ public class HomeActivity extends AppCompatActivity {
 
         resizeCompoundStartIcon(tvDrawerShowHistory, R.dimen.home_drawer_item_icon_size);
         resizeCompoundStartIcon(tvDrawerAdminDashboard, R.dimen.home_drawer_item_icon_size);
+    }
+
+    private void applySystemInsets() {
+        if (drawerLayout == null) {
+            return;
+        }
+
+        final int baseTopBarMargin = getResources().getDimensionPixelSize(R.dimen.home_top_bar_margin_top);
+        final int baseDrawerTop = getResources().getDimensionPixelSize(R.dimen.home_drawer_padding_top);
+
+        ViewCompat.setOnApplyWindowInsetsListener(drawerLayout, (v, insets) -> {
+            int statusTop = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+
+            if (topBar != null) {
+                androidx.constraintlayout.widget.ConstraintLayout.LayoutParams lp =
+                        (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) topBar.getLayoutParams();
+                lp.topMargin = baseTopBarMargin + statusTop;
+                topBar.setLayoutParams(lp);
+            }
+
+            if (drawerPanel != null) {
+                drawerPanel.setPadding(
+                        drawerPanel.getPaddingLeft(),
+                        baseDrawerTop + statusTop,
+                        drawerPanel.getPaddingRight(),
+                        drawerPanel.getPaddingBottom()
+                );
+            }
+
+            return insets;
+        });
     }
 
     private void setupDrawerActions() {

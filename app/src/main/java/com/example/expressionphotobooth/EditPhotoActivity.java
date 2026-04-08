@@ -276,14 +276,10 @@ public class EditPhotoActivity extends AppCompatActivity {
         if (ivFrameOverlay == null) {
             return;
         }
-        int overlayResId = resolveOverlayFrameResId();
-        if (overlayResId == -1) {
-            ivFrameOverlay.setVisibility(View.GONE);
-            ivFrameOverlay.setImageDrawable(null);
-            return;
-        }
-        ivFrameOverlay.setImageResource(overlayResId);
-        ivFrameOverlay.setVisibility(View.VISIBLE);
+        // Option 1: hide full frame overlay in Edit screen to keep single-photo editing clean.
+        // selectedFrameResId is still preserved for crop/sticker mapping and final Result render.
+        ivFrameOverlay.setVisibility(View.GONE);
+        ivFrameOverlay.setImageDrawable(null);
     }
 
     private int resolveOverlayFrameResId() {

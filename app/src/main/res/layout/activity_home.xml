@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/homeContentRoot"
@@ -31,7 +32,7 @@
             android:layout_marginTop="@dimen/home_top_bar_margin_top"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="10dp"
+            android:paddingHorizontal="@dimen/home_top_bar_padding_horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -49,20 +50,20 @@
                 android:minHeight="0dp"
                 android:padding="0dp"
                 android:gravity="center"
-                app:backgroundTint="#3B4D82"
-                app:cornerRadius="12dp"
+                app:backgroundTint="@color/home_top_action_bg"
+                app:cornerRadius="@dimen/home_top_action_corner_radius"
                 app:icon="@drawable/ic_menu_24"
-                app:iconGravity="textStart"
+                app:iconGravity="textTop"
                 app:iconPadding="0dp"
                 app:iconSize="@dimen/home_top_action_icon_size"
-                app:iconTint="#FFFFFF" />
+                app:iconTint="@color/white" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/mainContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxWidth="500dp"
+            android:maxWidth="@dimen/home_content_max_width"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -73,48 +74,48 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnStart"
-                android:layout_width="280dp"
-                android:layout_height="70dp"
+                android:layout_width="@dimen/home_main_button_width"
+                android:layout_height="@dimen/home_main_button_height"
                 android:text="@string/btn_start_decorated"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/home_main_start_text_size"
                 android:textStyle="bold"
-                app:backgroundTint="#FF99BE"
-                app:cornerRadius="40dp"
-                app:elevation="8dp" />
+                app:backgroundTint="@color/history_pill_pink"
+                app:cornerRadius="@dimen/home_main_button_corner_radius"
+                app:elevation="@dimen/home_main_start_elevation" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGallery"
-                android:layout_width="280dp"
-                android:layout_height="70dp"
-                android:layout_marginTop="16dp"
+                android:layout_width="@dimen/home_main_button_width"
+                android:layout_height="@dimen/home_main_button_height"
+                android:layout_marginTop="@dimen/home_main_button_spacing"
                 android:text="@string/btn_gallery"
-                android:textColor="#FFFFFF"
-                android:textSize="22sp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/home_main_gallery_text_size"
                 android:textStyle="bold"
                 android:visibility="gone"
-                app:backgroundTint="#81C19B"
-                app:cornerRadius="40dp"
-                app:elevation="4dp" />
+                app:backgroundTint="@color/home_gallery_button_bg"
+                app:cornerRadius="@dimen/home_main_button_corner_radius"
+                app:elevation="@dimen/home_main_gallery_elevation" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAdmin"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
-                android:layout_height="38dp"
-                android:layout_marginTop="12dp"
+                android:layout_height="@dimen/home_admin_height"
+                android:layout_marginTop="@dimen/home_admin_top_margin"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="@string/admin_go_to_dashboard"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/home_admin_text_size"
                 android:textStyle="bold"
                 android:visibility="gone"
                 app:icon="@drawable/ic_settings_24"
-                app:iconTint="#FFFFFF"
-                app:backgroundTint="#40FFFFFF"
-                app:cornerRadius="20dp" />
+                app:iconTint="@color/white"
+                app:backgroundTint="@color/home_admin_chip_bg"
+                app:cornerRadius="@dimen/home_admin_corner_radius" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -123,11 +124,11 @@
         android:layout_width="@dimen/admin_nav_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#042B66"
+        android:background="@color/home_drawer_bg"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="28dp"
-        android:paddingBottom="24dp">
+        android:paddingHorizontal="@dimen/home_drawer_padding_horizontal"
+        android:paddingTop="@dimen/home_drawer_padding_top"
+        android:paddingBottom="@dimen/home_drawer_padding_bottom">
 
         <TextView
             android:id="@+id/tvDrawerOur"
@@ -138,69 +139,69 @@
             android:gravity="center"
             android:text="@string/home_drawer_our"
             android:textAllCaps="true"
-            android:textColor="#F7A9D5"
-            android:textSize="30sp"
+            android:textColor="@color/home_drawer_text"
+            android:textSize="@dimen/home_drawer_title_text_size"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDrawerMemories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
+            android:layout_marginTop="@dimen/home_drawer_subtitle_top_margin"
             android:includeFontPadding="false"
             android:fontFamily="serif"
             android:gravity="center"
             android:text="@string/home_drawer_memories"
             android:textAllCaps="true"
-            android:textColor="#F7A9D5"
-            android:textSize="30sp"
+            android:textColor="@color/home_drawer_text"
+            android:textSize="@dimen/home_drawer_title_text_size"
             android:textStyle="bold" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="14dp"
-            android:background="#CCFFFFFF" />
+            android:layout_marginTop="@dimen/home_drawer_divider_top_margin"
+            android:background="@color/home_drawer_divider" />
 
         <TextView
             android:id="@+id/tvDrawerShowHistory"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="20dp"
+            android:layout_height="@dimen/home_drawer_item_height"
+            android:layout_marginTop="@dimen/home_drawer_item_top_margin"
             android:background="@drawable/bg_drawer_item_clickable"
             android:drawableStart="@drawable/ic_grid_view_24"
-            android:drawablePadding="8dp"
-            android:drawableTint="#F7A9D5"
+            android:drawablePadding="@dimen/home_drawer_item_padding_horizontal"
+            android:drawableTint="@color/home_drawer_text"
             android:fontFamily="serif"
             android:gravity="center_vertical"
-            android:paddingHorizontal="10dp"
+            android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
             android:text="@string/home_drawer_show_history"
-            android:textColor="#F7A9D5"
-            android:textSize="16sp"
+            android:textColor="@color/home_drawer_text"
+            android:textSize="@dimen/home_drawer_item_text_size"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDrawerAdminDashboard"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="@dimen/home_drawer_item_height"
+            android:layout_marginTop="@dimen/home_drawer_item_secondary_top_margin"
             android:background="@drawable/bg_drawer_item_clickable"
             android:drawableStart="@drawable/ic_settings_24"
-            android:drawablePadding="8dp"
-            android:drawableTint="#F7A9D5"
+            android:drawablePadding="@dimen/home_drawer_item_padding_horizontal"
+            android:drawableTint="@color/home_drawer_text"
             android:fontFamily="serif"
             android:gravity="center_vertical"
-            android:paddingHorizontal="10dp"
+            android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
             android:text="@string/admin_go_to_dashboard"
-            android:textColor="#F7A9D5"
-            android:textSize="16sp"
+            android:textColor="@color/home_drawer_text"
+            android:textSize="@dimen/home_drawer_item_text_size"
             android:textStyle="bold"
             android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="@dimen/home_drawer_section_top_margin"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -211,14 +212,14 @@
                 android:layout_weight="1"
                 android:fontFamily="serif"
                 android:text="@string/home_drawer_music"
-                android:textColor="#F7A9D5"
-                android:textSize="15sp"
+                android:textColor="@color/home_drawer_text"
+                android:textSize="@dimen/home_drawer_label_text_size"
                 android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/groupMusicState"
-                android:layout_width="122dp"
-                android:layout_height="34dp"
+                android:layout_width="@dimen/home_drawer_toggle_width"
+                android:layout_height="@dimen/home_drawer_toggle_height"
                 android:background="@drawable/bg_drawer_spinner"
                 app:selectionRequired="true"
                 app:singleSelection="true">
@@ -235,12 +236,12 @@
                     android:minHeight="0dp"
                     android:text="@string/home_music_on"
                     android:textAllCaps="false"
-                    android:textColor="#1B2559"
-                    android:textSize="11sp"
+                    android:textColor="@color/home_toggle_text"
+                    android:textSize="@dimen/home_drawer_toggle_text_size"
                     android:textStyle="bold"
-                    app:backgroundTint="#00000000"
-                    app:cornerRadius="15dp"
-                    app:rippleColor="#22F7A9D5" />
+                    app:backgroundTint="@android:color/transparent"
+                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
+                    app:rippleColor="@color/home_toggle_ripple" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnMusicOff"
@@ -254,19 +255,19 @@
                     android:minHeight="0dp"
                     android:text="@string/home_music_off"
                     android:textAllCaps="false"
-                    android:textColor="#1B2559"
-                    android:textSize="11sp"
+                    android:textColor="@color/home_toggle_text"
+                    android:textSize="@dimen/home_drawer_toggle_text_size"
                     android:textStyle="bold"
-                    app:backgroundTint="#00000000"
-                    app:cornerRadius="15dp"
-                    app:rippleColor="#22F7A9D5" />
+                    app:backgroundTint="@android:color/transparent"
+                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
+                    app:rippleColor="@color/home_toggle_ripple" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
+            android:layout_marginTop="@dimen/home_drawer_music_language_gap"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -277,14 +278,14 @@
                 android:layout_weight="1"
                 android:fontFamily="serif"
                 android:text="@string/home_drawer_language"
-                android:textColor="#F7A9D5"
-                android:textSize="15sp"
+                android:textColor="@color/home_drawer_text"
+                android:textSize="@dimen/home_drawer_label_text_size"
                 android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/groupLanguage"
-                android:layout_width="122dp"
-                android:layout_height="34dp"
+                android:layout_width="@dimen/home_drawer_toggle_width"
+                android:layout_height="@dimen/home_drawer_toggle_height"
                 android:background="@drawable/bg_drawer_spinner"
                 app:selectionRequired="true"
                 app:singleSelection="true">
@@ -301,12 +302,12 @@
                     android:minHeight="0dp"
                     android:text="@string/home_switch_to_vietnamese"
                     android:textAllCaps="false"
-                    android:textColor="#1B2559"
-                    android:textSize="10sp"
+                    android:textColor="@color/home_toggle_text"
+                    android:textSize="@dimen/home_drawer_lang_toggle_text_size"
                     android:textStyle="bold"
-                    app:backgroundTint="#00000000"
-                    app:cornerRadius="15dp"
-                    app:rippleColor="#22F7A9D5" />
+                    app:backgroundTint="@android:color/transparent"
+                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
+                    app:rippleColor="@color/home_toggle_ripple" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnLangEn"
@@ -320,12 +321,12 @@
                     android:minHeight="0dp"
                     android:text="@string/home_switch_to_english"
                     android:textAllCaps="false"
-                    android:textColor="#1B2559"
-                    android:textSize="10sp"
+                    android:textColor="@color/home_toggle_text"
+                    android:textSize="@dimen/home_drawer_lang_toggle_text_size"
                     android:textStyle="bold"
-                    app:backgroundTint="#00000000"
-                    app:cornerRadius="15dp"
-                    app:rippleColor="#22F7A9D5" />
+                    app:backgroundTint="@android:color/transparent"
+                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
+                    app:rippleColor="@color/home_toggle_ripple" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </LinearLayout>
 
@@ -337,23 +338,23 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginBottom="10dp"
-            android:background="#CCFFFFFF" />
+            android:layout_marginBottom="@dimen/home_drawer_bottom_divider_margin_bottom"
+            android:background="@color/home_drawer_divider" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDrawerSignOut"
-            android:layout_width="174dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/home_drawer_sign_out_width"
+            android:layout_height="@dimen/home_drawer_sign_out_height"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="6dp"
+            android:layout_marginTop="@dimen/home_drawer_sign_out_margin_top"
+            android:layout_marginBottom="@dimen/home_drawer_sign_out_margin_bottom"
             android:text="@string/auth_sign_out"
             android:textAllCaps="false"
-            android:textColor="#000000"
-            android:textSize="13sp"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/home_drawer_sign_out_text_size"
             android:textStyle="bold"
-            app:backgroundTint="#F7A9D5"
-            app:cornerRadius="24dp" />
+            app:backgroundTint="@color/history_pill_pink"
+            app:cornerRadius="@dimen/home_drawer_sign_out_corner_radius" />
 
     </LinearLayout>
 
