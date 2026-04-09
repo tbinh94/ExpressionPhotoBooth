@@ -14,6 +14,7 @@
         android:layout_height="match_parent">
 
         <ImageView
+            android:id="@+id/ivHomeBanner"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:contentDescription="@null"
@@ -176,6 +177,23 @@
             android:gravity="center_vertical"
             android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
             android:text="@string/home_drawer_show_history"
+            android:textColor="@color/home_drawer_text"
+            android:textSize="@dimen/home_drawer_item_text_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDrawerChangeBanner"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/home_drawer_item_height"
+            android:layout_marginTop="@dimen/home_drawer_item_secondary_top_margin"
+            android:background="@drawable/bg_drawer_item_clickable"
+            android:drawableStart="@drawable/ic_image_24"
+            android:drawablePadding="@dimen/home_drawer_item_padding_horizontal"
+            android:drawableTint="@color/home_drawer_text"
+            android:fontFamily="serif"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
+            android:text="@string/home_drawer_change_banner"
             android:textColor="@color/home_drawer_text"
             android:textSize="@dimen/home_drawer_item_text_size"
             android:textStyle="bold" />

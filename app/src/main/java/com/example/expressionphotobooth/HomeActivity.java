@@ -28,10 +28,18 @@ import com.example.expressionphotobooth.utils.LocaleManager;
 import com.example.expressionphotobooth.utils.ThemeManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.bumptech.glide.Glide;
+import android.net.Uri;
+import android.widget.ImageView;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
+import android.widget.Toast;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String PREF_HOME = "home_preferences";
     private static final String KEY_MUSIC_ENABLED = "music_enabled";
+    private static final String KEY_BANNER_URI = "banner_uri";
 
     private MediaPlayer mediaPlayer;
     private static boolean isMuted = false;
@@ -61,6 +69,10 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButton btnLangEn;
     private MaterialButton btnThemeLight;
     private MaterialButton btnThemeDark;
+
+    private ImageView ivHomeBanner;
+    private TextView tvDrawerChangeBanner;
+    private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -94,6 +106,8 @@ public class HomeActivity extends AppCompatActivity {
         setupThemeControls();
         updateLocalizedUi(LocaleManager.getCurrentLanguage(this));
         checkAdminAccess();
+        setupBannerPicker();
+        loadSavedBanner();
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -136,8 +150,11 @@ public class HomeActivity extends AppCompatActivity {
         btnLangEn = findViewById(R.id.btnLangEn);
         btnThemeLight = findViewById(R.id.btnThemeLight);
         btnThemeDark = findViewById(R.id.btnThemeDark);
+        ivHomeBanner = findViewById(R.id.ivHomeBanner);
+        tvDrawerChangeBanner = findViewById(R.id.tvDrawerChangeBanner);
 
         resizeCompoundStartIcon(tvDrawerShowHistory, R.dimen.home_drawer_item_icon_size);
+        resizeCompoundStartIcon(tvDrawerChangeBanner, R.dimen.home_drawer_item_icon_size);
         resizeCompoundStartIcon(tvDrawerAdminDashboard, R.dimen.home_drawer_item_icon_size);
     }
 
@@ -207,6 +224,13 @@ public class HomeActivity extends AppCompatActivity {
         btnDrawerSignOut.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
             handleSignOut();
+        });
+
+        tvDrawerChangeBanner.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            pickMedia.launch(new PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                    .build());
         });
     }
 
@@ -360,6 +384,7 @@ public class HomeActivity extends AppCompatActivity {
         btnLangEn.setText(LocaleManager.getString(this, R.string.home_switch_to_english, languageTag));
         btnThemeLight.setText(LocaleManager.getString(this, R.string.home_theme_light, languageTag));
         btnThemeDark.setText(LocaleManager.getString(this, R.string.home_theme_dark, languageTag));
+        tvDrawerChangeBanner.setText(LocaleManager.getString(this, R.string.home_drawer_change_banner, languageTag));
         btnDrawerSignOut.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
 
         updateMusicControls();
@@ -375,6 +400,45 @@ public class HomeActivity extends AppCompatActivity {
         if (btnGallery != null) {
             btnGallery.setText(LocaleManager.getString(this, R.string.btn_gallery, languageTag));
         }
+    }
+
+    private void setupBannerPicker() {
+        pickMedia = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+            if (uri != null) {
+                // Grant persistable permission so it survives reboots
+                try {
+                    getContentResolver().takePersistableUriPermission(uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                saveBannerUri(uri);
+                displayBanner(uri);
+            }
+        });
+    }
+
+    private void saveBannerUri(Uri uri) {
+        getSharedPreferences(PREF_HOME, MODE_PRIVATE)
+                .edit()
+                .putString(KEY_BANNER_URI, uri.toString())
+                .apply();
+    }
+
+    private void loadSavedBanner() {
+        String uriStr = getSharedPreferences(PREF_HOME, MODE_PRIVATE).getString(KEY_BANNER_URI, null);
+        if (uriStr != null) {
+            displayBanner(Uri.parse(uriStr));
+        }
+    }
+
+    private void displayBanner(Uri uri) {
+        if (ivHomeBanner == null) return;
+        Glide.with(this)
+                .load(uri)
+                .centerCrop()
+                .into(ivHomeBanner);
     }
 
     private void startBackgroundMusic() {

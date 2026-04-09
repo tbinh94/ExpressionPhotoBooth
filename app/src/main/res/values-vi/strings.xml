@@ -58,6 +58,7 @@
     <string name="home_music_off">Tắt</string>
     <string name="home_theme_light">Sáng</string>
     <string name="home_theme_dark">Tối</string>
+    <string name="home_drawer_change_banner">Đổi ảnh bìa</string>
     <string name="home_history_user_only_title">Chỉ dành cho thành viên</string>
     <string name="home_history_user_only_message">Lịch sử chỉ dành cho tài khoản đã đăng ký. Hãy đăng ký để lưu và xem lại phiên chụp.</string>
     <string name="home_gallery_user_only_title">Chỉ dành cho thành viên</string>
