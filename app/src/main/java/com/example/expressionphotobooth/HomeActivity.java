@@ -25,6 +25,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.utils.LocaleManager;
+import com.example.expressionphotobooth.utils.ThemeManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
@@ -50,12 +51,16 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvDrawerAdminDashboard;
     private TextView tvDrawerMusicLabel;
     private TextView tvDrawerLanguageLabel;
+    private TextView tvDrawerThemeLabel;
     private MaterialButtonToggleGroup groupMusicState;
     private MaterialButtonToggleGroup groupLanguage;
+    private MaterialButtonToggleGroup groupTheme;
     private MaterialButton btnMusicOn;
     private MaterialButton btnMusicOff;
     private MaterialButton btnLangVi;
     private MaterialButton btnLangEn;
+    private MaterialButton btnThemeLight;
+    private MaterialButton btnThemeDark;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -86,6 +91,7 @@ public class HomeActivity extends AppCompatActivity {
         applyMusicPreference();
         setupMusicControls();
         setupLanguageControls();
+        setupThemeControls();
         updateLocalizedUi(LocaleManager.getCurrentLanguage(this));
         checkAdminAccess();
 
@@ -120,12 +126,16 @@ public class HomeActivity extends AppCompatActivity {
         tvDrawerAdminDashboard = findViewById(R.id.tvDrawerAdminDashboard);
         tvDrawerMusicLabel = findViewById(R.id.tvDrawerMusicLabel);
         tvDrawerLanguageLabel = findViewById(R.id.tvDrawerLanguageLabel);
+        tvDrawerThemeLabel = findViewById(R.id.tvDrawerThemeLabel);
         groupMusicState = findViewById(R.id.groupMusicState);
         groupLanguage = findViewById(R.id.groupLanguage);
+        groupTheme = findViewById(R.id.groupTheme);
         btnMusicOn = findViewById(R.id.btnMusicOn);
         btnMusicOff = findViewById(R.id.btnMusicOff);
         btnLangVi = findViewById(R.id.btnLangVi);
         btnLangEn = findViewById(R.id.btnLangEn);
+        btnThemeLight = findViewById(R.id.btnThemeLight);
+        btnThemeDark = findViewById(R.id.btnThemeDark);
 
         resizeCompoundStartIcon(tvDrawerShowHistory, R.dimen.home_drawer_item_icon_size);
         resizeCompoundStartIcon(tvDrawerAdminDashboard, R.dimen.home_drawer_item_icon_size);
@@ -255,6 +265,24 @@ public class HomeActivity extends AppCompatActivity {
         updateLanguageControls(LocaleManager.getCurrentLanguage(this));
     }
 
+    private void setupThemeControls() {
+        if (groupTheme == null) {
+            return;
+        }
+        groupTheme.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            String targetMode = checkedId == R.id.btnThemeDark ? ThemeManager.MODE_DARK : ThemeManager.MODE_LIGHT;
+            String current = ThemeManager.getSavedThemeMode(HomeActivity.this);
+            if (!targetMode.equals(current)) {
+                ThemeManager.setThemeMode(HomeActivity.this, targetMode);
+            }
+            updateThemeControls();
+        });
+        updateThemeControls();
+    }
+
     private void applyMusicPreference() {
         SharedPreferences prefs = getSharedPreferences(PREF_HOME, MODE_PRIVATE);
         boolean musicEnabled = prefs.getBoolean(KEY_MUSIC_ENABLED, true);
@@ -304,6 +332,19 @@ public class HomeActivity extends AppCompatActivity {
         btnLangEn.setBackgroundTintList(ContextCompat.getColorStateList(this, viChecked ? android.R.color.transparent : R.color.white));
     }
 
+    private void updateThemeControls() {
+        if (groupTheme == null || btnThemeLight == null || btnThemeDark == null) {
+            return;
+        }
+        boolean darkMode = ThemeManager.MODE_DARK.equals(ThemeManager.getSavedThemeMode(this));
+        int checkedId = darkMode ? R.id.btnThemeDark : R.id.btnThemeLight;
+        if (groupTheme.getCheckedButtonId() != checkedId) {
+            groupTheme.check(checkedId);
+        }
+        btnThemeLight.setBackgroundTintList(ContextCompat.getColorStateList(this, darkMode ? android.R.color.transparent : R.color.white));
+        btnThemeDark.setBackgroundTintList(ContextCompat.getColorStateList(this, darkMode ? R.color.white : android.R.color.transparent));
+    }
+
 
     private void updateLocalizedUi(String languageTag) {
         tvDrawerOur.setText(LocaleManager.getString(this, R.string.home_drawer_our, languageTag));
@@ -312,14 +353,18 @@ public class HomeActivity extends AppCompatActivity {
         tvDrawerAdminDashboard.setText(LocaleManager.getString(this, R.string.admin_go_to_dashboard, languageTag));
         tvDrawerMusicLabel.setText(LocaleManager.getString(this, R.string.home_drawer_music, languageTag));
         tvDrawerLanguageLabel.setText(LocaleManager.getString(this, R.string.home_drawer_language, languageTag));
+        tvDrawerThemeLabel.setText(LocaleManager.getString(this, R.string.home_drawer_theme, languageTag));
         btnMusicOn.setText(LocaleManager.getString(this, R.string.home_music_on, languageTag));
         btnMusicOff.setText(LocaleManager.getString(this, R.string.home_music_off, languageTag));
         btnLangVi.setText(LocaleManager.getString(this, R.string.home_switch_to_vietnamese, languageTag));
         btnLangEn.setText(LocaleManager.getString(this, R.string.home_switch_to_english, languageTag));
+        btnThemeLight.setText(LocaleManager.getString(this, R.string.home_theme_light, languageTag));
+        btnThemeDark.setText(LocaleManager.getString(this, R.string.home_theme_dark, languageTag));
         btnDrawerSignOut.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
 
         updateMusicControls();
         updateLanguageControls(languageTag);
+        updateThemeControls();
 
         if (btnStart != null) {
             btnStart.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));

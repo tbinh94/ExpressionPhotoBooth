@@ -270,6 +270,16 @@ public class BitmapEditRenderer {
                 return com.example.expressionphotobooth.R.drawable.ic_sticker_smile;
             case FLOWER:
                 return com.example.expressionphotobooth.R.drawable.ic_sticker_flower;
+            case BOW:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_bow;
+            case SPARKLE:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_sparkle;
+            case BUTTERFLY:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_butterfly;
+            case CHERRY:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_cherry;
+            case MUSIC:
+                return com.example.expressionphotobooth.R.drawable.ic_sticker_music;
             case NONE:
             default:
                 return 0;
