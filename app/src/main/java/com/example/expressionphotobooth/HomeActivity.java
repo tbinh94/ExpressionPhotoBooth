@@ -12,6 +12,11 @@ import android.view.View;
 import android.widget.TextView;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.net.Uri;
+import android.widget.ImageView;
+import com.github.bumptech.glide.Glide;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
@@ -31,6 +36,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 public class HomeActivity extends AppCompatActivity {
     private static final String PREF_HOME = "home_preferences";
     private static final String KEY_MUSIC_ENABLED = "music_enabled";
+    private static final String KEY_BG_IMAGE_URI = "bg_image_uri";
 
     private MediaPlayer mediaPlayer;
     private static boolean isMuted = false;
@@ -41,6 +47,8 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButton btnAdmin;
     private MaterialButton btnStart;
     private MaterialButton btnGallery;
+    private MaterialButton btnChangeCover;
+    private ImageView ivHomeBackground;
     private View homeContentRoot;
     private View topBar;
     private View drawerPanel;
@@ -56,6 +64,14 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButton btnMusicOff;
     private MaterialButton btnLangVi;
     private MaterialButton btnLangEn;
+    
+    private final androidx.activity.result.ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
+            registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+                if (uri != null) {
+                    saveBackgroundUri(uri.toString());
+                    loadBackground(uri.toString());
+                }
+            });
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -88,6 +104,7 @@ public class HomeActivity extends AppCompatActivity {
         setupLanguageControls();
         updateLocalizedUi(LocaleManager.getCurrentLanguage(this));
         checkAdminAccess();
+        loadSavedBackground();
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -113,6 +130,8 @@ public class HomeActivity extends AppCompatActivity {
         btnAdmin = findViewById(R.id.btnAdmin);
         btnStart = findViewById(R.id.btnStart);
         btnGallery = findViewById(R.id.btnGallery);
+        btnChangeCover = findViewById(R.id.btnChangeCover);
+        ivHomeBackground = findViewById(R.id.ivHomeBackground);
 
         tvDrawerOur = findViewById(R.id.tvDrawerOur);
         tvDrawerMemories = findViewById(R.id.tvDrawerMemories);
@@ -223,6 +242,58 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         btnGallery.setOnClickListener(v -> openGalleryIfAllowed());
+        
+        btnChangeCover.setOnClickListener(v -> {
+            pickMedia.launch(new PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                    .build());
+        });
+    }
+
+    private void loadSavedBackground() {
+        SharedPreferences prefs = getSharedPreferences(PREF_HOME, MODE_PRIVATE);
+        String uriStr = prefs.getString(KEY_BG_IMAGE_URI, null);
+        loadBackground(uriStr);
+    }
+
+    private void saveBackgroundUri(String uriStr) {
+        getSharedPreferences(PREF_HOME, MODE_PRIVATE)
+                .edit()
+                .putString(KEY_BG_IMAGE_URI, uriStr)
+                .apply();
+    }
+
+    private void loadBackground(String uriStr) {
+        if (ivHomeBackground == null) return;
+        
+        if (uriStr == null || uriStr.isEmpty()) {
+            Glide.with(this)
+                    .load(R.drawable.photo_banner)
+                    .centerCrop()
+                    .into(ivHomeBackground);
+        } else {
+            try {
+                // Take persistable URI permission if it's a content URI
+                Uri uri = Uri.parse(uriStr);
+                if (uriStr.startsWith("content://")) {
+                    try {
+                        getContentResolver().takePersistableUriPermission(uri, 
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    } catch (SecurityException e) {
+                        // Might happen if it's not a persistent URI or already have it
+                    }
+                }
+                
+                Glide.with(this)
+                        .load(uri)
+                        .centerCrop()
+                        .placeholder(R.drawable.photo_banner)
+                        .error(R.drawable.photo_banner)
+                        .into(ivHomeBackground);
+            } catch (Exception e) {
+                ivHomeBackground.setImageResource(R.drawable.photo_banner);
+            }
+        }
     }
 
     private void setupMusicControls() {
@@ -329,6 +400,9 @@ public class HomeActivity extends AppCompatActivity {
         }
         if (btnGallery != null) {
             btnGallery.setText(LocaleManager.getString(this, R.string.btn_gallery, languageTag));
+        }
+        if (btnChangeCover != null) {
+            btnChangeCover.setText(LocaleManager.getString(this, R.string.home_change_cover, languageTag));
         }
     }
 

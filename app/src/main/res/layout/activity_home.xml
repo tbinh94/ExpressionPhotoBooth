@@ -14,6 +14,7 @@
         android:layout_height="match_parent">
 
         <ImageView
+            android:id="@+id/ivHomeBackground"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:contentDescription="@null"
@@ -27,7 +28,7 @@
 
         <LinearLayout
             android:id="@+id/topBar"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/home_top_bar_margin_top"
             android:gravity="center_vertical"
@@ -56,6 +57,35 @@
                 app:iconGravity="textTop"
                 app:iconPadding="0dp"
                 app:iconSize="@dimen/home_top_action_icon_size"
+                app:iconTint="@color/white" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChangeCover"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/home_top_action_size"
+                android:paddingHorizontal="12dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:text="@string/home_change_cover"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/home_top_action_bg"
+                app:cornerRadius="@dimen/home_top_action_corner_radius"
+                app:icon="@drawable/ic_image_24"
+                app:iconGravity="textStart"
+                app:iconSize="18dp"
                 app:iconTint="@color/white" />
         </LinearLayout>
 

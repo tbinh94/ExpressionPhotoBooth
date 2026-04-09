@@ -354,6 +354,17 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Button
+                android:id="@+id/btnRatioSquare"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/ratio_square"
+                android:textSize="11sp"
+                android:textColor="#2A5298"
+                app:strokeColor="#2A5298"
+                app:cornerRadius="8dp" />
+
+            <Button
                 android:id="@+id/btnRatioWide"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
@@ -361,7 +372,6 @@
                 android:text="@string/ratio_wide"
                 android:textSize="11sp"
                 android:textColor="#2A5298"
-                android:visibility="gone"
                 app:strokeColor="#2A5298"
                 app:cornerRadius="8dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>

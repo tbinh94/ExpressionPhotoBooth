@@ -276,4 +276,5 @@
     <string name="main_portrait_off">Portrait mode OFF</string>
     <string name="main_portrait_processing">Applying portrait effect…</string>
     <string name="main_portrait_failed">Portrait effect failed, saved original</string>
+    <string name="home_change_cover">Change Cover</string>
 </resources>
