@@ -70,8 +70,11 @@
     <string name="home_drawer_show_history">Gallery</string>
     <string name="home_drawer_music">Music:</string>
     <string name="home_drawer_language">Language:</string>
+    <string name="home_drawer_theme">Theme:</string>
     <string name="home_music_on">ON</string>
     <string name="home_music_off">OFF</string>
+    <string name="home_theme_light">Light</string>
+    <string name="home_theme_dark">Dark</string>
     <string name="home_history_user_only_title">Members only</string>
     <string name="home_history_user_only_message">History is available for registered users. Please sign up to save and view your sessions.</string>
     <string name="home_gallery_user_only_title">Members only</string>
@@ -99,6 +102,10 @@
 
     <string name="title_selection">OUR MEMORIES</string>
     <string name="title_edit">Edit Photo</string>
+    <string name="edit_sticker_tab_cute">Cute</string>
+    <string name="edit_sticker_tab_y2k">Y2K</string>
+    <string name="edit_sticker_tab_kpop">K-pop</string>
+    <string name="edit_sticker_tab_camera">Camera</string>
 
     <string name="result_title">Your Result</string>
     <string name="result_subtitle">Save your memories</string>

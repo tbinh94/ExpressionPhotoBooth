@@ -3,6 +3,8 @@ package com.example.expressionphotobooth.data.security;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * Utility class for password hashing using SHA-256
@@ -34,8 +36,8 @@ public class PasswordSecurityUtil {
         byte[] hash = hashPasswordWithSalt(password, salt);
 
         // Encode to Base64 for storage
-        String encodedSalt = android.util.Base64.encodeToString(salt, android.util.Base64.NO_WRAP);
-        String encodedHash = android.util.Base64.encodeToString(hash, android.util.Base64.NO_WRAP);
+        String encodedSalt = Base64.getEncoder().encodeToString(salt);
+        String encodedHash = Base64.getEncoder().encodeToString(hash);
 
         return encodedSalt + ":" + encodedHash;
     }
@@ -59,8 +61,8 @@ public class PasswordSecurityUtil {
                 return false;
             }
 
-            byte[] salt = android.util.Base64.decode(parts[0], android.util.Base64.DEFAULT);
-            byte[] storedHashBytes = android.util.Base64.decode(parts[1], android.util.Base64.DEFAULT);
+            byte[] salt = Base64.getDecoder().decode(parts[0]);
+            byte[] storedHashBytes = Base64.getDecoder().decode(parts[1]);
 
             // Hash provided password with same salt
             byte[] providedHash = hashPasswordWithSalt(password, salt);
@@ -84,7 +86,7 @@ public class PasswordSecurityUtil {
     private static byte[] hashPasswordWithSalt(String password, byte[] salt) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
         digest.update(salt);
-        return digest.digest(password.getBytes(java.nio.charset.Charset.forName("UTF-8")));
+        return digest.digest(password.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -121,8 +123,8 @@ public class PasswordSecurityUtil {
         }
 
         MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
-        byte[] hash = digest.digest(data.getBytes(java.nio.charset.Charset.forName("UTF-8")));
-        return android.util.Base64.encodeToString(hash, android.util.Base64.NO_WRAP);
+        byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(hash);
     }
 }
 

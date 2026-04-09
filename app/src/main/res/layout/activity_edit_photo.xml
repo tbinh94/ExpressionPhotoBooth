@@ -2,9 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient">
+    android:background="@drawable/bg_gradient"
+    tools:ignore="ContentDescription">
 
     <!-- ── TOP APP BAR ── -->
     <com.google.android.material.appbar.MaterialToolbar
@@ -96,6 +98,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#E8EDF5"
+                android:contentDescription="@string/edit_photo_preview_content_desc"
                 android:scaleType="centerCrop" />
 
             <ImageView
@@ -105,6 +108,7 @@
                 android:scaleType="fitXY"
                 android:contentDescription="@null"
                 android:importantForAccessibility="no"
+                tools:ignore="ContentDescription"
                 android:visibility="gone" />
 
             <!-- Active edit chip, floats top-right -->
@@ -114,9 +118,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|end"
                 android:layout_margin="10dp"
-                android:text="Original"
+                android:text="@string/edit_chip_original"
                 android:textColor="#FFFFFF"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 app:chipBackgroundColor="#88000000"
                 app:chipMinHeight="24dp"
                 app:chipStrokeWidth="0dp" />
@@ -206,7 +210,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Select a Filter"
+                                android:text="@string/edit_select_filter"
                                 android:textColor="#1F618D"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -216,7 +220,7 @@
                                 style="@style/Widget.MaterialComponents.Button.TextButton"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Apply"
+                                android:text="@string/edit_apply"
                                 android:textSize="12sp"
                                 android:textColor="#2A5298"
                                 app:icon="@drawable/ic_check_24"
@@ -235,7 +239,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Fine-tune your selection"
+                                android:text="@string/edit_fine_tune_selection"
                                 android:textColor="#88000000"
                                 android:textSize="12sp" />
 
@@ -282,7 +286,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:minWidth="56dp"
-                                android:text="Intensity"
+                                android:text="@string/edit_intensity"
                                 android:textColor="#1F618D"
                                 android:textSize="11sp"
                                 android:textStyle="bold" />
@@ -304,7 +308,7 @@
                                 android:layout_width="28dp"
                                 android:layout_height="wrap_content"
                                 android:gravity="end"
-                                android:text="80"
+                                android:text="@string/edit_default_intensity_value"
                                 android:textColor="#2A5298"
                                 android:textSize="11sp"
                                 android:textStyle="bold" />
@@ -342,6 +346,161 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone">
+
+                        <com.google.android.material.tabs.TabLayout
+                            android:id="@+id/stickerCategoryTabLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/bg_tab_container"
+                            app:tabBackground="@drawable/tab_selector"
+                            app:tabGravity="fill"
+                            app:tabIndicatorHeight="0dp"
+                            app:tabMode="fixed"
+                            app:tabRippleColor="@android:color/transparent"
+                            app:tabSelectedTextColor="#FFFFFF"
+                            app:tabTextColor="#8899A6" />
+
+                        <LinearLayout
+                            android:id="@+id/stickerSizeRow"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingStart="20dp"
+                            android:paddingTop="10dp"
+                            android:paddingEnd="20dp"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/edit_sticker_size"
+                                android:textColor="#1F618D"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+
+                            <SeekBar
+                                android:id="@+id/seekStickerSize"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginEnd="12dp"
+                                android:layout_weight="1"
+                                android:max="270"
+                                android:progress="70"
+                                android:progressTint="#2A5298"
+                                android:thumbTint="#2A5298" />
+
+                            <TextView
+                                android:id="@+id/tvStickerSizeValue"
+                                android:layout_width="44dp"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="100%"
+                                android:textColor="#2A5298"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.chip.ChipGroup
+                                android:id="@+id/stickerSizePresetGroup"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:chipSpacingHorizontal="8dp"
+                                app:singleSelection="true"
+                                android:visibility="gone">
+
+                                <com.google.android.material.chip.Chip
+                                    android:id="@+id/chipStickerSizeSmall"
+                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:checkable="true"
+                                    app:chipBackgroundColor="@color/selector_sticker_size_chip_bg"
+                                    app:chipStrokeColor="#809CB3D8"
+                                    app:chipStrokeWidth="1dp"
+                                    android:textColor="@color/selector_sticker_size_chip_text"
+                                    android:text="@string/edit_sticker_size_small" />
+
+                                <com.google.android.material.chip.Chip
+                                    android:id="@+id/chipStickerSizeMedium"
+                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:checkable="true"
+                                    app:chipBackgroundColor="@color/selector_sticker_size_chip_bg"
+                                    app:chipStrokeColor="#809CB3D8"
+                                    app:chipStrokeWidth="1dp"
+                                    android:textColor="@color/selector_sticker_size_chip_text"
+                                    android:text="@string/edit_sticker_size_medium" />
+
+                                <com.google.android.material.chip.Chip
+                                    android:id="@+id/chipStickerSizeLarge"
+                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:checkable="true"
+                                    app:chipBackgroundColor="@color/selector_sticker_size_chip_bg"
+                                    app:chipStrokeColor="#809CB3D8"
+                                    app:chipStrokeWidth="1dp"
+                                    android:textColor="@color/selector_sticker_size_chip_text"
+                                    android:text="@string/edit_sticker_size_large" />
+
+                            </com.google.android.material.chip.ChipGroup>
+
+                            <LinearLayout
+                                android:id="@+id/stickerQuickActionsRow"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:gravity="end|center_vertical"
+                                android:orientation="horizontal"
+                                android:visibility="gone">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnStickerCenter"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="36dp"
+                                android:minWidth="0dp"
+                                android:paddingStart="10dp"
+                                android:paddingEnd="10dp"
+                                android:text="@string/edit_sticker_center"
+                                android:textAllCaps="false"
+                                android:textColor="@color/camera_mode_primary"
+                                android:textSize="11sp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnStickerReset"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="36dp"
+                                android:minWidth="0dp"
+                                android:paddingStart="10dp"
+                                android:paddingEnd="10dp"
+                                android:text="@string/edit_sticker_reset"
+                                android:textAllCaps="false"
+                                android:textColor="@color/camera_mode_primary"
+                                android:textSize="11sp" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
 
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rvStickers"
