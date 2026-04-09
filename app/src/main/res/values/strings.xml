@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Our Memories Photobooth</string>
+    <string name="home_title_our">OUR</string>
+    <string name="home_title_memories">MEMORIES</string>
+    <string name="home_title_photobooth">Photobooth</string>
     <string name="capture_photo">Capture</string>
     <string name="ratio_square">1:1</string>
     <string name="ratio_wide">16:9</string>
@@ -95,6 +98,9 @@
     <string name="result_share">Chia sẻ</string>
     <string name="result_rate_title">Bạn thấy thế nào?</string>
     <string name="result_rate_subtitle">Đánh giá giúp chúng mình nhé!</string>
+    <string name="home_banner_dialog_title">Change Cover Photo</string>
+    <string name="home_banner_option_picker">From Gallery</string>
+    <string name="home_banner_option_default">Default</string>
     <string name="feedback_title">Rate Your Memories</string>
     <string name="feedback_subtitle">How do you like your photos? Share the love!</string>
     <string name="feedback_hint">Any sweet words for us?</string>
@@ -112,6 +118,7 @@
     <string name="edit_sticker_tab_y2k">Y2K</string>
     <string name="edit_sticker_tab_kpop">K-pop</string>
     <string name="edit_sticker_tab_camera">Camera</string>
+    <string name="edit_sticker_tab_store">Store</string>
     <string name="edit_preset_cute">Cute</string>
     <string name="edit_preset_kpop">K-pop</string>
     <string name="edit_preset_classic">Classic</string>
@@ -444,4 +451,5 @@ that you have taken before</string>
     <string name="main_portrait_off">Portrait mode OFF</string>
     <string name="main_portrait_processing">Applying portrait effect…</string>
     <string name="main_portrait_failed">Portrait effect failed, saved original</string>
+    <string name="failed_save_image">Failed to save image to gallery</string>
 </resources>

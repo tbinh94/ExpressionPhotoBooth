@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gallery_grid">
+    android:background="@android:color/transparent">
+
     <FrameLayout
         android:id="@+id/gridViewContainer"
         android:layout_width="match_parent"
@@ -26,247 +27,238 @@
         android:layout_height="match_parent"
         android:visibility="gone">
 
-        <TextView
-            android:id="@+id/tvCarouselTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/gallery_carousel_title_margin_top"
-            android:fontFamily="serif"
-            android:text="@string/gallery_history_title"
-            android:textColor="@color/screen_title"
-            android:gravity="center"
-            android:textSize="@dimen/gallery_carousel_title_text_size"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginStart="@dimen/gallery_carousel_title_side_margin"
-            android:layout_marginEnd="@dimen/gallery_carousel_title_side_margin" />
-
-        <TextView
-            android:id="@+id/tvCarouselSubtitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/gallery_carousel_subtitle_margin_top"
-            android:fontFamily="serif"
-            android:gravity="center"
-            android:lineSpacingExtra="@dimen/gallery_carousel_subtitle_line_spacing"
-            android:maxLines="2"
-            android:text="@string/gallery_history_subtitle"
-            android:textColor="@color/screen_subtitle"
-            android:textSize="@dimen/gallery_carousel_subtitle_text_size"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvCarouselTitle"
-            android:layout_marginStart="@dimen/gallery_carousel_title_side_margin"
-            android:layout_marginEnd="@dimen/gallery_carousel_title_side_margin" />
-
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/vpCarousel"
             android:layout_width="0dp"
-            android:layout_height="@dimen/gallery_carousel_preview_height"
-            android:layout_marginStart="@dimen/gallery_carousel_preview_side_margin"
-            android:layout_marginEnd="@dimen/gallery_carousel_preview_side_margin"
-            android:layout_marginTop="@dimen/gallery_carousel_preview_margin_top"
+            android:layout_height="0dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintDimensionRatio="H,11:15"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvCarouselSubtitle" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/carouselIndicator" />
 
-        <ImageButton
-            android:id="@+id/btnCarouselPrev"
-            android:layout_width="@dimen/gallery_carousel_arrow_size"
-            android:layout_height="@dimen/gallery_carousel_arrow_size"
-            android:layout_marginStart="@dimen/gallery_carousel_arrow_side_margin"
-            android:background="@drawable/bg_gallery_nav_circle"
-            android:contentDescription="@string/gallery_previous_item"
-            android:padding="@dimen/gallery_carousel_arrow_padding"
-            android:src="@drawable/ic_arrow_back_24"
-            app:layout_constraintBottom_toBottomOf="@id/vpCarousel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/vpCarousel"
-            app:tint="@color/screen_icon_tint" />
-
-        <ImageButton
-            android:id="@+id/btnCarouselNext"
-            android:layout_width="@dimen/gallery_carousel_arrow_size"
-            android:layout_height="@dimen/gallery_carousel_arrow_size"
-            android:layout_marginEnd="@dimen/gallery_carousel_arrow_side_margin"
-            android:background="@drawable/bg_gallery_nav_circle"
-            android:contentDescription="@string/gallery_next_item"
-            android:padding="@dimen/gallery_carousel_arrow_padding"
-            android:rotation="180"
-            android:src="@drawable/ic_arrow_back_24"
-            app:layout_constraintBottom_toBottomOf="@id/vpCarousel"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/vpCarousel"
-            app:tint="@color/screen_icon_tint" />
-
-
-        <!-- Dots Indicator -->
         <LinearLayout
             android:id="@+id/carouselIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/gallery_carousel_indicator_margin_top"
+            android:layout_marginBottom="40dp"
             android:orientation="horizontal"
             android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@id/vpCarousel"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <LinearLayout
+            android:id="@+id/layoutBottomActions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStaticSavePhoto"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="@string/history_save_photo"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/history_pill_pink"
+                    app:cornerRadius="22dp" />
+                <View android:layout_width="12dp" android:layout_height="1dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStaticShare"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="@string/result_share"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/history_pill_pink"
+                    app:cornerRadius="22dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStaticSaveVideo"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="@string/history_save_video"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/history_primary_text"
+                    app:cornerRadius="22dp" />
+                <View android:layout_width="12dp" android:layout_height="1dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStaticViewFeedback"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="@string/history_view_feedback"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/history_primary_text"
+                    app:cornerRadius="22dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Information Overlay Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCarouselInfo"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/gallery_carousel_card_side_margin"
-            android:layout_marginEnd="@dimen/gallery_carousel_card_side_margin"
-            android:layout_marginBottom="@dimen/gallery_carousel_card_bottom_margin"
-            app:cardBackgroundColor="@color/screen_surface"
-            app:cardCornerRadius="@dimen/gallery_carousel_card_corner_radius"
-            app:cardElevation="@dimen/gallery_carousel_card_elevation"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="16dp"
             app:strokeColor="@color/history_pill_pink"
-            app:strokeWidth="@dimen/gallery_carousel_card_stroke_width"
+            app:strokeWidth="2dp"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/carouselIndicator">
+            android:layout_marginBottom="-10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="@dimen/gallery_carousel_card_padding_horizontal"
-                android:paddingTop="@dimen/gallery_carousel_card_padding_top"
-                android:paddingEnd="@dimen/gallery_carousel_card_padding_horizontal"
-                android:paddingBottom="@dimen/gallery_carousel_card_padding_bottom">
+                android:padding="20dp"
+                android:paddingTop="12dp">
 
-                <TextView
-                    android:layout_width="@dimen/gallery_carousel_chip_size"
-                    android:layout_height="@dimen/gallery_carousel_chip_size"
+                <ImageButton
+                    android:id="@+id/btnHideInfo"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_gravity="center_horizontal"
-                    android:background="@drawable/bg_gallery_info_chip"
-                    android:gravity="center"
-                    android:text="v"
-                    android:textColor="@color/history_primary_text"
-                    android:textSize="@dimen/gallery_carousel_chip_text_size"
-                    android:textStyle="bold" />
+                    android:background="@drawable/bg_gallery_nav_circle"
+                    android:backgroundTint="@color/history_pill_pink"
+                    android:src="@drawable/ic_arrow_back_24"
+                    android:rotation="-90"
+                    app:tint="@color/white"
+                    android:padding="8dp"
+                    android:scaleType="fitCenter" />
 
                 <TextView
-                    android:id="@+id/tvCarouselInfoLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/gallery_carousel_info_label_margin_top"
+                    android:layout_marginTop="8dp"
                     android:fontFamily="serif"
                     android:text="@string/gallery_information"
                     android:textColor="@color/history_primary_text"
-                    android:textSize="@dimen/gallery_carousel_info_label_text_size"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvCarouselInfoDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/gallery_carousel_info_meta_gap_top"
+                    android:layout_marginTop="8dp"
                     android:textColor="@color/history_primary_text"
-                    android:textSize="@dimen/gallery_carousel_info_meta_text_size"
+                    android:textSize="14sp"
                     android:textStyle="bold"
-                    tools:text="Date: 02/04/2026" />
+                    tools:text="Date: 08/04/2026" />
 
                 <TextView
                     android:id="@+id/tvCarouselInfoFrame"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/gallery_carousel_subtitle_margin_top"
+                    android:layout_marginTop="4dp"
                     android:textColor="@color/history_primary_text"
-                    android:textSize="@dimen/gallery_carousel_info_meta_text_size"
+                    android:textSize="14sp"
                     android:textStyle="bold"
-                    tools:text="Frame: Princess Concept" />
+                    tools:text="Frame: Movie" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/gallery_carousel_action_row_gap_top"
+                    android:layout_marginTop="16dp"
                     android:orientation="horizontal">
-
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCarouselSavePhoto"
                         android:layout_width="0dp"
-                        android:layout_height="@dimen/gallery_carousel_action_button_height"
+                        android:layout_height="44dp"
                         android:layout_weight="1"
                         android:text="@string/history_save_photo"
                         android:textAllCaps="false"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/gallery_carousel_action_button_text_size"
+                        android:textColor="@color/black"
                         android:textStyle="bold"
                         app:backgroundTint="@color/history_pill_pink"
-                        app:cornerRadius="@dimen/history_pill_corner_radius" />
-
+                        app:cornerRadius="22dp" />
+                    <View android:layout_width="12dp" android:layout_height="1dp" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCarouselShare"
                         android:layout_width="0dp"
-                        android:layout_height="@dimen/gallery_carousel_action_button_height"
-                        android:layout_marginStart="@dimen/gallery_carousel_action_button_gap"
+                        android:layout_height="44dp"
                         android:layout_weight="1"
                         android:text="@string/result_share"
                         android:textAllCaps="false"
-                        android:textColor="@android:color/black"
-                        android:textSize="@dimen/gallery_carousel_action_button_text_size"
+                        android:textColor="@color/black"
                         android:textStyle="bold"
                         app:backgroundTint="@color/history_pill_pink"
-                        app:cornerRadius="@dimen/history_pill_corner_radius" />
+                        app:cornerRadius="22dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/gallery_carousel_action_button_gap"
+                    android:layout_marginTop="8dp"
                     android:orientation="horizontal">
-
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCarouselSaveVideo"
                         android:layout_width="0dp"
-                        android:layout_height="@dimen/gallery_carousel_action_button_height"
+                        android:layout_height="44dp"
                         android:layout_weight="1"
                         android:text="@string/history_save_video"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/gallery_carousel_action_button_text_size"
                         android:textStyle="bold"
                         app:backgroundTint="@color/history_primary_text"
-                        app:cornerRadius="@dimen/history_pill_corner_radius" />
-
+                        app:cornerRadius="22dp" />
+                    <View android:layout_width="12dp" android:layout_height="1dp" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCarouselViewFeedback"
                         android:layout_width="0dp"
-                        android:layout_height="@dimen/gallery_carousel_action_button_height"
-                        android:layout_marginStart="@dimen/gallery_carousel_action_button_gap"
+                        android:layout_height="44dp"
                         android:layout_weight="1"
                         android:text="@string/history_view_feedback"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/gallery_carousel_action_button_text_size"
                         android:textStyle="bold"
                         app:backgroundTint="@color/history_primary_text"
-                        app:cornerRadius="@dimen/history_pill_corner_radius" />
+                        app:cornerRadius="22dp" />
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCarouselDelete"
-                    android:layout_width="@dimen/gallery_carousel_delete_width"
-                    android:layout_height="@dimen/gallery_carousel_action_button_height"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="@dimen/gallery_carousel_delete_margin_top"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginHorizontal="60dp"
+                    android:layout_marginTop="12dp"
                     android:text="@string/history_delete"
                     android:textAllCaps="true"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/gallery_carousel_action_button_text_size"
                     android:textStyle="bold"
                     app:backgroundTint="@color/history_danger"
-                    app:cornerRadius="@dimen/history_pill_corner_radius" />
+                    app:cornerRadius="22dp" />
 
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -297,6 +289,5 @@
             android:text="No memories yet"
             android:textColor="#333333" />
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

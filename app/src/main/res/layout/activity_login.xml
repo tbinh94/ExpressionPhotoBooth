@@ -18,53 +18,33 @@
         android:layout_height="match_parent"
         android:background="#812C2A2A" />
 
-    <!-- Language Toggle -->
-    <FrameLayout
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLanguageToggle"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="44dp"
         android:layout_height="44dp"
         android:layout_gravity="top|end"
         android:layout_marginTop="54dp"
-        android:layout_marginEnd="16dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLanguageToggle"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:insetLeft="0dp"
-            android:insetTop="0dp"
-            android:insetRight="0dp"
-            android:insetBottom="0dp"
-            android:padding="0dp"
-            android:gravity="center"
-            android:contentDescription="@string/language_toggle_to_english"
-            app:cornerRadius="16dp"
-            app:backgroundTint="#40FFFFFF"
-            app:icon="@drawable/ic_language_24"
-            app:iconGravity="textTop"
-            app:iconPadding="0dp"
-            app:iconSize="22dp"
-            app:iconTint="@color/white"
-            app:strokeColor="#80FFFFFF"
-            app:strokeWidth="1dp" />
-
-        <TextView
-            android:id="@+id/tvLanguageBadge"
-            android:layout_width="18dp"
-            android:layout_height="14dp"
-            android:layout_gravity="end|top"
-            android:layout_marginEnd="-2dp"
-            android:layout_marginTop="-2dp"
-            android:background="@drawable/bg_language_badge"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:text="EN"
-            android:textColor="@color/white"
-            android:textSize="8sp"
-            android:textStyle="bold" />
-    </FrameLayout>
+        android:layout_marginEnd="16dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
+        android:gravity="center"
+        android:contentDescription="@string/language_toggle_to_english"
+        app:cornerRadius="16dp"
+        app:backgroundTint="#40FFFFFF"
+        app:icon="@drawable/ic_flag_vn"
+        app:iconGravity="textTop"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@android:color/transparent"
+        app:iconTintMode="src_over"
+        app:strokeColor="#80FFFFFF"
+        app:strokeWidth="1dp" />
 
     <!-- Logo / App branding at top -->
     <LinearLayout

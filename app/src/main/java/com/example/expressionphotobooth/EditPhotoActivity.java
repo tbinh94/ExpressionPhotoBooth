@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.net.Uri;
+import android.util.Log;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -46,6 +47,16 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+import android.graphics.drawable.Drawable;
+import androidx.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,11 +116,15 @@ public class EditPhotoActivity extends AppCompatActivity {
     // ── Thumbnail item model ──────────────────────────────────────────────────
 
     static class ThumbItem {
+        String id;         // Firestore doc ID
         String label;
-        int drawableRes;   // preview drawable (small cropped sample); 0 = use colorRes
-        int colorRes;      // fallback solid color for preview swatch
-        Object value;      // EditState.FilterStyle / FrameStyle / StickerStyle
-        String base64;     // New field for custom stickers
+        int drawableRes;
+        int colorRes;
+        Object value;
+        String base64;
+        String imageUrl;   // URL from Storage
+        boolean isRemovable;
+        boolean isGlobal;
 
         ThumbItem(String label, int drawableRes, int colorRes, Object value) {
             this.label = label;
@@ -117,14 +132,21 @@ public class EditPhotoActivity extends AppCompatActivity {
             this.colorRes = colorRes;
             this.value = value;
             this.base64 = null;
+            this.imageUrl = null;
+            this.isRemovable = false;
+            this.isGlobal = false;
         }
 
-        ThumbItem(String label, String base64, Object value) {
+        ThumbItem(String id, String label, String base64, String imageUrl, Object value) {
+            this.id = id;
             this.label = label;
             this.drawableRes = 0;
             this.colorRes = 0;
             this.value = value;
             this.base64 = base64;
+            this.imageUrl = imageUrl;
+            this.isRemovable = false;
+            this.isGlobal = false;
         }
     }
 
@@ -147,7 +169,20 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         void setSelectedByValue(Object value) {
             for (int i = 0; i < items.size(); i++) {
-                if (items.get(i).value != null && items.get(i).value.equals(value)) {
+                ThumbItem item = items.get(i);
+                boolean match = false;
+                if (item.value != null && item.value.equals(value)) {
+                    if (value == EditState.StickerStyle.CUSTOM) {
+                        // For stickers, also check base64 to distinguish between custom ones
+                        String currentB64 = currentEditState != null ? currentEditState.getCustomStickerBase64() : null;
+                        if (currentB64 != null && currentB64.equals(item.base64)) {
+                            match = true;
+                        }
+                    } else {
+                        match = true;
+                    }
+                }
+                if (match) {
                     int old = selectedPos;
                     selectedPos = i;
                     notifyItemChanged(old);
@@ -180,7 +215,13 @@ public class EditPhotoActivity extends AppCompatActivity {
             h.label.setText(item.label);
             h.label.setVisibility(item.label.isEmpty() ? View.INVISIBLE : View.VISIBLE);
 
-            if (item.base64 != null) {
+            if (item.imageUrl != null && !item.imageUrl.isEmpty()) {
+                Glide.with(h.itemView.getContext())
+                        .load(item.imageUrl)
+                        .placeholder(R.color.thumb_none)
+                        .into(h.preview);
+                h.preview.setBackground(null);
+            } else if (item.base64 != null) {
                 byte[] bytes = android.util.Base64.decode(item.base64, android.util.Base64.DEFAULT);
                 h.preview.setImageBitmap(android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
                 h.preview.setBackground(null);
@@ -199,6 +240,11 @@ public class EditPhotoActivity extends AppCompatActivity {
                     ? getColor(R.color.edit_accent)
                     : getColor(R.color.edit_label));
 
+            h.btnDelete.setVisibility(item.isRemovable ? View.VISIBLE : View.GONE);
+            h.btnDelete.setOnClickListener(v -> {
+                deleteCustomSticker(item);
+            });
+
             h.itemView.setOnClickListener(v -> {
                 int old = selectedPos;
                 selectedPos = h.getAdapterPosition();
@@ -215,12 +261,14 @@ public class EditPhotoActivity extends AppCompatActivity {
             ImageView preview;
             com.google.android.material.card.MaterialCardView cardThumb;
             TextView label;
+            View btnDelete;
 
             VH(@NonNull View itemView) {
                 super(itemView);
                 preview   = itemView.findViewById(R.id.ivThumbPreview);
                 cardThumb = itemView.findViewById(R.id.cardThumb);
                 label     = itemView.findViewById(R.id.tvThumbLabel);
+                btnDelete = itemView.findViewById(R.id.btnDeleteSticker);
             }
         }
     }
@@ -236,13 +284,15 @@ public class EditPhotoActivity extends AppCompatActivity {
         CUTE,
         Y2K,
         KPOP,
-        CAMERA
+        CAMERA,
+        STORE
     }
 
     private StickerCategory currentStickerCategory = StickerCategory.CUTE;
     private final Map<StickerCategory, int[]> stickerScrollState = new HashMap<>();
     private long stickerFadeOutDurationMs = 100L;
     private long stickerFadeInDurationMs = 130L;
+    private final List<ThumbItem> globalStickers = new ArrayList<>();
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -290,6 +340,7 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         applyCurrentEditState();
         syncSelectionsToAdapters();
+        loadGlobalStickers();
     }
 
     private void bindViews() {
@@ -329,6 +380,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_y2k)));
         stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_kpop)));
         stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_camera)));
+        stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_store)));
 
         stickerCategoryTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -575,10 +627,16 @@ public class EditPhotoActivity extends AppCompatActivity {
         }
 
         AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
-        List<String> localStickers = getLocalCustomStickers(authRepository.getCurrentUid());
-        for (String base64 : localStickers) {
-            stickerItems.add(new ThumbItem("Me", base64, EditState.StickerStyle.CUSTOM));
+        // Removed local sticker loading logic as everything is now in Firestore
+
+        // Add Global Store stickers if this is STORE category
+        if (category == StickerCategory.STORE) {
+            List<ThumbItem> storeItems = new ArrayList<>();
+            storeItems.add(new ThumbItem("", R.drawable.ic_add_24, R.color.edit_accent, "ADD_NEW"));
+            storeItems.addAll(globalStickers);
+            return storeItems;
         }
+
         return stickerItems;
     }
 
@@ -603,7 +661,12 @@ public class EditPhotoActivity extends AppCompatActivity {
             case FLOWER:
             case BOW:
             case NONE:
+                return StickerCategory.CUTE;
             case CUSTOM:
+                if (currentEditState != null && currentEditState.isFromStore()) {
+                    return StickerCategory.STORE;
+                }
+                return StickerCategory.CUTE;
             default:
                 return StickerCategory.CUTE;
         }
@@ -680,15 +743,31 @@ public class EditPhotoActivity extends AppCompatActivity {
 
             Bitmap scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
             java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-            scaled.compress(Bitmap.CompressFormat.PNG, 95, baos);
-            String base64 = android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.DEFAULT);
+            scaled.compress(Bitmap.CompressFormat.PNG, 90, baos);
+            byte[] bytes = baos.toByteArray();
+            String base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
 
-            runOnUiThread(() -> {
-                AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
-                saveLocalCustomSticker(authRepository.getCurrentUid(), base64);
-                refreshStickerAdapter();
-                updateSticker(new ThumbItem("Me", base64, EditState.StickerStyle.CUSTOM));
-            });
+            AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+            String uid = authRepository.getCurrentUid();
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("type", "user");
+            data.put("userId", uid);
+            data.put("base64", base64);
+            data.put("timestamp", System.currentTimeMillis());
+
+            FirebaseFirestore.getInstance().collection("stickers")
+                    .add(data)
+                    .addOnSuccessListener(docRef -> {
+                        runOnUiThread(() -> {
+                            loadGlobalStickers(); 
+                            updateSticker(new ThumbItem(docRef.getId(), "Me", base64, null, EditState.StickerStyle.CUSTOM));
+                        });
+                    })
+                    .addOnFailureListener(e -> {
+                        runOnUiThread(() -> Toast.makeText(this, "Failed to save: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                    });
+
             scaled.recycle();
         }).start();
     }
@@ -717,10 +796,15 @@ public class EditPhotoActivity extends AppCompatActivity {
         pushToUndoStack();
         EditState.StickerStyle style = (EditState.StickerStyle) item.value;
         currentEditState.setStickerStyle(style);
+        
         if (style == EditState.StickerStyle.CUSTOM) {
             currentEditState.setCustomStickerBase64(item.base64);
+            currentEditState.setCustomStickerId(item.id);
+            currentEditState.setFromStore(item.isGlobal);
         } else {
             currentEditState.setCustomStickerBase64(null);
+            currentEditState.setCustomStickerId(null);
+            currentEditState.setFromStore(false);
         }
         applyCurrentEditState();
         updateStickerSizeUi();
@@ -1303,6 +1387,66 @@ public class EditPhotoActivity extends AppCompatActivity {
                 (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) previewCard.getLayoutParams();
         params.dimensionRatio = String.format(Locale.US, "%d:%d", ratioW, ratioH);
         previewCard.setLayoutParams(params);
+    }
+
+    private void loadGlobalStickers() {
+        AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        String uid = authRepository.getCurrentUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("stickers")
+                .whereEqualTo("type", "admin")
+                .get()
+                .addOnSuccessListener(adminSnap -> {
+                    List<ThumbItem> temp = new ArrayList<>();
+                    temp.add(new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none, EditState.StickerStyle.NONE));
+
+                    for (QueryDocumentSnapshot doc : adminSnap) {
+                        ThumbItem item = new ThumbItem(doc.getId(), doc.getString("label"), doc.getString("base64"), null, EditState.StickerStyle.CUSTOM);
+                        item.isGlobal = true;
+                        temp.add(item);
+                    }
+
+                    if (uid != null) {
+                        db.collection("stickers")
+                                .whereEqualTo("type", "user")
+                                .whereEqualTo("userId", uid)
+                                .get()
+                                .addOnSuccessListener(userSnap -> {
+                                    for (QueryDocumentSnapshot doc : userSnap) {
+                                        ThumbItem item = new ThumbItem(doc.getId(), "Me", doc.getString("base64"), null, EditState.StickerStyle.CUSTOM);
+                                        item.isRemovable = true;
+                                        temp.add(item);
+                                    }
+                                    globalStickers.clear();
+                                    globalStickers.addAll(temp);
+                                    refreshStickerAdapter();
+                                });
+                    } else {
+                        globalStickers.clear();
+                        globalStickers.addAll(temp);
+                        refreshStickerAdapter();
+                    }
+                });
+    }
+
+    private void deleteCustomSticker(ThumbItem item) {
+        if (item == null || item.id == null) return;
+        
+        Toast.makeText(this, "Deleting...", Toast.LENGTH_SHORT).show();
+        FirebaseFirestore.getInstance().collection("stickers")
+                .document(item.id)
+                .delete()
+                .addOnSuccessListener(v -> {
+                    loadGlobalStickers(); // Reload list
+                    if (currentEditState.getStickerStyle() == EditState.StickerStyle.CUSTOM && 
+                        item.id.equals(item.id)) { // Simplistic check
+                        updateSticker(new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none, EditState.StickerStyle.NONE));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }
 

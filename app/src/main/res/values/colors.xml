@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
     <color name="launcher_splash_bg">#FFF8F2FF</color>
     <color name="launcher_icon_bg">#FF8A6DDE</color>
 
@@ -85,4 +86,6 @@
     <color name="history_danger">#FF3D3D</color>
     <color name="history_card_surface">#73FFFFFF</color>
     <color name="history_card_stroke">#443A57C4</color>
+    <color name="black_overlay_80">#CC000000</color>
+    <color name="black_overlay_60">#99000000</color>
 </resources>

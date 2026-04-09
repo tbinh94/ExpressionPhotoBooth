@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.bumptech.glide.Glide;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -150,22 +154,24 @@ public class AdminStickersActivity extends AppCompatActivity {
                 }
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                finalSticker.compress(Bitmap.CompressFormat.PNG, 100, baos);
-                String base64 = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+                finalSticker.compress(Bitmap.CompressFormat.PNG, 95, baos);
+                String base64 = android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.NO_WRAP);
 
+                // Save metadata and base64 directly to Firestore
                 Map<String, Object> data = new HashMap<>();
                 data.put("label", label);
                 data.put("base64", base64);
+                data.put("type", "admin");
                 data.put("timestamp", System.currentTimeMillis());
 
-                FirebaseFirestore.getInstance().collection("custom_stickers")
+                FirebaseFirestore.getInstance().collection("stickers")
                         .add(data)
-                        .addOnSuccessListener(doc -> {
+                        .addOnSuccessListener(docRef -> {
                             runOnUiThread(() -> {
                                 progress.setVisibility(View.GONE);
                                 btnUpload.setEnabled(true);
                                 etLabel.setText("");
-                                Toast.makeText(this, R.string.admin_sticker_success, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Sticker added globally", Toast.LENGTH_SHORT).show();
                                 loadStickers();
                             });
                         })
@@ -173,7 +179,7 @@ public class AdminStickersActivity extends AppCompatActivity {
                             runOnUiThread(() -> {
                                 progress.setVisibility(View.GONE);
                                 btnUpload.setEnabled(true);
-                                Toast.makeText(this, R.string.admin_sticker_error, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "DB Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
                         });
 
@@ -204,46 +210,80 @@ public class AdminStickersActivity extends AppCompatActivity {
         return transparentBitmap;
     }
 
+    private void deleteSticker(String id) {
+        if (id == null) return;
+        FirebaseFirestore.getInstance().collection("stickers")
+                .document(id)
+                .delete()
+                .addOnSuccessListener(v -> {
+                    Toast.makeText(this, "Sticker deleted", Toast.LENGTH_SHORT).show();
+                    loadStickers();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
     private void loadStickers() {
-        FirebaseFirestore.getInstance().collection("custom_stickers")
-                .orderBy("timestamp", Query.Direction.DESCENDING)
+        FirebaseFirestore.getInstance().collection("stickers")
+                .whereEqualTo("type", "admin")
                 .get()
                 .addOnSuccessListener(snap -> {
                     stickerList.clear();
                     for (QueryDocumentSnapshot doc : snap) {
                         stickerList.add(new StickerModel(
+                                doc.getId(),
                                 doc.getString("label"),
                                 doc.getString("base64")
                         ));
                     }
-                    tvEmpty.setVisibility(stickerList.isEmpty() ? View.VISIBLE : View.GONE);
-                    adapter.notifyDataSetChanged();
+                    runOnUiThread(() -> {
+                        tvEmpty.setVisibility(stickerList.isEmpty() ? View.VISIBLE : View.GONE);
+                        adapter.notifyDataSetChanged();
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AdminStickers", "Error loading: " + e.getMessage());
+                    Toast.makeText(this, "Load failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
     private static class StickerModel {
+        String id;
         String label;
         String base64;
-        StickerModel(String l, String b) { label = l; base64 = b; }
+        StickerModel(String id, String l, String b) { 
+            this.id = id;
+            this.label = l; 
+            this.base64 = b; 
+        }
     }
 
-    private static class StickerAdapter extends RecyclerView.Adapter<StickerAdapter.VH> {
+    private class StickerAdapter extends RecyclerView.Adapter<StickerAdapter.VH> {
         private final List<StickerModel> items;
         StickerAdapter(List<StickerModel> items) { this.items = items; }
         @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
             View v = LayoutInflater.from(p.getContext()).inflate(R.layout.item_admin_sticker, p, false);
             return new VH(v);
         }
-        @Override public void onBindViewHolder(@NonNull VH h, int p) {
-            StickerModel m = items.get(p);
+        @Override public void onBindViewHolder(@NonNull VH h, int position) {
+            StickerModel m = items.get(position);
             h.tv.setText(m.label);
-            byte[] bytes = Base64.decode(m.base64, Base64.DEFAULT);
-            h.iv.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+            if (m.base64 != null) {
+                byte[] bytes = android.util.Base64.decode(m.base64, android.util.Base64.DEFAULT);
+                h.iv.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+            }
+            h.btnDelete.setOnClickListener(v -> deleteSticker(m.id));
         }
         @Override public int getItemCount() { return items.size(); }
-        static class VH extends RecyclerView.ViewHolder {
-            ImageView iv; TextView tv;
-            VH(View v) { super(v); iv = v.findViewById(R.id.ivPreview); tv = v.findViewById(R.id.tvLabel); }
+        class VH extends RecyclerView.ViewHolder {
+            ImageView iv; TextView tv; View btnDelete;
+            VH(View v) { 
+                super(v); 
+                iv = v.findViewById(R.id.ivPreview); 
+                tv = v.findViewById(R.id.tvLabel); 
+                btnDelete = v.findViewById(R.id.btnDeleteSticker);
+            }
         }
     }
 }
