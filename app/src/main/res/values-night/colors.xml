@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night palette overrides for Home + Drawer theme switching -->
+    <color name="launcher_splash_bg">#121522</color>
+    <color name="home_top_action_bg">#4A5F9E</color>
+    <color name="home_drawer_bg">#0E1B3E</color>
+    <color name="home_drawer_text">#FFD1E8</color>
+    <color name="home_drawer_divider">#66FFFFFF</color>
+    <color name="home_gallery_button_bg">#4F9F79</color>
+    <color name="home_admin_chip_bg">#5A6EA8</color>
+    <color name="home_toggle_text">#1E2C5E</color>
+    <color name="home_toggle_ripple">#33FFD1E8</color>
+    <color name="history_pill_pink">#F5A9D0</color>
+
+    <color name="admin_dashboard_bg">#101C42</color>
+    <color name="app_bg_light">#111827</color>
+    <color name="app_blue">#88A9FF</color>
+    <color name="admin_subtitle_color">#AFC0E5</color>
+    <color name="admin_card_stroke">#2A3A66</color>
+    <color name="primary_alpha_10">#2B88A9FF</color>
+    <color name="pink_alpha_12">#2BF5A9D0</color>
+
+    <!-- Brand selected state remains stable in dark -->
+    <color name="home_toggle_selected_bg">@color/camera_mode_primary</color>
+    <color name="home_toggle_selected_text">@color/white</color>
+
+    <!-- Semantic tokens for full-app dark palette -->
+    <color name="screen_bg">#111827</color>
+    <color name="screen_surface">#1A2238</color>
+    <color name="screen_surface_alt">#141D32</color>
+    <color name="screen_title">#AFC6FF</color>
+    <color name="screen_subtitle">#9CB8FF</color>
+    <color name="screen_icon_tint">#AFC6FF</color>
+    <color name="screen_divider">#314368</color>
+    <color name="screen_overlay">#AA000000</color>
+    <color name="screen_text_muted">#B9C7E8</color>
+
+    <color name="history_screen_bg">#0F172A</color>
+    <color name="history_primary_text">#B7C7F8</color>
+    <color name="history_card_surface">#1F2A44</color>
+    <color name="history_card_stroke">#3B4D78</color>
+    <color name="history_danger">#FF6B6B</color>
+</resources>

@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.ContentValues;
+import android.app.ActivityManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -126,13 +129,25 @@ public class GalleryActivity extends AppCompatActivity {
     private TextView tvTabStamp, tvTabBook;
     private ImageButton btnViewModeToggle;
     private ImageButton btnHeaderAction;
+    private View bottomModeSwitcher;
+    private TextView tvGalleryDate;
 
     private boolean isGridView = true;
     private ViewPager2 vpCarousel;
     private CarouselAdapter carouselAdapter;
     private LinearLayout carouselIndicator;
+    private ImageButton btnCarouselPrev;
+    private ImageButton btnCarouselNext;
+    private View cardCarouselInfo;
+    private TextView tvCarouselInfoDate;
+    private TextView tvCarouselInfoFrame;
+    private static final long CAROUSEL_INFO_AUTO_HIDE_MS = 2500L;
+    private final Handler carouselInfoHandler = new Handler(Looper.getMainLooper());
+    private final Runnable hideCarouselInfoRunnable = this::hideCarouselInfoPanelImmediate;
 
     private static final String PREF_BOOK_PHOTOS = "book_pinned_photos";
+    private static final String PREF_CAROUSEL_INFO_AUTO_SHOWN = "carousel_info_auto_shown";
+    private boolean hasCarouselInfoAutoShown;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -183,6 +198,7 @@ public class GalleryActivity extends AppCompatActivity {
         
         // 3. Lấy dữ liệu an toàn
         prefs = getSharedPreferences("ExpressionGallery", MODE_PRIVATE);
+        hasCarouselInfoAutoShown = prefs.getBoolean(PREF_CAROUSEL_INFO_AUTO_SHOWN, false);
         loadMemoryBooks();
         
         initViews();
@@ -223,7 +239,10 @@ public class GalleryActivity extends AppCompatActivity {
 
         rvGallery = stampView.findViewById(R.id.rvGallery);
         emptyState = stampView.findViewById(R.id.emptyState);
-        
+        rvGallery.setLayoutManager(new GridLayoutManager(this, 2));
+        adapter = new GalleryAdapter(galleryFiles);
+        rvGallery.setAdapter(adapter);
+
         tvEmptyBook = bookView.findViewById(R.id.tvEmptyBook);
 
         bookView.findViewById(R.id.btnSaveBook).setOnClickListener(v -> {
@@ -257,8 +276,22 @@ public class GalleryActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 updateCarouselIndicator(position);
+                updateCarouselInfo(position);
             }
         });
+
+        btnCarouselPrev = stampView.findViewById(R.id.btnCarouselPrev);
+        btnCarouselNext = stampView.findViewById(R.id.btnCarouselNext);
+        cardCarouselInfo = stampView.findViewById(R.id.cardCarouselInfo);
+        tvCarouselInfoDate = stampView.findViewById(R.id.tvCarouselInfoDate);
+        tvCarouselInfoFrame = stampView.findViewById(R.id.tvCarouselInfoFrame);
+
+        if (btnCarouselPrev != null) {
+            btnCarouselPrev.setOnClickListener(v -> moveCarouselBy(-1));
+        }
+        if (btnCarouselNext != null) {
+            btnCarouselNext.setOnClickListener(v -> moveCarouselBy(1));
+        }
 
         stampView.findViewById(R.id.btnCarouselSavePhoto).setOnClickListener(v -> performCarouselAction("save_photo"));
         stampView.findViewById(R.id.btnCarouselShare).setOnClickListener(v -> performCarouselAction("share"));
@@ -279,8 +312,12 @@ public class GalleryActivity extends AppCompatActivity {
         
         // Current Date for Title
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, d MMM", Locale.getDefault());
-        ((TextView) findViewById(R.id.tvGalleryDate)).setText(dateFormat.format(new Date()));
-        
+        tvGalleryDate = findViewById(R.id.tvGalleryDate);
+        bottomModeSwitcher = findViewById(R.id.bottomModeSwitcher);
+        if (tvGalleryDate != null) {
+            tvGalleryDate.setText(dateFormat.format(new Date()));
+        }
+
         setupTabs();
     }
 
@@ -406,8 +443,8 @@ public class GalleryActivity extends AppCompatActivity {
         try {
             View gridContainer = stampView.findViewById(R.id.gridViewContainer);
             View carouselContainer = stampView.findViewById(R.id.carouselViewContainer);
-            View carouselActions = stampView.findViewById(R.id.carouselActions);
-            
+            View carouselActions = cardCarouselInfo;
+
             if (gridContainer != null) gridContainer.setVisibility(isGridView ? View.VISIBLE : View.GONE);
             if (carouselContainer != null) carouselContainer.setVisibility(isGridView ? View.GONE : View.VISIBLE);
             
@@ -418,12 +455,32 @@ public class GalleryActivity extends AppCompatActivity {
                 if (galleryFiles.isEmpty()) {
                     if (carouselActions != null) carouselActions.setVisibility(View.GONE);
                     if (carouselIndicator != null) carouselIndicator.setVisibility(View.GONE);
+                    if (btnCarouselPrev != null) btnCarouselPrev.setVisibility(View.GONE);
+                    if (btnCarouselNext != null) btnCarouselNext.setVisibility(View.GONE);
+                    if (bottomModeSwitcher != null) bottomModeSwitcher.setVisibility(View.VISIBLE);
+                    if (tvGalleryDate != null) tvGalleryDate.setVisibility(View.VISIBLE);
                 } else {
                     if (carouselActions != null) carouselActions.setVisibility(View.VISIBLE);
                     if (carouselIndicator != null) carouselIndicator.setVisibility(View.VISIBLE);
-                    vpCarousel.post(this::setupCarousel);
+                    if (btnCarouselPrev != null) btnCarouselPrev.setVisibility(View.VISIBLE);
+                    if (btnCarouselNext != null) btnCarouselNext.setVisibility(View.VISIBLE);
+                    if (bottomModeSwitcher != null) bottomModeSwitcher.setVisibility(View.GONE);
+                    if (tvGalleryDate != null) tvGalleryDate.setVisibility(View.GONE);
+                    hideCarouselInfoPanelImmediate();
+                    ensureCarouselAdapter();
+                    vpCarousel.post(() -> {
+                        setupCarousel();
+                        if (!hasCarouselInfoAutoShown) {
+                            showCarouselInfoPanelTemporarily();
+                            hasCarouselInfoAutoShown = true;
+                            prefs.edit().putBoolean(PREF_CAROUSEL_INFO_AUTO_SHOWN, true).apply();
+                        }
+                    });
                 }
             } else {
+                if (bottomModeSwitcher != null) bottomModeSwitcher.setVisibility(View.VISIBLE);
+                if (tvGalleryDate != null) tvGalleryDate.setVisibility(View.VISIBLE);
+                carouselInfoHandler.removeCallbacks(hideCarouselInfoRunnable);
                 if (adapter != null) adapter.notifyDataSetChanged();
             }
         } catch (Exception e) {
@@ -644,30 +701,85 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     private void setupCarousel() {
-        if (carouselAdapter == null) {
-            carouselAdapter = new CarouselAdapter(galleryFiles);
-            vpCarousel.setAdapter(carouselAdapter);
-            
-            vpCarousel.setClipToPadding(false);
-            vpCarousel.setClipChildren(false);
-            vpCarousel.setOffscreenPageLimit(3);
-            
-            int pageMarginPx = (int) (12 * getResources().getDisplayMetrics().density);
-            int offsetPx = (int) (30 * getResources().getDisplayMetrics().density);
-            vpCarousel.setPadding(offsetPx, 0, offsetPx, 0);
-            
-            androidx.viewpager2.widget.CompositePageTransformer transformer = new androidx.viewpager2.widget.CompositePageTransformer();
-            transformer.addTransformer(new androidx.viewpager2.widget.MarginPageTransformer(pageMarginPx));
-            transformer.addTransformer((page, position) -> {
-                float r = 1 - Math.abs(position);
-                page.setScaleY(0.85f + r * 0.15f);
-                page.setAlpha(0.6f + r * 0.4f);
-            });
-            vpCarousel.setPageTransformer(transformer);
-        } else {
+        ensureCarouselAdapter();
+        if (carouselAdapter != null) {
+            // Keep one primary page fully visible to avoid side clipping/overlap.
+            vpCarousel.setClipToPadding(true);
+            vpCarousel.setClipChildren(true);
+            boolean constrained = isCarouselPerformanceConstrainedDevice();
+            vpCarousel.setOffscreenPageLimit(constrained ? 1 : 2);
+
+            // No side offset so adjacent pages are not visible.
+            vpCarousel.setPadding(0, 0, 0, 0);
+
+            if (constrained) {
+                // On weak devices, disable custom transform for best frame stability.
+                vpCarousel.setPageTransformer(null);
+            } else {
+                // Very light transform keeps focus without causing visible clipping.
+                vpCarousel.setPageTransformer((page, position) -> {
+                    float abs = Math.abs(position);
+                    page.setScaleY(1f - (0.04f * abs));
+                    page.setAlpha(1f - (0.12f * abs));
+                });
+            }
+        }
+        if (carouselAdapter != null) {
             carouselAdapter.notifyDataSetChanged();
         }
         updateCarouselIndicator(vpCarousel.getCurrentItem());
+        updateCarouselInfo(vpCarousel.getCurrentItem());
+    }
+
+    private boolean isCarouselPerformanceConstrainedDevice() {
+        ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        return am != null && am.isLowRamDevice();
+    }
+
+    private void ensureCarouselAdapter() {
+        if (vpCarousel == null) {
+            return;
+        }
+        if (carouselAdapter == null) {
+            carouselAdapter = new CarouselAdapter(galleryFiles);
+            vpCarousel.setAdapter(carouselAdapter);
+        } else if (vpCarousel.getAdapter() == null) {
+            vpCarousel.setAdapter(carouselAdapter);
+        }
+    }
+
+    private void moveCarouselBy(int delta) {
+        if (vpCarousel == null || galleryFiles.isEmpty()) {
+            return;
+        }
+        int current = vpCarousel.getCurrentItem();
+        int target = Math.max(0, Math.min(galleryFiles.size() - 1, current + delta));
+        showCarouselInfoPanelTemporarily();
+        if (target != current) {
+            vpCarousel.setCurrentItem(target, true);
+        }
+    }
+
+    private void showCarouselInfoPanelTemporarily() {
+        if (cardCarouselInfo == null) {
+            return;
+        }
+        cardCarouselInfo.setVisibility(View.VISIBLE);
+        cardCarouselInfo.animate().cancel();
+        cardCarouselInfo.setAlpha(0.95f);
+        cardCarouselInfo.animate().alpha(1f).setDuration(120L).start();
+
+        carouselInfoHandler.removeCallbacks(hideCarouselInfoRunnable);
+        carouselInfoHandler.postDelayed(hideCarouselInfoRunnable, CAROUSEL_INFO_AUTO_HIDE_MS);
+    }
+
+    private void hideCarouselInfoPanelImmediate() {
+        if (cardCarouselInfo == null) {
+            return;
+        }
+        cardCarouselInfo.animate().cancel();
+        cardCarouselInfo.setVisibility(View.GONE);
+        cardCarouselInfo.setAlpha(1f);
     }
 
     private void updateCarouselIndicator(int position) {
@@ -677,10 +789,12 @@ public class GalleryActivity extends AppCompatActivity {
         if (count == 0) return;
         
         try {
+            int dotSize = getResources().getDimensionPixelSize(R.dimen.gallery_carousel_dot_size);
+            int dotGap = getResources().getDimensionPixelSize(R.dimen.gallery_carousel_dot_gap);
             for (int i = 0; i < Math.min(count, 10); i++) {
                 View dot = new View(this);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(16, 16);
-                params.setMargins(8, 0, 8, 0);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dotSize, dotSize);
+                params.setMargins(dotGap, 0, dotGap, 0);
                 dot.setLayoutParams(params);
                 dot.setBackgroundResource(i == position ? R.drawable.bg_dot_active : R.drawable.bg_dot_inactive);
                 carouselIndicator.addView(dot);
@@ -688,6 +802,30 @@ public class GalleryActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void updateCarouselInfo(int position) {
+        if (tvCarouselInfoDate == null || tvCarouselInfoFrame == null) {
+            return;
+        }
+        if (galleryFiles.isEmpty() || position < 0 || position >= galleryFiles.size()) {
+            tvCarouselInfoDate.setText(getString(R.string.history_date_value, getString(R.string.history_not_available)));
+            tvCarouselInfoFrame.setText(getString(R.string.history_frame_value, getString(R.string.history_not_available)));
+            return;
+        }
+
+        File file = galleryFiles.get(position);
+        String dateText = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date(file.lastModified()));
+        String frameText = getString(R.string.history_not_available);
+
+        String uid = authRepository != null ? authRepository.getCurrentUid() : null;
+        HistorySession session = findSessionForFile(file, uid);
+        if (session != null && session.getFrameName() != null && !session.getFrameName().trim().isEmpty()) {
+            frameText = session.getFrameName().trim();
+        }
+
+        tvCarouselInfoDate.setText(getString(R.string.history_date_value, dateText));
+        tvCarouselInfoFrame.setText(getString(R.string.history_frame_value, frameText));
     }
 
     private void loadGallery() {
@@ -733,11 +871,7 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        if (adapter == null) {
-            adapter = new GalleryAdapter(galleryFiles);
-            rvGallery.setLayoutManager(new GridLayoutManager(this, 2));
-            rvGallery.setAdapter(adapter);
-        } else {
+        if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
     }
@@ -1002,7 +1136,7 @@ public class GalleryActivity extends AppCompatActivity {
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gallery_stamp, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_carousel_photo, parent, false);
             // ViewPager2 REQUIRES match_parent for its items.
             view.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -1019,7 +1153,16 @@ public class GalleryActivity extends AppCompatActivity {
                 .fitCenter()
                 .placeholder(R.drawable.bg_stamp_border)
                 .into(holder.ivPhoto);
-            holder.tvDate.setVisibility(View.GONE);
+            if (holder.tvDate != null) holder.tvDate.setVisibility(View.GONE);
+            View.OnClickListener showInfoClick = v -> {
+                int pos = holder.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    updateCarouselInfo(pos);
+                }
+                showCarouselInfoPanelTemporarily();
+            };
+            holder.ivPhoto.setOnClickListener(showInfoClick);
+            holder.itemView.setOnClickListener(showInfoClick);
         }
 
         @Override

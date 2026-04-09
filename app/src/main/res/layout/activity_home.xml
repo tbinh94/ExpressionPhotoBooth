@@ -58,6 +58,33 @@
                 app:iconPadding="0dp"
                 app:iconSize="@dimen/home_top_action_icon_size"
                 app:iconTint="@color/white" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnThemeQuick"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="@dimen/home_top_action_size"
+                android:layout_height="@dimen/home_top_action_size"
+                android:contentDescription="@string/home_theme_toggle_to_dark"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:gravity="center"
+                app:backgroundTint="@color/home_top_action_bg"
+                app:cornerRadius="@dimen/home_top_action_corner_radius"
+                app:icon="@drawable/ic_theme_moon_20"
+                app:iconGravity="textTop"
+                app:iconPadding="0dp"
+                app:iconSize="@dimen/home_top_action_icon_size"
+                app:iconTint="@color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -300,52 +327,49 @@
                 android:textSize="@dimen/home_drawer_label_text_size"
                 android:textStyle="bold" />
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/groupLanguage"
-                android:layout_width="@dimen/home_drawer_toggle_width"
-                android:layout_height="@dimen/home_drawer_toggle_height"
-                android:background="@drawable/bg_drawer_spinner"
-                app:selectionRequired="true"
-                app:singleSelection="true">
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLangVi"
+                    android:id="@+id/btnLanguageToggle"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:text="@string/home_switch_to_vietnamese"
-                    android:textAllCaps="false"
-                    android:textColor="@color/home_toggle_text"
-                    android:textSize="@dimen/home_drawer_lang_toggle_text_size"
-                    android:textStyle="bold"
-                    app:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
-                    app:rippleColor="@color/home_toggle_ripple" />
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
+                    android:gravity="center"
+                    android:contentDescription="@string/language_toggle_to_english"
+                    app:backgroundTint="@color/camera_mode_primary"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_language_24"
+                    app:iconGravity="textTop"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
+                    app:iconTint="@color/white"
+                    app:strokeColor="@color/app_blue"
+                    app:strokeWidth="1dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLangEn"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:text="@string/home_switch_to_english"
-                    android:textAllCaps="false"
-                    android:textColor="@color/home_toggle_text"
-                    android:textSize="@dimen/home_drawer_lang_toggle_text_size"
-                    android:textStyle="bold"
-                    app:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
-                    app:rippleColor="@color/home_toggle_ripple" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
+                <TextView
+                    android:id="@+id/tvLanguageBadge"
+                    android:layout_width="18dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="end|top"
+                    android:layout_marginEnd="-2dp"
+                    android:layout_marginTop="-2dp"
+                    android:background="@drawable/bg_language_badge"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:text="EN"
+                    android:textColor="@color/white"
+                    android:textSize="8sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
         </LinearLayout>
 
         <LinearLayout
