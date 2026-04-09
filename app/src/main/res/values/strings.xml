@@ -154,6 +154,7 @@
     <string name="edit_sticker_reset">Reset</string>
     <string name="edit_sticker_size_format">%1$d%%</string>
     <string name="edit_sticker_picker_title">Select Sticker Image</string>
+    <string name="edit_sticker_cannot_delete_global">System stickers cannot be deleted!</string>
     <string name="edit_sticker_processing">Processing sticker...</string>
     <string name="edit_nothing_to_undo">Nothing to undo</string>
     <string name="edit_save_error_format">Error saving edits: %1$s</string>
@@ -391,8 +392,10 @@
     <string name="gallery_no_feedback_data">No feedback data</string>
     <string name="gallery_share_memory_chooser">Share Memory</string>
     <string name="gallery_book_photo_count">%1$d photos</string>
+    <string name="gallery_book_exporting">Exporting Album...</string>
+    <string name="gallery_book_export_success">Album saved to gallery!</string>
     <string name="gallery_book_delete_title">Delete Book</string>
-    <string name="gallery_book_delete_message">Delete "%1$s"?</string>
+    <string name="gallery_book_delete_message">Delete \"%1$s\"?</string>
     <string name="gallery_history_title">Your History</string>
     <string name="gallery_history_subtitle">You can see and download photos
 that you have taken before</string>

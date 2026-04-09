@@ -1433,14 +1433,21 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void deleteCustomSticker(ThumbItem item) {
         if (item == null || item.id == null) return;
         
+        // Anti-deletion safeguard: Users cannot delete global stickers
+        if (item.isGlobal) {
+            Toast.makeText(this, R.string.edit_sticker_cannot_delete_global, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         Toast.makeText(this, "Deleting...", Toast.LENGTH_SHORT).show();
         FirebaseFirestore.getInstance().collection("stickers")
                 .document(item.id)
                 .delete()
                 .addOnSuccessListener(v -> {
                     loadGlobalStickers(); // Reload list
+                    // Corrected check: reset current selection if the deleted sticker was active
                     if (currentEditState.getStickerStyle() == EditState.StickerStyle.CUSTOM && 
-                        item.id.equals(item.id)) { // Simplistic check
+                        item.id.equals(currentEditState.getCustomStickerId())) {
                         updateSticker(new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none, EditState.StickerStyle.NONE));
                     }
                 })

@@ -105,8 +105,20 @@
             android:shadowDy="1"
             android:shadowRadius="2"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="16dp" />
+            app:layout_constraintStart_toEndOf="@id/vBookSpine"
+            android:layout_marginStart="16dp" />
+
+        <ImageView
+            android:id="@+id/btnDownloadBook"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="12dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_download_24"
+            app:tint="#FFFFFF"
+            android:background="@drawable/bg_circle_translucent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

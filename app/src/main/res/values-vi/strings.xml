@@ -325,8 +325,10 @@
     <string name="gallery_no_feedback_data">Chưa có dữ liệu đánh giá</string>
     <string name="gallery_share_memory_chooser">Chia sẻ kỷ niệm</string>
     <string name="gallery_book_photo_count">%1$d ảnh</string>
+    <string name="gallery_book_exporting">Đang kết xuất Album...</string>
+    <string name="gallery_book_export_success">Đã lưu Album vào thư viện ảnh!</string>
     <string name="gallery_book_delete_title">Xóa album</string>
-    <string name="gallery_book_delete_message">Xóa "%1$s"?</string>
+    <string name="gallery_book_delete_message">Xóa \"%1$s\"?</string>
     <string name="gallery_history_title">Lịch Sử Của Bạn</string>
     <string name="gallery_history_subtitle">Bạn có thể xem và tải về
 những ảnh đã chụp trước đó</string>
@@ -406,6 +408,7 @@ những ảnh đã chụp trước đó</string>
     <string name="edit_sticker_reset">Đặt lại</string>
     <string name="edit_sticker_size_format">%1$d%%</string>
     <string name="edit_sticker_picker_title">Chọn ảnh sticker</string>
+    <string name="edit_sticker_cannot_delete_global">Bạn không thể xóa sticker hệ thống!</string>
     <string name="edit_sticker_processing">Đang xử lý sticker...</string>
     <string name="edit_nothing_to_undo">Không có thao tác để hoàn tác</string>
     <string name="edit_save_error_format">Lỗi khi lưu chỉnh sửa: %1$s</string>

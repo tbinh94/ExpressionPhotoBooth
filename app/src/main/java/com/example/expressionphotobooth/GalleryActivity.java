@@ -1137,6 +1137,7 @@ public class GalleryActivity extends AppCompatActivity {
             }
 
             h.itemView.setOnClickListener(v -> openBook(b));
+            h.btnDownload.setOnClickListener(v -> exportBookAsPng(b));
             h.itemView.setOnLongClickListener(v -> {
                 int currentPos = h.getBindingAdapterPosition();
                 if (currentPos == RecyclerView.NO_POSITION) return true;
@@ -1160,12 +1161,13 @@ public class GalleryActivity extends AppCompatActivity {
         @Override public int getItemCount() { return books.size(); }
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView title, count;
-            ImageView cover;
+            ImageView cover, btnDownload;
             ViewHolder(View v) {
                 super(v);
                 title = v.findViewById(R.id.tvBookTitle);
                 count = v.findViewById(R.id.tvPhotoCount);
                 cover = v.findViewById(R.id.ivBookCover);
+                btnDownload = v.findViewById(R.id.btnDownloadBook);
             }
         }
     }
@@ -1344,5 +1346,82 @@ public class GalleryActivity extends AppCompatActivity {
             },
             null
         );
+    }
+
+    private void exportBookAsPng(MemoryBook book) {
+        if (book == null) return;
+        Toast.makeText(this, R.string.gallery_book_exporting, Toast.LENGTH_SHORT).show();
+        
+        new Thread(() -> {
+            try {
+                // Resolution for export (1080x1920)
+                int width = 1080;
+                int height = 1920;
+                android.graphics.Bitmap result = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+                android.graphics.Canvas canvas = new android.graphics.Canvas(result);
+                
+                // 1. Draw Background
+                android.graphics.Paint paint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+                paint.setColor(book.backgroundColor);
+                canvas.drawRect(0, 0, width, height, paint);
+                
+                // 2. Draw Book Spine Effect
+                paint.setColor(0x2E000000);
+                canvas.drawRect(0, 0, 60, height, paint);
+                paint.setColor(0x4D000000);
+                canvas.drawRect(50, 0, 56, height, paint);
+                
+                // 3. Draw Photos/Items
+                for (BookItem item : book.items) {
+                    android.graphics.Bitmap itemBmp = android.graphics.BitmapFactory.decodeFile(item.imagePath);
+                    if (itemBmp != null) {
+                        canvas.save();
+                        // Coordinates in saved books might need mapping to 1080p width
+                        // Simple proportional mapping
+                        canvas.translate(item.x, item.y);
+                        canvas.scale(item.scale, item.scale);
+                        canvas.rotate(item.rotation);
+                        
+                        // Draw with fixed editor size (400x500 reference)
+                        canvas.drawBitmap(itemBmp, null, new android.graphics.Rect(0, 0, 400, 500), null);
+                        canvas.restore();
+                        itemBmp.recycle();
+                    }
+                }
+                
+                // 4. Draw Title Header
+                paint.setColor(book.textColor);
+                paint.setTextSize(64f);
+                paint.setTypeface(android.graphics.Typeface.create(android.graphics.Typeface.SERIF, android.graphics.Typeface.BOLD));
+                paint.setTextAlign(android.graphics.Paint.Align.CENTER);
+                canvas.drawText(book.name, width/2f + 30, 200, paint);
+
+                // 5. Save logic
+                String fileName = "Album_" + book.name.replaceAll("[^a-zA-Z0-9]", "_") + "_" + System.currentTimeMillis() + ".png";
+                saveBitmapToSystemGallery(result, fileName);
+                
+                result.recycle();
+                runOnUiThread(() -> Toast.makeText(this, R.string.gallery_book_export_success, Toast.LENGTH_SHORT).show());
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(this, "Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+    private void saveBitmapToSystemGallery(android.graphics.Bitmap bitmap, String fileName) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/OurMemories_Albums");
+
+        Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        if (uri != null) {
+            try (OutputStream out = getContentResolver().openOutputStream(uri)) {
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
