@@ -60,5 +60,31 @@
     <dimen name="home_drawer_lang_toggle_text_size">9sp</dimen>
     <dimen name="home_drawer_sign_out_width">166dp</dimen>
     <dimen name="home_drawer_sign_out_height">46dp</dimen>
+
+    <dimen name="gallery_carousel_title_margin_top">4dp</dimen>
+    <dimen name="gallery_carousel_title_side_margin">14dp</dimen>
+    <dimen name="gallery_carousel_title_text_size">18sp</dimen>
+    <dimen name="gallery_carousel_subtitle_margin_top">2dp</dimen>
+    <dimen name="gallery_carousel_subtitle_text_size">10sp</dimen>
+    <dimen name="gallery_carousel_preview_margin_top">8dp</dimen>
+    <dimen name="gallery_carousel_preview_height">206dp</dimen>
+    <dimen name="gallery_carousel_preview_side_margin">34dp</dimen>
+    <dimen name="gallery_carousel_arrow_size">30dp</dimen>
+    <dimen name="gallery_carousel_arrow_side_margin">6dp</dimen>
+    <dimen name="gallery_carousel_indicator_margin_top">6dp</dimen>
+    <dimen name="gallery_carousel_card_side_margin">10dp</dimen>
+    <dimen name="gallery_carousel_card_corner_radius">26dp</dimen>
+    <dimen name="gallery_carousel_card_padding_horizontal">12dp</dimen>
+    <dimen name="gallery_carousel_card_padding_top">8dp</dimen>
+    <dimen name="gallery_carousel_card_padding_bottom">10dp</dimen>
+    <dimen name="gallery_carousel_info_label_text_size">14sp</dimen>
+    <dimen name="gallery_carousel_info_meta_text_size">12sp</dimen>
+    <dimen name="gallery_carousel_action_button_height">34dp</dimen>
+    <dimen name="gallery_carousel_action_button_text_size">12sp</dimen>
+    <dimen name="gallery_carousel_delete_width">126dp</dimen>
+    <dimen name="gallery_carousel_page_margin">8dp</dimen>
+    <dimen name="gallery_carousel_side_offset">18dp</dimen>
+    <dimen name="gallery_carousel_dot_size">10dp</dimen>
+    <dimen name="gallery_carousel_dot_gap">5dp</dimen>
 </resources>
 

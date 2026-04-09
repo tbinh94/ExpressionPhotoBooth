@@ -76,6 +76,12 @@
     <string name="home_music_off">OFF</string>
     <string name="home_theme_light">Light</string>
     <string name="home_theme_dark">Dark</string>
+    <string name="home_theme_toggle_to_dark">Switch to dark theme</string>
+    <string name="home_theme_toggle_to_light">Switch to light theme</string>
+    <string name="language_toggle_to_english">Switch language to English</string>
+    <string name="language_toggle_to_vietnamese">Switch language to Vietnamese</string>
+    <string name="language_badge_en">EN</string>
+    <string name="language_badge_vi">VI</string>
     <string name="home_drawer_change_banner">Change Cover Photo</string>
     <string name="home_history_user_only_title">Members only</string>
     <string name="home_history_user_only_message">History is available for registered users. Please sign up to save and view your sessions.</string>
@@ -249,6 +255,8 @@
     <string name="admin_stat_avg">Avg Score</string>
     <string name="admin_stat_low">Below 3★</string>
     <string name="admin_settings_toast">System settings</string>
+    <string name="admin_language_toggle_to_english">Switch language to English</string>
+    <string name="admin_language_toggle_to_vietnamese">Switch language to Vietnamese</string>
     <string name="admin_overview_chart_subtitle_placeholder">0 reviews</string>
     <string name="admin_overview_chart_subtitle_format">%1$d reviews</string>
     <string name="admin_overview_chart_subtitle_error">Failed to load data</string>
@@ -378,6 +386,17 @@
     <string name="gallery_book_photo_count">%1$d photos</string>
     <string name="gallery_book_delete_title">Delete Book</string>
     <string name="gallery_book_delete_message">Delete "%1$s"?</string>
+    <string name="gallery_history_title">Your History</string>
+    <string name="gallery_history_subtitle">You can see and download photos
+that you have taken before</string>
+    <string name="gallery_information">INFORMATION</string>
+    <string name="gallery_previous_item">Previous photo</string>
+    <string name="gallery_next_item">Next photo</string>
+    <string name="gallery_tab_picture">Picture</string>
+    <string name="gallery_tab_book">Book</string>
+    <string name="gallery_date_placeholder">Thursday, 2 Apr</string>
+    <string name="gallery_toggle_view_mode">Toggle gallery view mode</string>
+    <string name="gallery_add_action">Add gallery item</string>
 
     <string name="nav_history">Lịch sử</string>
     <string name="history_empty">Chưa có lịch sử nào</string>
@@ -399,6 +418,8 @@
     <string name="history_not_available">N/A</string>
     <string name="history_no_video_to_save">Không có video để lưu</string>
     <string name="history_ratio_value">Tỷ lệ: %1$s</string>
+    <string name="common_back">Back</string>
+    <string name="admin_role_label">Administrator</string>
 
     <!-- Security & RBAC -->
     <string name="permission_denied">Bạn không có quyền thực hiện hành động này</string>

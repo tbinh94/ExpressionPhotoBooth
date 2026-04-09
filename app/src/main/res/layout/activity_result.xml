@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/screen_bg">
 
     <!-- Background -->
     <ImageView
@@ -34,7 +35,7 @@
         app:iconGravity="textStart"
         app:iconPadding="0dp"
         app:iconSize="22dp"
-        app:iconTint="#2A5298"
+        app:iconTint="@color/screen_icon_tint"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -55,7 +56,7 @@
         app:iconGravity="textStart"
         app:iconPadding="0dp"
         app:iconSize="22dp"
-        app:iconTint="#2A5298"
+        app:iconTint="@color/screen_icon_tint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,10 +68,10 @@
         android:fontFamily="@font/pacifico_regular"
         android:gravity="center"
         android:text="@string/result_title"
-        android:textColor="#2A5298"
+        android:textColor="@color/screen_title"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:shadowColor="#FFFFFF"
+        android:shadowColor="@color/white"
         android:shadowRadius="8"
         android:shadowDx="0"
         android:shadowDy="0"
@@ -84,7 +85,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:text="@string/result_subtitle"
-        android:textColor="#1F618D"
+        android:textColor="@color/screen_subtitle"
         android:textSize="13sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -121,13 +122,13 @@
                 android:insetTop="0dp"
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="#FFC311"
+                app:backgroundTint="@color/thumb_gold"
                 app:cornerRadius="22dp"
                 app:icon="@drawable/ic_star_24"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 app:iconSize="22dp"
-                app:iconTint="#FFFFFF" />
+                app:iconTint="@color/white" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -140,7 +141,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/result_rate_title"
-                    android:textColor="#99265e"
+                    android:textColor="@color/screen_title"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -149,11 +150,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:orientation="horizontal">
-                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_24" app:tint="#FFC107" android:layout_marginEnd="2dp"/>
-                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_24" app:tint="#FFC107" android:layout_marginEnd="2dp"/>
-                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_24" app:tint="#FFC107" android:layout_marginEnd="2dp"/>
-                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_24" app:tint="#FFC107" android:layout_marginEnd="2dp"/>
-                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_outline_24" app:tint="#ff99be"/>
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_24" app:tint="@color/thumb_gold" android:layout_marginEnd="2dp"/>
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_24" app:tint="@color/thumb_gold" android:layout_marginEnd="2dp"/>
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_24" app:tint="@color/thumb_gold" android:layout_marginEnd="2dp"/>
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_24" app:tint="@color/thumb_gold" android:layout_marginEnd="2dp"/>
+                    <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_star_outline_24" app:tint="@color/history_pill_pink"/>
                 </LinearLayout>
 
                 <TextView
@@ -161,7 +162,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
                     android:text="@string/result_rate_subtitle"
-                    android:textColor="#c06080"
+                    android:textColor="@color/screen_text_muted"
                     android:textSize="11sp" />
             </LinearLayout>
 
@@ -169,7 +170,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:src="@drawable/ic_arrow_forward_24"
-                app:tint="#c06080" />
+                app:tint="@color/screen_text_muted" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -197,19 +198,19 @@
             android:layout_marginEnd="4dp"
             android:text="@string/result_save_image"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="12sp"
             android:textStyle="bold"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
-            app:backgroundTint="#31569A"
+            app:backgroundTint="@color/camera_mode_primary"
             app:cornerRadius="24dp"
             app:elevation="2dp"
             app:icon="@drawable/ic_download_24"
             app:iconGravity="textStart"
             app:iconPadding="4dp"
             app:iconSize="18dp"
-            app:iconTint="#FFFFFF"
+            app:iconTint="@color/white"
             app:strokeWidth="0dp"/>
 
         <com.google.android.material.button.MaterialButton
@@ -222,19 +223,19 @@
             android:layout_marginEnd="4dp"
             android:text="@string/result_share"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="12sp"
             android:textStyle="bold"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
-            app:backgroundTint="#673AB7"
+            app:backgroundTint="@color/app_blue"
             app:cornerRadius="24dp"
             app:elevation="2dp"
             app:icon="@drawable/ic_share_24"
             app:iconGravity="textStart"
             app:iconPadding="4dp"
             app:iconSize="18dp"
-            app:iconTint="#FFFFFF"
+            app:iconTint="@color/white"
             app:strokeWidth="0dp"/>
 
         <com.google.android.material.button.MaterialButton
@@ -246,19 +247,19 @@
             android:layout_marginStart="4dp"
             android:text="@string/result_save_video"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="12sp"
             android:textStyle="bold"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
-            app:backgroundTint="#ff99be"
+            app:backgroundTint="@color/history_pill_pink"
             app:cornerRadius="24dp"
             app:elevation="2dp"
             app:icon="@drawable/ic_videocam_24"
             app:iconGravity="textStart"
             app:iconPadding="4dp"
             app:iconSize="18dp"
-            app:iconTint="#FFFFFF"
+            app:iconTint="@color/white"
             app:strokeWidth="0dp"/>
     </LinearLayout>
 
@@ -283,7 +284,7 @@
         android:id="@+id/loadingOverlay"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#88000000"
+        android:background="@color/screen_overlay"
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone"
@@ -296,7 +297,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:indeterminateTint="#FFFFFF" />
+            android:indeterminateTint="@color/white" />
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

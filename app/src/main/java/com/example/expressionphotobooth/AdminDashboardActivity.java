@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
@@ -31,6 +32,7 @@ import java.util.Locale;
 public class AdminDashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private com.google.android.material.button.MaterialButton btnLanguageToggle;
+    private TextView tvLanguageBadge;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private TextView tvAdminGreeting;
@@ -78,7 +80,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         tvStatVideoDownloadsLabel = findViewById(R.id.tvStatVideoDownloadsLabel);
 
         btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
-        updateLanguageButtonText();
+        tvLanguageBadge = findViewById(R.id.tvLanguageBadge);
+        updateLanguageButtonA11y(LocaleManager.getCurrentLanguage(this));
         btnLanguageToggle.setOnClickListener(v -> {
             if (languageSwitchInProgress) {
                 return;
@@ -155,6 +158,21 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         if (navSignOut != null) navSignOut.setTitle(localized.getString(R.string.admin_menu_sign_out));
     }
 
+    private void setupOnBackPressed() {
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                    setEnabled(true);
+                }
+            }
+        });
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -181,32 +199,38 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
 
-    private void updateLanguageButtonText() {
+    private void updateLanguageButtonA11y(String currentLanguageTag) {
         if (btnLanguageToggle == null) {
             return;
         }
-        int textRes = com.example.expressionphotobooth.utils.LocaleManager.isVietnamese(this)
-                ? R.string.home_switch_to_english
-                : R.string.home_switch_to_vietnamese;
-        btnLanguageToggle.setText(textRes);
+        boolean isVietnamese = LocaleManager.LANG_VI.equalsIgnoreCase(currentLanguageTag);
+        int contentDescRes = isVietnamese
+                ? R.string.language_toggle_to_english
+                : R.string.language_toggle_to_vietnamese;
+        String contentDesc = getString(contentDescRes);
+        btnLanguageToggle.setContentDescription(contentDesc);
+        ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
+        if (tvLanguageBadge != null) {
+            animateLanguageBadgeText(getString(isVietnamese ? R.string.language_badge_vi : R.string.language_badge_en));
+        }
     }
 
     private void updateLocalizedUi(String languageTag) {
         Context localized = LocaleManager.createLocalizedContext(this, languageTag);
 
-        btnLanguageToggle.setText(localized.getString(
-                LocaleManager.LANG_VI.equals(languageTag)
-                        ? R.string.home_switch_to_english
-                        : R.string.home_switch_to_vietnamese));
+        if (btnLanguageToggle != null) {
+            boolean isVietnamese = LocaleManager.LANG_VI.equals(languageTag);
+            int contentDescRes = isVietnamese
+                    ? R.string.language_toggle_to_english
+                    : R.string.language_toggle_to_vietnamese;
+            String contentDesc = localized.getString(contentDescRes);
+            btnLanguageToggle.setContentDescription(contentDesc);
+            ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
+            if (tvLanguageBadge != null) {
+                animateLanguageBadgeText(localized.getString(isVietnamese ? R.string.language_badge_vi : R.string.language_badge_en));
+            }
+        }
 
         if (tvAdminGreeting != null) {
             tvAdminGreeting.setText(localized.getString(R.string.admin_dashboard_greeting));
@@ -228,6 +252,32 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             dispatchLanguageToFragment(fragment, languageTag);
         }
+    }
+
+    private void animateLanguageBadgeText(String newText) {
+        if (tvLanguageBadge == null || TextUtils.isEmpty(newText)) {
+            return;
+        }
+        CharSequence current = tvLanguageBadge.getText();
+        if (newText.contentEquals(current)) {
+            return;
+        }
+        tvLanguageBadge.animate().cancel();
+        tvLanguageBadge.animate()
+                .alpha(0f)
+                .scaleX(0.88f)
+                .scaleY(0.88f)
+                .setDuration(120L)
+                .withEndAction(() -> {
+                    tvLanguageBadge.setText(newText);
+                    tvLanguageBadge.animate()
+                            .alpha(1f)
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(120L)
+                            .start();
+                })
+                .start();
     }
 
     private void dispatchLanguageToFragment(Fragment fragment, String languageTag) {

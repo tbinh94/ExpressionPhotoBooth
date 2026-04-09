@@ -58,6 +58,12 @@
     <string name="home_music_off">Tắt</string>
     <string name="home_theme_light">Sáng</string>
     <string name="home_theme_dark">Tối</string>
+    <string name="home_theme_toggle_to_dark">Chuyển sang giao diện tối</string>
+    <string name="home_theme_toggle_to_light">Chuyển sang giao diện sáng</string>
+    <string name="language_toggle_to_english">Chuyển ngôn ngữ sang English</string>
+    <string name="language_toggle_to_vietnamese">Chuyển ngôn ngữ sang Tiếng Việt</string>
+    <string name="language_badge_en">EN</string>
+    <string name="language_badge_vi">VI</string>
     <string name="home_drawer_change_banner">Đổi ảnh bìa</string>
     <string name="home_history_user_only_title">Chỉ dành cho thành viên</string>
     <string name="home_history_user_only_message">Lịch sử chỉ dành cho tài khoản đã đăng ký. Hãy đăng ký để lưu và xem lại phiên chụp.</string>
@@ -195,6 +201,8 @@
     <string name="admin_stat_avg">Điểm TB</string>
     <string name="admin_stat_low">Dưới 3★</string>
     <string name="admin_settings_toast">Cài đặt hệ thống</string>
+    <string name="admin_language_toggle_to_english">Chuyển ngôn ngữ sang English</string>
+    <string name="admin_language_toggle_to_vietnamese">Chuyển ngôn ngữ sang Tiếng Việt</string>
 
     <string name="admin_overview_chart_subtitle_placeholder">0 đánh giá</string>
     <string name="admin_overview_chart_subtitle_format">%1$d đánh giá</string>
@@ -315,6 +323,17 @@
     <string name="gallery_book_photo_count">%1$d ảnh</string>
     <string name="gallery_book_delete_title">Xóa album</string>
     <string name="gallery_book_delete_message">Xóa "%1$s"?</string>
+    <string name="gallery_history_title">Lịch Sử Của Bạn</string>
+    <string name="gallery_history_subtitle">Bạn có thể xem và tải về
+những ảnh đã chụp trước đó</string>
+    <string name="gallery_information">THÔNG TIN</string>
+    <string name="gallery_previous_item">Ảnh trước</string>
+    <string name="gallery_next_item">Ảnh tiếp theo</string>
+    <string name="gallery_tab_picture">Ảnh</string>
+    <string name="gallery_tab_book">Album</string>
+    <string name="gallery_date_placeholder">Thứ Năm, 2 Tháng 4</string>
+    <string name="gallery_toggle_view_mode">Chuyển chế độ hiển thị thư viện</string>
+    <string name="gallery_add_action">Thêm mục vào thư viện</string>
 
     <string name="nav_history">Lịch sử</string>
     <string name="history_empty">Chưa có lịch sử nào</string>
@@ -336,6 +355,8 @@
     <string name="history_not_available">N/A</string>
     <string name="history_no_video_to_save">Không có video để lưu</string>
     <string name="history_ratio_value">Tỷ lệ: %1$s</string>
+    <string name="common_back">Quay lại</string>
+    <string name="admin_role_label">Quản trị viên</string>
 
     <!-- Security & RBAC -->
     <string name="permission_denied">Bạn không có quyền thực hiện hành động này</string>

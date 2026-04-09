@@ -50,13 +50,13 @@
                             android:minHeight="0dp"
                             android:padding="0dp"
                             android:gravity="center"
-                            app:backgroundTint="#2E4280"
+                            app:backgroundTint="@color/camera_mode_primary"
                             app:cornerRadius="12dp"
                             app:icon="@drawable/ic_menu_24"
                             app:iconGravity="textStart"
                             app:iconPadding="0dp"
                             app:iconSize="24dp"
-                            app:iconTint="#FFFFFF" />
+                            app:iconTint="@color/white" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -70,33 +70,61 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/admin_dashboard_greeting"
-                                android:textColor="#B0BED4"
+                                android:textColor="@color/admin_subtitle_color"
                                 android:textSize="14sp" />
 
                              <TextView
                                  android:layout_width="wrap_content"
                                  android:layout_height="wrap_content"
-                                 android:text="Administrator"
-                                 android:textColor="#FFFFFF"
+                                 android:text="@string/admin_role_label"
+                                 android:textColor="@color/white"
                                  android:textSize="12sp"
                                  android:textStyle="bold" />
                         </LinearLayout>
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnLanguageToggle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="0dp"
-                            android:minHeight="0dp"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="6dp"
-                            android:text="@string/home_switch_to_english"
-                            android:textColor="#FFFFFF"
-                            android:textSize="11sp"
-                            app:backgroundTint="#2E4280"
-                            app:cornerRadius="16dp"
-                            app:strokeColor="#4A65C4"
-                            app:strokeWidth="1dp" />
+                        <FrameLayout
+                            android:layout_width="44dp"
+                            android:layout_height="44dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnLanguageToggle"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                android:insetLeft="0dp"
+                                android:insetTop="0dp"
+                                android:insetRight="0dp"
+                                android:insetBottom="0dp"
+                                android:padding="0dp"
+                                android:gravity="center"
+                                android:contentDescription="@string/language_toggle_to_english"
+                                app:backgroundTint="@color/camera_mode_primary"
+                                app:cornerRadius="16dp"
+                                app:icon="@drawable/ic_language_24"
+                                app:iconGravity="textTop"
+                                app:iconPadding="0dp"
+                                app:iconSize="22dp"
+                                app:iconTint="@color/white"
+                                app:strokeColor="@color/app_blue"
+                                app:strokeWidth="1dp" />
+
+                            <TextView
+                                android:id="@+id/tvLanguageBadge"
+                                android:layout_width="18dp"
+                                android:layout_height="14dp"
+                                android:layout_gravity="end|top"
+                                android:layout_marginEnd="-2dp"
+                                android:layout_marginTop="-2dp"
+                                android:background="@drawable/bg_language_badge"
+                                android:gravity="center"
+                                android:includeFontPadding="false"
+                                android:text="EN"
+                                android:textColor="@color/white"
+                                android:textSize="8sp"
+                                android:textStyle="bold" />
+                        </FrameLayout>
 
                     </LinearLayout>
 
@@ -124,7 +152,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="#FFFFFF"
+                                android:textColor="@color/white"
                                 android:textSize="@dimen/admin_stat_value_text"
                                 android:textStyle="bold" />
 
@@ -136,7 +164,7 @@
                                 android:minLines="2"
                                 android:maxLines="2"
                                 android:text="@string/admin_stat_accounts"
-                                android:textColor="#B0BED4"
+                                android:textColor="@color/admin_subtitle_color"
                                 android:textSize="@dimen/admin_stat_label_text" />
                         </LinearLayout>
 
@@ -156,7 +184,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="#FFFFFF"
+                                android:textColor="@color/white"
                                 android:textSize="@dimen/admin_stat_value_text"
                                 android:textStyle="bold" />
 
@@ -168,7 +196,7 @@
                                 android:minLines="2"
                                 android:maxLines="2"
                                 android:text="@string/admin_stat_image_downloads"
-                                android:textColor="#E8EFFF"
+                                android:textColor="@color/white"
                                 android:textSize="@dimen/admin_stat_label_text" />
                         </LinearLayout>
 
@@ -188,7 +216,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="#FFFFFF"
+                                android:textColor="@color/white"
                                 android:textSize="@dimen/admin_stat_value_text"
                                 android:textStyle="bold" />
 
@@ -200,7 +228,7 @@
                                 android:minLines="2"
                                 android:maxLines="2"
                                 android:text="@string/admin_stat_video_downloads"
-                                android:textColor="#FFDADA"
+                                android:textColor="@color/white"
                                 android:textSize="@dimen/admin_stat_label_text" />
                         </LinearLayout>
                     </LinearLayout>

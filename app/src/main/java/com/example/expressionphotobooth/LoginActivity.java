@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 
 import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
@@ -26,7 +27,7 @@ import java.util.Locale;
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword, etName, etBirthday;
-    private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage;
+    private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage, tvLanguageBadge;
     private View layoutRegisterExtra, tvForgotPassword, layoutLoadingOverlay;
     private MaterialButton btnSignIn, btnRegister, btnGuest, btnLanguageToggle;
     private AuthRepository authRepository;
@@ -48,7 +49,8 @@ public class LoginActivity extends AppCompatActivity {
         authRepository = ((AppContainer) getApplication()).getAuthRepository();
         
         btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
-        updateLanguageButtonText();
+        tvLanguageBadge = findViewById(R.id.tvLanguageBadge);
+        updateLanguageToggleUi(com.example.expressionphotobooth.utils.LocaleManager.getCurrentLanguage(this));
         btnLanguageToggle.setOnClickListener(v -> {
             String language = com.example.expressionphotobooth.utils.LocaleManager.toggleLanguageWithoutRecreate(this);
             updateLocalizedUi(language);
@@ -151,22 +153,51 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void updateLanguageButtonText() {
+    private void updateLanguageToggleUi(String languageTag) {
         if (btnLanguageToggle == null) {
             return;
         }
-        int textRes = com.example.expressionphotobooth.utils.LocaleManager.isVietnamese(this)
-                ? R.string.home_switch_to_english
-                : R.string.home_switch_to_vietnamese;
-        btnLanguageToggle.setText(textRes);
+        boolean isVietnamese = com.example.expressionphotobooth.utils.LocaleManager.LANG_VI.equalsIgnoreCase(languageTag);
+        int contentDescRes = isVietnamese
+                ? R.string.language_toggle_to_english
+                : R.string.language_toggle_to_vietnamese;
+        String contentDesc = com.example.expressionphotobooth.utils.LocaleManager.getString(this, contentDescRes, languageTag);
+        btnLanguageToggle.setContentDescription(contentDesc);
+        ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
+        if (tvLanguageBadge != null) {
+            int badgeRes = isVietnamese ? R.string.language_badge_vi : R.string.language_badge_en;
+            animateLanguageBadgeText(com.example.expressionphotobooth.utils.LocaleManager.getString(this, badgeRes, languageTag));
+        }
+    }
+
+    private void animateLanguageBadgeText(String newText) {
+        if (tvLanguageBadge == null || TextUtils.isEmpty(newText)) {
+            return;
+        }
+        CharSequence current = tvLanguageBadge.getText();
+        if (newText.contentEquals(current)) {
+            return;
+        }
+        tvLanguageBadge.animate().cancel();
+        tvLanguageBadge.animate()
+                .alpha(0f)
+                .scaleX(0.88f)
+                .scaleY(0.88f)
+                .setDuration(120L)
+                .withEndAction(() -> {
+                    tvLanguageBadge.setText(newText);
+                    tvLanguageBadge.animate()
+                            .alpha(1f)
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(120L)
+                            .start();
+                })
+                .start();
     }
 
     private void updateLocalizedUi(String languageTag) {
-        btnLanguageToggle.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
-                com.example.expressionphotobooth.utils.LocaleManager.LANG_VI.equals(languageTag)
-                        ? R.string.home_switch_to_english
-                        : R.string.home_switch_to_vietnamese,
-                languageTag));
+        updateLanguageToggleUi(languageTag);
 
         if (tvLoginTitle != null) {
             tvLoginTitle.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient"
+    android:background="@color/screen_bg"
     tools:ignore="ContentDescription">
 
     <!-- ── TOP APP BAR ── -->
@@ -41,7 +41,7 @@
                 app:icon="@drawable/ic_arrow_back_24"
                 app:iconGravity="textStart"
                 app:iconSize="24dp"
-                app:iconTint="#2A5298" />
+                app:iconTint="@color/screen_icon_tint" />
 
             <TextView
                 android:layout_width="0dp"
@@ -50,7 +50,7 @@
                 android:layout_marginStart="8dp"
                 android:fontFamily="@font/pacifico_regular"
                 android:text="@string/title_edit"
-                android:textColor="#2A5298"
+                android:textColor="@color/screen_title"
                 android:textSize="22sp" />
 
             <com.google.android.material.button.MaterialButton
@@ -66,7 +66,7 @@
                 app:icon="@drawable/ic_visibility_24"
                 app:iconGravity="textStart"
                 app:iconSize="24dp"
-                app:iconTint="#2A5298" />
+                app:iconTint="@color/screen_icon_tint" />
 
         </LinearLayout>
     </com.google.android.material.appbar.MaterialToolbar>
@@ -97,7 +97,7 @@
                 android:id="@+id/ivEditingPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#E8EDF5"
+                android:background="@color/color_input_stroke"
                 android:contentDescription="@string/edit_photo_preview_content_desc"
                 android:scaleType="centerCrop" />
 
@@ -137,7 +137,7 @@
         android:layout_marginTop="12dp"
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="0dp"
-        app:cardBackgroundColor="#FAFCFF"
+        app:cardBackgroundColor="@color/screen_surface"
         app:cardCornerRadius="32dp"
         app:cardElevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -172,8 +172,8 @@
                 app:tabGravity="fill"
                 app:tabIndicatorHeight="0dp"
                 app:tabMode="fixed"
-                app:tabSelectedTextColor="#FFFFFF"
-                app:tabTextColor="#8899A6"
+                app:tabSelectedTextColor="@color/white"
+                app:tabTextColor="@color/screen_text_muted"
                 app:tabRippleColor="@android:color/transparent"
                 app:tabMaxWidth="0dp" />
 
@@ -211,7 +211,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/edit_select_filter"
-                                android:textColor="#1F618D"
+                                android:textColor="@color/screen_subtitle"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
 
@@ -222,7 +222,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/edit_apply"
                                 android:textSize="12sp"
-                                android:textColor="#2A5298"
+                                android:textColor="@color/camera_mode_primary"
                                 app:icon="@drawable/ic_check_24"
                                 app:iconSize="14dp" />
                         </LinearLayout>
@@ -240,7 +240,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/edit_fine_tune_selection"
-                                android:textColor="#88000000"
+                                android:textColor="@color/screen_text_muted"
                                 android:textSize="12sp" />
 
                             <com.google.android.material.button.MaterialButton
@@ -254,7 +254,7 @@
                                 app:icon="@drawable/ic_undo_24"
                                 app:iconGravity="textStart"
                                 app:iconSize="22dp"
-                                app:iconTint="#2A5298" />
+                                app:iconTint="@color/camera_mode_primary" />
                         </LinearLayout>
 
                         <androidx.recyclerview.widget.RecyclerView
@@ -287,7 +287,7 @@
                                 android:layout_height="wrap_content"
                                 android:minWidth="56dp"
                                 android:text="@string/edit_intensity"
-                                android:textColor="#1F618D"
+                                android:textColor="@color/screen_subtitle"
                                 android:textSize="11sp"
                                 android:textStyle="bold" />
 
@@ -300,8 +300,8 @@
                                 android:layout_weight="1"
                                 android:max="100"
                                 android:progress="80"
-                                android:progressTint="#2A5298"
-                                android:thumbTint="#2A5298" />
+                                android:progressTint="@color/camera_mode_primary"
+                                android:thumbTint="@color/camera_mode_primary" />
 
                             <TextView
                                 android:id="@+id/tvIntensityValue"
@@ -309,7 +309,7 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="end"
                                 android:text="@string/edit_default_intensity_value"
-                                android:textColor="#2A5298"
+                                android:textColor="@color/camera_mode_primary"
                                 android:textSize="11sp"
                                 android:textStyle="bold" />
 
@@ -360,8 +360,8 @@
                             app:tabIndicatorHeight="0dp"
                             app:tabMode="fixed"
                             app:tabRippleColor="@android:color/transparent"
-                            app:tabSelectedTextColor="#FFFFFF"
-                            app:tabTextColor="#8899A6" />
+                            app:tabSelectedTextColor="@color/white"
+                            app:tabTextColor="@color/screen_text_muted" />
 
                         <LinearLayout
                             android:id="@+id/stickerSizeRow"
@@ -378,7 +378,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/edit_sticker_size"
-                                android:textColor="#1F618D"
+                                android:textColor="@color/screen_subtitle"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
 
@@ -391,8 +391,8 @@
                                 android:layout_weight="1"
                                 android:max="270"
                                 android:progress="70"
-                                android:progressTint="#2A5298"
-                                android:thumbTint="#2A5298" />
+                                android:progressTint="@color/camera_mode_primary"
+                                android:thumbTint="@color/camera_mode_primary" />
 
                             <TextView
                                 android:id="@+id/tvStickerSizeValue"
@@ -400,7 +400,7 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="end"
                                 android:text="100%"
-                                android:textColor="#2A5298"
+                                android:textColor="@color/camera_mode_primary"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
 
@@ -432,7 +432,7 @@
                                     android:layout_height="wrap_content"
                                     android:checkable="true"
                                     app:chipBackgroundColor="@color/selector_sticker_size_chip_bg"
-                                    app:chipStrokeColor="#809CB3D8"
+                                    app:chipStrokeColor="@color/camera_mode_primary"
                                     app:chipStrokeWidth="1dp"
                                     android:textColor="@color/selector_sticker_size_chip_text"
                                     android:text="@string/edit_sticker_size_small" />
@@ -444,7 +444,7 @@
                                     android:layout_height="wrap_content"
                                     android:checkable="true"
                                     app:chipBackgroundColor="@color/selector_sticker_size_chip_bg"
-                                    app:chipStrokeColor="#809CB3D8"
+                                    app:chipStrokeColor="@color/camera_mode_primary"
                                     app:chipStrokeWidth="1dp"
                                     android:textColor="@color/selector_sticker_size_chip_text"
                                     android:text="@string/edit_sticker_size_medium" />
@@ -456,7 +456,7 @@
                                     android:layout_height="wrap_content"
                                     android:checkable="true"
                                     app:chipBackgroundColor="@color/selector_sticker_size_chip_bg"
-                                    app:chipStrokeColor="#809CB3D8"
+                                    app:chipStrokeColor="@color/camera_mode_primary"
                                     app:chipStrokeWidth="1dp"
                                     android:textColor="@color/selector_sticker_size_chip_text"
                                     android:text="@string/edit_sticker_size_large" />
@@ -522,14 +522,14 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#E0E6F0" />
+                android:background="@color/screen_divider" />
 
             <!-- ── SAVE BUTTON ROW ── -->
             <FrameLayout
                 android:id="@+id/persistentBottomBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#F8FAFD"
+                android:background="@color/screen_surface_alt"
                 android:paddingHorizontal="24dp"
                 android:paddingTop="12dp"
                 android:paddingBottom="32dp">
@@ -539,17 +539,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="54dp"
                     android:text="@string/btn_save_return"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    app:backgroundTint="#ff99be"
+                    app:backgroundTint="@color/history_pill_pink"
                     app:cornerRadius="27dp"
                     app:elevation="4dp"
                     app:icon="@drawable/ic_check_24"
                     app:iconGravity="textStart"
                     app:iconPadding="8dp"
                     app:iconSize="20dp"
-                    app:iconTint="#FFFFFF" />
+                    app:iconTint="@color/white" />
 
             </FrameLayout>
 

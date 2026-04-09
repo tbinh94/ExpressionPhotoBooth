@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/screen_bg">
 
     <!-- ── FULL SCREEN SCAN MODE (HIDDEN BY DEFAULT) ── -->
     <androidx.camera.view.PreviewView
@@ -61,7 +62,7 @@
             android:layout_marginTop="@dimen/camera_title_margin_top"
             android:fontFamily="@font/pacifico_regular"
             android:text="@string/camera_main_title"
-            android:textColor="#2A5298"
+            android:textColor="@color/screen_title"
             android:textSize="28sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -74,7 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/camera_subtitle_margin_top"
             android:text="@string/camera_header_subtitle"
-            android:textColor="#1F618D"
+            android:textColor="@color/screen_subtitle"
             android:textSize="13sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -139,7 +140,7 @@
                     android:padding="10dp"
                     android:src="@drawable/ic_flip_camera"
                     android:contentDescription="@string/camera_switch_lens"
-                    app:tint="#2A5298" />
+                    app:tint="@color/screen_icon_tint" />
 
                 <ImageButton
                     android:id="@+id/btnPortraitMode"
@@ -152,7 +153,7 @@
                     android:padding="10dp"
                     android:src="@drawable/ic_person_24"
                     android:contentDescription="@string/main_portrait_mode"
-                    app:tint="#3D68E8" />
+                    app:tint="@color/screen_icon_tint" />
             </FrameLayout>
         </androidx.cardview.widget.CardView>
 
@@ -177,7 +178,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
                 android:text="@string/main_capture_mode_label"
-                android:textColor="#3D68E8"
+                android:textColor="@color/screen_subtitle"
                 android:textSize="11sp"
                 android:letterSpacing="0.08"
                 android:textStyle="bold" />
@@ -314,7 +315,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/capture_status_ready"
-                    android:textColor="#2A5298"
+                    android:textColor="@color/screen_title"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -332,8 +333,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                app:indicatorColor="#2A5298"
-                app:trackColor="#D1D9E6"
+                app:indicatorColor="@color/camera_mode_primary"
+                app:trackColor="@color/screen_divider"
                 app:trackThickness="4dp"
                 app:trackCornerRadius="2dp" />
 
@@ -360,9 +361,9 @@
                 android:layout_height="match_parent"
                 android:text="@string/ratio_wide"
                 android:textSize="11sp"
-                android:textColor="#2A5298"
+                android:textColor="@color/screen_title"
                 android:visibility="gone"
-                app:strokeColor="#2A5298"
+                app:strokeColor="@color/screen_title"
                 app:cornerRadius="8dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -376,7 +377,7 @@
             android:src="@drawable/ic_flash_off_24"
             android:contentDescription="@string/camera_flash_toggle"
             android:padding="11dp"
-            app:tint="#2A5298"
+            app:tint="@color/screen_icon_tint"
             app:layout_constraintBottom_toBottomOf="@id/btnCapture"
             app:layout_constraintStart_toEndOf="@id/btnCapture"
             app:layout_constraintTop_toTopOf="@id/btnCapture" />
@@ -390,7 +391,7 @@
             android:src="@drawable/ic_sound_on"
             android:contentDescription="@string/main_sound_toggle"
             android:padding="11dp"
-            app:tint="#2A5298"
+            app:tint="@color/screen_icon_tint"
             app:layout_constraintBottom_toBottomOf="@id/btnCapture"
             app:layout_constraintStart_toEndOf="@id/btnFlash"
             app:layout_constraintTop_toTopOf="@id/btnCapture" />
