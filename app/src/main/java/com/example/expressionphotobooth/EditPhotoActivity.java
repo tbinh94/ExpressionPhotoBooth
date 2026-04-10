@@ -1439,7 +1439,7 @@ public class EditPhotoActivity extends AppCompatActivity {
             return;
         }
         
-        Toast.makeText(this, "Deleting...", Toast.LENGTH_SHORT).show();
+        // SILENT DELETE
         FirebaseFirestore.getInstance().collection("stickers")
                 .document(item.id)
                 .delete()

@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
                 isFaceExpressionMode = (checkedId == R.id.btnAiFace);
                 
                 if (isHandGestureMode && !isHandAnalyzerAvailable) {
-                    Toast.makeText(this, "Hand tracking models downloading...", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Hand tracking models downloading in background...");
                 }
             }
         });
