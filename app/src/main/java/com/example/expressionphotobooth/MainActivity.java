@@ -628,14 +628,41 @@ public class MainActivity extends AppCompatActivity {
         
         if (isExpressionMode) {
             if (isHandGestureMode) {
-                if (nextShot % 2 != 0) {
-                    targetExpression = "HI";
-                    tvCountdown.setText("✌️");
-                    updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
-                } else {
-                    targetExpression = "HEART";
-                    tvCountdown.setText("❤️");
-                    updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot));
+                switch (nextShot) {
+                    case 1:
+                        targetExpression = "HI";
+                        tvCountdown.setText("✌️");
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
+                        break;
+                    case 2:
+                        targetExpression = "HEART";
+                        tvCountdown.setText("❤️");
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot));
+                        break;
+                    case 3:
+                        targetExpression = "THUMBS_UP";
+                        tvCountdown.setText("👍");
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_thumbs_up, nextShot));
+                        break;
+                    case 4:
+                        targetExpression = "OPEN_PALM";
+                        tvCountdown.setText("🖐️");
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_open_palm, nextShot));
+                        break;
+                    case 5:
+                        targetExpression = "FIST";
+                        tvCountdown.setText("✊");
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_fist, nextShot));
+                        break;
+                    case 6:
+                        targetExpression = "OK_SIGN";
+                        tvCountdown.setText("👌");
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_ok, nextShot));
+                        break;
+                    default:
+                        targetExpression = "HI";
+                        tvCountdown.setText("✌️");
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
                 }
             } else if (isVoiceTriggerMode) {
                 tvCountdown.setText("🎤");

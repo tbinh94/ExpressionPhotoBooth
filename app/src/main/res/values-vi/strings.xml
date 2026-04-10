@@ -143,6 +143,10 @@
     <string name="main_ai_hand_unavailable">AI nhận diện hành động chưa hỗ trợ trên máy/giả lập này. Vui lòng dùng chế độ Khuôn mặt.</string>
     <string name="main_capture_prompt_hand_hi">Chụp %1$d: Giơ tay Hi nào!</string>
     <string name="main_capture_prompt_hand_heart">Chụp %1$d: Thả tim xem!</string>
+    <string name="main_capture_prompt_hand_thumbs_up">Chụp %1$d: Hãy Like nào!</string>
+    <string name="main_capture_prompt_hand_open_palm">Chụp %1$d: Mở lòng bàn tay nào!</string>
+    <string name="main_capture_prompt_hand_fist">Chụp %1$d: Nắm đấm mạnh mẽ!</string>
+    <string name="main_capture_prompt_hand_ok">Chụp %1$d: Ra hiệu OK nào!</string>
     <string name="main_capture_prompt_face_smile">Chụp %1$d: Cười lên nào!</string>
     <string name="main_capture_prompt_face_wink">Chụp %1$d: Nháy mắt cái nào!</string>
     <string name="main_sound_on">Đã bật âm thanh</string>

@@ -86,13 +86,32 @@ public class GestureAnalyzer {
             if (result != null && !result.landmarks().isEmpty()) {
                 List<NormalizedLandmark> landmarks = result.landmarks().get(0);
                 
-                boolean[] isFingerRaised = checkFingersRaised(landmarks);
-                
-                if (isFingerRaised[1] && isFingerRaised[2] && !isFingerRaised[3] && !isFingerRaised[4]) {
+                boolean[] raised = checkFingersRaised(landmarks);
+                float dThumbIndex = dist(landmarks.get(4), landmarks.get(8));
+
+                // 1. HI (V-sign: Index & Middle up)
+                if (raised[1] && raised[2] && !raised[3] && !raised[4]) {
                     rawGesture = "HI";
                 }
-                else if (checkFingerHeart(landmarks)) {
+                // 2. FIST (All 5 fingers tightly folded) - Ưu tiên kiểm tra trước Heart
+                else if (!raised[0] && !raised[1] && !raised[2] && !raised[3] && !raised[4]) {
+                    rawGesture = "FIST";
+                }
+                // 3. FINGER HEART (Thumb & Index near, BUT not a fist)
+                else if (dThumbIndex < 0.13f && !raised[2] && !raised[3] && !raised[4]) {
                     rawGesture = "HEART";
+                }
+                // 4. THUMBS UP (Thumb up, others folded)
+                else if (raised[0] && !raised[1] && !raised[2] && !raised[3] && !raised[4]) {
+                    rawGesture = "THUMBS_UP";
+                }
+                // 5. OPEN PALM (All extended fingers)
+                else if (raised[1] && raised[2] && raised[3] && raised[4]) {
+                    rawGesture = "OPEN_PALM";
+                }
+                // 6. OK SIGN (Thumb & Index near, others up)
+                else if (dThumbIndex < 0.13f && raised[2] && raised[3] && raised[4]) {
+                    rawGesture = "OK_SIGN";
                 }
 
                 handBox = calculateHandBox(landmarks, mpImage.getWidth(), mpImage.getHeight());
@@ -102,13 +121,18 @@ public class GestureAnalyzer {
             if (gestureHistory.size() > HISTORY_SIZE) gestureHistory.pollFirst();
 
             String confirmed = "NONE";
-            int hiVotes = 0, heartVotes = 0;
+            java.util.Map<String, Integer> counts = new java.util.HashMap<>();
             for (String g : gestureHistory) {
-                if ("HI".equals(g)) hiVotes++;
-                else if ("HEART".equals(g)) heartVotes++;
+                if ("NONE".equals(g)) continue;
+                counts.put(g, counts.getOrDefault(g, 0) + 1);
             }
-            if (hiVotes >= CONFIRM_THRESHOLD) confirmed = "HI";
-            else if (heartVotes >= CONFIRM_THRESHOLD) confirmed = "HEART";
+
+            for (java.util.Map.Entry<String, Integer> entry : counts.entrySet()) {
+                if (entry.getValue() >= CONFIRM_THRESHOLD) {
+                    confirmed = entry.getKey();
+                    break;
+                }
+            }
 
             boolean matched = confirmed.equals(targetExpression);
             listener.onResult(new AnalysisResult(matched, handBox, confirmed));
@@ -147,11 +171,6 @@ public class GestureAnalyzer {
         return raised;
     }
 
-    private boolean checkFingerHeart(List<NormalizedLandmark> landmarks) {
-        // Finger heart: Đầu ngón cái (4) và đầu ngón trỏ (8) gần nhau
-        float dThumbIndex = dist(landmarks.get(4), landmarks.get(8));
-        return dThumbIndex < 0.12f; // Nới lỏng để dễ nhận diện hơn
-    }
 
     private float dist(NormalizedLandmark a, NormalizedLandmark b) {
         float dx = a.x() - b.x();

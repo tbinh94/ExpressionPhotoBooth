@@ -232,6 +232,10 @@
     <string name="main_ai_hand_unavailable">Gesture AI is unavailable on this device/emulator. Please use Face mode.</string>
     <string name="main_capture_prompt_hand_hi">Shot %1$d: Give a Hi wave!</string>
     <string name="main_capture_prompt_hand_heart">Shot %1$d: Show some heart!</string>
+    <string name="main_capture_prompt_hand_thumbs_up">Shot %1$d: Give a Thumbs Up!</string>
+    <string name="main_capture_prompt_hand_open_palm">Shot %1$d: Open your palm!</string>
+    <string name="main_capture_prompt_hand_fist">Shot %1$d: Make a Fist!</string>
+    <string name="main_capture_prompt_hand_ok">Shot %1$d: Give an OK sign!</string>
     <string name="main_capture_prompt_face_smile">Shot %1$d: Smile for us!</string>
     <string name="main_capture_prompt_face_wink">Shot %1$d: Give a wink!</string>
     <string name="main_sound_on">Sound enabled</string>
