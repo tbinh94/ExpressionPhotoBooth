@@ -6,6 +6,10 @@
         <item name="android:windowSplashScreenBackground">@color/launcher_splash_bg</item>
         <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@color/launcher_icon_bg</item>
+        <!-- Edge to Edge configs -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.ExpressionPhotoBooth" parent="Base.Theme.ExpressionPhotoBooth" />

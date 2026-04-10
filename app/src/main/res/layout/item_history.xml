@@ -69,7 +69,7 @@
                     android:layout_weight="1"
                     android:text="@string/history_save_photo"
                     android:textAllCaps="false"
-                    android:textColor="@android:color/black"
+                    android:textColor="@color/text_primary"
                     android:textSize="@dimen/history_pill_text_size"
                     android:textStyle="bold"
                     app:backgroundTint="@color/history_pill_pink"
@@ -117,7 +117,7 @@
                     android:layout_weight="1"
                     android:text="@string/result_share"
                     android:textAllCaps="false"
-                    android:textColor="@android:color/black"
+                    android:textColor="@color/text_primary"
                     android:textSize="@dimen/history_pill_text_size"
                     android:textStyle="bold"
                     app:backgroundTint="@color/history_pill_pink"
@@ -152,4 +152,5 @@
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+
 

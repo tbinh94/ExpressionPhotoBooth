@@ -75,7 +75,7 @@
                         android:text="@string/admin_sticker_empty"
                         android:gravity="center"
                         android:padding="40dp"
-                        android:textColor="#8A9BB8"
+                        android:textColor="@color/text_secondary"
                         android:visibility="gone"/>
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
@@ -127,3 +127,4 @@
     </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

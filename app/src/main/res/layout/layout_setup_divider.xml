@@ -11,13 +11,13 @@
         android:layout_height="1dp"
         android:layout_weight="1"
         android:layout_marginEnd="8dp"
-        android:background="#2A5298" />
+        android:background="@color/camera_mode_primary" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="★   •   ☆   •   ★"
-        android:textColor="#2A5298"
+        android:textColor="@color/camera_mode_primary"
         android:textSize="14sp"
         android:textStyle="bold" />
 
@@ -26,5 +26,5 @@
         android:layout_height="1dp"
         android:layout_weight="1"
         android:layout_marginStart="8dp"
-        android:background="#2A5298" />
+        android:background="@color/camera_mode_primary" />
 </LinearLayout>

@@ -72,7 +72,7 @@
                     android:layout_weight="1"
                     android:text="@string/history_save_photo"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold"
                     app:backgroundTint="@color/history_pill_pink"
                     app:cornerRadius="22dp" />
@@ -84,7 +84,7 @@
                     android:layout_weight="1"
                     android:text="@string/result_share"
                     android:textAllCaps="false"
-                    android:textColor="@color/black"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold"
                     app:backgroundTint="@color/history_pill_pink"
                     app:cornerRadius="22dp" />
@@ -126,7 +126,7 @@
             android:id="@+id/cardCarouselInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/white"
+            app:cardBackgroundColor="@color/surface_card"
             app:cardCornerRadius="32dp"
             app:cardElevation="16dp"
             app:strokeColor="@color/history_pill_pink"
@@ -161,7 +161,7 @@
                     android:layout_marginTop="8dp"
                     android:fontFamily="serif"
                     android:text="@string/gallery_information"
-                    android:textColor="@color/history_primary_text"
+                    android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -170,7 +170,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:textColor="@color/history_primary_text"
+                    android:textColor="@color/text_secondary"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     tools:text="Date: 08/04/2026" />
@@ -180,7 +180,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textColor="@color/history_primary_text"
+                    android:textColor="@color/text_secondary"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     tools:text="Frame: Movie" />
@@ -197,7 +197,7 @@
                         android:layout_weight="1"
                         android:text="@string/history_save_photo"
                         android:textAllCaps="false"
-                        android:textColor="@color/black"
+                        android:textColor="@color/text_primary"
                         android:textStyle="bold"
                         app:backgroundTint="@color/history_pill_pink"
                         app:cornerRadius="22dp" />
@@ -209,7 +209,7 @@
                         android:layout_weight="1"
                         android:text="@string/result_share"
                         android:textAllCaps="false"
-                        android:textColor="@color/black"
+                        android:textColor="@color/text_primary"
                         android:textStyle="bold"
                         app:backgroundTint="@color/history_pill_pink"
                         app:cornerRadius="22dp" />
@@ -285,9 +285,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:alpha="0.4"
+            android:alpha="0.65"
             android:text="No memories yet"
-            android:textColor="#333333" />
+            android:textColor="@color/text_secondary" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

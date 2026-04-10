@@ -39,6 +39,7 @@ public class AdminUsersActivity extends AppCompatActivity {
         getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         
         super.onCreate(savedInstanceState);
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_admin_users);
 

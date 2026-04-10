@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/surface_card"
     app:cardCornerRadius="@dimen/admin_card_corner_radius_item"
     app:cardElevation="@dimen/admin_card_elevation"
     app:strokeColor="@color/admin_card_stroke"
@@ -30,7 +30,7 @@
                 android:background="@drawable/bg_avatar_circle"
                 android:gravity="center"
                 android:text="A"
-                android:textColor="#1B2A5C"
+                android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -101,3 +101,4 @@
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+

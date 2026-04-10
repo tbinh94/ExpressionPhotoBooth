@@ -21,7 +21,7 @@
             android:visibility="gone"
             app:cardCornerRadius="@dimen/admin_card_corner_radius"
             app:cardElevation="@dimen/admin_card_elevation"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="@color/surface_card"
             app:strokeWidth="0dp">
 
             <LinearLayout
@@ -125,11 +125,11 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/tvBar5Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_five" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar5Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_five" android:textSize="11sp" android:textColor="@color/text_secondary"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar5Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_green"/>
                     </FrameLayout>
-                    <TextView android:id="@+id/tv5StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="#4A5D77" android:gravity="end"/>
+                    <TextView android:id="@+id/tv5StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="@color/text_secondary" android:gravity="end"/>
                 </LinearLayout>
 
                 <!-- 4 Stars -->
@@ -139,11 +139,11 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/tvBar4Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_four" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar4Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_four" android:textSize="11sp" android:textColor="@color/text_secondary"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar4Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_blue"/>
                     </FrameLayout>
-                    <TextView android:id="@+id/tv4StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="#4A5D77" android:gravity="end"/>
+                    <TextView android:id="@+id/tv4StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="@color/text_secondary" android:gravity="end"/>
                 </LinearLayout>
 
                 <!-- 3 Stars -->
@@ -153,11 +153,11 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/tvBar3Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_three" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar3Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_three" android:textSize="11sp" android:textColor="@color/text_secondary"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar3Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_gold"/>
                     </FrameLayout>
-                    <TextView android:id="@+id/tv3StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="#4A5D77" android:gravity="end"/>
+                    <TextView android:id="@+id/tv3StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="@color/text_secondary" android:gravity="end"/>
                 </LinearLayout>
 
                 <!-- 2 Stars -->
@@ -167,11 +167,11 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/tvBar2Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_two" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar2Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_two" android:textSize="11sp" android:textColor="@color/text_secondary"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar2Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_orange"/>
                     </FrameLayout>
-                    <TextView android:id="@+id/tv2StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="#4A5D77" android:gravity="end"/>
+                    <TextView android:id="@+id/tv2StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="@color/text_secondary" android:gravity="end"/>
                 </LinearLayout>
 
                 <!-- 1 Star -->
@@ -180,11 +180,11 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/tvBar1Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_one" android:textSize="11sp" android:textColor="#4A5D77"/>
+                    <TextView android:id="@+id/tvBar1Label" android:layout_width="32dp" android:layout_height="wrap_content" android:text="@string/admin_overview_bar_one" android:textSize="11sp" android:textColor="@color/text_secondary"/>
                     <FrameLayout android:layout_width="0dp" android:layout_height="8dp" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:background="@drawable/shape_bar_track">
                         <View android:id="@+id/bar1Star" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_bar_fill_red"/>
                     </FrameLayout>
-                    <TextView android:id="@+id/tv1StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="#4A5D77" android:gravity="end"/>
+                    <TextView android:id="@+id/tv1StarCount" android:layout_width="24dp" android:layout_height="wrap_content" android:text="0" android:textSize="11sp" android:textColor="@color/text_secondary" android:gravity="end"/>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -263,7 +263,7 @@
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="@dimen/admin_card_corner_radius_item"
             app:cardElevation="@dimen/admin_card_elevation"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="@color/surface_card"
             app:strokeColor="@color/admin_card_stroke"
             app:strokeWidth="1dp">
 
@@ -285,10 +285,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0%"
-                    android:textColor="#1B2A5C"
+                    android:textColor="@color/text_primary"
                     android:textSize="@dimen/admin_ai_mini_percent_text"
                     android:textStyle="bold"
-                    app:layout_constraintBaseline_toBaselineOf="@id/tvAiRatioMiniTitle"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
                 <LinearLayout
@@ -309,7 +310,7 @@
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:text="@string/admin_ai_pie_title"
-                        android:textColor="#1B2A5C"
+                        android:textColor="@color/text_primary"
                         android:textSize="@dimen/admin_ai_mini_title_text"
                         android:textStyle="bold" />
 
@@ -333,7 +334,7 @@
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="@dimen/admin_card_corner_radius"
             app:cardElevation="@dimen/admin_card_elevation"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/surface_card">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -384,7 +385,7 @@
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="@dimen/admin_card_corner_radius"
             app:cardElevation="@dimen/admin_card_elevation"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/surface_card">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -435,7 +436,7 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="@dimen/admin_card_corner_radius"
             app:cardElevation="@dimen/admin_card_elevation"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/surface_card">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -482,3 +483,4 @@
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
+

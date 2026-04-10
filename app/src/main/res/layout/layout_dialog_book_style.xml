@@ -22,7 +22,7 @@
         android:layout_marginTop="16dp"
         android:fontFamily="serif"
         android:text="Choose Your Style"
-        android:textColor="#333333"
+        android:textColor="@color/text_primary"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -49,3 +49,4 @@
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

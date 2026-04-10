@@ -54,10 +54,12 @@
     <string name="home_drawer_music">Âm nhạc:</string>
     <string name="home_drawer_language">Ngôn ngữ:</string>
     <string name="home_drawer_theme">Giao diện:</string>
+    <string name="home_drawer_usage_guide">Hướng dẫn sử dụng</string>
     <string name="home_music_on">Bật</string>
     <string name="home_music_off">Tắt</string>
     <string name="home_theme_light">Sáng</string>
     <string name="home_theme_dark">Tối</string>
+    <string name="home_theme_system">Hệ thống</string>
     <string name="home_theme_toggle_to_dark">Chuyển sang giao diện tối</string>
     <string name="home_theme_toggle_to_light">Chuyển sang giao diện sáng</string>
     <string name="language_toggle_to_english">Chuyển ngôn ngữ sang English</string>
@@ -73,6 +75,17 @@
     <string name="home_banner_dialog_title">Đổi ảnh bìa</string>
     <string name="home_banner_option_picker">Chọn từ máy</string>
     <string name="home_banner_option_default">Mặc định</string>
+    <string name="home_usage_guide_title">Hướng dẫn dùng Photobooth</string>
+    <string name="home_usage_guide_subtitle">Làm theo đầy đủ các bước dưới đây để sử dụng app trọn quy trình từ đầu đến cuối.</string>
+    <string name="home_usage_step_1">Tại Trang chủ, bấm BẮT ĐẦU và chọn kiểu khung ở màn Setup.</string>
+    <string name="home_usage_step_2">Bấm TIẾP THEO để vào Camera và hoàn tất chuỗi chụp tự động.</string>
+    <string name="home_usage_step_3">Xem lại danh sách ảnh đã chụp và chọn đúng số ảnh theo khung đã chọn.</string>
+    <string name="home_usage_step_4">Tuỳ chọn: bấm CHỈNH SỬA để thêm filter, frame, sticker trước khi xuất kết quả.</string>
+    <string name="home_usage_step_5">Bấm KẾT QUẢ để tạo ảnh collage cuối cùng từ các ảnh đã chọn.</string>
+    <string name="home_usage_step_6">Tại màn Kết quả, bạn có thể lưu ảnh/video hoặc chia sẻ ngay.</string>
+    <string name="home_usage_step_7">Vào Thư viện/Lịch sử để xem lại phiên chụp, tải lại hoặc xoá phiên cũ.</string>
+    <string name="home_usage_step_8">Dùng thanh drawer để đổi Ngôn ngữ, Giao diện (Sáng/Tối/Hệ thống) và Nhạc nền theo ý muốn.</string>
+    <string name="home_usage_cta_start_now">Bắt đầu ngay</string>
 
     <string name="help_setup_content_desc">Hướng dẫn setup</string>
     <string name="help_setup_title">Cách chọn khung ảnh</string>

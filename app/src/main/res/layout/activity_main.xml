@@ -34,7 +34,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/bg_gradient"
+        android:src="@drawable/bg_screen_dynamic"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -301,42 +301,30 @@
                 </com.google.android.material.button.MaterialButtonToggleGroup>
             </HorizontalScrollView>
 
-            <!-- Status + Dot counter trên cùng 1 hàng -->
+            <!-- Centered Ratio Status + Dot counter -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center_vertical"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
                 android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tvCaptureStatus"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/capture_status_ready"
-                    android:textColor="@color/screen_title"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
                 <LinearLayout
                     android:id="@+id/dotContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
+                    android:paddingEnd="8dp"
                     android:gravity="center_vertical" />
+                <TextView
+                    android:id="@+id/tvCaptureStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/capture_status_ready"
+                    android:textColor="@color/screen_title"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
             </LinearLayout>
-
-            <!-- Progress bar -->
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/captureProgress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                app:indicatorColor="@color/camera_mode_primary"
-                app:trackColor="@color/screen_divider"
-                app:trackThickness="4dp"
-                app:trackCornerRadius="2dp" />
 
         </LinearLayout>
 
@@ -367,40 +355,25 @@
                 app:cornerRadius="8dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
-        <!-- Flash + Sound — bên phải capture -->
-        <ImageButton
-            android:id="@+id/btnFlash"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="@dimen/camera_side_button_margin_start"
-            android:background="@drawable/bg_flash_pill"
-            android:src="@drawable/ic_flash_off_24"
-            android:contentDescription="@string/camera_flash_toggle"
-            android:padding="11dp"
-            app:tint="@color/screen_icon_tint"
-            app:layout_constraintBottom_toBottomOf="@id/btnCapture"
-            app:layout_constraintStart_toEndOf="@id/btnCapture"
-            app:layout_constraintTop_toTopOf="@id/btnCapture" />
-
+        <!-- Sound - left of capture -->
         <ImageButton
             android:id="@+id/btnSound"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="@dimen/camera_side_button_spacing"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="@dimen/camera_side_button_margin_start"
             android:background="@drawable/bg_flash_pill"
             android:src="@drawable/ic_sound_on"
             android:contentDescription="@string/main_sound_toggle"
-            android:padding="11dp"
+            android:padding="14dp"
             app:tint="@color/screen_icon_tint"
             app:layout_constraintBottom_toBottomOf="@id/btnCapture"
-            app:layout_constraintStart_toEndOf="@id/btnFlash"
+            app:layout_constraintEnd_toStartOf="@id/btnCapture"
             app:layout_constraintTop_toTopOf="@id/btnCapture" />
-
         <!-- Capture button -->
         <ImageButton
             android:id="@+id/btnCapture"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
+            android:layout_width="84dp"
+            android:layout_height="84dp"
             android:layout_marginBottom="@dimen/camera_capture_bottom_margin"
             android:background="@drawable/selector_camera_btn"
             android:contentDescription="@string/capture_photo"
@@ -408,18 +381,31 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
-
-        <!-- Last capture thumbnail — bên trái capture -->
+        <!-- Flash - right of capture -->
+        <ImageButton
+            android:id="@+id/btnFlash"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="@dimen/camera_side_button_margin_start"
+            android:background="@drawable/bg_flash_pill"
+            android:src="@drawable/ic_flash_off_24"
+            android:contentDescription="@string/camera_flash_toggle"
+            android:padding="14dp"
+            app:tint="@color/screen_icon_tint"
+            app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+            app:layout_constraintStart_toEndOf="@id/btnCapture"
+            app:layout_constraintTop_toTopOf="@id/btnCapture" />
+        <!-- Last capture thumbnail -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardLastCapture"
             android:layout_width="52dp"
             android:layout_height="52dp"
-            android:layout_marginEnd="@dimen/camera_last_capture_margin_start"
+            android:layout_marginStart="24dp"
             android:visibility="gone"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
             app:layout_constraintBottom_toBottomOf="@id/btnCapture"
-            app:layout_constraintEnd_toStartOf="@id/btnCapture"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/btnCapture">
 
             <ImageView
@@ -440,3 +426,5 @@
         android:elevation="100dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+

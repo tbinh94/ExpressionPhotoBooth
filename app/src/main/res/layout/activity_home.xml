@@ -26,6 +26,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <View
+            android:id="@+id/viewHomeBannerDimmer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/bg_home_banner_overlay"
+            android:alpha="0.88"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <LinearLayout
             android:id="@+id/topBar"
             android:layout_width="0dp"
@@ -57,7 +69,7 @@
                 app:iconGravity="textTop"
                 app:iconPadding="0dp"
                 app:iconSize="@dimen/home_top_action_icon_size"
-                app:iconTint="@color/white" />
+                app:iconTint="@color/home_menu_icon_tint" />
 
             <View
                 android:layout_width="0dp"
@@ -78,38 +90,44 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintVertical_bias="0.12">
 
-            <TextView
+            <com.example.expressionphotobooth.ui.OutlinedTextView
                 android:id="@+id/tvHomeOur"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/home_title_our"
-                android:textColor="@color/history_pill_pink"
+                android:textColor="@color/home_neon_title"
                 android:textSize="@dimen/home_title_text_size"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-black"
                 android:includeFontPadding="false"
                 android:letterSpacing="@dimen/home_title_letter_spacing"
-                android:shadowColor="@color/white"
+                android:textScaleX="0.93"
+                android:shadowColor="@android:color/transparent"
                 android:shadowDx="0"
                 android:shadowDy="0"
-                android:shadowRadius="@dimen/home_title_shadow_radius" />
+                android:shadowRadius="0"
+                app:strokeColor="@color/white"
+                app:strokeWidth="@dimen/home_title_stroke_width" />
 
-            <TextView
+            <com.example.expressionphotobooth.ui.OutlinedTextView
                 android:id="@+id/tvHomeMemories"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/home_memories_margin_top"
                 android:text="@string/home_title_memories"
-                android:textColor="@color/history_pill_pink"
+                android:textColor="@color/home_neon_title"
                 android:textSize="@dimen/home_title_text_size"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-black"
                 android:includeFontPadding="false"
                 android:letterSpacing="@dimen/home_title_letter_spacing"
-                android:shadowColor="@color/white"
+                android:textScaleX="0.93"
+                android:shadowColor="@android:color/transparent"
                 android:shadowDx="0"
                 android:shadowDy="0"
-                android:shadowRadius="@dimen/home_title_shadow_radius" />
+                android:shadowRadius="0"
+                app:strokeColor="@color/white"
+                app:strokeWidth="@dimen/home_title_stroke_width" />
 
             <TextView
                 android:id="@+id/tvHomePhotobooth"
@@ -117,7 +135,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/home_photobooth_margin_top"
                 android:text="@string/home_title_photobooth"
-                android:textColor="@color/camera_mode_primary"
+                android:textColor="@color/home_brand_wordmark"
                 android:textSize="@dimen/home_subtitle_text_size"
                 android:fontFamily="@font/pacifico_regular"
                 android:includeFontPadding="false" />
@@ -259,6 +277,23 @@
             android:gravity="center_vertical"
             android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
             android:text="@string/home_drawer_change_banner"
+            android:textColor="@color/home_drawer_text"
+            android:textSize="@dimen/home_drawer_item_text_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDrawerUsageGuide"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/home_drawer_item_height"
+            android:layout_marginTop="@dimen/home_drawer_item_secondary_top_margin"
+            android:background="@drawable/bg_drawer_item_clickable"
+            android:drawableStart="@drawable/ic_help_24"
+            android:drawablePadding="@dimen/home_drawer_item_padding_horizontal"
+            android:drawableTint="@color/home_drawer_text"
+            android:fontFamily="serif"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
+            android:text="@string/home_drawer_usage_guide"
             android:textColor="@color/home_drawer_text"
             android:textSize="@dimen/home_drawer_item_text_size"
             android:textStyle="bold" />
@@ -412,7 +447,7 @@
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/groupTheme"
-                android:layout_width="@dimen/home_drawer_toggle_width"
+                android:layout_width="@dimen/home_drawer_theme_toggle_width"
                 android:layout_height="@dimen/home_drawer_toggle_height"
                 android:background="@drawable/bg_drawer_spinner"
                 app:selectionRequired="true"
@@ -455,6 +490,25 @@
                     app:backgroundTint="@android:color/transparent"
                     app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
                     app:rippleColor="@color/home_toggle_ripple" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnThemeSystem"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.2"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:text="@string/home_theme_system"
+                    android:textAllCaps="false"
+                    android:textColor="@color/home_toggle_text"
+                    android:textSize="@dimen/home_drawer_lang_toggle_text_size"
+                    android:textStyle="bold"
+                    app:backgroundTint="@android:color/transparent"
+                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
+                    app:rippleColor="@color/home_toggle_ripple" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </LinearLayout>
 
@@ -478,7 +532,7 @@
             android:layout_marginBottom="@dimen/home_drawer_sign_out_margin_bottom"
             android:text="@string/auth_sign_out"
             android:textAllCaps="false"
-            android:textColor="@android:color/black"
+            android:textColor="@color/text_primary"
             android:textSize="@dimen/home_drawer_sign_out_text_size"
             android:textStyle="bold"
             app:backgroundTint="@color/history_pill_pink"
@@ -487,3 +541,4 @@
     </LinearLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>
+

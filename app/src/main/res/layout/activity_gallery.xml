@@ -32,7 +32,7 @@
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="32dp"
-            app:iconTint="@color/history_primary_text"
+            app:iconTint="@color/text_primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/titleBox" />
@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/pacifico_regular"
                 android:text="@string/gallery_history_title"
-                android:textColor="@color/history_primary_text"
+                android:textColor="@color/text_primary"
                 android:textSize="28sp" />
 
             <TextView
@@ -63,7 +63,7 @@
                 android:alpha="0.8"
                 android:gravity="center"
                 android:text="@string/gallery_history_subtitle"
-                android:textColor="@color/screen_subtitle"
+                android:textColor="@color/text_secondary"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:layout_marginTop="-4dp" />
@@ -76,7 +76,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/gallery_toggle_view_mode"
             android:src="@drawable/ic_view_carousel"
-            app:tint="@color/history_primary_text"
+            app:tint="@color/text_primary"
             android:padding="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -89,7 +89,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/gallery_add_action"
             android:src="@android:drawable/ic_menu_add"
-            app:tint="@color/history_primary_text"
+            app:tint="@color/text_primary"
             android:padding="10dp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
@@ -192,3 +192,4 @@
     </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

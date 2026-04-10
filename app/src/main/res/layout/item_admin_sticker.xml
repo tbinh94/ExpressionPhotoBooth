@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="#1B2A5C"
+                android:textColor="@color/text_primary"
                 android:textSize="10sp"
                 android:gravity="center"
                 android:maxLines="1"
@@ -50,3 +50,4 @@
             android:elevation="2dp" />
     </FrameLayout>
 </com.google.android.material.card.MaterialCardView>
+

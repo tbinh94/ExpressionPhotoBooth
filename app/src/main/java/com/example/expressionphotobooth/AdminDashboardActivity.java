@@ -52,6 +52,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.admin_dashboard_bg)));
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_admin_dashboard);
         overridePendingTransition(0, 0);

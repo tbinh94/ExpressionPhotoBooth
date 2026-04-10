@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:gravity="center"
-                android:textColor="#2A5298"
+                android:textColor="@color/camera_mode_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -45,7 +45,7 @@
                 android:layout_marginTop="8dp"
                 android:gravity="center"
                 android:lineSpacingExtra="3dp"
-                android:textColor="#324963"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
             <com.google.android.material.button.MaterialButton
@@ -61,4 +61,5 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 </FrameLayout>
+
 

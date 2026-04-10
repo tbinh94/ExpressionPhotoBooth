@@ -7,7 +7,7 @@
     android:layout_marginBottom="8dp"
     app:cardCornerRadius="@dimen/admin_card_corner_radius_item"
     app:cardElevation="@dimen/admin_card_elevation"
-    app:cardBackgroundColor="#FFFFFF">
+    app:cardBackgroundColor="@color/surface_card">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
                 android:layout_height="38dp"
                 android:gravity="center"
                 android:text="@string/admin_review_avatar_placeholder"
-                android:textColor="#2A5298"
+                android:textColor="@color/camera_mode_primary"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:background="@drawable/bg_avatar_circle"
@@ -47,7 +47,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/admin_review_email_placeholder"
-                    android:textColor="#2A5298"
+                    android:textColor="@color/camera_mode_primary"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:ellipsize="end"
@@ -109,7 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/admin_review_feedback_placeholder"
-            android:textColor="#4A5D77"
+            android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:lineSpacingExtra="2dp" />
 
@@ -117,3 +117,4 @@
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
+

@@ -60,6 +60,7 @@
     <dimen name="home_drawer_lang_toggle_text_size">9sp</dimen>
     <dimen name="home_drawer_sign_out_width">166dp</dimen>
     <dimen name="home_drawer_sign_out_height">46dp</dimen>
+    <dimen name="home_title_stroke_width">5dp</dimen>
 
     <dimen name="gallery_carousel_title_margin_top">4dp</dimen>
     <dimen name="gallery_carousel_title_side_margin">14dp</dimen>
