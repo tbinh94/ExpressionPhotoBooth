@@ -40,6 +40,8 @@ public class EditState {
     private FrameStyle frameStyle = FrameStyle.NONE;
     private StickerStyle stickerStyle = StickerStyle.NONE;
     private String customStickerBase64 = null; // New field for custom stickers
+    private String customStickerId = null;    // Firestore ID
+    private boolean fromStore = false;        // Whether it's an admin/store sticker
     private float filterIntensity = 0.8f;
     private float stickerX = -1f;
     private float stickerY = -1f;
@@ -65,6 +67,8 @@ public class EditState {
         this.frameStyle = other.frameStyle;
         this.stickerStyle = other.stickerStyle;
         this.customStickerBase64 = other.customStickerBase64;
+        this.customStickerId = other.customStickerId;
+        this.fromStore = other.fromStore;
         this.filterIntensity = other.filterIntensity;
         this.stickerX = other.stickerX;
         this.stickerY = other.stickerY;
@@ -201,4 +205,10 @@ public class EditState {
     public void setStickerRotation(float stickerRotation) {
         this.stickerRotation = stickerRotation;
     }
+
+    public String getCustomStickerId() { return customStickerId; }
+    public void setCustomStickerId(String customStickerId) { this.customStickerId = customStickerId; }
+
+    public boolean isFromStore() { return fromStore; }
+    public void setFromStore(boolean fromStore) { this.fromStore = fromStore; }
 }

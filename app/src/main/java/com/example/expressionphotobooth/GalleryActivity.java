@@ -136,8 +136,6 @@ public class GalleryActivity extends AppCompatActivity {
     private ViewPager2 vpCarousel;
     private CarouselAdapter carouselAdapter;
     private LinearLayout carouselIndicator;
-    private ImageButton btnCarouselPrev;
-    private ImageButton btnCarouselNext;
     private View cardCarouselInfo;
     private TextView tvCarouselInfoDate;
     private TextView tvCarouselInfoFrame;
@@ -280,24 +278,27 @@ public class GalleryActivity extends AppCompatActivity {
             }
         });
 
-        btnCarouselPrev = stampView.findViewById(R.id.btnCarouselPrev);
-        btnCarouselNext = stampView.findViewById(R.id.btnCarouselNext);
         cardCarouselInfo = stampView.findViewById(R.id.cardCarouselInfo);
         tvCarouselInfoDate = stampView.findViewById(R.id.tvCarouselInfoDate);
         tvCarouselInfoFrame = stampView.findViewById(R.id.tvCarouselInfoFrame);
 
-        if (btnCarouselPrev != null) {
-            btnCarouselPrev.setOnClickListener(v -> moveCarouselBy(-1));
-        }
-        if (btnCarouselNext != null) {
-            btnCarouselNext.setOnClickListener(v -> moveCarouselBy(1));
-        }
+/* Nav buttons removed per user request */
 
         stampView.findViewById(R.id.btnCarouselSavePhoto).setOnClickListener(v -> performCarouselAction("save_photo"));
         stampView.findViewById(R.id.btnCarouselShare).setOnClickListener(v -> performCarouselAction("share"));
         stampView.findViewById(R.id.btnCarouselSaveVideo).setOnClickListener(v -> performCarouselAction("save_video"));
         stampView.findViewById(R.id.btnCarouselViewFeedback).setOnClickListener(v -> performCarouselAction("view_feedback"));
         stampView.findViewById(R.id.btnCarouselDelete).setOnClickListener(v -> performCarouselAction("delete"));
+
+        stampView.findViewById(R.id.btnStaticSavePhoto).setOnClickListener(v -> performCarouselAction("save_photo"));
+        stampView.findViewById(R.id.btnStaticShare).setOnClickListener(v -> performCarouselAction("share"));
+        stampView.findViewById(R.id.btnStaticSaveVideo).setOnClickListener(v -> performCarouselAction("save_video"));
+        stampView.findViewById(R.id.btnStaticViewFeedback).setOnClickListener(v -> performCarouselAction("view_feedback"));
+
+        View btnHideInfo = stampView.findViewById(R.id.btnHideInfo);
+        if (btnHideInfo != null) {
+            btnHideInfo.setOnClickListener(v -> hideCarouselInfoPanelImmediate());
+        }
 
         // Removed btnPrev/btnNext handlers as requested
 
@@ -455,23 +456,22 @@ public class GalleryActivity extends AppCompatActivity {
                 if (galleryFiles.isEmpty()) {
                     if (carouselActions != null) carouselActions.setVisibility(View.GONE);
                     if (carouselIndicator != null) carouselIndicator.setVisibility(View.GONE);
-                    if (btnCarouselPrev != null) btnCarouselPrev.setVisibility(View.GONE);
-                    if (btnCarouselNext != null) btnCarouselNext.setVisibility(View.GONE);
                     if (bottomModeSwitcher != null) bottomModeSwitcher.setVisibility(View.VISIBLE);
                     if (tvGalleryDate != null) tvGalleryDate.setVisibility(View.VISIBLE);
                 } else {
                     if (carouselActions != null) carouselActions.setVisibility(View.VISIBLE);
                     if (carouselIndicator != null) carouselIndicator.setVisibility(View.VISIBLE);
-                    if (btnCarouselPrev != null) btnCarouselPrev.setVisibility(View.VISIBLE);
-                    if (btnCarouselNext != null) btnCarouselNext.setVisibility(View.VISIBLE);
                     if (bottomModeSwitcher != null) bottomModeSwitcher.setVisibility(View.GONE);
                     if (tvGalleryDate != null) tvGalleryDate.setVisibility(View.GONE);
                     hideCarouselInfoPanelImmediate();
                     ensureCarouselAdapter();
                     vpCarousel.post(() -> {
                         setupCarousel();
-                        if (!hasCarouselInfoAutoShown) {
-                            showCarouselInfoPanelTemporarily();
+                        if (!hasCarouselInfoAutoShown && !galleryFiles.isEmpty()) {
+                            // Delay a bit to show the slide up effect as a hint
+                            vpCarousel.postDelayed(() -> {
+                                if (!isGridView) showCarouselInfoPanelTemporarily();
+                            }, 500L);
                             hasCarouselInfoAutoShown = true;
                             prefs.edit().putBoolean(PREF_CAROUSEL_INFO_AUTO_SHOWN, true).apply();
                         }
@@ -488,6 +488,33 @@ public class GalleryActivity extends AppCompatActivity {
         }
     }
 
+    private void saveCurrentImageToGallery(File file) {
+        if (file == null || !file.exists()) return;
+        try {
+            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
+            if (bitmap == null) return;
+
+            String name = "photobooth_" + System.currentTimeMillis() + ".png";
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, name);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Photobooth");
+
+            Uri outputUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (outputUri != null) {
+                try (OutputStream out = getContentResolver().openOutputStream(outputUri)) {
+                    if (out != null) {
+                        bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+                        Toast.makeText(this, R.string.saved_to_gallery_short, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, R.string.failed_save_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void performCarouselAction(String action) {
         if (galleryFiles.isEmpty()) return;
         File currentFile = galleryFiles.get(vpCarousel.getCurrentItem());
@@ -498,9 +525,7 @@ public class GalleryActivity extends AppCompatActivity {
         if (currentFile == null) return;
         switch (action) {
             case "save_photo":
-                Intent full = new Intent(this, FullImageActivity.class);
-                full.putExtra("IMAGE_PATH", currentFile.getAbsolutePath());
-                startActivity(full);
+                saveCurrentImageToGallery(currentFile);
                 break;
             case "share":
                 shareFile(currentFile);
@@ -754,23 +779,38 @@ public class GalleryActivity extends AppCompatActivity {
         }
         int current = vpCarousel.getCurrentItem();
         int target = Math.max(0, Math.min(galleryFiles.size() - 1, current + delta));
-        showCarouselInfoPanelTemporarily();
+        // Removed automatic info show per user request
         if (target != current) {
             vpCarousel.setCurrentItem(target, true);
         }
     }
 
-    private void showCarouselInfoPanelTemporarily() {
-        if (cardCarouselInfo == null) {
+    private void showCarouselInfoPanelToggle() {
+        if (cardCarouselInfo == null || isGridView) {
             return;
         }
+        
+        if (cardCarouselInfo.getVisibility() == View.VISIBLE && cardCarouselInfo.getAlpha() > 0.5f) {
+            hideCarouselInfoPanelImmediate();
+            return;
+        }
+
         cardCarouselInfo.setVisibility(View.VISIBLE);
         cardCarouselInfo.animate().cancel();
-        cardCarouselInfo.setAlpha(0.95f);
-        cardCarouselInfo.animate().alpha(1f).setDuration(120L).start();
-
-        carouselInfoHandler.removeCallbacks(hideCarouselInfoRunnable);
-        carouselInfoHandler.postDelayed(hideCarouselInfoRunnable, CAROUSEL_INFO_AUTO_HIDE_MS);
+        // Slide up from bottom
+        if (cardCarouselInfo.getTranslationY() == 0f || cardCarouselInfo.getTranslationY() < 100f) {
+            cardCarouselInfo.setTranslationY(cardCarouselInfo.getHeight() > 0 ? cardCarouselInfo.getHeight() : 1000f);
+        }
+        cardCarouselInfo.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(400L)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .start();
+    }
+    
+    private void showCarouselInfoPanelTemporarily() {
+        showCarouselInfoPanelToggle();
     }
 
     private void hideCarouselInfoPanelImmediate() {
@@ -778,8 +818,12 @@ public class GalleryActivity extends AppCompatActivity {
             return;
         }
         cardCarouselInfo.animate().cancel();
-        cardCarouselInfo.setVisibility(View.GONE);
-        cardCarouselInfo.setAlpha(1f);
+        cardCarouselInfo.animate()
+                .translationY(cardCarouselInfo.getHeight() > 0 ? cardCarouselInfo.getHeight() : 1000f)
+                .alpha(0f)
+                .setDuration(350L)
+                .withEndAction(() -> cardCarouselInfo.setVisibility(View.GONE))
+                .start();
     }
 
     private void updateCarouselIndicator(int position) {
@@ -1093,6 +1137,7 @@ public class GalleryActivity extends AppCompatActivity {
             }
 
             h.itemView.setOnClickListener(v -> openBook(b));
+            h.btnDownload.setOnClickListener(v -> exportBookAsPng(b));
             h.itemView.setOnLongClickListener(v -> {
                 int currentPos = h.getBindingAdapterPosition();
                 if (currentPos == RecyclerView.NO_POSITION) return true;
@@ -1116,12 +1161,13 @@ public class GalleryActivity extends AppCompatActivity {
         @Override public int getItemCount() { return books.size(); }
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView title, count;
-            ImageView cover;
+            ImageView cover, btnDownload;
             ViewHolder(View v) {
                 super(v);
                 title = v.findViewById(R.id.tvBookTitle);
                 count = v.findViewById(R.id.tvPhotoCount);
                 cover = v.findViewById(R.id.ivBookCover);
+                btnDownload = v.findViewById(R.id.btnDownloadBook);
             }
         }
     }
@@ -1300,5 +1346,82 @@ public class GalleryActivity extends AppCompatActivity {
             },
             null
         );
+    }
+
+    private void exportBookAsPng(MemoryBook book) {
+        if (book == null) return;
+        Toast.makeText(this, R.string.gallery_book_exporting, Toast.LENGTH_SHORT).show();
+        
+        new Thread(() -> {
+            try {
+                // Resolution for export (1080x1920)
+                int width = 1080;
+                int height = 1920;
+                android.graphics.Bitmap result = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+                android.graphics.Canvas canvas = new android.graphics.Canvas(result);
+                
+                // 1. Draw Background
+                android.graphics.Paint paint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+                paint.setColor(book.backgroundColor);
+                canvas.drawRect(0, 0, width, height, paint);
+                
+                // 2. Draw Book Spine Effect
+                paint.setColor(0x2E000000);
+                canvas.drawRect(0, 0, 60, height, paint);
+                paint.setColor(0x4D000000);
+                canvas.drawRect(50, 0, 56, height, paint);
+                
+                // 3. Draw Photos/Items
+                for (BookItem item : book.items) {
+                    android.graphics.Bitmap itemBmp = android.graphics.BitmapFactory.decodeFile(item.imagePath);
+                    if (itemBmp != null) {
+                        canvas.save();
+                        // Coordinates in saved books might need mapping to 1080p width
+                        // Simple proportional mapping
+                        canvas.translate(item.x, item.y);
+                        canvas.scale(item.scale, item.scale);
+                        canvas.rotate(item.rotation);
+                        
+                        // Draw with fixed editor size (400x500 reference)
+                        canvas.drawBitmap(itemBmp, null, new android.graphics.Rect(0, 0, 400, 500), null);
+                        canvas.restore();
+                        itemBmp.recycle();
+                    }
+                }
+                
+                // 4. Draw Title Header
+                paint.setColor(book.textColor);
+                paint.setTextSize(64f);
+                paint.setTypeface(android.graphics.Typeface.create(android.graphics.Typeface.SERIF, android.graphics.Typeface.BOLD));
+                paint.setTextAlign(android.graphics.Paint.Align.CENTER);
+                canvas.drawText(book.name, width/2f + 30, 200, paint);
+
+                // 5. Save logic
+                String fileName = "Album_" + book.name.replaceAll("[^a-zA-Z0-9]", "_") + "_" + System.currentTimeMillis() + ".png";
+                saveBitmapToSystemGallery(result, fileName);
+                
+                result.recycle();
+                runOnUiThread(() -> Toast.makeText(this, R.string.gallery_book_export_success, Toast.LENGTH_SHORT).show());
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(this, "Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+    private void saveBitmapToSystemGallery(android.graphics.Bitmap bitmap, String fileName) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/OurMemories_Albums");
+
+        Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        if (uri != null) {
+            try (OutputStream out = getContentResolver().openOutputStream(uri)) {
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -8,28 +8,45 @@
     app:cardCornerRadius="12dp"
     app:cardElevation="1dp">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/ivPreview"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:scaleType="centerInside"
-            android:background="#FAFAFA"/>
-
-        <TextView
-            android:id="@+id/tvLabel"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#1B2A5C"
-            android:textSize="10sp"
-            android:gravity="center"
-            android:maxLines="1"
-            android:ellipsize="end"/>
-    </LinearLayout>
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/ivPreview"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:scaleType="centerInside"
+                android:background="#FAFAFA"/>
+
+            <TextView
+                android:id="@+id/tvLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#1B2A5C"
+                android:textSize="10sp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btnDeleteSticker"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="4dp"
+            android:background="@drawable/bg_delete_circle"
+            android:padding="6dp"
+            android:src="@drawable/ic_close_24"
+            app:tint="@color/white"
+            android:elevation="2dp" />
+    </FrameLayout>
 </com.google.android.material.card.MaterialCardView>

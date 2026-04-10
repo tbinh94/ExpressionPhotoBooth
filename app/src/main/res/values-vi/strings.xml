@@ -70,6 +70,9 @@
     <string name="home_gallery_user_only_title">Chỉ dành cho thành viên</string>
     <string name="home_gallery_user_only_message">Mở khóa Thư viện cá nhân bằng cách tạo tài khoản ngay. Đăng ký để lưu, quản lý và xem lại mọi khoảnh khắc của bạn bất cứ lúc nào.</string>
     <string name="home_guest_register_now">Đăng ký ngay</string>
+    <string name="home_banner_dialog_title">Đổi ảnh bìa</string>
+    <string name="home_banner_option_picker">Chọn từ máy</string>
+    <string name="home_banner_option_default">Mặc định</string>
 
     <string name="help_setup_content_desc">Hướng dẫn setup</string>
     <string name="help_setup_title">Cách chọn khung ảnh</string>
@@ -109,6 +112,7 @@
     <string name="edit_sticker_tab_y2k">Y2K</string>
     <string name="edit_sticker_tab_kpop">K-pop</string>
     <string name="edit_sticker_tab_camera">Camera</string>
+    <string name="edit_sticker_tab_store">Cửa hàng</string>
     <string name="edit_preset_classic">Cổ điển</string>
 
     <string name="btn_save_return">LƯU &amp; QUAY LẠI</string>
@@ -139,6 +143,10 @@
     <string name="main_ai_hand_unavailable">AI nhận diện hành động chưa hỗ trợ trên máy/giả lập này. Vui lòng dùng chế độ Khuôn mặt.</string>
     <string name="main_capture_prompt_hand_hi">Chụp %1$d: Giơ tay Hi nào!</string>
     <string name="main_capture_prompt_hand_heart">Chụp %1$d: Thả tim xem!</string>
+    <string name="main_capture_prompt_hand_thumbs_up">Chụp %1$d: Hãy Like nào!</string>
+    <string name="main_capture_prompt_hand_open_palm">Chụp %1$d: Mở lòng bàn tay nào!</string>
+    <string name="main_capture_prompt_hand_fist">Chụp %1$d: Nắm đấm mạnh mẽ!</string>
+    <string name="main_capture_prompt_hand_ok">Chụp %1$d: Ra hiệu OK nào!</string>
     <string name="main_capture_prompt_face_smile">Chụp %1$d: Cười lên nào!</string>
     <string name="main_capture_prompt_face_wink">Chụp %1$d: Nháy mắt cái nào!</string>
     <string name="main_sound_on">Đã bật âm thanh</string>
@@ -321,8 +329,10 @@
     <string name="gallery_no_feedback_data">Chưa có dữ liệu đánh giá</string>
     <string name="gallery_share_memory_chooser">Chia sẻ kỷ niệm</string>
     <string name="gallery_book_photo_count">%1$d ảnh</string>
+    <string name="gallery_book_exporting">Đang kết xuất Album...</string>
+    <string name="gallery_book_export_success">Đã lưu Album vào thư viện ảnh!</string>
     <string name="gallery_book_delete_title">Xóa album</string>
-    <string name="gallery_book_delete_message">Xóa "%1$s"?</string>
+    <string name="gallery_book_delete_message">Xóa \"%1$s\"?</string>
     <string name="gallery_history_title">Lịch Sử Của Bạn</string>
     <string name="gallery_history_subtitle">Bạn có thể xem và tải về
 những ảnh đã chụp trước đó</string>
@@ -402,6 +412,7 @@ những ảnh đã chụp trước đó</string>
     <string name="edit_sticker_reset">Đặt lại</string>
     <string name="edit_sticker_size_format">%1$d%%</string>
     <string name="edit_sticker_picker_title">Chọn ảnh sticker</string>
+    <string name="edit_sticker_cannot_delete_global">Bạn không thể xóa sticker hệ thống!</string>
     <string name="edit_sticker_processing">Đang xử lý sticker...</string>
     <string name="edit_nothing_to_undo">Không có thao tác để hoàn tác</string>
     <string name="edit_save_error_format">Lỗi khi lưu chỉnh sửa: %1$s</string>
@@ -412,4 +423,5 @@ những ảnh đã chụp trước đó</string>
     <string name="edit_fine_tune_selection">Tinh chỉnh lựa chọn của bạn</string>
     <string name="edit_intensity">Cường độ</string>
     <string name="edit_default_intensity_value">80</string>
+    <string name="failed_save_image">Không thể lưu ảnh vào bộ sưu tập</string>
 </resources>

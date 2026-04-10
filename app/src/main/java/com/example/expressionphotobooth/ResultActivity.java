@@ -135,8 +135,11 @@ public class ResultActivity extends AppCompatActivity {
         }
 
         ImageView ivFinalResult = findViewById(R.id.ivFinalResult);
+        View loadingOverlay = findViewById(R.id.loadingOverlay);
 
-        // Chạy ngầm để xử lý ảnh nặng
+        // Chạy ngầm để xử lý ảnh nặng + Hiện loading tránh người dùng sốt ruột
+        if (loadingOverlay != null) loadingOverlay.setVisibility(View.VISIBLE);
+        
         new Thread(() -> {
             List<String> imageUrisToCollage = new ArrayList<>();
             Map<String, String> editedImageUris = sessionState.getEditedImageUris();
@@ -155,10 +158,11 @@ public class ResultActivity extends AppCompatActivity {
             } else {
                 // TRƯỜNG HỢP LỖI HOẶC KHÔNG CHỌN FRAME -> Fallback về Collage dọc
                 finalBitmap = createVerticalCollageUseCase.execute(ResultActivity.this, imageUrisToCollage);
-                runOnUiThread(() -> Toast.makeText(this, R.string.frame_not_found_using_default_collage, Toast.LENGTH_SHORT).show());
             }
 
             runOnUiThread(() -> {
+                if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
+                
                 if (finalBitmap != null) {
                     resultUri = saveBitmapToCache(finalBitmap);
                     ivFinalResult.setImageBitmap(finalBitmap);
@@ -220,28 +224,32 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private Bitmap createFramedCollage(List<String> photoUris, int frameResId) {
-        // 1. Cấm Android tự ý scale mật độ điểm ảnh (Density Scaling)
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inScaled = false;
-        Bitmap frameBitmap = BitmapFactory.decodeResource(getResources(), frameResId, options);
+        // 1. Tăng độ phân giải: Sử dụng Scale Factor để ảnh xuất ra cực nét
+        // Thay vì dùng kích thước gốc của file Frame (thường nhỏ), ta nhân lên 4 lần.
+        final float EXPORT_SCALE_FACTOR = 4.0f;
 
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false; // Lấy pixel gốc của Frame
+        Bitmap frameBitmap = BitmapFactory.decodeResource(getResources(), frameResId, options);
         if (frameBitmap == null) return null;
 
-        // 2. Tạo Bitmap kết quả với kích thước chuẩn xác của file Frame (ví dụ 180x559)
-        Bitmap resultBitmap = Bitmap.createBitmap(frameBitmap.getWidth(), frameBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(resultBitmap);
-        Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG); // Giúp ảnh sau khi scale mượt hơn
+        int targetWidth = Math.round(frameBitmap.getWidth() * EXPORT_SCALE_FACTOR);
+        int targetHeight = Math.round(frameBitmap.getHeight() * EXPORT_SCALE_FACTOR);
 
-        // Lấy danh sách tọa độ các lỗ hổng từ FrameConfig (cấu hình tĩnh)
+        // 2. Tạo Bitmap kết quả với độ phân giải cao
+        Bitmap resultBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(resultBitmap);
+        
+        // Bật các cờ chống răng cưa và lọc bitmap để ảnh mượt nhất
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
+
         List<Rect> holes = FrameConfig.getHolesForFrame(frameResId);
 
-        // 3. VẼ CÁC ẢNH CHỤP NẰM DƯỚI FRAME
+        // 3. VẼ CÁC ẢNH CHỤP (SCALED)
         for (int i = 0; i < Math.min(photoUris.size(), holes.size()); i++) {
             String originalUri = photoUris.get(i);
             Bitmap originalPhoto = decodeBitmap(Uri.parse(originalUri));
-            if (originalPhoto == null) {
-                continue;
-            }
+            if (originalPhoto == null) continue;
 
             EditState photoState = sessionState != null
                     ? sessionState.getPhotoEditState(originalUri).copy()
@@ -249,17 +257,24 @@ public class ResultActivity extends AppCompatActivity {
 
             Bitmap photoNoSticker = renderPhotoWithoutSticker(originalPhoto, photoState);
             originalPhoto.recycle();
-            if (photoNoSticker == null) {
-                continue;
-            }
+            if (photoNoSticker == null) continue;
 
-            Rect targetHole = holes.get(i);
+            // Tính toán khung lỗ (hole) và nhân với hệ số scale
+            Rect hole = holes.get(i);
+            Rect scaledHole = new Rect(
+                    Math.round(hole.left * EXPORT_SCALE_FACTOR),
+                    Math.round(hole.top * EXPORT_SCALE_FACTOR),
+                    Math.round(hole.right * EXPORT_SCALE_FACTOR),
+                    Math.round(hole.bottom * EXPORT_SCALE_FACTOR)
+            );
+
             RectF srcRectF = StickerPlacementMapper.calculateCenterCropRect(
                     photoNoSticker.getWidth(),
                     photoNoSticker.getHeight(),
-                    targetHole.width(),
-                    targetHole.height()
+                    scaledHole.width(),
+                    scaledHole.height()
             );
+            
             Rect srcRect = new Rect(
                     Math.round(srcRectF.left),
                     Math.round(srcRectF.top),
@@ -267,18 +282,20 @@ public class ResultActivity extends AppCompatActivity {
                     Math.round(srcRectF.bottom)
             );
 
-            canvas.drawBitmap(photoNoSticker, srcRect, targetHole, paint);
-            drawStickerForHole(canvas, targetHole, srcRectF, photoNoSticker.getWidth(), photoNoSticker.getHeight(), photoState);
+            // Vẽ ảnh đã crop vào lỗ đã phóng to
+            canvas.drawBitmap(photoNoSticker, srcRect, scaledHole, paint);
+            
+            // Vẽ sticker (cũng sẽ được phóng to bên trong hàm này)
+            drawStickerForHole(canvas, scaledHole, srcRectF, photoNoSticker.getWidth(), photoNoSticker.getHeight(), photoState);
+            
             photoNoSticker.recycle();
         }
 
-        // 4. VẼ FRAME LÊN TRÊN CÙNG (ĐÈ LÊN ẢNH CHỤP)
-        // Ép Canvas vẽ chính xác 1:1, không cho phép tự động zoom
-        Rect frameRect = new Rect(0, 0, frameBitmap.getWidth(), frameBitmap.getHeight());
-        canvas.drawBitmap(frameBitmap, null, frameRect, null);
+        // 4. VẼ FRAME CHỒNG LÊN TRÊN (SCALED)
+        Rect destFrameRect = new Rect(0, 0, targetWidth, targetHeight);
+        canvas.drawBitmap(frameBitmap, null, destFrameRect, paint);
         
-        frameBitmap.recycle(); // Giải phóng frame bitmap sau khi vẽ xong
-
+        frameBitmap.recycle();
         return resultBitmap;
     }
 
@@ -617,8 +634,7 @@ public class ResultActivity extends AppCompatActivity {
 
         btnSaveVideo.setEnabled(false);
         String originalText = btnSaveVideo.getText().toString();
-        btnSaveVideo.setText(R.string.video_exporting_btn);
-        Toast.makeText(this, R.string.exporting_video, Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> btnSaveVideo.setText(R.string.video_exporting_btn));
 
         new Thread(() -> {
             try {

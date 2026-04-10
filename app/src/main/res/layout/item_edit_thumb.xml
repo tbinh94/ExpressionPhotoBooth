@@ -10,25 +10,44 @@
     android:padding="8dp">
 
     <!-- Preview image/color Card with built-in stroke -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardThumb"
+    <FrameLayout
         android:layout_width="64dp"
-        android:layout_height="64dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="2dp"
-        app:strokeWidth="0dp"
-        app:strokeColor="#2A5298"
-        app:cardBackgroundColor="#FFFFFF">
+        android:layout_height="64dp">
 
-        <ImageView
-            android:id="@+id/ivThumbPreview"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThumb"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerInside"
-            android:padding="8dp"
-            android:adjustViewBounds="true" />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp"
+            app:strokeColor="#2A5298"
+            app:cardBackgroundColor="#FFFFFF">
 
-    </com.google.android.material.card.MaterialCardView>
+            <ImageView
+                android:id="@+id/ivThumbPreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                android:padding="8dp"
+                android:adjustViewBounds="true" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <ImageView
+            android:id="@+id/btnDeleteSticker"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="-4dp"
+            android:layout_marginEnd="-4dp"
+            android:background="@drawable/bg_delete_circle"
+            android:padding="4dp"
+            android:src="@drawable/ic_close_24"
+            app:tint="@color/white"
+            android:visibility="gone"
+            android:elevation="4dp" />
+    </FrameLayout>
 
     <!-- Label -->
     <TextView

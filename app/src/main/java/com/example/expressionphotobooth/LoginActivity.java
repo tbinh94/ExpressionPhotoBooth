@@ -27,7 +27,7 @@ import java.util.Locale;
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword, etName, etBirthday;
-    private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage, tvLanguageBadge;
+    private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage;
     private View layoutRegisterExtra, tvForgotPassword, layoutLoadingOverlay;
     private MaterialButton btnSignIn, btnRegister, btnGuest, btnLanguageToggle;
     private AuthRepository authRepository;
@@ -49,7 +49,6 @@ public class LoginActivity extends AppCompatActivity {
         authRepository = ((AppContainer) getApplication()).getAuthRepository();
         
         btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
-        tvLanguageBadge = findViewById(R.id.tvLanguageBadge);
         updateLanguageToggleUi(com.example.expressionphotobooth.utils.LocaleManager.getCurrentLanguage(this));
         btnLanguageToggle.setOnClickListener(v -> {
             String language = com.example.expressionphotobooth.utils.LocaleManager.toggleLanguageWithoutRecreate(this);
@@ -164,37 +163,11 @@ public class LoginActivity extends AppCompatActivity {
         String contentDesc = com.example.expressionphotobooth.utils.LocaleManager.getString(this, contentDescRes, languageTag);
         btnLanguageToggle.setContentDescription(contentDesc);
         ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
-        if (tvLanguageBadge != null) {
-            int badgeRes = isVietnamese ? R.string.language_badge_vi : R.string.language_badge_en;
-            animateLanguageBadgeText(com.example.expressionphotobooth.utils.LocaleManager.getString(this, badgeRes, languageTag));
-        }
+        
+        int flagRes = isVietnamese ? R.drawable.ic_flag_uk : R.drawable.ic_flag_vn;
+        btnLanguageToggle.setIconResource(flagRes);
     }
 
-    private void animateLanguageBadgeText(String newText) {
-        if (tvLanguageBadge == null || TextUtils.isEmpty(newText)) {
-            return;
-        }
-        CharSequence current = tvLanguageBadge.getText();
-        if (newText.contentEquals(current)) {
-            return;
-        }
-        tvLanguageBadge.animate().cancel();
-        tvLanguageBadge.animate()
-                .alpha(0f)
-                .scaleX(0.88f)
-                .scaleY(0.88f)
-                .setDuration(120L)
-                .withEndAction(() -> {
-                    tvLanguageBadge.setText(newText);
-                    tvLanguageBadge.animate()
-                            .alpha(1f)
-                            .scaleX(1f)
-                            .scaleY(1f)
-                            .setDuration(120L)
-                            .start();
-                })
-                .start();
-    }
 
     private void updateLocalizedUi(String languageTag) {
         updateLanguageToggleUi(languageTag);

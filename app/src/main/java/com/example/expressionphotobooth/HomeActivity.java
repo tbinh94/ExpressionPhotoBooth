@@ -61,7 +61,6 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvDrawerMusicLabel;
     private TextView tvDrawerLanguageLabel;
     private TextView tvDrawerThemeLabel;
-    private TextView tvLanguageBadge;
     private MaterialButtonToggleGroup groupMusicState;
     private MaterialButtonToggleGroup groupTheme;
     private MaterialButton btnMusicOn;
@@ -69,7 +68,10 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButton btnLanguageToggle;
     private MaterialButton btnThemeLight;
     private MaterialButton btnThemeDark;
-    private MaterialButton btnThemeQuick;
+    private TextView tvHomeOur;
+    private TextView tvHomeMemories;
+    private TextView tvHomePhotobooth;
+    private View titleContainer;
 
     private ImageView ivHomeBanner;
     private TextView tvDrawerChangeBanner;
@@ -109,6 +111,7 @@ public class HomeActivity extends AppCompatActivity {
         checkAdminAccess();
         setupBannerPicker();
         loadSavedBanner();
+        updateTitleVisibility();
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -147,11 +150,13 @@ public class HomeActivity extends AppCompatActivity {
         btnMusicOn = findViewById(R.id.btnMusicOn);
         btnMusicOff = findViewById(R.id.btnMusicOff);
         btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
-        tvLanguageBadge = findViewById(R.id.tvLanguageBadge);
         btnThemeLight = findViewById(R.id.btnThemeLight);
         btnThemeDark = findViewById(R.id.btnThemeDark);
-        btnThemeQuick = findViewById(R.id.btnThemeQuick);
         ivHomeBanner = findViewById(R.id.ivHomeBanner);
+        tvHomeOur = findViewById(R.id.tvHomeOur);
+        tvHomeMemories = findViewById(R.id.tvHomeMemories);
+        tvHomePhotobooth = findViewById(R.id.tvHomePhotobooth);
+        titleContainer = findViewById(R.id.titleContainer);
         tvDrawerChangeBanner = findViewById(R.id.tvDrawerChangeBanner);
 
         resizeCompoundStartIcon(tvDrawerShowHistory, R.dimen.home_drawer_item_icon_size);
@@ -227,9 +232,7 @@ public class HomeActivity extends AppCompatActivity {
 
         tvDrawerChangeBanner.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            pickMedia.launch(new PickVisualMediaRequest.Builder()
-                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
-                    .build());
+            showChangeBannerDialog();
         });
     }
 
@@ -257,16 +260,6 @@ public class HomeActivity extends AppCompatActivity {
 
         btnGallery.setOnClickListener(v -> openGalleryIfAllowed());
 
-        if (btnThemeQuick != null) {
-            btnThemeQuick.setOnClickListener(v -> {
-                v.animate().rotationBy(180f).setDuration(180L).start();
-                String current = ThemeManager.getSavedThemeMode(HomeActivity.this);
-                String target = ThemeManager.MODE_DARK.equals(current)
-                        ? ThemeManager.MODE_LIGHT
-                        : ThemeManager.MODE_DARK;
-                applyThemeWithCrossFade(target);
-            });
-        }
     }
 
     private void setupMusicControls() {
@@ -362,37 +355,13 @@ public class HomeActivity extends AppCompatActivity {
         String contentDesc = LocaleManager.getString(this, contentDescRes, languageTag);
         btnLanguageToggle.setContentDescription(contentDesc);
         ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
-        if (tvLanguageBadge != null) {
-            int badgeRes = isVietnamese ? R.string.language_badge_vi : R.string.language_badge_en;
-            animateLanguageBadgeText(LocaleManager.getString(this, badgeRes, languageTag));
-        }
+        
+        // Show flag of what the NEXT language will be, or the current one? 
+        // Usually, show the flag of the language you will SWITCH TO.
+        int flagRes = isVietnamese ? R.drawable.ic_flag_uk : R.drawable.ic_flag_vn;
+        btnLanguageToggle.setIconResource(flagRes);
     }
 
-    private void animateLanguageBadgeText(String newText) {
-        if (tvLanguageBadge == null || newText == null || newText.isEmpty()) {
-            return;
-        }
-        CharSequence current = tvLanguageBadge.getText();
-        if (newText.contentEquals(current)) {
-            return;
-        }
-        tvLanguageBadge.animate().cancel();
-        tvLanguageBadge.animate()
-                .alpha(0f)
-                .scaleX(0.88f)
-                .scaleY(0.88f)
-                .setDuration(120L)
-                .withEndAction(() -> {
-                    tvLanguageBadge.setText(newText);
-                    tvLanguageBadge.animate()
-                            .alpha(1f)
-                            .scaleX(1f)
-                            .scaleY(1f)
-                            .setDuration(120L)
-                            .start();
-                })
-                .start();
-    }
 
     private void updateThemeControls() {
         if (groupTheme == null || btnThemeLight == null || btnThemeDark == null) {
@@ -405,8 +374,6 @@ public class HomeActivity extends AppCompatActivity {
         }
         updateSegmentButtonState(btnThemeLight, !darkMode);
         updateSegmentButtonState(btnThemeDark, darkMode);
-
-        updateQuickThemeButtonUi(LocaleManager.getCurrentLanguage(this));
     }
 
     private void updateSegmentButtonState(MaterialButton button, boolean selected) {
@@ -553,18 +520,6 @@ public class HomeActivity extends AppCompatActivity {
         view.setCompoundDrawablesRelative(start, drawables[1], drawables[2], drawables[3]);
     }
 
-    private void updateQuickThemeButtonUi(String languageTag) {
-        if (btnThemeQuick == null) {
-            return;
-        }
-        boolean darkMode = ThemeManager.MODE_DARK.equals(ThemeManager.getSavedThemeMode(this));
-        int iconRes = darkMode ? R.drawable.ic_theme_sun_20 : R.drawable.ic_theme_moon_20;
-        int contentDescRes = darkMode
-                ? R.string.home_theme_toggle_to_light
-                : R.string.home_theme_toggle_to_dark;
-        btnThemeQuick.setIconResource(iconRes);
-        btnThemeQuick.setContentDescription(LocaleManager.getString(this, contentDescRes, languageTag));
-    }
 
     private void updateLocalizedUi(String languageTag) {
         if (tvDrawerOur != null) tvDrawerOur.setText(LocaleManager.getString(this, R.string.home_drawer_our, languageTag));
@@ -582,8 +537,79 @@ public class HomeActivity extends AppCompatActivity {
         if (btnDrawerSignOut != null) btnDrawerSignOut.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
         if (btnStart != null) btnStart.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));
         if (btnGallery != null) btnGallery.setText(LocaleManager.getString(this, R.string.btn_gallery, languageTag));
-        updateQuickThemeButtonUi(languageTag);
+        if (tvHomeOur != null) tvHomeOur.setText(LocaleManager.getString(this, R.string.home_title_our, languageTag));
+        if (tvHomeMemories != null) tvHomeMemories.setText(LocaleManager.getString(this, R.string.home_title_memories, languageTag));
+        if (tvHomePhotobooth != null) tvHomePhotobooth.setText(LocaleManager.getString(this, R.string.home_title_photobooth, languageTag));
         updateLanguageControls(languageTag);
+        updateThemeControls();
+    }
+
+    private void showChangeBannerDialog() {
+        String languageTag = LocaleManager.getCurrentLanguage(this);
+        String[] options = {
+            LocaleManager.getString(this, R.string.home_banner_option_picker, languageTag),
+            LocaleManager.getString(this, R.string.home_banner_option_default, languageTag)
+        };
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(LocaleManager.getString(this, R.string.home_banner_dialog_title, languageTag))
+            .setItems(options, (dialog, which) -> {
+                if (which == 0) {
+                    pickMedia.launch(new PickVisualMediaRequest.Builder()
+                            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                            .build());
+                } else {
+                    resetBannerToDefault();
+                }
+            })
+            .show();
+    }
+
+    private void resetBannerToDefault() {
+        getSharedPreferences(PREF_HOME, MODE_PRIVATE)
+                .edit()
+                .remove(KEY_BANNER_URI)
+                .apply();
+        if (ivHomeBanner != null) {
+            ivHomeBanner.setImageResource(R.drawable.photo_banner);
+        }
+        updateTitleVisibility();
+    }
+
+    private void updateTitleVisibility() {
+        if (titleContainer == null) return;
+        String savedUri = getSharedPreferences(PREF_HOME, MODE_PRIVATE).getString(KEY_BANNER_URI, null);
+        boolean isCustom = savedUri != null;
+        titleContainer.setVisibility(isCustom ? View.VISIBLE : View.GONE);
+        
+        // Apply shadows/glows to text
+        int shadowColor = isCustom ? 0xBB000000 : 0x88FFFFFF;
+        float radius = isCustom ? 16f : 8f;
+        float dy = isCustom ? 4f : 0f;
+        
+        if (tvHomeOur != null) tvHomeOur.setShadowLayer(radius, 0f, dy, shadowColor);
+        if (tvHomeMemories != null) tvHomeMemories.setShadowLayer(radius, 0f, dy, shadowColor);
+        if (tvHomePhotobooth != null) tvHomePhotobooth.setShadowLayer(radius, 0f, dy/2, shadowColor);
+
+        // Enhance buttons for custom background
+        if (btnStart != null) {
+            btnStart.setElevation(isCustom ? dpToPx(16f) : dpToPx(8f));
+            if (isCustom) {
+                btnStart.setStrokeWidth(Math.round(dpToPx(2f)));
+                btnStart.setStrokeColor(ContextCompat.getColorStateList(this, R.color.black_overlay_80));
+            } else {
+                btnStart.setStrokeWidth(0);
+            }
+        }
+        if (btnGallery != null) {
+            btnGallery.setElevation(isCustom ? dpToPx(12f) : dpToPx(4f));
+            if (isCustom) {
+                btnGallery.setStrokeWidth(Math.round(dpToPx(1.5f)));
+                btnGallery.setStrokeColor(ContextCompat.getColorStateList(this, R.color.black_overlay_60));
+            } else {
+                btnGallery.setStrokeWidth(0);
+            }
+        }
     }
 
     private void setupBannerPicker() {
@@ -591,6 +617,14 @@ public class HomeActivity extends AppCompatActivity {
             if (uri == null) {
                 return;
             }
+            // Persist permission for internal storage URIs if possible
+            try {
+                final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                getContentResolver().takePersistableUriPermission(uri, takeFlags);
+            } catch (SecurityException e) {
+                // Not a persistable URI, fine for many pickers
+            }
+
             if (ivHomeBanner != null) {
                 Glide.with(this).load(uri).centerCrop().into(ivHomeBanner);
             }
@@ -598,6 +632,7 @@ public class HomeActivity extends AppCompatActivity {
                     .edit()
                     .putString(KEY_BANNER_URI, uri.toString())
                     .apply();
+            updateTitleVisibility();
         });
     }
 

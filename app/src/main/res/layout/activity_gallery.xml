@@ -6,15 +6,17 @@
     android:layout_height="match_parent"
     android:maxWidth="900dp"
     android:layout_gravity="center"
-    android:background="@color/screen_bg">
+    android:background="@drawable/bg_gallery_gradient">
 
     <!-- Header -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/galleryHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
+        android:paddingTop="32dp"
+        android:paddingBottom="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.button.MaterialButton
@@ -29,45 +31,86 @@
             app:icon="@drawable/ic_arrow_back_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            app:iconSize="28dp"
-            app:iconTint="@color/screen_icon_tint" />
+            app:iconSize="32dp"
+            app:iconTint="@color/history_primary_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/titleBox" />
+
+        <LinearLayout
+            android:id="@+id/titleBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/tvHeaderTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pacifico_regular"
+                android:text="@string/gallery_history_title"
+                android:textColor="@color/history_primary_text"
+                android:textSize="28sp" />
+
+            <TextView
+                android:id="@+id/tvHeaderSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.8"
+                android:gravity="center"
+                android:text="@string/gallery_history_subtitle"
+                android:textColor="@color/screen_subtitle"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="-4dp" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnViewModeToggle"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_gravity="end"
-            android:layout_marginTop="-48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/gallery_toggle_view_mode"
             android:src="@drawable/ic_view_carousel"
-            app:tint="@color/screen_icon_tint"
-            android:padding="12dp" />
+            app:tint="@color/history_primary_text"
+            android:padding="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/titleBox" />
 
         <ImageButton
             android:id="@+id/btnHeaderAction"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_gravity="end"
-            android:layout_marginTop="-48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/gallery_add_action"
             android:src="@android:drawable/ic_menu_add"
-            app:tint="@color/screen_icon_tint"
-            android:padding="10dp" />
+            app:tint="@color/history_primary_text"
+            android:padding="10dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/titleBox" />
 
         <TextView
             android:id="@+id/tvGalleryDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="-30dp"
             android:alpha="0.6"
             android:fontFamily="serif"
             android:text="@string/gallery_date_placeholder"
             android:textColor="@color/screen_title"
-            android:textSize="18sp" />
-    </LinearLayout>
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/titleBox"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Fragment Container -->
     <FrameLayout

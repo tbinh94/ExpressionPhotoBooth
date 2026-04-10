@@ -26,13 +26,14 @@ import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.Locale;
 
 public class AdminDashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private com.google.android.material.button.MaterialButton btnLanguageToggle;
-    private TextView tvLanguageBadge;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private TextView tvAdminGreeting;
@@ -80,7 +81,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         tvStatVideoDownloadsLabel = findViewById(R.id.tvStatVideoDownloadsLabel);
 
         btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
-        tvLanguageBadge = findViewById(R.id.tvLanguageBadge);
         updateLanguageButtonA11y(LocaleManager.getCurrentLanguage(this));
         btnLanguageToggle.setOnClickListener(v -> {
             if (languageSwitchInProgress) {
@@ -124,15 +124,19 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                     .collection("users")
                     .document(uid)
                     .get()
-                    .addOnSuccessListener(snapshot -> {
-                        String displayName = snapshot.getString("displayName");
-                        if (!TextUtils.isEmpty(displayName)) {
-                            tvNavAvatarInitials.setText(resolveAvatarInitial(displayName));
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot snapshot) {
+                            String displayName = snapshot.getString("displayName");
+                            if (!TextUtils.isEmpty(displayName)) {
+                                tvNavAvatarInitials.setText(resolveAvatarInitial(displayName));
+                            }
                         }
                     });
         }
 
         updateNavigationMenuTitles(LocaleManager.getCurrentLanguage(this));
+        setupOnBackPressed();
     }
 
     private void updateNavigationMenuTitles(String languageTag) {
@@ -211,9 +215,9 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         String contentDesc = getString(contentDescRes);
         btnLanguageToggle.setContentDescription(contentDesc);
         ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
-        if (tvLanguageBadge != null) {
-            animateLanguageBadgeText(getString(isVietnamese ? R.string.language_badge_vi : R.string.language_badge_en));
-        }
+
+        int flagRes = isVietnamese ? R.drawable.ic_flag_uk : R.drawable.ic_flag_vn;
+        btnLanguageToggle.setIconResource(flagRes);
     }
 
     private void updateLocalizedUi(String languageTag) {
@@ -227,9 +231,9 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             String contentDesc = localized.getString(contentDescRes);
             btnLanguageToggle.setContentDescription(contentDesc);
             ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
-            if (tvLanguageBadge != null) {
-                animateLanguageBadgeText(localized.getString(isVietnamese ? R.string.language_badge_vi : R.string.language_badge_en));
-            }
+
+            int flagRes = isVietnamese ? R.drawable.ic_flag_uk : R.drawable.ic_flag_vn;
+            btnLanguageToggle.setIconResource(flagRes);
         }
 
         if (tvAdminGreeting != null) {
@@ -252,32 +256,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             dispatchLanguageToFragment(fragment, languageTag);
         }
-    }
-
-    private void animateLanguageBadgeText(String newText) {
-        if (tvLanguageBadge == null || TextUtils.isEmpty(newText)) {
-            return;
-        }
-        CharSequence current = tvLanguageBadge.getText();
-        if (newText.contentEquals(current)) {
-            return;
-        }
-        tvLanguageBadge.animate().cancel();
-        tvLanguageBadge.animate()
-                .alpha(0f)
-                .scaleX(0.88f)
-                .scaleY(0.88f)
-                .setDuration(120L)
-                .withEndAction(() -> {
-                    tvLanguageBadge.setText(newText);
-                    tvLanguageBadge.animate()
-                            .alpha(1f)
-                            .scaleX(1f)
-                            .scaleY(1f)
-                            .setDuration(120L)
-                            .start();
-                })
-                .start();
     }
 
     private void dispatchLanguageToFragment(Fragment fragment, String languageTag) {

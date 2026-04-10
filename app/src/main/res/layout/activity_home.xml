@@ -64,28 +64,66 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnThemeQuick"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="@dimen/home_top_action_size"
-                android:layout_height="@dimen/home_top_action_size"
-                android:contentDescription="@string/home_theme_toggle_to_dark"
-                android:insetLeft="0dp"
-                android:insetTop="0dp"
-                android:insetRight="0dp"
-                android:insetBottom="0dp"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="0dp"
-                android:gravity="center"
-                app:backgroundTint="@color/home_top_action_bg"
-                app:cornerRadius="@dimen/home_top_action_corner_radius"
-                app:icon="@drawable/ic_theme_moon_20"
-                app:iconGravity="textTop"
-                app:iconPadding="0dp"
-                app:iconSize="@dimen/home_top_action_icon_size"
-                app:iconTint="@color/white" />
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/titleContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/topBar"
+            app:layout_constraintBottom_toTopOf="@+id/mainContent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="0.12">
+
+            <TextView
+                android:id="@+id/tvHomeOur"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/home_title_our"
+                android:textColor="@color/history_pill_pink"
+                android:textSize="@dimen/home_title_text_size"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-black"
+                android:includeFontPadding="false"
+                android:letterSpacing="@dimen/home_title_letter_spacing"
+                android:shadowColor="@color/white"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="@dimen/home_title_shadow_radius" />
+
+            <TextView
+                android:id="@+id/tvHomeMemories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/home_memories_margin_top"
+                android:text="@string/home_title_memories"
+                android:textColor="@color/history_pill_pink"
+                android:textSize="@dimen/home_title_text_size"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-black"
+                android:includeFontPadding="false"
+                android:letterSpacing="@dimen/home_title_letter_spacing"
+                android:shadowColor="@color/white"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="@dimen/home_title_shadow_radius" />
+
+            <TextView
+                android:id="@+id/tvHomePhotobooth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/home_photobooth_margin_top"
+                android:text="@string/home_title_photobooth"
+                android:textColor="@color/camera_mode_primary"
+                android:textSize="@dimen/home_subtitle_text_size"
+                android:fontFamily="@font/pacifico_regular"
+                android:includeFontPadding="false" />
+
+        </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/mainContent"
@@ -344,31 +382,13 @@
                     android:insetBottom="0dp"
                     android:padding="0dp"
                     android:gravity="center"
-                    android:contentDescription="@string/language_toggle_to_english"
-                    app:backgroundTint="@color/camera_mode_primary"
+                    app:backgroundTint="@android:color/transparent"
                     app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_language_24"
+                    app:icon="@drawable/ic_flag_vn"
                     app:iconGravity="textTop"
                     app:iconPadding="0dp"
-                    app:iconSize="22dp"
-                    app:iconTint="@color/white"
-                    app:strokeColor="@color/app_blue"
-                    app:strokeWidth="1dp" />
-
-                <TextView
-                    android:id="@+id/tvLanguageBadge"
-                    android:layout_width="18dp"
-                    android:layout_height="14dp"
-                    android:layout_gravity="end|top"
-                    android:layout_marginEnd="-2dp"
-                    android:layout_marginTop="-2dp"
-                    android:background="@drawable/bg_language_badge"
-                    android:gravity="center"
-                    android:includeFontPadding="false"
-                    android:text="EN"
-                    android:textColor="@color/white"
-                    android:textSize="8sp"
-                    android:textStyle="bold" />
+                    app:iconSize="32dp"
+                    app:iconTint="@null" />
             </FrameLayout>
         </LinearLayout>
 

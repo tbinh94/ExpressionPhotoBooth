@@ -58,6 +58,14 @@
     <dimen name="history_detail_action_gap">6dp</dimen>
 
     <dimen name="home_top_action_size">48dp</dimen>
+
+    <dimen name="home_title_text_size">56sp</dimen>
+    <dimen name="home_subtitle_text_size">32sp</dimen>
+    <item name="home_title_letter_spacing" format="float" type="dimen">0.05</item>
+    <item name="home_title_shadow_radius" format="float" type="dimen">8.0</item>
+    <dimen name="home_photobooth_margin_top">-8dp</dimen>
+    <dimen name="home_memories_margin_top">-20dp</dimen>
+
     <dimen name="home_top_bar_margin_top">20dp</dimen>
     <dimen name="home_top_action_icon_size">22dp</dimen>
     <dimen name="home_top_action_corner_radius">12dp</dimen>
@@ -147,8 +155,8 @@
     <dimen name="gallery_carousel_subtitle_text_size">12sp</dimen>
     <dimen name="gallery_carousel_subtitle_line_spacing">1dp</dimen>
     <dimen name="gallery_carousel_preview_margin_top">12dp</dimen>
-    <dimen name="gallery_carousel_preview_height">248dp</dimen>
-    <dimen name="gallery_carousel_preview_side_margin">44dp</dimen>
+    <dimen name="gallery_carousel_preview_height">420dp</dimen>
+    <dimen name="gallery_carousel_preview_side_margin">16dp</dimen>
     <dimen name="gallery_carousel_arrow_size">34dp</dimen>
     <dimen name="gallery_carousel_arrow_padding">6dp</dimen>
     <dimen name="gallery_carousel_arrow_side_margin">8dp</dimen>
