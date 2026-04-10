@@ -97,7 +97,7 @@
                 android:id="@+id/ivEditingPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/color_input_stroke"
+                android:background="@drawable/bg_dashed_border"
                 android:contentDescription="@string/edit_photo_preview_content_desc"
                 android:scaleType="centerCrop" />
 
@@ -557,3 +557,4 @@
     </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

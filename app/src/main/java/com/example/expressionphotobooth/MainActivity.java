@@ -46,7 +46,7 @@ import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.ExpressionAnalyzer;
 import com.example.expressionphotobooth.domain.usecase.GestureAnalyzer;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvCountdown;
     private TextView tvCaptureStatus;
     private LinearLayout dotContainer;
-    private LinearProgressIndicator captureProgress;
     private ImageView ivLastCapturePreview;
     private View cardLastCapture;
     private View captureFlashOverlay;
@@ -132,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         
@@ -178,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
         wideRatioButton = findViewById(R.id.btnRatioWide);
         tvCaptureStatus = findViewById(R.id.tvCaptureStatus);
         dotContainer = findViewById(R.id.dotContainer);
-        captureProgress = findViewById(R.id.captureProgress);
         ivLastCapturePreview = findViewById(R.id.ivLastCapturePreview);
         cardLastCapture = findViewById(R.id.cardLastCapture);
         captureFlashOverlay = findViewById(R.id.captureFlashOverlay);
@@ -426,8 +425,6 @@ public class MainActivity extends AppCompatActivity {
             dotContainer.addView(dot);
         }
         
-        captureProgress.setProgress(0);
-        captureProgress.setMax(maxPhotos);
         tvCaptureStatus.setText(R.string.capture_status_ready);
         cardLastCapture.setVisibility(View.GONE);
         updateFlashIcon();
@@ -435,7 +432,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateCaptureStatus(String text) {
         tvCaptureStatus.setText(text);
-        captureProgress.setProgress(capturedCount);
         for (int i = 0; i < dotContainer.getChildCount(); i++) {
             dotContainer.getChildAt(i).setBackgroundResource(i < capturedCount ? R.drawable.dot_active : R.drawable.dot_inactive);
         }
@@ -818,7 +814,7 @@ public class MainActivity extends AppCompatActivity {
         long fadeOut = isScreenFlashStrong ? SCREEN_FLASH_FADE_OUT_STRONG_MS : SCREEN_FLASH_FADE_OUT_NORMAL_MS;
 
         captureFlashOverlay.animate()
-                .alpha(1f)
+                .alpha(0.7f)
                 .setDuration(fadeIn)
                 .withEndAction(() -> {
                     if (isSoundEnabled) shutterSound.play(MediaActionSound.SHUTTER_CLICK);

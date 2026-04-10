@@ -61,7 +61,8 @@
 
     <dimen name="home_title_text_size">56sp</dimen>
     <dimen name="home_subtitle_text_size">32sp</dimen>
-    <item name="home_title_letter_spacing" format="float" type="dimen">0.05</item>
+    <item name="home_title_letter_spacing" format="float" type="dimen">0.02</item>
+    <dimen name="home_title_stroke_width">4dp</dimen>
     <item name="home_title_shadow_radius" format="float" type="dimen">8.0</item>
     <dimen name="home_photobooth_margin_top">-8dp</dimen>
     <dimen name="home_memories_margin_top">-20dp</dimen>
@@ -101,6 +102,7 @@
     <dimen name="home_drawer_music_language_gap">7dp</dimen>
     <dimen name="home_drawer_label_text_size">15sp</dimen>
     <dimen name="home_drawer_toggle_width">122dp</dimen>
+    <dimen name="home_drawer_theme_toggle_width">166dp</dimen>
     <dimen name="home_drawer_toggle_height">34dp</dimen>
     <dimen name="home_drawer_toggle_corner_radius">15dp</dimen>
     <dimen name="home_drawer_toggle_text_size">11sp</dimen>

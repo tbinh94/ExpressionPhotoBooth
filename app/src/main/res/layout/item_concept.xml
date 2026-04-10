@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/item_concept_placeholder"
-        android:textColor="#1A5276"
+        android:textColor="@color/screen_subtitle"
         android:textSize="17sp"
         android:textStyle="bold"
         android:gravity="center"

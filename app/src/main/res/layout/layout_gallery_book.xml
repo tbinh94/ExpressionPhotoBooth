@@ -31,7 +31,7 @@
             android:fontFamily="serif"
             android:text="No books created yet.\nTap + to start a memory book!"
             android:gravity="center"
-            android:textColor="#333333"
+            android:textColor="@color/text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -52,7 +52,7 @@
             android:layout_margin="16dp"
             android:fontFamily="serif"
             android:text="My Book"
-            android:textColor="#333333"
+            android:textColor="@color/text_primary"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -95,3 +95,4 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

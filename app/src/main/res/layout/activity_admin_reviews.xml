@@ -20,10 +20,10 @@
             android:layout_height="?attr/actionBarSize"
             android:background="#1B2A5C"
             app:navigationIcon="@drawable/ic_arrow_back_24"
-            app:navigationIconTint="#FFFFFF"
+            app:navigationIconTint="@color/surface_card"
             app:title="@string/admin_reviews_title"
             app:titleCentered="true"
-            app:titleTextColor="#FFFFFF" />
+            app:titleTextColor="@color/surface_card" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
@@ -59,7 +59,7 @@
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="@dimen/admin_card_corner_radius"
                 app:cardElevation="@dimen/admin_card_elevation"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/surface_card">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -79,7 +79,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0.0"
-                            android:textColor="#1B2A5C"
+                            android:textColor="@color/text_primary"
                             android:textSize="32sp"
                             android:textStyle="bold" />
 
@@ -116,7 +116,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="#1B2A5C"
+                                android:textColor="@color/text_primary"
                                 android:textSize="18sp"
                                 android:textStyle="bold" />
                             <TextView
@@ -182,7 +182,7 @@
                 android:layout_marginTop="12dp"
                 app:cardCornerRadius="@dimen/admin_card_corner_radius"
                 app:cardElevation="@dimen/admin_card_elevation"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/surface_card">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -195,7 +195,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/admin_ai_pie_title"
-                        android:textColor="#1B2A5C"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -223,7 +223,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0%"
-                                android:textColor="#1B2A5C"
+                                android:textColor="@color/text_primary"
                                 android:textSize="24sp"
                                 android:textStyle="bold" />
 
@@ -308,7 +308,7 @@
                         android:background="@android:color/transparent"
                         android:hint="@string/admin_reviews_search_hint"
                         android:textColorHint="@color/admin_subtitle_color"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/surface_card"
                         android:textSize="14sp"
                         android:inputType="textEmailAddress"
                         android:imeOptions="actionSearch" />
@@ -354,8 +354,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/admin_reviews_filter_five_star"
-                        android:textColor="#475569"
-                        app:chipBackgroundColor="#FFFFFF"
+                        android:textColor="@color/text_secondary"
+                        app:chipBackgroundColor="@color/surface_card"
                         app:chipStrokeColor="#E2E8F0"
                         app:chipStrokeWidth="1dp" />
 
@@ -365,8 +365,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/admin_reviews_filter_four_star"
-                        android:textColor="#475569"
-                        app:chipBackgroundColor="#FFFFFF"
+                        android:textColor="@color/text_secondary"
+                        app:chipBackgroundColor="@color/surface_card"
                         app:chipStrokeColor="#E2E8F0"
                         app:chipStrokeWidth="1dp" />
 
@@ -376,8 +376,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/admin_reviews_filter_three_star"
-                        android:textColor="#475569"
-                        app:chipBackgroundColor="#FFFFFF"
+                        android:textColor="@color/text_secondary"
+                        app:chipBackgroundColor="@color/surface_card"
                         app:chipStrokeColor="#E2E8F0"
                         app:chipStrokeWidth="1dp" />
 
@@ -387,8 +387,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/admin_reviews_filter_negative"
-                        android:textColor="#475569"
-                        app:chipBackgroundColor="#FFFFFF"
+                        android:textColor="@color/text_secondary"
+                        app:chipBackgroundColor="@color/surface_card"
                         app:chipStrokeColor="#E2E8F0"
                         app:chipStrokeWidth="1dp" />
 
@@ -449,3 +449,4 @@
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

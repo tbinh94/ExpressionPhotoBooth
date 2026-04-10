@@ -45,7 +45,7 @@
                 android:layout_marginTop="8dp"
                 android:gravity="center"
                 android:text="@string/main_subscription_required_message"
-                android:textColor="#324963"
+                android:textColor="@color/text_secondary"
                 android:textSize="15sp" />
 
             <com.google.android.material.card.MaterialCardView
@@ -89,3 +89,4 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 </FrameLayout>
+

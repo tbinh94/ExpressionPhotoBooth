@@ -36,6 +36,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class HomeActivity extends AppCompatActivity {
     private static final String PREF_HOME = "home_preferences";
     private static final String KEY_MUSIC_ENABLED = "music_enabled";
@@ -58,6 +61,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvDrawerMemories;
     private TextView tvDrawerShowHistory;
     private TextView tvDrawerAdminDashboard;
+    private TextView tvDrawerUsageGuide;
     private TextView tvDrawerMusicLabel;
     private TextView tvDrawerLanguageLabel;
     private TextView tvDrawerThemeLabel;
@@ -68,10 +72,12 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButton btnLanguageToggle;
     private MaterialButton btnThemeLight;
     private MaterialButton btnThemeDark;
+    private MaterialButton btnThemeSystem;
     private TextView tvHomeOur;
     private TextView tvHomeMemories;
     private TextView tvHomePhotobooth;
     private View titleContainer;
+    private View viewHomeBannerDimmer;
 
     private ImageView ivHomeBanner;
     private TextView tvDrawerChangeBanner;
@@ -142,6 +148,7 @@ public class HomeActivity extends AppCompatActivity {
         tvDrawerMemories = findViewById(R.id.tvDrawerMemories);
         tvDrawerShowHistory = findViewById(R.id.tvDrawerShowHistory);
         tvDrawerAdminDashboard = findViewById(R.id.tvDrawerAdminDashboard);
+        tvDrawerUsageGuide = findViewById(R.id.tvDrawerUsageGuide);
         tvDrawerMusicLabel = findViewById(R.id.tvDrawerMusicLabel);
         tvDrawerLanguageLabel = findViewById(R.id.tvDrawerLanguageLabel);
         tvDrawerThemeLabel = findViewById(R.id.tvDrawerThemeLabel);
@@ -152,7 +159,10 @@ public class HomeActivity extends AppCompatActivity {
         btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
         btnThemeLight = findViewById(R.id.btnThemeLight);
         btnThemeDark = findViewById(R.id.btnThemeDark);
+        btnThemeSystem = findViewById(R.id.btnThemeSystem);
         ivHomeBanner = findViewById(R.id.ivHomeBanner);
+        viewHomeBannerDimmer = findViewById(R.id.viewHomeBannerDimmer);
+
         tvHomeOur = findViewById(R.id.tvHomeOur);
         tvHomeMemories = findViewById(R.id.tvHomeMemories);
         tvHomePhotobooth = findViewById(R.id.tvHomePhotobooth);
@@ -161,6 +171,7 @@ public class HomeActivity extends AppCompatActivity {
 
         resizeCompoundStartIcon(tvDrawerShowHistory, R.dimen.home_drawer_item_icon_size);
         resizeCompoundStartIcon(tvDrawerChangeBanner, R.dimen.home_drawer_item_icon_size);
+        resizeCompoundStartIcon(tvDrawerUsageGuide, R.dimen.home_drawer_item_icon_size);
         resizeCompoundStartIcon(tvDrawerAdminDashboard, R.dimen.home_drawer_item_icon_size);
     }
 
@@ -219,6 +230,11 @@ public class HomeActivity extends AppCompatActivity {
 
         tvDrawerShowHistory.setOnClickListener(v -> openGalleryIfAllowed());
 
+        tvDrawerUsageGuide.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            showUsageGuideDialog();
+        });
+
         tvDrawerAdminDashboard.setOnClickListener(v -> {
             startActivity(new Intent(HomeActivity.this, AdminDashboardActivity.class));
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -248,8 +264,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    pauseBackgroundMusicForCaptureFlow();
-                    startActivity(new Intent(HomeActivity.this, SetupActivity.class));
+                    openSetupActivity();
                 }
 
                 @Override
@@ -295,12 +310,18 @@ public class HomeActivity extends AppCompatActivity {
             if (!isChecked) {
                 return;
             }
-            String targetMode = checkedId == R.id.btnThemeDark ? ThemeManager.MODE_DARK : ThemeManager.MODE_LIGHT;
+            String targetMode = ThemeManager.MODE_LIGHT;
+            if (checkedId == R.id.btnThemeDark) targetMode = ThemeManager.MODE_DARK;
+            else if (checkedId == R.id.btnThemeSystem) targetMode = ThemeManager.MODE_SYSTEM;
+
             String current = ThemeManager.getSavedThemeMode(HomeActivity.this);
             if (!targetMode.equals(current)) {
-                applyThemeWithCrossFade(targetMode);
+                // Update UI immediately before animation to prevent toggle bounce-back
+                updateSegmentButtonState(btnThemeLight, ThemeManager.MODE_LIGHT.equals(targetMode));
+                updateSegmentButtonState(btnThemeDark, ThemeManager.MODE_DARK.equals(targetMode));
+                updateSegmentButtonState(btnThemeSystem, ThemeManager.MODE_SYSTEM.equals(targetMode));
+                applyThemeWithCrossFade(targetMode, groupTheme);
             }
-            updateThemeControls();
         });
         updateThemeControls();
     }
@@ -364,16 +385,53 @@ public class HomeActivity extends AppCompatActivity {
 
 
     private void updateThemeControls() {
-        if (groupTheme == null || btnThemeLight == null || btnThemeDark == null) {
-            return;
+        boolean isNightMode = (getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+
+        if (viewHomeBannerDimmer != null) {
+            viewHomeBannerDimmer.setVisibility(isNightMode ? View.VISIBLE : View.GONE);
+            viewHomeBannerDimmer.setAlpha(isNightMode ? 0.88f : 0f);
         }
-        boolean darkMode = ThemeManager.MODE_DARK.equals(ThemeManager.getSavedThemeMode(this));
-        int checkedId = darkMode ? R.id.btnThemeDark : R.id.btnThemeLight;
+
+        String savedMode = ThemeManager.getSavedThemeMode(this);
+
+        // Temporarily clear listener to prevent infinite loop when setting checked state
+        groupTheme.clearOnButtonCheckedListeners();
+
+        int checkedId = R.id.btnThemeLight;
+        if (ThemeManager.MODE_DARK.equals(savedMode)) checkedId = R.id.btnThemeDark;
+        else if (ThemeManager.MODE_SYSTEM.equals(savedMode)) checkedId = R.id.btnThemeSystem;
+
         if (groupTheme.getCheckedButtonId() != checkedId) {
             groupTheme.check(checkedId);
         }
-        updateSegmentButtonState(btnThemeLight, !darkMode);
-        updateSegmentButtonState(btnThemeDark, darkMode);
+
+        updateSegmentButtonState(btnThemeLight, ThemeManager.MODE_LIGHT.equals(savedMode));
+        updateSegmentButtonState(btnThemeDark, ThemeManager.MODE_DARK.equals(savedMode));
+        updateSegmentButtonState(btnThemeSystem, ThemeManager.MODE_SYSTEM.equals(savedMode));
+
+        // Re-attach listener
+        setupThemeControlsListenerOnly();
+    }
+
+    private void setupThemeControlsListenerOnly() {
+        groupTheme.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            String targetMode = ThemeManager.MODE_LIGHT;
+            if (checkedId == R.id.btnThemeDark) targetMode = ThemeManager.MODE_DARK;
+            else if (checkedId == R.id.btnThemeSystem) targetMode = ThemeManager.MODE_SYSTEM;
+
+            String current = ThemeManager.getSavedThemeMode(HomeActivity.this);
+            if (!targetMode.equals(current)) {
+                updateSegmentButtonState(btnThemeLight, ThemeManager.MODE_LIGHT.equals(targetMode));
+                updateSegmentButtonState(btnThemeDark, ThemeManager.MODE_DARK.equals(targetMode));
+                updateSegmentButtonState(btnThemeSystem, ThemeManager.MODE_SYSTEM.equals(targetMode));
+                applyThemeWithCrossFade(targetMode, groupTheme);
+            }
+        });
     }
 
     private void updateSegmentButtonState(MaterialButton button, boolean selected) {
@@ -386,17 +444,40 @@ public class HomeActivity extends AppCompatActivity {
         button.setTextColor(ContextCompat.getColor(this, text));
     }
 
-    private void applyThemeWithCrossFade(String targetMode) {
+    private void applyThemeWithCrossFade(String targetMode, View anchor) {
         View root = findViewById(android.R.id.content);
-        if (root == null) {
+        if (root == null || anchor == null) {
             ThemeManager.setThemeMode(this, targetMode);
             return;
         }
-        root.animate()
-                .alpha(0.9f)
-                .setDuration(120L)
-                .withEndAction(() -> ThemeManager.setThemeMode(HomeActivity.this, targetMode))
-                .start();
+
+        root.setDrawingCacheEnabled(true);
+        android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(root.getDrawingCache());
+        root.setDrawingCacheEnabled(false);
+
+        ImageView overlay = new ImageView(this);
+        overlay.setImageBitmap(bitmap);
+        overlay.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+        ((android.view.ViewGroup) root).addView(overlay);
+
+        ThemeManager.setThemeMode(this, targetMode);
+
+        int cx = (anchor.getLeft() + anchor.getRight()) / 2;
+        int cy = (anchor.getTop() + anchor.getBottom()) / 2;
+        int finalRadius = Math.max(root.getWidth(), root.getHeight());
+
+        android.animation.Animator anim = android.view.ViewAnimationUtils.createCircularReveal(root, cx, cy, 0, finalRadius);
+        anim.setDuration(400);
+        anim.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                ((android.view.ViewGroup) root).removeView(overlay);
+                bitmap.recycle();
+            }
+        });
+        anim.start();
     }
 
     private void applyThemeWithoutCrossFade(String targetMode) {
@@ -526,6 +607,7 @@ public class HomeActivity extends AppCompatActivity {
         if (tvDrawerMemories != null) tvDrawerMemories.setText(LocaleManager.getString(this, R.string.home_drawer_memories, languageTag));
         if (tvDrawerShowHistory != null) tvDrawerShowHistory.setText(LocaleManager.getString(this, R.string.home_drawer_show_history, languageTag));
         if (tvDrawerChangeBanner != null) tvDrawerChangeBanner.setText(LocaleManager.getString(this, R.string.home_drawer_change_banner, languageTag));
+        if (tvDrawerUsageGuide != null) tvDrawerUsageGuide.setText(LocaleManager.getString(this, R.string.home_drawer_usage_guide, languageTag));
         if (tvDrawerAdminDashboard != null) tvDrawerAdminDashboard.setText(LocaleManager.getString(this, R.string.admin_go_to_dashboard, languageTag));
         if (tvDrawerMusicLabel != null) tvDrawerMusicLabel.setText(LocaleManager.getString(this, R.string.home_drawer_music, languageTag));
         if (tvDrawerLanguageLabel != null) tvDrawerLanguageLabel.setText(LocaleManager.getString(this, R.string.home_drawer_language, languageTag));
@@ -534,6 +616,7 @@ public class HomeActivity extends AppCompatActivity {
         if (btnMusicOff != null) btnMusicOff.setText(LocaleManager.getString(this, R.string.home_music_off, languageTag));
         if (btnThemeLight != null) btnThemeLight.setText(LocaleManager.getString(this, R.string.home_theme_light, languageTag));
         if (btnThemeDark != null) btnThemeDark.setText(LocaleManager.getString(this, R.string.home_theme_dark, languageTag));
+        if (btnThemeSystem != null) btnThemeSystem.setText(LocaleManager.getString(this, R.string.home_theme_system, languageTag));
         if (btnDrawerSignOut != null) btnDrawerSignOut.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
         if (btnStart != null) btnStart.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));
         if (btnGallery != null) btnGallery.setText(LocaleManager.getString(this, R.string.btn_gallery, languageTag));
@@ -542,6 +625,39 @@ public class HomeActivity extends AppCompatActivity {
         if (tvHomePhotobooth != null) tvHomePhotobooth.setText(LocaleManager.getString(this, R.string.home_title_photobooth, languageTag));
         updateLanguageControls(languageTag);
         updateThemeControls();
+    }
+
+    private void showUsageGuideDialog() {
+        String languageTag = LocaleManager.getCurrentLanguage(this);
+        String title = LocaleManager.getString(this, R.string.home_usage_guide_title, languageTag);
+        String subtitle = LocaleManager.getString(this, R.string.home_usage_guide_subtitle, languageTag);
+        List<String> steps = Arrays.asList(
+                LocaleManager.getString(this, R.string.home_usage_step_1, languageTag),
+                LocaleManager.getString(this, R.string.home_usage_step_2, languageTag),
+                LocaleManager.getString(this, R.string.home_usage_step_3, languageTag),
+                LocaleManager.getString(this, R.string.home_usage_step_4, languageTag),
+                LocaleManager.getString(this, R.string.home_usage_step_5, languageTag),
+                LocaleManager.getString(this, R.string.home_usage_step_6, languageTag),
+                LocaleManager.getString(this, R.string.home_usage_step_7, languageTag),
+                LocaleManager.getString(this, R.string.home_usage_step_8, languageTag)
+        );
+        int[] stepIcons = new int[] {
+                R.drawable.ic_grid_pattern,
+                R.drawable.ic_videocam_24,
+                R.drawable.ic_videocam_24,
+                R.drawable.ic_edit_24,
+                R.drawable.ic_check_24,
+                R.drawable.ic_check_24,
+                R.drawable.ic_history_24,
+                R.drawable.ic_settings_24
+        };
+        String ctaText = LocaleManager.getString(this, R.string.home_usage_cta_start_now, languageTag);
+        HelpDialogUtils.showUsageGuideBranded(this, title, subtitle, steps, stepIcons, ctaText, this::openSetupActivity);
+    }
+
+    private void openSetupActivity() {
+        pauseBackgroundMusicForCaptureFlow();
+        startActivity(new Intent(HomeActivity.this, SetupActivity.class));
     }
 
     private void showChangeBannerDialog() {
@@ -580,13 +696,18 @@ public class HomeActivity extends AppCompatActivity {
         if (titleContainer == null) return;
         String savedUri = getSharedPreferences(PREF_HOME, MODE_PRIVATE).getString(KEY_BANNER_URI, null);
         boolean isCustom = savedUri != null;
+        boolean isNightMode = (getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
         titleContainer.setVisibility(isCustom ? View.VISIBLE : View.GONE);
         
-        // Apply shadows/glows to text
-        int shadowColor = isCustom ? 0xBB000000 : 0x88FFFFFF;
-        float radius = isCustom ? 16f : 8f;
-        float dy = isCustom ? 4f : 0f;
-        
+        // Apply adaptive neon glow in dark mode and soft depth in light mode.
+        int shadowColor = isNightMode
+                ? ContextCompat.getColor(this, R.color.home_neon_glow)
+                : (isCustom ? 0xAA000000 : 0x66FFFFFF);
+        float radius = isNightMode ? 20f : (isCustom ? 12f : 8f);
+        float dy = isNightMode ? 0f : (isCustom ? 3f : 0f);
+
         if (tvHomeOur != null) tvHomeOur.setShadowLayer(radius, 0f, dy, shadowColor);
         if (tvHomeMemories != null) tvHomeMemories.setShadowLayer(radius, 0f, dy, shadowColor);
         if (tvHomePhotobooth != null) tvHomePhotobooth.setShadowLayer(radius, 0f, dy/2, shadowColor);

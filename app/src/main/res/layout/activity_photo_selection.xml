@@ -9,7 +9,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/bg_gradient"
+        android:src="@drawable/bg_screen_dynamic"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,7 +55,7 @@
         android:insetBottom="0dp"
         android:text="?"
         android:textAllCaps="false"
-        android:textColor="#2A5298"
+        android:textColor="@color/camera_mode_primary"
         android:textSize="14sp"
         android:textStyle="bold"
         app:backgroundTint="#DDFFFFFF"
@@ -113,7 +113,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/selected_strip_title"
-                    android:textColor="#2A5298"
+                    android:textColor="@color/camera_mode_primary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
