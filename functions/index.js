@@ -13,6 +13,11 @@ const {
   validateRequestPayload
 } = require("./src/adminAiInsightsCore");
 
+const {
+  buildChatPrompt,
+  normalizeChatResponse
+} = require("./src/adminAiChatCore");
+
 admin.initializeApp();
 const firestore = getFirestore();
 
@@ -97,14 +102,13 @@ async function writeCache(cacheKey, response) {
   );
 }
 
-async function callGemini(payload) {
+async function callGemini(prompt, responseMimeType = "application/json") {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("Missing GEMINI_API_KEY.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const prompt = buildPrompt(payload);
 
   const modelCandidates = Array.from(new Set([
     GEMINI_MODEL,
@@ -121,7 +125,7 @@ async function callGemini(payload) {
           temperature: 0.2,
           topP: 0.9,
           maxOutputTokens: 900,
-          responseMimeType: "application/json"
+          responseMimeType: responseMimeType
         }
       });
 
@@ -141,7 +145,7 @@ async function callGemini(payload) {
 
       const parsed = JSON.parse(jsonText);
       return {
-        insights: normalizeModelResponse(parsed, payload.languageTag),
+        responseText: jsonText,
         modelUsed: modelName
       };
     } catch (error) {
@@ -177,8 +181,10 @@ exports.adminAiInsights = onCall(
 
     let response;
     try {
-      const aiResult = await callGemini(payload);
-      response = aiResult.insights;
+      const prompt = buildPrompt(payload);
+      const aiResult = await callGemini(prompt);
+      const parsed = JSON.parse(aiResult.responseText);
+      response = normalizeModelResponse(parsed, payload.languageTag);
       response.meta = {
         source: "gemini",
         model: aiResult.modelUsed || GEMINI_MODEL,
@@ -202,6 +208,44 @@ exports.adminAiInsights = onCall(
       logger.warn("adminAiInsights cache write failed, response still returned", error);
     }
     return response;
+  }
+);
+
+exports.adminAiChat = onCall(
+  {
+    region: "asia-southeast1",
+    timeoutSeconds: 30,
+    memory: "256MiB"
+  },
+  async (request) => {
+    ensureAdminAccess(request);
+
+    const data = request.data || {};
+    const query = String(data.query || "").trim();
+    if (!query) {
+      throw new HttpsError("invalid-argument", "Query is required.");
+    }
+
+    const payload = {
+      query,
+      languageTag: data.languageTag || "en-US",
+      statsSnapshot: data.statsSnapshot || {}
+    };
+
+    try {
+      const prompt = buildChatPrompt(payload);
+      const aiResult = await callGemini(prompt);
+      const answer = normalizeChatResponse(aiResult.responseText, payload.languageTag);
+      
+      return {
+        answer,
+        model: aiResult.modelUsed || GEMINI_MODEL
+      };
+    } catch (error) {
+      logger.error("adminAiChat error", error);
+      const isVi = String(payload.languageTag).startsWith("vi");
+      throw new HttpsError("internal", isVi ? "Lỗi AI Chat." : "AI Chat error.");
+    }
   }
 );
 

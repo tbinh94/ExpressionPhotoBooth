@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
@@ -39,13 +41,20 @@ android {
         buildConfig = true
     }
 
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(localPropertiesFile.inputStream())
+    }
+    val geminiApiKey = localProperties.getProperty("gemini.api.key") ?: ""
+
     buildTypes {
         debug {
-            buildConfigField("String", "GEMINI_API_KEY", "\"AIzaSyAjkThNtfS3X5JLyViFvUOJsM9lKlGsR-A\"")
+            buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
         }
         release {
             isMinifyEnabled = false
-            buildConfigField("String", "GEMINI_API_KEY", "\"AIzaSyAjkThNtfS3X5JLyViFvUOJsM9lKlGsR-A  \"")
+            buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

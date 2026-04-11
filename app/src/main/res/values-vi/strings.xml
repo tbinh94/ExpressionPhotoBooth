@@ -459,4 +459,11 @@ những ảnh đã chụp trước đó</string>
     <string name="edit_intensity">Cường độ</string>
     <string name="edit_default_intensity_value">80</string>
     <string name="failed_save_image">Không thể lưu ảnh vào bộ sưu tập</string>
+    <string name="admin_ai_chat_search_hint">Hỏi AI về dữ liệu (VD: Xu hướng tháng này...)</string>
+    <string name="admin_ai_chat_title">Trợ lý ảo Dữ liệu</string>
+    <string name="admin_ai_chat_input_hint">Gõ câu hỏi tại đây...</string>
+    <string name="admin_ai_chat_bot_name">Trợ lý Sparkle</string>
+    <string name="admin_ai_chat_thinking">Sparkle đang suy nghĩ...</string>
+    <string name="admin_ai_chat_error">Lỗi khi kết nối với trợ lý AI.</string>
+    <string name="admin_ai_chat_welcome">Xin chào! Tôi có thể giúp bạn phân tích dữ liệu ứng dụng. Bạn muốn hỏi gì?</string>
 </resources>

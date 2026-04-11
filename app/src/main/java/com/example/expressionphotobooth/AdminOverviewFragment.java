@@ -104,6 +104,8 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private TextView tvAiRecommendation;
     private ProgressBar progressAiInsights;
     private MaterialButton btnAiAnalyze;
+    private View cardAiChatSearch;
+    private TextView tvAiChatPrompt;
 
     private AdminStatsRepository adminStatsRepository;
     private AdminAiInsightsRepository adminAiInsightsRepository;
@@ -203,6 +205,21 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 }
                 startAnalyzeCooldown(languageTag);
                 loadAiInsights(latestStats, languageTag);
+            });
+        }
+
+        cardAiChatSearch = view.findViewById(R.id.cardAiChatSearch);
+        tvAiChatPrompt = view.findViewById(R.id.tvAiChatPrompt);
+
+        if (cardAiChatSearch != null) {
+            cardAiChatSearch.setOnClickListener(v -> {
+                if (latestStats == null) {
+                    Toast.makeText(requireContext(), R.string.admin_ai_insights_loading, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String languageTag = LocaleManager.getCurrentLanguage(requireContext());
+                AdminAiChatBottomSheet chat = AdminAiChatBottomSheet.newInstance(latestStats, languageTag);
+                chat.show(getChildFragmentManager(), "AdminAiChat");
             });
         }
 
@@ -660,6 +677,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         if (tvUsersByMonthEmpty != null) tvUsersByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
         if (tvImageDownloadsByMonthEmpty != null) tvImageDownloadsByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
         if (tvReviewScoreByMonthEmpty != null) tvReviewScoreByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
+        if (tvAiChatPrompt != null) tvAiChatPrompt.setText(localized.getString(R.string.admin_ai_chat_search_hint));
 
         if (latestStats != null) {
             renderStats(latestStats, false, languageTag);

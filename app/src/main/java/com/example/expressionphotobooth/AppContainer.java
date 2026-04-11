@@ -10,8 +10,10 @@ import com.example.expressionphotobooth.domain.repository.AdminStatsRepository;
 import com.example.expressionphotobooth.domain.repository.AdminAiInsightsRepository;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
-import com.example.expressionphotobooth.data.repository.SharedPrefsHistoryRepository;
 import com.example.expressionphotobooth.domain.repository.HistoryRepository;
+import com.example.expressionphotobooth.data.repository.SharedPrefsHistoryRepository;
+import com.example.expressionphotobooth.domain.repository.AdminAiChatRepository;
+import com.example.expressionphotobooth.data.repository.FirebaseAdminAiChatRepository;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.example.expressionphotobooth.utils.ThemeManager;
 
@@ -21,6 +23,7 @@ public class AppContainer extends Application {
 	private AuthRepository authRepository;
 	private AdminStatsRepository adminStatsRepository;
 	private AdminAiInsightsRepository adminAiInsightsRepository;
+	private AdminAiChatRepository adminAiChatRepository;
 	private HistoryRepository historyRepository;
 
 	@Override
@@ -32,6 +35,7 @@ public class AppContainer extends Application {
 		authRepository = new FirebaseAuthRepository();
 		adminStatsRepository = new FirebaseAdminStatsRepository();
 		adminAiInsightsRepository = new FirebaseAdminAiInsightsRepository(this);
+		adminAiChatRepository = new FirebaseAdminAiChatRepository();
 		historyRepository = new SharedPrefsHistoryRepository(this);
 	}
 
@@ -53,6 +57,10 @@ public class AppContainer extends Application {
 
 	public HistoryRepository getHistoryRepository() {
 		return historyRepository;
+	}
+
+	public AdminAiChatRepository getAdminAiChatRepository() {
+		return adminAiChatRepository;
 	}
 }
 
