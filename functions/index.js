@@ -1,6 +1,7 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { GoogleGenAI } = require("@google/genai");
 
 const {
@@ -13,7 +14,7 @@ const {
 } = require("./src/adminAiInsightsCore");
 
 admin.initializeApp();
-const firestore = admin.firestore();
+const firestore = getFirestore();
 
 const CACHE_COLLECTION = "admin_ai_insights_cache";
 const CACHE_TTL_MS = Number(process.env.ADMIN_AI_CACHE_TTL_MS || 15 * 60 * 1000);
@@ -90,7 +91,7 @@ async function writeCache(cacheKey, response) {
     {
       response,
       expiresAtMillis,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp()
     },
     { merge: true }
   );

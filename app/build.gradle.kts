@@ -34,6 +34,24 @@ android {
     lint {
         abortOnError = false
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField("String", "GEMINI_API_KEY", "\"AIzaSyAjkThNtfS3X5JLyViFvUOJsM9lKlGsR-A\"")
+        }
+        release {
+            isMinifyEnabled = false
+            buildConfigField("String", "GEMINI_API_KEY", "\"AIzaSyAjkThNtfS3X5JLyViFvUOJsM9lKlGsR-A  \"")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -72,6 +90,7 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 }
 
 java {
