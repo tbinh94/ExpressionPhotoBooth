@@ -83,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
     private View captureButton;
     private ImageButton flashButton;
     private ImageButton soundButton;
-    private Button squareRatioButton;
-    private Button wideRatioButton;
     private TextView tvCountdown;
     private TextView tvCaptureStatus;
     private LinearLayout dotContainer;
@@ -180,8 +178,6 @@ public class MainActivity extends AppCompatActivity {
         flashButton = findViewById(R.id.btnFlash);
         soundButton = findViewById(R.id.btnSound);
         tvCountdown = findViewById(R.id.tvCountdown);
-        squareRatioButton = findViewById(R.id.btnRatioSquare);
-        wideRatioButton = findViewById(R.id.btnRatioWide);
         tvCaptureStatus = findViewById(R.id.tvCaptureStatus);
         dotContainer = findViewById(R.id.dotContainer);
         ivLastCapturePreview = findViewById(R.id.ivLastCapturePreview);
@@ -232,25 +228,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        if (squareRatioButton != null) {
-            squareRatioButton.setOnClickListener(v -> {
-                if (!isSquareRatio) {
-                    isSquareRatio = true;
-                    applyPreviewRatio();
-                    if (cameraProvider != null) bindCameraUseCases();
-                }
-            });
-        }
 
-        if (wideRatioButton != null) {
-            wideRatioButton.setOnClickListener(v -> {
-                if (isSquareRatio) {
-                    isSquareRatio = false;
-                    applyPreviewRatio();
-                    if (cameraProvider != null) bindCameraUseCases();
-                }
-            });
-        }
 
         com.google.android.material.button.MaterialButtonToggleGroup modeGroup = findViewById(R.id.modeContainer);
         View aiSubGroup = findViewById(R.id.aiScrollContainer);
@@ -389,30 +367,7 @@ public class MainActivity extends AppCompatActivity {
         soundButton.setImageResource(isSoundEnabled ? R.drawable.ic_volume_up : R.drawable.ic_volume_off);
     }
 
-    private void applyPreviewRatio() {
-        if (previewCard == null) {
-            return;
-        }
-        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) previewCard.getLayoutParams();
-        if (isSquareRatio) {
-            lp.dimensionRatio = "1:1";
-            if (squareRatioButton != null) {
-                squareRatioButton.setAlpha(1.0f);
-            }
-            if (wideRatioButton != null) {
-                wideRatioButton.setAlpha(0.5f);
-            }
-        } else {
-            lp.dimensionRatio = "3:4";
-            if (squareRatioButton != null) {
-                squareRatioButton.setAlpha(0.5f);
-            }
-            if (wideRatioButton != null) {
-                wideRatioButton.setAlpha(1.0f);
-            }
-        }
-        previewCard.setLayoutParams(lp);
-    }
+
 
     private void initCaptureUi() {
         capturedCount = 0;
