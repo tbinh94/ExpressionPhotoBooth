@@ -161,7 +161,10 @@
     <string name="main_capture_prompt_hand_fist">Chụp %1$d: Nắm đấm mạnh mẽ!</string>
     <string name="main_capture_prompt_hand_ok">Chụp %1$d: Ra hiệu OK nào!</string>
     <string name="main_capture_prompt_face_smile">Chụp %1$d: Cười lên nào!</string>
-    <string name="main_capture_prompt_face_wink">Chụp %1$d: Nháy mắt cái nào!</string>
+    <string name="main_capture_prompt_face_wink">Chụp %1$d: Hãy nháy mắt nhé!</string>
+    <string name="main_capture_prompt_face_mouth_open">Chụp %1$d: Hãy hả miệng ra nào!</string>
+    <string name="main_capture_prompt_face_tilt">Chụp %1$d: Hãy nghiêng đầu đi!</string>
+    <string name="main_capture_prompt_face_center">Chụp %1$d: Hãy nhìn vào giữa!</string>
     <string name="main_sound_on">Đã bật âm thanh</string>
     <string name="main_sound_off">Đã tắt âm thanh</string>
     <string name="main_mode_voice">Giọng nói</string>

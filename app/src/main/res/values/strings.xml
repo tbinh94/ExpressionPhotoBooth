@@ -251,6 +251,9 @@
     <string name="main_capture_prompt_hand_ok">Shot %1$d: Give an OK sign!</string>
     <string name="main_capture_prompt_face_smile">Shot %1$d: Smile for us!</string>
     <string name="main_capture_prompt_face_wink">Shot %1$d: Give a wink!</string>
+    <string name="main_capture_prompt_face_mouth_open">Shot %1$d: Open your mouth! (Hả miệng)</string>
+    <string name="main_capture_prompt_face_tilt">Shot %1$d: Tilt your head!</string>
+    <string name="main_capture_prompt_face_center">Shot %1$d: Face the center!</string>
     <string name="main_sound_on">Sound enabled</string>
     <string name="main_sound_off">Sound disabled</string>
     <string name="main_mode_voice">Voice</string>

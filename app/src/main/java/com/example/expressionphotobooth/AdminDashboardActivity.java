@@ -33,7 +33,7 @@ import java.util.Locale;
 
 public class AdminDashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private com.google.android.material.button.MaterialButton btnLanguageToggle;
+    private android.widget.ImageView btnLanguageToggle;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private TextView tvAdminGreeting;
@@ -217,8 +217,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         btnLanguageToggle.setContentDescription(contentDesc);
         ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
 
-        int flagRes = isVietnamese ? R.drawable.ic_flag_uk : R.drawable.ic_flag_vn;
-        btnLanguageToggle.setIconResource(flagRes);
+        int flagRes = isVietnamese ? R.drawable.ic_flag_vn : R.drawable.ic_flag_uk;
+        btnLanguageToggle.setImageResource(flagRes);
     }
 
     private void updateLocalizedUi(String languageTag) {
@@ -233,8 +233,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             btnLanguageToggle.setContentDescription(contentDesc);
             ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
 
-            int flagRes = isVietnamese ? R.drawable.ic_flag_uk : R.drawable.ic_flag_vn;
-            btnLanguageToggle.setIconResource(flagRes);
+            int flagRes = isVietnamese ? R.drawable.ic_flag_vn : R.drawable.ic_flag_uk;
+            btnLanguageToggle.setImageResource(flagRes);
         }
 
         if (tvAdminGreeting != null) {

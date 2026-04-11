@@ -350,13 +350,16 @@
                     android:layout_weight="1"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:text="@string/home_music_on"
-                    android:textAllCaps="false"
-                    android:textColor="@color/home_toggle_text"
-                    android:textSize="@dimen/home_drawer_toggle_text_size"
-                    android:textStyle="bold"
+                    android:padding="0dp"
+                    app:icon="@drawable/ic_volume_up"
+                    app:iconGravity="textTop"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
+                    app:iconTint="@color/home_toggle_text"
                     app:backgroundTint="@android:color/transparent"
                     app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
                     app:rippleColor="@color/home_toggle_ripple" />
@@ -369,62 +372,20 @@
                     android:layout_weight="1"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:text="@string/home_music_off"
-                    android:textAllCaps="false"
-                    android:textColor="@color/home_toggle_text"
-                    android:textSize="@dimen/home_drawer_toggle_text_size"
-                    android:textStyle="bold"
+                    android:padding="0dp"
+                    app:icon="@drawable/ic_volume_off"
+                    app:iconGravity="textTop"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
+                    app:iconTint="@color/home_toggle_text"
                     app:backgroundTint="@android:color/transparent"
                     app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
                     app:rippleColor="@color/home_toggle_ripple" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/home_drawer_music_language_gap"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tvDrawerLanguageLabel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="serif"
-                android:text="@string/home_drawer_language"
-                android:textColor="@color/home_drawer_text"
-                android:textSize="@dimen/home_drawer_label_text_size"
-                android:textStyle="bold" />
-
-            <FrameLayout
-                android:layout_width="44dp"
-                android:layout_height="44dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLanguageToggle"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp"
-                    android:padding="0dp"
-                    android:gravity="center"
-                    app:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_flag_vn"
-                    app:iconGravity="textTop"
-                    app:iconPadding="0dp"
-                    app:iconSize="32dp"
-                    app:iconTint="@null" />
-            </FrameLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -461,13 +422,16 @@
                     android:layout_weight="1"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:text="@string/home_theme_light"
-                    android:textAllCaps="false"
-                    android:textColor="@color/home_toggle_text"
-                    android:textSize="@dimen/home_drawer_lang_toggle_text_size"
-                    android:textStyle="bold"
+                    android:padding="0dp"
+                    app:icon="@drawable/ic_theme_sun_20"
+                    app:iconGravity="textTop"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
+                    app:iconTint="@color/home_toggle_text"
                     app:backgroundTint="@android:color/transparent"
                     app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
                     app:rippleColor="@color/home_toggle_ripple" />
@@ -480,13 +444,16 @@
                     android:layout_weight="1"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:text="@string/home_theme_dark"
-                    android:textAllCaps="false"
-                    android:textColor="@color/home_toggle_text"
-                    android:textSize="@dimen/home_drawer_lang_toggle_text_size"
-                    android:textStyle="bold"
+                    android:padding="0dp"
+                    app:icon="@drawable/ic_theme_moon_20"
+                    app:iconGravity="textTop"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
+                    app:iconTint="@color/home_toggle_text"
                     app:backgroundTint="@android:color/transparent"
                     app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
                     app:rippleColor="@color/home_toggle_ripple" />
@@ -496,20 +463,53 @@
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1.2"
+                    android:layout_weight="1"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:text="@string/home_theme_system"
-                    android:textAllCaps="false"
-                    android:textColor="@color/home_toggle_text"
-                    android:textSize="@dimen/home_drawer_lang_toggle_text_size"
-                    android:textStyle="bold"
+                    android:padding="0dp"
+                    app:icon="@drawable/ic_auto_awesome"
+                    app:iconGravity="textTop"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp"
+                    app:iconTint="@color/home_toggle_text"
                     app:backgroundTint="@android:color/transparent"
                     app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
                     app:rippleColor="@color/home_toggle_ripple" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/home_drawer_music_language_gap"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvDrawerLanguageLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="serif"
+                android:text="@string/home_drawer_language"
+                android:textColor="@color/home_drawer_text"
+                android:textSize="@dimen/home_drawer_label_text_size"
+                android:textStyle="bold" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/btnLanguageToggle"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:src="@drawable/ic_flag_vn"
+                android:scaleType="centerCrop"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/CircleAppearance" />
         </LinearLayout>
 
         <View

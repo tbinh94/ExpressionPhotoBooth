@@ -68,9 +68,9 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButtonToggleGroup groupMusicState;
     private MaterialButtonToggleGroup groupTheme;
     private MaterialButton btnMusicOn;
-    private MaterialButton btnMusicOff;
-    private MaterialButton btnLanguageToggle;
-    private MaterialButton btnThemeLight;
+    private com.google.android.material.button.MaterialButton btnMusicOff;
+    private android.widget.ImageView btnLanguageToggle;
+    private com.google.android.material.button.MaterialButton btnThemeLight;
     private MaterialButton btnThemeDark;
     private MaterialButton btnThemeSystem;
     private TextView tvHomeOur;
@@ -379,8 +379,8 @@ public class HomeActivity extends AppCompatActivity {
         
         // Show flag of what the NEXT language will be, or the current one? 
         // Usually, show the flag of the language you will SWITCH TO.
-        int flagRes = isVietnamese ? R.drawable.ic_flag_uk : R.drawable.ic_flag_vn;
-        btnLanguageToggle.setIconResource(flagRes);
+        int flagRes = isVietnamese ? R.drawable.ic_flag_vn : R.drawable.ic_flag_uk;
+        btnLanguageToggle.setImageResource(flagRes);
     }
 
 
@@ -439,9 +439,12 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
         int bg = selected ? R.color.home_toggle_selected_bg : android.R.color.transparent;
-        int text = selected ? R.color.home_toggle_selected_text : R.color.home_toggle_text;
+        int colorRes = selected ? R.color.home_toggle_selected_text : R.color.home_toggle_text;
+        int color = ContextCompat.getColor(this, colorRes);
+        
         button.setBackgroundTintList(ContextCompat.getColorStateList(this, bg));
-        button.setTextColor(ContextCompat.getColor(this, text));
+        button.setTextColor(color);
+        button.setIconTint(ContextCompat.getColorStateList(this, colorRes));
     }
 
     private void applyThemeWithCrossFade(String targetMode, View anchor) {
@@ -612,11 +615,6 @@ public class HomeActivity extends AppCompatActivity {
         if (tvDrawerMusicLabel != null) tvDrawerMusicLabel.setText(LocaleManager.getString(this, R.string.home_drawer_music, languageTag));
         if (tvDrawerLanguageLabel != null) tvDrawerLanguageLabel.setText(LocaleManager.getString(this, R.string.home_drawer_language, languageTag));
         if (tvDrawerThemeLabel != null) tvDrawerThemeLabel.setText(LocaleManager.getString(this, R.string.home_drawer_theme, languageTag));
-        if (btnMusicOn != null) btnMusicOn.setText(LocaleManager.getString(this, R.string.home_music_on, languageTag));
-        if (btnMusicOff != null) btnMusicOff.setText(LocaleManager.getString(this, R.string.home_music_off, languageTag));
-        if (btnThemeLight != null) btnThemeLight.setText(LocaleManager.getString(this, R.string.home_theme_light, languageTag));
-        if (btnThemeDark != null) btnThemeDark.setText(LocaleManager.getString(this, R.string.home_theme_dark, languageTag));
-        if (btnThemeSystem != null) btnThemeSystem.setText(LocaleManager.getString(this, R.string.home_theme_system, languageTag));
         if (btnDrawerSignOut != null) btnDrawerSignOut.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
         if (btnStart != null) btnStart.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));
         if (btnGallery != null) btnGallery.setText(LocaleManager.getString(this, R.string.btn_gallery, languageTag));
