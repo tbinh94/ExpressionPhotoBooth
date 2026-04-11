@@ -26,6 +26,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 public class PhotoSelectionActivity extends AppCompatActivity {
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(com.example.expressionphotobooth.utils.LocaleManager.wrapContext(newBase));
+    }
+
     private static final int FALLBACK_SELECTION_COUNT = 4;
     private PhotoAdapter adapter;
     private SessionRepository sessionRepository;

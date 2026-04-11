@@ -45,6 +45,7 @@ import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.ExpressionAnalyzer;
 import com.example.expressionphotobooth.domain.usecase.GestureAnalyzer;
+import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -127,6 +128,11 @@ public class MainActivity extends AppCompatActivity {
     private boolean isPortraitMode = false;
     private PortraitProcessor portraitProcessor;
     private boolean isNavigatingToSelection = false;
+
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(LocaleManager.wrapContext(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -691,6 +697,7 @@ public class MainActivity extends AppCompatActivity {
                                 .withEndAction(() -> tvCountdown.animate().alpha(1f).setDuration(600).start())
                                 .start();
                         updateCaptureStatus(getString(R.string.main_capture_prompt_voice_v2));
+                        Toast.makeText(this, getString(R.string.main_mic_active_toast), Toast.LENGTH_SHORT).show();
                         
                         voiceTriggerAnalyzer.start(new VoiceTriggerAnalyzer.OnVoiceTriggerDetected() {
                             @Override

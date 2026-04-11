@@ -166,6 +166,12 @@
     <string name="main_capture_prompt_face_wink">Shot %1$d: Give a wink!</string>
     <string name="main_sound_on">Sound enabled</string>
     <string name="main_sound_off">Sound disabled</string>
+    <string name="main_mode_voice">Voice</string>
+    <string name="main_ai_voice_selected">Switched to: Voice trigger (Say \'Cheese\'!)</string>
+    <string name="main_capture_prompt_voice">Shot %1$d: Say \'Cheese\' to capture!</string>
+    <string name="main_capture_prompt_voice_v2">🎙️ Shout \"Cheese\" loudly to capture!</string>
+    <string name="main_mic_error_format">🎤 Mic error: %1$s</string>
+    <string name="main_mic_active_toast">Mic active: Say Cheese!</string>
 
     <string name="auth_register_creating">Creating account...</string>
 
