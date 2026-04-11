@@ -104,6 +104,13 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private TextView tvAiRecommendation;
     private ProgressBar progressAiInsights;
     private MaterialButton btnAiAnalyze;
+    private View cardAiChatSearch;
+    private TextView tvAiChatPrompt;
+
+    private View layoutAiEmptyState;
+    private View layoutAiResultState;
+    private TextView tvAiEmptyTitle;
+    private TextView tvAiEmptyDesc;
 
     private AdminStatsRepository adminStatsRepository;
     private AdminAiInsightsRepository adminAiInsightsRepository;
@@ -183,6 +190,10 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         tvAiRecommendation = view.findViewById(R.id.tvAiRecommendation);
         progressAiInsights = view.findViewById(R.id.progressAiInsights);
         btnAiAnalyze = view.findViewById(R.id.btnAiAnalyze);
+        layoutAiEmptyState = view.findViewById(R.id.layoutAiEmptyState);
+        layoutAiResultState = view.findViewById(R.id.layoutAiResultState);
+        tvAiEmptyTitle = view.findViewById(R.id.tvAiEmptyTitle);
+        tvAiEmptyDesc = view.findViewById(R.id.tvAiEmptyDesc);
 
         if (btnAiAnalyze != null) {
             btnAiAnalyze.setOnClickListener(v -> {
@@ -203,6 +214,20 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 }
                 startAnalyzeCooldown(languageTag);
                 loadAiInsights(latestStats, languageTag);
+            });
+        }
+
+        cardAiChatSearch = view.findViewById(R.id.cardAiChatSearch);
+        tvAiChatPrompt = view.findViewById(R.id.tvAiChatPrompt);
+
+        if (cardAiChatSearch != null) {
+            cardAiChatSearch.setOnClickListener(v -> {
+                if (latestStats == null) {
+                    return;
+                }
+                String languageTag = LocaleManager.getCurrentLanguage(requireContext());
+                AdminAiChatBottomSheet chat = AdminAiChatBottomSheet.newInstance(latestStats, languageTag);
+                chat.show(getChildFragmentManager(), "AdminAiChat");
             });
         }
 
@@ -269,16 +294,20 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private void resetAiInsightsState(String languageTag) {
         Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
         setAiInsightsLoading(false, languageTag);
+        
+        // Show Welcome (Empty) state, Hide Results
+        if (layoutAiEmptyState != null) layoutAiEmptyState.setVisibility(View.VISIBLE);
+        if (layoutAiResultState != null) layoutAiResultState.setVisibility(View.GONE);
+        
         if (tvAiInsightsSubtitle != null) {
             tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_tap_to_analyze));
         }
-        if (tvAiSummary != null) {
-            tvAiSummary.setText(localized.getString(R.string.admin_ai_insights_tap_to_analyze));
-        }
+        if (tvAiSummary != null) tvAiSummary.setText("");
         if (tvAiInsightLine1 != null) tvAiInsightLine1.setText("");
         if (tvAiInsightLine2 != null) tvAiInsightLine2.setText("");
         if (tvAiInsightLine3 != null) tvAiInsightLine3.setText("");
         if (tvAiRecommendation != null) tvAiRecommendation.setText("");
+        
         refreshAnalyzeButtonState(languageTag);
     }
 
@@ -470,17 +499,17 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
             progressAiInsights.setVisibility(loading ? View.VISIBLE : View.GONE);
         }
         refreshAnalyzeButtonState(languageTag);
-        if (tvAiInsightsSubtitle != null && loading) {
-            tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_loading));
-        }
+        
         if (loading) {
-            if (tvAiSummary != null) {
-                tvAiSummary.setText(localized.getString(R.string.admin_ai_insights_loading));
+            if (tvAiInsightsSubtitle != null) {
+                tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_loading));
             }
-            if (tvAiInsightLine1 != null) tvAiInsightLine1.setText("");
-            if (tvAiInsightLine2 != null) tvAiInsightLine2.setText("");
-            if (tvAiInsightLine3 != null) tvAiInsightLine3.setText("");
-            if (tvAiRecommendation != null) tvAiRecommendation.setText("");
+            // Dim the card slightly while loading
+            if (layoutAiEmptyState != null) layoutAiEmptyState.setAlpha(0.5f);
+            if (layoutAiResultState != null) layoutAiResultState.setAlpha(0.5f);
+        } else {
+            if (layoutAiEmptyState != null) layoutAiEmptyState.setAlpha(1.0f);
+            if (layoutAiResultState != null) layoutAiResultState.setAlpha(1.0f);
         }
     }
 
@@ -494,6 +523,10 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
             }
             return;
         }
+
+        // Show Result state, Hide Empty state
+        if (layoutAiEmptyState != null) layoutAiEmptyState.setVisibility(View.GONE);
+        if (layoutAiResultState != null) layoutAiResultState.setVisibility(View.VISIBLE);
 
         String source = insights.getSourceLabel();
         String confidence = localized.getString(R.string.admin_ai_insights_confidence, insights.getConfidence() * 100d);
@@ -660,6 +693,9 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         if (tvUsersByMonthEmpty != null) tvUsersByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
         if (tvImageDownloadsByMonthEmpty != null) tvImageDownloadsByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
         if (tvReviewScoreByMonthEmpty != null) tvReviewScoreByMonthEmpty.setText(localized.getString(R.string.admin_overview_trend_empty));
+        if (tvAiChatPrompt != null) tvAiChatPrompt.setText(localized.getString(R.string.admin_ai_chat_search_hint));
+        if (tvAiEmptyTitle != null) tvAiEmptyTitle.setText(localized.getString(R.string.admin_ai_insights_empty_title));
+        if (tvAiEmptyDesc != null) tvAiEmptyDesc.setText(localized.getString(R.string.admin_ai_insights_empty_desc));
 
         if (latestStats != null) {
             renderStats(latestStats, false, languageTag);

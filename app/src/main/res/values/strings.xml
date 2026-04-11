@@ -365,7 +365,9 @@
     <string name="admin_ai_insights_action_fallback_en">Prioritize top frame optimization and monitor negative reviews weekly.</string>
     <string name="admin_ai_insights_source_ai_vi">Phan tich AI</string>
     <string name="admin_ai_insights_source_ai_en">AI analysis</string>
-    <string name="admin_ai_insights_source_rule_vi">Che do du phong</string>
+    <string name="admin_ai_insights_empty_title">Ready to analyze</string>
+    <string name="admin_ai_insights_empty_desc">Tap \'Analyze\' to discover hidden trends in your data with Sparkle AI.</string>
+    <string name="admin_ai_insights_source_rule_vi">Chế độ dự phòng</string>
     <string name="admin_ai_insights_source_rule_en">Fallback mode</string>
     <string name="admin_reviews_filter_all">All</string>
     <string name="admin_reviews_filter_five_star">5 ⭐</string>
@@ -494,4 +496,11 @@ that you have taken before</string>
     <string name="main_portrait_processing">Applying portrait effect…</string>
     <string name="main_portrait_failed">Portrait effect failed, saved original</string>
     <string name="failed_save_image">Failed to save image to gallery</string>
+    <string name="admin_ai_chat_search_hint">Ask AI about data (e.g. Trends this month...)</string>
+    <string name="admin_ai_chat_title">Data Assistant</string>
+    <string name="admin_ai_chat_input_hint">Type your question here...</string>
+    <string name="admin_ai_chat_bot_name">Sparkle Analysis</string>
+    <string name="admin_ai_chat_thinking">Sparkle is thinking...</string>
+    <string name="admin_ai_chat_error">Error connecting to AI assistant.</string>
+    <string name="admin_ai_chat_welcome">Hello! I can help you analyze app data. What would you like to know?</string>
 </resources>

@@ -1,15 +1,32 @@
 package com.example.expressionphotobooth.data.repository;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.expressionphotobooth.BuildConfig;
 import com.example.expressionphotobooth.R;
 import com.example.expressionphotobooth.domain.model.AdminAiInsightRequest;
 import com.example.expressionphotobooth.domain.model.AdminAiInsights;
 import com.example.expressionphotobooth.domain.repository.AdminAiInsightsRepository;
-import com.google.firebase.functions.FirebaseFunctions;
+import com.google.ai.client.generativeai.GenerativeModel;
+import com.google.ai.client.generativeai.java.GenerativeModelFutures;
+import com.google.ai.client.generativeai.type.BlockThreshold;
+import com.google.ai.client.generativeai.type.Content;
+import com.google.ai.client.generativeai.type.GenerateContentResponse;
+import com.google.ai.client.generativeai.type.GenerationConfig;
+import com.google.ai.client.generativeai.type.HarmCategory;
+import com.google.ai.client.generativeai.type.SafetySetting;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,24 +34,38 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class FirebaseAdminAiInsightsRepository implements AdminAiInsightsRepository {
-    private static final String FUNCTION_NAME = "adminAiInsights";
-    private static final String FUNCTIONS_REGION = "asia-southeast1";
-    // Android emulator maps host machine localhost to 10.0.2.2.
-    private static final String DEBUG_EMULATOR_HOST = "10.0.2.2";
-    private static final int DEBUG_EMULATOR_PORT = 5001;
+    private static final String TAG = "AiInsightsRepo";
+    
+    // Sử dụng BuildConfig để bảo mật API Key
+    private static final String GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY;
+    private static final String MODEL_NAME = "gemini-flash-latest"; // Cập nhật bản latest chuẩn nhất
 
     private final Context appContext;
-    private final FirebaseFunctions functions;
+    private final GenerativeModelFutures model;
+    private final Executor executor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final Gson gson = new Gson();
 
     public FirebaseAdminAiInsightsRepository(Context context) {
         this.appContext = context.getApplicationContext();
-        this.functions = FirebaseFunctions.getInstance(FUNCTIONS_REGION);
-        boolean isDebuggable = (this.appContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        if (isDebuggable) {
-            this.functions.useEmulator(DEBUG_EMULATOR_HOST, DEBUG_EMULATOR_PORT);
-        }
+
+        // 1. Setup GenerationConfig (Pipeline 4)
+        GenerationConfig.Builder configBuilder = new GenerationConfig.Builder();
+        configBuilder.temperature = 0.2f; // Độ chính xác cao và ổn định
+        GenerationConfig config = configBuilder.build();
+
+        // 2. Setup SafetySettings
+        List<SafetySetting> safetySettings = new ArrayList<>();
+        safetySettings.add(new SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.ONLY_HIGH));
+        safetySettings.add(new SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.ONLY_HIGH));
+
+        // 3. Setup GenerativeModel
+        GenerativeModel gm = new GenerativeModel(MODEL_NAME, GEMINI_API_KEY, config, safetySettings);
+        this.model = GenerativeModelFutures.from(gm);
     }
 
     @Override
@@ -44,264 +75,147 @@ public class FirebaseAdminAiInsightsRepository implements AdminAiInsightsReposit
             return;
         }
 
-        Map<String, Object> payload = buildPayload(request);
-        functions
-                .getHttpsCallable(FUNCTION_NAME)
-                .call(payload)
-                .addOnSuccessListener(result -> {
-                    AdminAiInsights parsed = parseResponse(result.getData(), request);
-                    callback.onSuccess(parsed);
-                })
-                .addOnFailureListener(error -> callback.onSuccess(buildFallbackInsights(request)));
+        // Logic Prompt (Pipeline 3): Flexible, Realistic, JSON only, No markdown
+        String prompt = buildPrompt(request);
+        
+        Content content = new Content.Builder()
+                .addText(prompt)
+                .build();
+
+        // Async Call (Pipeline 4)
+        ListenableFuture<GenerateContentResponse> responseFuture = model.generateContent(content);
+
+        Futures.addCallback(responseFuture, new FutureCallback<GenerateContentResponse>() {
+            @Override
+            public void onSuccess(GenerateContentResponse result) {
+                String fullText = result.getText();
+                mainHandler.post(() -> {
+                    try {
+                        // JSON Extraction (Pipeline 4)
+                        AdminAiInsights parsed = parseGeminiResponse(fullText, request);
+                        callback.onSuccess(parsed);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Parse error: " + e.getMessage());
+                        callback.onSuccess(buildFallbackInsights(request));
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(@NonNull Throwable t) {
+                Log.e(TAG, "Gemini connection failed. Error: " + t.getMessage());
+                if (t.getMessage() != null && t.getMessage().contains("API key not valid")) {
+                    Log.e(TAG, "LỖI: API KEY CỦA BẠN ĐANG BỊ BÁO LÀ KHÔNG HỢP LỆ!");
+                }
+                mainHandler.post(() -> callback.onSuccess(buildFallbackInsights(request)));
+            }
+        }, executor);
     }
 
-    private Map<String, Object> buildPayload(AdminAiInsightRequest request) {
+    private String buildPrompt(AdminAiInsightRequest request) {
         Map<String, Object> payload = new HashMap<>();
         payload.put("rangeMonths", request.getRangeMonths());
         payload.put("languageTag", request.getLanguageTag());
+        payload.put("statsSnapshot", buildStatsSnapshot(request));
 
+        boolean isVi = isVietnamese(request.getLanguageTag());
+        String languageName = isVi ? "Vietnamese" : "English";
+
+        return "You are a product analytics assistant for a mobile photobooth app.\n" +
+                "CRITICAL REQUIREMENT: All text content in the JSON MUST be in " + languageName + ".\n" +
+                "Task: Analyze the provided admin dashboard metrics and return a structured insights report.\n" +
+                "Rules:\n" +
+                "1) Be flexible and realistic in your interpretations.\n" +
+                "2) Output ONLY raw JSON. Do NOT include markdown blocks like ```json ... ```.\n" +
+                "3) Response structure:\n" +
+                "{\n" +
+                "  \"summary\": \"Overall business health summary (in " + languageName + ")\",\n" +
+                "  \"insights\": [\"Trend insight 1 (in " + languageName + ")\", \"Trend insight 2 (in " + languageName + ")\"],\n" +
+                "  \"recommendations\": [\n" +
+                "    { \"title\": \"Strategy\", \"action\": \"Step\" }\n" +
+                "  ],\n" +
+                "  \"confidence\": 0.95\n" +
+                "}\n" +
+                "Input Data:\n" + gson.toJson(payload);
+    }
+
+    private Map<String, Object> buildStatsSnapshot(AdminAiInsightRequest request) {
         Map<String, Object> snapshot = new HashMap<>();
         snapshot.put("usersByMonth", request.getUsersByMonth());
         snapshot.put("imageDownloadsByMonth", request.getImageDownloadsByMonth());
         snapshot.put("reviewScoreByMonth", request.getReviewScoreByMonth());
 
-        Map<String, Object> aiRatio = new HashMap<>();
+        Map<String, Integer> aiRatio = new HashMap<>();
         aiRatio.put("withAI", request.getAiRegisteredUsers());
         aiRatio.put("withoutAI", request.getAiNotRegisteredUsers());
         snapshot.put("aiRatio", aiRatio);
-
-        payload.put("statsSnapshot", snapshot);
-        return payload;
+        return snapshot;
     }
 
-    @SuppressWarnings("unchecked")
-    private AdminAiInsights parseResponse(Object raw, AdminAiInsightRequest request) {
-        String languageTag = request.getLanguageTag();
-        if (!(raw instanceof Map)) {
-            return buildFallbackInsights(request);
-        }
-
-        Map<String, Object> data = (Map<String, Object>) raw;
-        String summary = stringOrDefault(data.get("summary"), localized(languageTag,
-                R.string.admin_ai_insights_summary_fallback_vi,
-                R.string.admin_ai_insights_summary_fallback_en));
-
-        List<String> insights = parseStringOrObjectList(data.get("insights"));
-        if (insights.isEmpty()) {
-            insights.add(localized(languageTag,
-                    R.string.admin_ai_insights_line_no_data_vi,
-                    R.string.admin_ai_insights_line_no_data_en));
-        }
-
-        List<String> recommendations = parseRecommendationList(data.get("recommendations"));
-        if (recommendations.isEmpty()) {
-            recommendations.add(localized(languageTag,
-                    R.string.admin_ai_insights_action_fallback_vi,
-                    R.string.admin_ai_insights_action_fallback_en));
-        }
-
-        double confidence = parseDouble(data.get("confidence"));
-        String source = localized(languageTag,
-                R.string.admin_ai_insights_source_ai_vi,
-                R.string.admin_ai_insights_source_ai_en);
-
-        return new AdminAiInsights(summary, clampList(insights, 3), clampList(recommendations, 2), true, source, confidence);
-    }
-
-    private List<String> parseStringOrObjectList(Object rawList) {
-        List<String> out = new ArrayList<>();
-        if (!(rawList instanceof List)) {
-            return out;
-        }
-        for (Object item : (List<?>) rawList) {
-            if (item instanceof String) {
-                String text = ((String) item).trim();
-                if (!text.isEmpty()) {
-                    out.add(text);
-                }
-            } else if (item instanceof Map) {
-                Object detail = ((Map<?, ?>) item).get("detail");
-                Object title = ((Map<?, ?>) item).get("title");
-                String merged = stringOrDefault(title, "");
-                String detailText = stringOrDefault(detail, "");
-                if (!detailText.isEmpty()) {
-                    merged = merged.isEmpty() ? detailText : merged + ": " + detailText;
-                }
-                if (!merged.trim().isEmpty()) {
-                    out.add(merged.trim());
+    private AdminAiInsights parseGeminiResponse(String rawText, AdminAiInsightRequest request) {
+        String jsonString = extractJson(rawText);
+        
+        // Parse using JSONObject according to requirement
+        try {
+            JSONObject json = new JSONObject(jsonString);
+            String summary = json.optString("summary", "");
+            
+            List<String> insights = new ArrayList<>();
+            org.json.JSONArray insArray = json.optJSONArray("insights");
+            if (insArray != null) {
+                for (int i = 0; i < insArray.length(); i++) {
+                    insights.add(insArray.getString(i));
                 }
             }
-        }
-        return out;
-    }
 
-    private List<String> parseRecommendationList(Object rawList) {
-        List<String> out = new ArrayList<>();
-        if (!(rawList instanceof List)) {
-            return out;
-        }
-        for (Object item : (List<?>) rawList) {
-            if (item instanceof String) {
-                String text = ((String) item).trim();
-                if (!text.isEmpty()) {
-                    out.add(text);
-                }
-            } else if (item instanceof Map) {
-                Map<?, ?> map = (Map<?, ?>) item;
-                String title = stringOrDefault(map.get("title"), "");
-                String action = stringOrDefault(map.get("action"), "");
-                String merged = title;
-                if (!action.isEmpty()) {
-                    merged = merged.isEmpty() ? action : merged + " - " + action;
-                }
-                if (!merged.trim().isEmpty()) {
-                    out.add(merged.trim());
+            List<String> recommendations = new ArrayList<>();
+            org.json.JSONArray recArray = json.optJSONArray("recommendations");
+            if (recArray != null) {
+                for (int i = 0; i < recArray.length(); i++) {
+                    JSONObject obj = recArray.getJSONObject(i);
+                    String title = obj.optString("title", "");
+                    String action = obj.optString("action", "");
+                    recommendations.add(title + ": " + action);
                 }
             }
+
+            double confidence = json.optDouble("confidence", 0.7);
+            String source = isVietnamese(request.getLanguageTag()) ? "AI Dashboard (Chuyên sâu)" : "AI Dashboard (Deep Analysis)";
+
+            return new AdminAiInsights(summary, insights, recommendations, true, source, confidence);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse AI JSON", e);
         }
-        return out;
+    }
+
+    // JSON Extraction (Pipeline 4)
+    private String extractJson(String input) {
+        if (input == null || input.isEmpty()) return "{}";
+        // Lọc chuỗi JSON sạch, bỏ markdown blocks nếu AI cố tình trả về
+        String cleaned = input.replaceAll("(?s)```json\\s*(.*?)\\s*```", "$1")
+                             .replaceAll("(?s)```\\s*(.*?)\\s*```", "$1")
+                             .trim();
+        int start = cleaned.indexOf("{");
+        int end = cleaned.lastIndexOf("}");
+        if (start >= 0 && end > start) {
+            return cleaned.substring(start, end + 1);
+        }
+        return cleaned;
     }
 
     private AdminAiInsights buildFallbackInsights(AdminAiInsightRequest request) {
         boolean vi = isVietnamese(request.getLanguageTag());
-        LinkedHashMap<String, Integer> users = request.getUsersByMonth();
-        LinkedHashMap<String, Integer> downloads = request.getImageDownloadsByMonth();
-        LinkedHashMap<String, Double> reviews = request.getReviewScoreByMonth();
+        String summary = vi
+                ? "Báo cáo tóm tắt được tạo theo quy tắc nội bộ (AI không phản hồi)."
+                : "Summary generated by internal rules (AI failed to respond).";
 
         List<String> insights = new ArrayList<>();
-        insights.add(buildTrendLine(users, vi,
-                "Tài khoản mới", "New accounts"));
-        insights.add(buildTrendLine(downloads, vi,
-                "Lượt tải ảnh", "Image downloads"));
-        insights.add(buildTrendLineDouble(reviews, vi,
-                "Điểm đánh giá", "Review score"));
+        insights.add(vi ? "Hệ thống: Vui lòng kiểm tra lại kết nối mạng hoặc API Key." : "System: Please check your network or API Key.");
 
-        int totalAi = request.getAiRegisteredUsers() + request.getAiNotRegisteredUsers();
-        double ratio = totalAi > 0 ? (request.getAiRegisteredUsers() * 100d) / totalAi : 0d;
-        String aiRatioLine = vi
-                ? String.format(Locale.getDefault(), "Tỷ lệ user đăng ký AI hiện tại là %.1f%%.", ratio)
-                : String.format(Locale.getDefault(), "Current AI-registered user ratio is %.1f%%.", ratio);
-
-        if (insights.size() >= 3) {
-            insights.set(2, insights.get(2) + " " + aiRatioLine);
-        } else {
-            insights.add(aiRatioLine);
-        }
-
-        List<String> actions = new ArrayList<>();
-        actions.add(vi
-                ? "Ưu tiên đẩy frame/chủ đề đang có hiệu suất tải cao lên vị trí đầu trang Home trong 7 ngày."
-                : "Prioritize high-performing frames/themes on Home for the next 7 days.");
-        actions.add(vi
-                ? "Theo dõi biến động review theo tháng và phản hồi nhóm đánh giá thấp trong vòng 24 giờ."
-                : "Track monthly review shifts and respond to low-score feedback within 24 hours.");
-
-        String summary = vi
-                ? "Báo cáo tóm tắt được tạo theo quy tắc nội bộ do AI API chưa phản hồi."
-                : "Summary generated by internal rules because AI API is currently unavailable.";
-        String source = vi
-                ? appContext.getString(R.string.admin_ai_insights_source_rule_vi)
-                : appContext.getString(R.string.admin_ai_insights_source_rule_en);
-
-        return new AdminAiInsights(summary, clampList(insights, 3), clampList(actions, 2), false, source, 0.55d);
+        return new AdminAiInsights(summary, insights, new ArrayList<>(), false, "Dự phòng", 0.55d);
     }
 
-    private String buildTrendLine(Map<String, Integer> map, boolean vi, String labelVi, String labelEn) {
-        if (map == null || map.size() < 2) {
-            return vi
-                    ? labelVi + " chưa đủ dữ liệu để kết luận xu hướng."
-                    : labelEn + " does not have enough data for trend detection.";
-        }
-        List<Integer> values = new ArrayList<>(map.values());
-        int current = values.get(values.size() - 1);
-        int previous = values.get(values.size() - 2);
-        double pct = previous == 0 ? 0d : ((current - previous) * 100d / previous);
-        if (vi) {
-            return String.format(Locale.getDefault(), "%s tháng gần nhất %s %.1f%% (%d -> %d).",
-                    labelVi, pct >= 0 ? "tăng" : "giảm", Math.abs(pct), previous, current);
-        }
-        return String.format(Locale.getDefault(), "%s in the latest month %s %.1f%% (%d -> %d).",
-                labelEn, pct >= 0 ? "increased" : "decreased", Math.abs(pct), previous, current);
-    }
-
-    private String buildTrendLineDouble(Map<String, Double> map, boolean vi, String labelVi, String labelEn) {
-        if (map == null || map.size() < 2) {
-            return vi
-                    ? labelVi + " chưa đủ dữ liệu để kết luận xu hướng."
-                    : labelEn + " does not have enough data for trend detection.";
-        }
-        List<Double> values = new ArrayList<>(map.values());
-        double current = values.get(values.size() - 1);
-        double previous = values.get(values.size() - 2);
-        double diff = current - previous;
-        if (vi) {
-            return String.format(Locale.getDefault(), "%s thay đổi %.2f điểm (%s -> %s).",
-                    labelVi,
-                    diff,
-                    trimDouble(previous),
-                    trimDouble(current));
-        }
-        return String.format(Locale.getDefault(), "%s changed by %.2f points (%s -> %s).",
-                labelEn,
-                diff,
-                trimDouble(previous),
-                trimDouble(current));
-    }
-
-    private String trimDouble(double value) {
-        return String.format(Locale.getDefault(), "%.2f", value);
-    }
-
-    private List<String> clampList(List<String> source, int maxItems) {
-        List<String> out = new ArrayList<>();
-        if (source == null || source.isEmpty()) {
-            return out;
-        }
-        for (String item : source) {
-            if (item == null) {
-                continue;
-            }
-            String trimmed = item.trim();
-            if (!trimmed.isEmpty()) {
-                out.add(trimmed);
-            }
-            if (out.size() >= maxItems) {
-                break;
-            }
-        }
-        return out;
-    }
-
-    private boolean isVietnamese(String languageTag) {
-        return languageTag != null && languageTag.toLowerCase(Locale.US).startsWith("vi");
-    }
-
-    private String stringOrDefault(Object value, String fallback) {
-        if (value == null) {
-            return fallback;
-        }
-        String text = String.valueOf(value).trim();
-        return text.isEmpty() ? fallback : text;
-    }
-
-    private double parseDouble(Object value) {
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-        if (value instanceof String) {
-            try {
-                return Double.parseDouble(((String) value).trim());
-            } catch (NumberFormatException ignored) {
-                return 0d;
-            }
-        }
-        return 0d;
-    }
-
-    private String localized(String languageTag, int viRes, int enRes) {
-        return appContext.getString(isVietnamese(languageTag) ? viRes : enRes);
+    private boolean isVietnamese(String tag) {
+        return tag != null && tag.toLowerCase().startsWith("vi");
     }
 }
-
-
-

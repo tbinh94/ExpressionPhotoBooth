@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
@@ -33,6 +35,31 @@ android {
 
     lint {
         abortOnError = false
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(localPropertiesFile.inputStream())
+    }
+    val geminiApiKey = localProperties.getProperty("gemini.api.key") ?: ""
+
+    buildTypes {
+        debug {
+            buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        }
+        release {
+            isMinifyEnabled = false
+            buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
 }
 
@@ -72,6 +99,7 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 }
 
 java {
