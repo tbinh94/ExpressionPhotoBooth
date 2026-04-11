@@ -69,6 +69,11 @@ import java.util.Map;
 import java.util.Stack;
 
 public class EditPhotoActivity extends AppCompatActivity {
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(com.example.expressionphotobooth.utils.LocaleManager.wrapContext(newBase));
+    }
+
 
     private static final int MAX_EDIT_BITMAP_SIZE = 1600;
     private static final float MIN_STICKER_SCALE = 0.3f;

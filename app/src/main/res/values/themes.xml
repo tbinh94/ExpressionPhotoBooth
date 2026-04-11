@@ -25,4 +25,9 @@
         <item name="android:activityCloseExitAnimation">@anim/no_anim</item>
     </style>
 
+    <style name="CircleAppearance">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>

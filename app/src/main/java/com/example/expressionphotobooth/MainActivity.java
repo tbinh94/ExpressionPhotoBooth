@@ -45,6 +45,7 @@ import com.example.expressionphotobooth.domain.model.SessionState;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.ExpressionAnalyzer;
 import com.example.expressionphotobooth.domain.usecase.GestureAnalyzer;
+import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -82,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
     private View captureButton;
     private ImageButton flashButton;
     private ImageButton soundButton;
-    private Button squareRatioButton;
-    private Button wideRatioButton;
     private TextView tvCountdown;
     private TextView tvCaptureStatus;
     private LinearLayout dotContainer;
@@ -127,6 +126,11 @@ public class MainActivity extends AppCompatActivity {
     private boolean isPortraitMode = false;
     private PortraitProcessor portraitProcessor;
     private boolean isNavigatingToSelection = false;
+
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(LocaleManager.wrapContext(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,8 +178,6 @@ public class MainActivity extends AppCompatActivity {
         flashButton = findViewById(R.id.btnFlash);
         soundButton = findViewById(R.id.btnSound);
         tvCountdown = findViewById(R.id.tvCountdown);
-        squareRatioButton = findViewById(R.id.btnRatioSquare);
-        wideRatioButton = findViewById(R.id.btnRatioWide);
         tvCaptureStatus = findViewById(R.id.tvCaptureStatus);
         dotContainer = findViewById(R.id.dotContainer);
         ivLastCapturePreview = findViewById(R.id.ivLastCapturePreview);
@@ -226,25 +228,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        if (squareRatioButton != null) {
-            squareRatioButton.setOnClickListener(v -> {
-                if (!isSquareRatio) {
-                    isSquareRatio = true;
-                    applyPreviewRatio();
-                    if (cameraProvider != null) bindCameraUseCases();
-                }
-            });
-        }
 
-        if (wideRatioButton != null) {
-            wideRatioButton.setOnClickListener(v -> {
-                if (isSquareRatio) {
-                    isSquareRatio = false;
-                    applyPreviewRatio();
-                    if (cameraProvider != null) bindCameraUseCases();
-                }
-            });
-        }
 
         com.google.android.material.button.MaterialButtonToggleGroup modeGroup = findViewById(R.id.modeContainer);
         View aiSubGroup = findViewById(R.id.aiScrollContainer);
@@ -383,30 +367,7 @@ public class MainActivity extends AppCompatActivity {
         soundButton.setImageResource(isSoundEnabled ? R.drawable.ic_volume_up : R.drawable.ic_volume_off);
     }
 
-    private void applyPreviewRatio() {
-        if (previewCard == null) {
-            return;
-        }
-        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) previewCard.getLayoutParams();
-        if (isSquareRatio) {
-            lp.dimensionRatio = "1:1";
-            if (squareRatioButton != null) {
-                squareRatioButton.setAlpha(1.0f);
-            }
-            if (wideRatioButton != null) {
-                wideRatioButton.setAlpha(0.5f);
-            }
-        } else {
-            lp.dimensionRatio = "3:4";
-            if (squareRatioButton != null) {
-                squareRatioButton.setAlpha(0.5f);
-            }
-            if (wideRatioButton != null) {
-                wideRatioButton.setAlpha(1.0f);
-            }
-        }
-        previewCard.setLayoutParams(lp);
-    }
+
 
     private void initCaptureUi() {
         capturedCount = 0;
@@ -627,54 +588,72 @@ public class MainActivity extends AppCompatActivity {
                 switch (nextShot) {
                     case 1:
                         targetExpression = "HI";
-                        tvCountdown.setText("✌️");
                         updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
                         break;
                     case 2:
                         targetExpression = "HEART";
-                        tvCountdown.setText("❤️");
                         updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot));
                         break;
                     case 3:
                         targetExpression = "THUMBS_UP";
-                        tvCountdown.setText("👍");
                         updateCaptureStatus(getString(R.string.main_capture_prompt_hand_thumbs_up, nextShot));
                         break;
                     case 4:
                         targetExpression = "OPEN_PALM";
-                        tvCountdown.setText("🖐️");
                         updateCaptureStatus(getString(R.string.main_capture_prompt_hand_open_palm, nextShot));
                         break;
                     case 5:
                         targetExpression = "FIST";
-                        tvCountdown.setText("✊");
                         updateCaptureStatus(getString(R.string.main_capture_prompt_hand_fist, nextShot));
                         break;
                     case 6:
                         targetExpression = "OK_SIGN";
-                        tvCountdown.setText("👌");
                         updateCaptureStatus(getString(R.string.main_capture_prompt_hand_ok, nextShot));
                         break;
                     default:
                         targetExpression = "HI";
-                        tvCountdown.setText("✌️");
                         updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
                 }
             } else if (isVoiceTriggerMode) {
-                tvCountdown.setText("🎤");
                 updateCaptureStatus(getString(R.string.main_capture_prompt_voice, nextShot));
             } else {
-                // Face mode
-                if (nextShot % 2 != 0) {
-                    targetExpression = "SMILE";
-                    tvCountdown.setText(":D");
-                    updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
-                } else {
-                    targetExpression = "WINK_RIGHT"; // Simple specific wink
-                    tvCountdown.setText(";)");
-                    updateCaptureStatus(getString(R.string.main_capture_prompt_face_wink, nextShot));
+                // Face mode cycle
+                int step = (nextShot - 1) % 6;
+                switch (step) {
+                    case 0:
+                        targetExpression = "CENTERED";
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_center, nextShot));
+                        break;
+                    case 1:
+                        targetExpression = "SMILE";
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
+                        break;
+                    case 2:
+                        targetExpression = "MOUTH_OPEN";
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_mouth_open, nextShot));
+                        break;
+                    case 3:
+                        targetExpression = "WINK";
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_wink, nextShot));
+                        break;
+                    case 4:
+                        targetExpression = "TILT_RIGHT";
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_tilt, nextShot));
+                        break;
+                    case 5:
+                        targetExpression = "TILT_LEFT";
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_tilt, nextShot));
+                        break;
+                    default:
+                        targetExpression = "SMILE";
+                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
                 }
             }
+            
+            // Clear countdown text area in AI mode
+            tvCountdown.setText("");
+            tvCountdown.setVisibility(View.GONE);
+
 
             // Reset detector state and wait a bit longer (1.5s) to allow user to see the prompt
             captureHandler.postDelayed(() -> {
@@ -683,14 +662,9 @@ public class MainActivity extends AppCompatActivity {
                     
                     if (isVoiceTriggerMode) {
                         isWaitingForVoice = true;
-                        // Hiển thị trạng thái rõ ràng hơn
-                        tvCountdown.setText("🎤");
-                        tvCountdown.setVisibility(View.VISIBLE);
-                        // Nhấp nháy countdown icon để báo hiệu đang lắng nghe
-                        tvCountdown.animate().alpha(0.3f).setDuration(600)
-                                .withEndAction(() -> tvCountdown.animate().alpha(1f).setDuration(600).start())
-                                .start();
                         updateCaptureStatus(getString(R.string.main_capture_prompt_voice_v2));
+                        Toast.makeText(this, getString(R.string.main_mic_active_toast), Toast.LENGTH_SHORT).show();
+
                         
                         voiceTriggerAnalyzer.start(new VoiceTriggerAnalyzer.OnVoiceTriggerDetected() {
                             @Override
@@ -998,7 +972,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (!isNavigatingToSelection && hasCameraPermission()) {
+        // Reset navigation flag and UI state when returning to this screen
+        isNavigatingToSelection = false;
+        initCaptureUi();
+        
+        if (hasCameraPermission()) {
             if (cameraProvider != null && imageCapture == null) {
                 bindCameraUseCases();
                 captureButton.setEnabled(true);

@@ -29,7 +29,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText etEmail, etPassword, etName, etBirthday;
     private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage;
     private View layoutRegisterExtra, tvForgotPassword, layoutLoadingOverlay;
-    private MaterialButton btnSignIn, btnRegister, btnGuest, btnLanguageToggle;
+    private MaterialButton btnSignIn, btnRegister, btnGuest;
+    private android.widget.ImageView btnLanguageToggle;
     private AuthRepository authRepository;
     private boolean isRegisterMode = false;
 
@@ -165,8 +166,8 @@ public class LoginActivity extends AppCompatActivity {
         btnLanguageToggle.setContentDescription(contentDesc);
         ViewCompat.setTooltipText(btnLanguageToggle, contentDesc);
         
-        int flagRes = isVietnamese ? R.drawable.ic_flag_uk : R.drawable.ic_flag_vn;
-        btnLanguageToggle.setIconResource(flagRes);
+        int flagRes = isVietnamese ? R.drawable.ic_flag_vn : R.drawable.ic_flag_uk;
+        btnLanguageToggle.setImageResource(flagRes);
     }
 
 

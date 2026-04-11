@@ -166,7 +166,7 @@
             android:layout_marginTop="@dimen/camera_controls_margin_top"
             android:layout_marginEnd="@dimen/camera_controls_horizontal_margin"
             android:orientation="vertical"
-            app:layout_constraintBottom_toTopOf="@id/ratioContainer"
+            app:layout_constraintBottom_toTopOf="@id/btnCapture"
             android:layout_marginBottom="@dimen/camera_controls_margin_bottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -327,33 +327,6 @@
             </LinearLayout>
 
         </LinearLayout>
-
-        <!-- ── BOTTOM BAR ── -->
-        <!-- Ratio toggle — căn giữa phía trên nút capture -->
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/ratioContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:layout_marginBottom="@dimen/camera_ratio_margin_top"
-            app:singleSelection="true"
-            app:selectionRequired="true"
-            app:checkedButton="@+id/btnRatioSquare"
-            app:layout_constraintBottom_toTopOf="@id/btnCapture"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <Button
-                android:id="@+id/btnRatioWide"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="@string/ratio_wide"
-                android:textSize="11sp"
-                android:textColor="@color/screen_title"
-                android:visibility="gone"
-                app:strokeColor="@color/screen_title"
-                app:cornerRadius="8dp" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <!-- Sound - left of capture -->
         <ImageButton

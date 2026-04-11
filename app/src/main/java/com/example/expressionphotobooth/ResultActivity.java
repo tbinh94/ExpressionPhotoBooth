@@ -69,6 +69,11 @@ import java.util.List;
 import java.util.Map;
 
 public class ResultActivity extends AppCompatActivity {
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(com.example.expressionphotobooth.utils.LocaleManager.wrapContext(newBase));
+    }
+
     private Uri resultUri;
     private SessionRepository sessionRepository;
     private SessionState sessionState;

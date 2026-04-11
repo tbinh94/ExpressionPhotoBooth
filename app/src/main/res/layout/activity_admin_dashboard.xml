@@ -82,28 +82,17 @@
                                  android:textStyle="bold" />
                         </LinearLayout>
 
-                        <com.google.android.material.button.MaterialButton
+                        <com.google.android.material.imageview.ShapeableImageView
                             android:id="@+id/btnLanguageToggle"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:minWidth="0dp"
-                            android:minHeight="0dp"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            android:padding="0dp"
-                            android:gravity="center"
-                            android:contentDescription="@string/language_toggle_to_english"
-                            app:backgroundTint="@color/camera_mode_primary"
-                            app:cornerRadius="16dp"
-                            app:icon="@drawable/ic_flag_vn"
-                            app:iconGravity="textTop"
-                            app:iconPadding="0dp"
-                            app:iconSize="24dp"
-                            app:iconTint="@android:color/transparent"
-                            app:iconTintMode="src_over"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:src="@drawable/ic_flag_vn"
+                            android:scaleType="centerCrop"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?attr/selectableItemBackgroundBorderless"
+                            android:layout_marginStart="8dp"
+                            app:shapeAppearanceOverlay="@style/CircleAppearance"
                             app:strokeColor="@color/app_blue"
                             app:strokeWidth="1dp" />
 

@@ -9,6 +9,11 @@ import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 
 public class LauncherActivity extends AppCompatActivity {
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(com.example.expressionphotobooth.utils.LocaleManager.wrapContext(newBase));
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
