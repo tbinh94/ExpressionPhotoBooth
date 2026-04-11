@@ -300,6 +300,8 @@
     <string name="admin_ai_insights_action_fallback_en">Prioritize top frame optimization and monitor negative reviews weekly.</string>
     <string name="admin_ai_insights_source_ai_vi">Phân tích AI</string>
     <string name="admin_ai_insights_source_ai_en">AI analysis</string>
+    <string name="admin_ai_insights_empty_title">Sẵn sàng phân tích</string>
+    <string name="admin_ai_insights_empty_desc">Nhấn \'Phân tích\' để Sparkle AI giúp bạn tìm ra các xu hướng ẩn trong số liệu.</string>
     <string name="admin_ai_insights_source_rule_vi">Chế độ dự phòng</string>
     <string name="admin_ai_insights_source_rule_en">Fallback mode</string>
     <string name="admin_reviews_filter_all">Tất cả</string>

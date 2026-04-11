@@ -37,6 +37,9 @@ public class AdminAiChatBottomSheet extends BottomSheetDialogFragment {
     private View btnClose;
     private ChatAdapter adapter;
     private List<ChatMessage> messages = new ArrayList<>();
+    
+    private long lastSentTime = 0;
+    private static final long COOLDOWN_MS = 5000; // 5 giây
 
     public static AdminAiChatBottomSheet newInstance(AdminDashboardStats statsSnapshot, String languageTag) {
         AdminAiChatBottomSheet fragment = new AdminAiChatBottomSheet();
@@ -70,9 +73,17 @@ public class AdminAiChatBottomSheet extends BottomSheetDialogFragment {
 
         btnSend.setOnClickListener(v -> {
             String query = etChatInput.getText().toString().trim();
-            if (!query.isEmpty()) {
-                sendQuery(query);
+            if (query.isEmpty()) return;
+
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastSentTime < COOLDOWN_MS) {
+                long waitSec = (COOLDOWN_MS - (currentTime - lastSentTime)) / 1000;
+                Toast.makeText(requireContext(), "Vui lòng chờ " + (waitSec + 1) + " giây để tiếp tục hỏi.", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            lastSentTime = currentTime;
+            sendQuery(query);
         });
 
         // Welcome message

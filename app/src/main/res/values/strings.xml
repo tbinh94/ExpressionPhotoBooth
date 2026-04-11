@@ -365,7 +365,9 @@
     <string name="admin_ai_insights_action_fallback_en">Prioritize top frame optimization and monitor negative reviews weekly.</string>
     <string name="admin_ai_insights_source_ai_vi">Phan tich AI</string>
     <string name="admin_ai_insights_source_ai_en">AI analysis</string>
-    <string name="admin_ai_insights_source_rule_vi">Che do du phong</string>
+    <string name="admin_ai_insights_empty_title">Ready to analyze</string>
+    <string name="admin_ai_insights_empty_desc">Tap \'Analyze\' to discover hidden trends in your data with Sparkle AI.</string>
+    <string name="admin_ai_insights_source_rule_vi">Chế độ dự phòng</string>
     <string name="admin_ai_insights_source_rule_en">Fallback mode</string>
     <string name="admin_reviews_filter_all">All</string>
     <string name="admin_reviews_filter_five_star">5 ⭐</string>
