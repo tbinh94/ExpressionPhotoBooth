@@ -4,11 +4,13 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +20,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.expressionphotobooth.domain.model.AdminDashboardStats;
+import com.example.expressionphotobooth.domain.model.AdminAiInsightRequest;
+import com.example.expressionphotobooth.domain.model.AdminAiInsights;
+import com.example.expressionphotobooth.domain.repository.AdminAiInsightsRepository;
 import com.example.expressionphotobooth.domain.repository.AdminStatsRepository;
 import com.example.expressionphotobooth.ui.chart.MonthlyBarChartView;
 import com.example.expressionphotobooth.ui.chart.MonthlyChartPoint;
@@ -37,6 +42,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private static final int RANGE_3M = 3;
     private static final int RANGE_6M = 6;
     private static final int RANGE_12M = 12;
+    private static final long AI_ANALYZE_COOLDOWN_MS = 45_000L;
 
     private View bar5;
     private View bar4;
@@ -89,10 +95,24 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private TextView tvAiRatioMiniTitle;
     private TextView tvAiRatioMiniPercent;
     private TextView tvAiRatioMiniMeta;
+    private TextView tvAiInsightsTitle;
+    private TextView tvAiInsightsSubtitle;
+    private TextView tvAiSummary;
+    private TextView tvAiInsightLine1;
+    private TextView tvAiInsightLine2;
+    private TextView tvAiInsightLine3;
+    private TextView tvAiRecommendation;
+    private ProgressBar progressAiInsights;
+    private MaterialButton btnAiAnalyze;
 
     private AdminStatsRepository adminStatsRepository;
+    private AdminAiInsightsRepository adminAiInsightsRepository;
     private AdminDashboardStats latestStats;
     private int selectedRangeMonths = RANGE_6M;
+    private int aiRequestSerial = 0;
+    private boolean aiInsightsLoading = false;
+    private long aiCooldownUntilMillis = 0L;
+    private CountDownTimer aiCooldownTimer;
 
     @Nullable
     @Override
@@ -105,6 +125,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         super.onViewCreated(view, savedInstanceState);
 
         adminStatsRepository = ((AppContainer) requireActivity().getApplication()).getAdminStatsRepository();
+        adminAiInsightsRepository = ((AppContainer) requireActivity().getApplication()).getAdminAiInsightsRepository();
 
         bar5 = view.findViewById(R.id.bar5Star);
         bar4 = view.findViewById(R.id.bar4Star);
@@ -153,6 +174,37 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         tvAiRatioMiniTitle = view.findViewById(R.id.tvAiRatioMiniTitle);
         tvAiRatioMiniPercent = view.findViewById(R.id.tvAiRatioMiniPercent);
         tvAiRatioMiniMeta = view.findViewById(R.id.tvAiRatioMiniMeta);
+        tvAiInsightsTitle = view.findViewById(R.id.tvAiInsightsTitle);
+        tvAiInsightsSubtitle = view.findViewById(R.id.tvAiInsightsSubtitle);
+        tvAiSummary = view.findViewById(R.id.tvAiSummary);
+        tvAiInsightLine1 = view.findViewById(R.id.tvAiInsightLine1);
+        tvAiInsightLine2 = view.findViewById(R.id.tvAiInsightLine2);
+        tvAiInsightLine3 = view.findViewById(R.id.tvAiInsightLine3);
+        tvAiRecommendation = view.findViewById(R.id.tvAiRecommendation);
+        progressAiInsights = view.findViewById(R.id.progressAiInsights);
+        btnAiAnalyze = view.findViewById(R.id.btnAiAnalyze);
+
+        if (btnAiAnalyze != null) {
+            btnAiAnalyze.setOnClickListener(v -> {
+                if (latestStats == null) {
+                    return;
+                }
+                String languageTag = LocaleManager.getCurrentLanguage(requireContext());
+                long remainingMillis = aiCooldownUntilMillis - System.currentTimeMillis();
+                if (remainingMillis > 0L) {
+                    int seconds = (int) Math.ceil(remainingMillis / 1000d);
+                    Toast.makeText(
+                            requireContext(),
+                            LocaleManager.createLocalizedContext(requireContext(), languageTag)
+                                    .getString(R.string.admin_ai_insights_wait_to_retry_format, seconds),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    return;
+                }
+                startAnalyzeCooldown(languageTag);
+                loadAiInsights(latestStats, languageTag);
+            });
+        }
 
         bindRangeSelector();
 
@@ -182,8 +234,10 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
             return;
         }
         selectedRangeMonths = months;
+        String languageTag = LocaleManager.getCurrentLanguage(requireContext());
         if (latestStats != null) {
-            renderStats(latestStats, true, LocaleManager.getCurrentLanguage(requireContext()));
+            renderStats(latestStats, true, languageTag);
+            resetAiInsightsState(languageTag);
         }
     }
 
@@ -194,7 +248,9 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 if (!isAdded()) {
                     return;
                 }
-                renderStats(stats, true, LocaleManager.getCurrentLanguage(requireContext()));
+                String languageTag = LocaleManager.getCurrentLanguage(requireContext());
+                renderStats(stats, true, languageTag);
+                resetAiInsightsState(languageTag);
             }
 
             @Override
@@ -208,6 +264,66 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void resetAiInsightsState(String languageTag) {
+        Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
+        setAiInsightsLoading(false, languageTag);
+        if (tvAiInsightsSubtitle != null) {
+            tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_tap_to_analyze));
+        }
+        if (tvAiSummary != null) {
+            tvAiSummary.setText(localized.getString(R.string.admin_ai_insights_tap_to_analyze));
+        }
+        if (tvAiInsightLine1 != null) tvAiInsightLine1.setText("");
+        if (tvAiInsightLine2 != null) tvAiInsightLine2.setText("");
+        if (tvAiInsightLine3 != null) tvAiInsightLine3.setText("");
+        if (tvAiRecommendation != null) tvAiRecommendation.setText("");
+        refreshAnalyzeButtonState(languageTag);
+    }
+
+    private void startAnalyzeCooldown(String languageTag) {
+        aiCooldownUntilMillis = System.currentTimeMillis() + AI_ANALYZE_COOLDOWN_MS;
+        if (aiCooldownTimer != null) {
+            aiCooldownTimer.cancel();
+        }
+        aiCooldownTimer = new CountDownTimer(AI_ANALYZE_COOLDOWN_MS, 1000L) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if (!isAdded()) {
+                    return;
+                }
+                refreshAnalyzeButtonState(languageTag);
+            }
+
+            @Override
+            public void onFinish() {
+                aiCooldownUntilMillis = 0L;
+                if (!isAdded()) {
+                    return;
+                }
+                refreshAnalyzeButtonState(languageTag);
+            }
+        };
+        aiCooldownTimer.start();
+        refreshAnalyzeButtonState(languageTag);
+    }
+
+    private void refreshAnalyzeButtonState(String languageTag) {
+        if (btnAiAnalyze == null || !isAdded()) {
+            return;
+        }
+        Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
+        long remainingMillis = aiCooldownUntilMillis - System.currentTimeMillis();
+        int remainingSeconds = (int) Math.ceil(Math.max(0L, remainingMillis) / 1000d);
+        boolean inCooldown = remainingSeconds > 0;
+        boolean enabled = !aiInsightsLoading && !inCooldown;
+        btnAiAnalyze.setEnabled(enabled);
+        if (inCooldown) {
+            btnAiAnalyze.setText(localized.getString(R.string.admin_ai_insights_analyze_cooldown_format, remainingSeconds));
+        } else {
+            btnAiAnalyze.setText(localized.getString(R.string.admin_ai_insights_analyze_cta));
+        }
     }
 
     private void renderStats(AdminDashboardStats stats, boolean animateVisuals, String languageTag) {
@@ -300,6 +416,116 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 localized.getString(R.string.admin_overview_legend_review_score),
                 animateVisuals
         );
+    }
+
+    private void loadAiInsights(AdminDashboardStats stats, String languageTag) {
+        if (adminAiInsightsRepository == null || stats == null) {
+            return;
+        }
+
+        int requestId = ++aiRequestSerial;
+        setAiInsightsLoading(true, languageTag);
+
+        AdminAiInsightRequest request = new AdminAiInsightRequest(
+                selectedRangeMonths,
+                languageTag,
+                keepLatest(stats.getUsersByMonth(), selectedRangeMonths),
+                keepLatest(stats.getImageDownloadsByMonth(), selectedRangeMonths),
+                keepLatest(stats.getReviewScoreByMonth(), selectedRangeMonths),
+                stats.getAiRegisteredUsers(),
+                stats.getAiNotRegisteredUsers()
+        );
+
+        adminAiInsightsRepository.fetchInsights(request, new AdminAiInsightsRepository.Callback() {
+            @Override
+            public void onSuccess(AdminAiInsights insights) {
+                if (!isAdded() || requestId != aiRequestSerial) {
+                    return;
+                }
+                renderAiInsights(insights, languageTag);
+            }
+
+            @Override
+            public void onError(String message) {
+                if (!isAdded() || requestId != aiRequestSerial) {
+                    return;
+                }
+                setAiInsightsLoading(false, languageTag);
+                if (tvAiInsightsSubtitle != null) {
+                    tvAiInsightsSubtitle.setText(getString(R.string.admin_ai_insights_error));
+                }
+                if (tvAiSummary != null) {
+                    tvAiSummary.setText(message == null || message.trim().isEmpty()
+                            ? getString(R.string.admin_ai_insights_error)
+                            : message.trim());
+                }
+            }
+        });
+    }
+
+    private void setAiInsightsLoading(boolean loading, String languageTag) {
+        aiInsightsLoading = loading;
+        Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
+        if (progressAiInsights != null) {
+            progressAiInsights.setVisibility(loading ? View.VISIBLE : View.GONE);
+        }
+        refreshAnalyzeButtonState(languageTag);
+        if (tvAiInsightsSubtitle != null && loading) {
+            tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_loading));
+        }
+        if (loading) {
+            if (tvAiSummary != null) {
+                tvAiSummary.setText(localized.getString(R.string.admin_ai_insights_loading));
+            }
+            if (tvAiInsightLine1 != null) tvAiInsightLine1.setText("");
+            if (tvAiInsightLine2 != null) tvAiInsightLine2.setText("");
+            if (tvAiInsightLine3 != null) tvAiInsightLine3.setText("");
+            if (tvAiRecommendation != null) tvAiRecommendation.setText("");
+        }
+    }
+
+    private void renderAiInsights(AdminAiInsights insights, String languageTag) {
+        Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
+        setAiInsightsLoading(false, languageTag);
+
+        if (insights == null) {
+            if (tvAiInsightsSubtitle != null) {
+                tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_error));
+            }
+            return;
+        }
+
+        String source = insights.getSourceLabel();
+        String confidence = localized.getString(R.string.admin_ai_insights_confidence, insights.getConfidence() * 100d);
+        if (tvAiInsightsSubtitle != null) {
+            tvAiInsightsSubtitle.setText(source.isEmpty() ? confidence : source + " | " + confidence);
+        }
+
+        if (tvAiSummary != null) {
+            tvAiSummary.setText(insights.getSummary());
+        }
+
+        List<String> lines = insights.getInsights();
+        if (tvAiInsightLine1 != null) {
+            tvAiInsightLine1.setText(lines.size() > 0 ? "- " + lines.get(0) : "");
+        }
+        if (tvAiInsightLine2 != null) {
+            tvAiInsightLine2.setText(lines.size() > 1 ? "- " + lines.get(1) : "");
+        }
+        if (tvAiInsightLine3 != null) {
+            tvAiInsightLine3.setText(lines.size() > 2 ? "- " + lines.get(2) : "");
+        }
+
+        List<String> actions = insights.getRecommendations();
+        if (tvAiRecommendation != null) {
+            if (!actions.isEmpty()) {
+                tvAiRecommendation.setText(localized.getString(
+                        R.string.admin_ai_insights_recommendation_format,
+                        actions.get(0)));
+            } else {
+                tvAiRecommendation.setText("");
+            }
+        }
     }
 
     private void bindChart(
@@ -415,6 +641,8 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         if (tvFiveStarLabel != null) tvFiveStarLabel.setText(localized.getString(R.string.admin_overview_five_star_label));
         if (tvRangeTitle != null) tvRangeTitle.setText(localized.getString(R.string.admin_overview_range_title));
         if (tvAiRatioMiniTitle != null) tvAiRatioMiniTitle.setText(localized.getString(R.string.admin_ai_pie_title));
+        if (tvAiInsightsTitle != null) tvAiInsightsTitle.setText(localized.getString(R.string.admin_ai_insights_title));
+        refreshAnalyzeButtonState(languageTag);
         if (tvUsersChartTitle != null) tvUsersChartTitle.setText(localized.getString(R.string.admin_overview_users_chart_title));
         if (tvUsersChartSubtitle != null) tvUsersChartSubtitle.setText(localized.getString(R.string.admin_overview_users_chart_subtitle));
         if (tvDownloadsChartTitle != null) tvDownloadsChartTitle.setText(localized.getString(R.string.admin_overview_download_chart_title));
@@ -435,6 +663,16 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
 
         if (latestStats != null) {
             renderStats(latestStats, false, languageTag);
+            resetAiInsightsState(languageTag);
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (aiCooldownTimer != null) {
+            aiCooldownTimer.cancel();
+            aiCooldownTimer = null;
+        }
+        super.onDestroyView();
     }
 }

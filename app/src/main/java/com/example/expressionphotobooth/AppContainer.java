@@ -3,9 +3,11 @@ package com.example.expressionphotobooth;
 import android.app.Application;
 
 import com.example.expressionphotobooth.data.repository.FirebaseAdminStatsRepository;
+import com.example.expressionphotobooth.data.repository.FirebaseAdminAiInsightsRepository;
 import com.example.expressionphotobooth.data.repository.FirebaseAuthRepository;
 import com.example.expressionphotobooth.data.repository.SharedPrefsSessionRepository;
 import com.example.expressionphotobooth.domain.repository.AdminStatsRepository;
+import com.example.expressionphotobooth.domain.repository.AdminAiInsightsRepository;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.data.repository.SharedPrefsHistoryRepository;
@@ -18,6 +20,7 @@ public class AppContainer extends Application {
 	private SessionRepository sessionRepository;
 	private AuthRepository authRepository;
 	private AdminStatsRepository adminStatsRepository;
+	private AdminAiInsightsRepository adminAiInsightsRepository;
 	private HistoryRepository historyRepository;
 
 	@Override
@@ -28,6 +31,7 @@ public class AppContainer extends Application {
 		sessionRepository = new SharedPrefsSessionRepository(this);
 		authRepository = new FirebaseAuthRepository();
 		adminStatsRepository = new FirebaseAdminStatsRepository();
+		adminAiInsightsRepository = new FirebaseAdminAiInsightsRepository(this);
 		historyRepository = new SharedPrefsHistoryRepository(this);
 	}
 
@@ -41,6 +45,10 @@ public class AppContainer extends Application {
 
 	public AdminStatsRepository getAdminStatsRepository() {
 		return adminStatsRepository;
+	}
+
+	public AdminAiInsightsRepository getAdminAiInsightsRepository() {
+		return adminAiInsightsRepository;
 	}
 
 	public HistoryRepository getHistoryRepository() {
