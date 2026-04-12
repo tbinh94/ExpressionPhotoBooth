@@ -136,8 +136,30 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                     });
         }
 
+        findViewById(R.id.btnThemeToggle).setOnClickListener(v -> {
+            String current = com.example.expressionphotobooth.utils.ThemeManager.getSavedThemeMode(this);
+            String target = com.example.expressionphotobooth.utils.ThemeManager.MODE_DARK.equals(current) 
+                    ? com.example.expressionphotobooth.utils.ThemeManager.MODE_LIGHT 
+                    : com.example.expressionphotobooth.utils.ThemeManager.MODE_DARK;
+            
+            com.example.expressionphotobooth.utils.ThemeManager.setThemeMode(this, target);
+            updateThemeToggleButton(target);
+            
+            // Recreate activity to apply theme globally
+            recreate();
+        });
+        updateThemeToggleButton(com.example.expressionphotobooth.utils.ThemeManager.getSavedThemeMode(this));
+
         updateNavigationMenuTitles(LocaleManager.getCurrentLanguage(this));
         setupOnBackPressed();
+    }
+
+    private void updateThemeToggleButton(String mode) {
+        android.widget.ImageView btnThemeToggle = findViewById(R.id.btnThemeToggle);
+        if (btnThemeToggle != null) {
+            boolean isDark = com.example.expressionphotobooth.utils.ThemeManager.MODE_DARK.equals(mode);
+            btnThemeToggle.setImageResource(isDark ? R.drawable.ic_theme_sun_20 : R.drawable.ic_theme_moon_20);
+        }
     }
 
     private void updateNavigationMenuTitles(String languageTag) {

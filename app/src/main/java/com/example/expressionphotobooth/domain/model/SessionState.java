@@ -17,6 +17,8 @@ public class SessionState {
     private boolean flashEnabled;
     private boolean screenFlashStrong;
     private boolean soundEnabled = true;
+    private List<String> enabledHandGestures = new ArrayList<>();
+    private List<String> enabledFaceExpressions = new ArrayList<>();
     private EditState editState = new EditState();
 
     public int getPhotoCount() {
@@ -133,5 +135,33 @@ public class SessionState {
 
     public void setSoundEnabled(boolean soundEnabled) {
         this.soundEnabled = soundEnabled;
+    }
+
+    public List<String> getEnabledHandGestures() {
+        if (enabledHandGestures.isEmpty()) {
+            return java.util.Arrays.asList("HI", "HEART", "THUMBS_UP", "OPEN_PALM", "FIST", "OK_SIGN");
+        }
+        return enabledHandGestures;
+    }
+
+    public void setEnabledHandGestures(List<String> gestures) {
+        this.enabledHandGestures.clear();
+        if (gestures != null) {
+            this.enabledHandGestures.addAll(gestures);
+        }
+    }
+
+    public List<String> getEnabledFaceExpressions() {
+        if (enabledFaceExpressions.isEmpty()) {
+            return java.util.Arrays.asList("CENTERED", "SMILE", "MOUTH_OPEN", "WINK", "TILT_RIGHT", "TILT_LEFT");
+        }
+        return enabledFaceExpressions;
+    }
+
+    public void setEnabledFaceExpressions(List<String> expressions) {
+        this.enabledFaceExpressions.clear();
+        if (expressions != null) {
+            this.enabledFaceExpressions.addAll(expressions);
+        }
     }
 }

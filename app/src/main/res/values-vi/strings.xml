@@ -468,4 +468,23 @@ những ảnh đã chụp trước đó</string>
     <string name="admin_ai_chat_thinking">Sparkle đang suy nghĩ...</string>
     <string name="admin_ai_chat_error">Lỗi khi kết nối với trợ lý AI.</string>
     <string name="admin_ai_chat_welcome">Xin chào! Tôi có thể giúp bạn phân tích dữ liệu ứng dụng. Bạn muốn hỏi gì?</string>
+    <string name="ai_settings_title">Cấu hình AI Trigger</string>
+    <string name="ai_settings_description">Chọn các biểu cảm hoặc hành động sẽ kích hoạt máy ảnh. Chế độ Shuffle chỉ sử dụng các lựa chọn đã bật.</string>
+    <string name="ai_settings_hand_gestures">Hành động tay</string>
+    <string name="ai_settings_face_expressions">Biểu cảm khuôn mặt</string>
+    <string name="ai_settings_save">Lưu cấu hình</string>
+    <string name="ai_settings_saved">Đã lưu cấu hình!</string>
+    <string name="ai_settings_select_hand_required">Vui lòng chọn ít nhất một hành động tay</string>
+    <string name="ai_settings_select_face_required">Vui lòng chọn ít nhất một biểu cảm khuôn mặt</string>
+    <string name="ai_trigger_hand_hi">Chào (V-Sign) 👋</string>
+    <string name="ai_trigger_hand_heart">Bắn tim 🫰</string>
+    <string name="ai_trigger_hand_thumbs_up">Tuyệt vời 👍</string>
+    <string name="ai_trigger_hand_open_palm">Mở lòng bàn tay 🖐️</string>
+    <string name="ai_trigger_hand_fist">Nắm đấm ✊</string>
+    <string name="ai_trigger_hand_ok">Đồng ý 👌</string>
+    <string name="ai_trigger_face_centered">Nhìn thẳng 🎯</string>
+    <string name="ai_trigger_face_smile">Mỉm cười 😊</string>
+    <string name="ai_trigger_face_mouth_open">Há miệng 😮</string>
+    <string name="ai_trigger_face_wink">Nháy mắt 😉</string>
+    <string name="ai_trigger_face_tilt">Nghiêng đầu 🤳</string>
 </resources>

@@ -68,6 +68,8 @@ public class AiOverlayView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        // Bounding boxes and labels drawing logic disabled as per user request
+        /*
         for (Rect box : boxes) {
             // Vẽ viền khung
             canvas.drawRect(box, boxPaint);
@@ -83,5 +85,6 @@ public class AiOverlayView extends View {
                 canvas.drawText(label, bgLeft + 10, bgBottom - 8, labelTextPaint);
             }
         }
+        */
     }
 }
