@@ -43,6 +43,8 @@ public class FirebaseAdminAiInsightsRepository implements AdminAiInsightsReposit
     // Sử dụng BuildConfig để bảo mật API Key
     private static final String GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY;
     private static final String MODEL_NAME = "gemini-flash-latest"; // Cập nhật bản latest chuẩn nhất
+    private static final int MAX_RETRIES_PER_MODEL = 2;
+    private static final long RETRY_DELAY_MS = 1800L;
 
     private final Context appContext;
     private final GenerativeModelFutures model;
