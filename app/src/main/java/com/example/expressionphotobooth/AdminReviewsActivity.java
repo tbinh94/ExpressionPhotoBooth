@@ -174,7 +174,7 @@ public class AdminReviewsActivity extends AppCompatActivity {
         tvFiveStarCount.setText(String.valueOf(count5));
         tvLowStarCount.setText(String.valueOf(countLow));
         double avg = total > 0 ? sum / total : 0;
-        tvAvgScore.setText(String.format(Locale.getDefault(), "%.1f", avg));
+        tvAvgScore.setText(String.format(Locale.US, "%.1f", avg));
     }
 
     private void loadAiRegistrationStats() {
@@ -258,7 +258,7 @@ public class AdminReviewsActivity extends AppCompatActivity {
         TextView tvTime = itemView.findViewById(R.id.tvReviewTime);
 
         tvEmail.setText(TextUtils.isEmpty(review.email) ? getString(R.string.admin_review_email_na) : review.email);
-        tvRating.setText(String.format(Locale.getDefault(), "%.1f", review.rating));
+        tvRating.setText(String.format(Locale.getDefault(), "%d sao", (int) review.rating));
         tvFeedback.setText(review.feedback.isEmpty() ? getString(R.string.admin_review_no_content) : review.feedback);
 
         if (review.timestamp != null && review.timestamp > 0) {
