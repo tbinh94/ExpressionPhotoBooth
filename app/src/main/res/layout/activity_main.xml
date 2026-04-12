@@ -51,6 +51,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
+            app:navigationIcon="@drawable/ic_arrow_back_24"
+            app:navigationIconTint="@color/screen_title"
             app:title=""
             app:layout_constraintTop_toTopOf="parent" />
 

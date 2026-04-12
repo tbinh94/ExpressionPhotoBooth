@@ -503,4 +503,23 @@ that you have taken before</string>
     <string name="admin_ai_chat_thinking">Sparkle is thinking...</string>
     <string name="admin_ai_chat_error">Error connecting to AI assistant.</string>
     <string name="admin_ai_chat_welcome">Hello! I can help you analyze app data. What would you like to know?</string>
+    <string name="ai_settings_title">AI Trigger Configuration</string>
+    <string name="ai_settings_description">Choose which expressions or gestures will trigger the camera. Shuffling only uses your enabled choices.</string>
+    <string name="ai_settings_hand_gestures">Hand Gestures</string>
+    <string name="ai_settings_face_expressions">Face Expressions</string>
+    <string name="ai_settings_save">Save Configuration</string>
+    <string name="ai_settings_saved">Configuration saved!</string>
+    <string name="ai_settings_select_hand_required">Select at least one hand gesture</string>
+    <string name="ai_settings_select_face_required">Select at least one face expression</string>
+    <string name="ai_trigger_hand_hi">Hi (V-Sign) 👋</string>
+    <string name="ai_trigger_hand_heart">Finger Heart 🫰</string>
+    <string name="ai_trigger_hand_thumbs_up">Thumbs Up 👍</string>
+    <string name="ai_trigger_hand_open_palm">Open Palm 🖐️</string>
+    <string name="ai_trigger_hand_fist">Fist ✊</string>
+    <string name="ai_trigger_hand_ok">OK Sign 👌</string>
+    <string name="ai_trigger_face_centered">Centered 🎯</string>
+    <string name="ai_trigger_face_smile">Smile 😊</string>
+    <string name="ai_trigger_face_mouth_open">Mouth Open 😮</string>
+    <string name="ai_trigger_face_wink">Wink 😉</string>
+    <string name="ai_trigger_face_tilt">Head Tilt 🤳</string>
 </resources>

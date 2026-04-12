@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private int maxPhotos;
     private int capturedCount = 0;
     private final List<Uri> savedImageUris = new ArrayList<>();
+    private List<String> shuffledTriggers = new ArrayList<>();
     private ProcessCameraProvider cameraProvider;
     private Camera camera;
     private CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
@@ -230,9 +231,12 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        com.google.android.material.button.MaterialButtonToggleGroup modeGroup = findViewById(R.id.modeContainer);
+        com.google.android.material.button.MaterialButtonToggleGroup modeToggleGroup = findViewById(R.id.modeContainer);
         View aiSubGroup = findViewById(R.id.aiScrollContainer);
-        modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+        isExpressionMode = (modeToggleGroup.getCheckedButtonId() == R.id.btnModeExpression);
+        aiSubGroup.setVisibility(isExpressionMode ? View.VISIBLE : View.GONE);
+
+        modeToggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
                 if (checkedId == R.id.btnModeExpression) {
@@ -267,6 +271,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = findViewById(R.id.aiSelectionContainer);
+        // Initial sub-mode state based on UI defaults
+        isHandGestureMode = (aiSubSelector.getCheckedButtonId() == R.id.btnAiHand);
+        isVoiceTriggerMode = (aiSubSelector.getCheckedButtonId() == R.id.btnAiVoice);
+        isFaceExpressionMode = (aiSubSelector.getCheckedButtonId() == R.id.btnAiFace);
+
         aiSubSelector.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (checkedId == R.id.btnAiVoice && !hasAudioPermission()) {
@@ -319,8 +328,12 @@ public class MainActivity extends AppCompatActivity {
         toolbar.inflateMenu(R.menu.camera_menu);
         toolbar.setNavigationOnClickListener(v -> finish());
         toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_help) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.action_help) {
                 HelpDialogUtils.showHelpDialog(this);
+                return true;
+            } else if (itemId == R.id.action_ai_settings) {
+                startActivity(new Intent(this, AiTriggerSettingsActivity.class));
                 return true;
             }
             return false;
@@ -433,7 +446,43 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.aiSelectionContainer).setEnabled(false);
         
         updateCaptureStatus(getString(R.string.capture_status_starting));
+        
+        // Refresh session to get latest settings
+        sessionState = sessionRepository.getSession();
+        prepareShuffledTriggers();
+        
+        // Debug Toast to confirm trigger count
+        int enabledCount = (isHandGestureMode) ? sessionState.getEnabledHandGestures().size() : sessionState.getEnabledFaceExpressions().size();
+        Toast.makeText(this, "Active triggers: " + enabledCount + " (Shuffled into 6 slots)", Toast.LENGTH_SHORT).show();
+        
         startCountdownAndCapture();
+    }
+
+    private void prepareShuffledTriggers() {
+        shuffledTriggers.clear();
+        List<String> enabled;
+        if (isHandGestureMode) {
+            enabled = sessionState.getEnabledHandGestures();
+        } else {
+            enabled = sessionState.getEnabledFaceExpressions();
+        }
+
+        if (enabled.isEmpty()) {
+            // Fallback (should not happen with default values)
+            if (isHandGestureMode) {
+                enabled = java.util.Arrays.asList("HI", "HEART", "THUMBS_UP", "OPEN_PALM", "FIST", "OK_SIGN");
+            } else {
+                enabled = java.util.Arrays.asList("CENTERED", "SMILE", "MOUTH_OPEN", "WINK", "TILT_RIGHT", "TILT_LEFT");
+            }
+        }
+
+        // Fill up to maxPhotos (6) by cycling through enabled triggers
+        for (int i = 0; i < maxPhotos; i++) {
+            shuffledTriggers.add(enabled.get(i % enabled.size()));
+        }
+        
+        // Randomly shuffle the prepared list
+        java.util.Collections.shuffle(shuffledTriggers);
     }
 
     private boolean hasCameraPermission() {
@@ -584,69 +633,30 @@ public class MainActivity extends AppCompatActivity {
         int nextShot = capturedCount + 1;
         
         if (isExpressionMode) {
+            targetExpression = shuffledTriggers.get(capturedCount % shuffledTriggers.size());
+            
             if (isHandGestureMode) {
-                switch (nextShot) {
-                    case 1:
-                        targetExpression = "HI";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
-                        break;
-                    case 2:
-                        targetExpression = "HEART";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot));
-                        break;
-                    case 3:
-                        targetExpression = "THUMBS_UP";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_thumbs_up, nextShot));
-                        break;
-                    case 4:
-                        targetExpression = "OPEN_PALM";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_open_palm, nextShot));
-                        break;
-                    case 5:
-                        targetExpression = "FIST";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_fist, nextShot));
-                        break;
-                    case 6:
-                        targetExpression = "OK_SIGN";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_ok, nextShot));
-                        break;
-                    default:
-                        targetExpression = "HI";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
+                switch (targetExpression) {
+                    case "HI": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot)); break;
+                    case "HEART": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot)); break;
+                    case "THUMBS_UP": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_thumbs_up, nextShot)); break;
+                    case "OPEN_PALM": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_open_palm, nextShot)); break;
+                    case "FIST": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_fist, nextShot)); break;
+                    case "OK_SIGN": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_ok, nextShot)); break;
+                    default: updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
                 }
             } else if (isVoiceTriggerMode) {
                 updateCaptureStatus(getString(R.string.main_capture_prompt_voice, nextShot));
             } else {
-                // Face mode cycle
-                int step = (nextShot - 1) % 6;
-                switch (step) {
-                    case 0:
-                        targetExpression = "CENTERED";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_center, nextShot));
-                        break;
-                    case 1:
-                        targetExpression = "SMILE";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
-                        break;
-                    case 2:
-                        targetExpression = "MOUTH_OPEN";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_mouth_open, nextShot));
-                        break;
-                    case 3:
-                        targetExpression = "WINK";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_wink, nextShot));
-                        break;
-                    case 4:
-                        targetExpression = "TILT_RIGHT";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_tilt, nextShot));
-                        break;
-                    case 5:
-                        targetExpression = "TILT_LEFT";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_tilt, nextShot));
-                        break;
-                    default:
-                        targetExpression = "SMILE";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
+                // Face mode strings mapping
+                switch (targetExpression) {
+                    case "CENTERED": updateCaptureStatus(getString(R.string.main_capture_prompt_face_center, nextShot)); break;
+                    case "SMILE": updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot)); break;
+                    case "MOUTH_OPEN": updateCaptureStatus(getString(R.string.main_capture_prompt_face_mouth_open, nextShot)); break;
+                    case "WINK": updateCaptureStatus(getString(R.string.main_capture_prompt_face_wink, nextShot)); break;
+                    case "TILT_RIGHT": 
+                    case "TILT_LEFT": updateCaptureStatus(getString(R.string.main_capture_prompt_face_tilt, nextShot)); break;
+                    default: updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
                 }
             }
             
@@ -972,6 +982,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Reload session state in case settings were changed
+        sessionState = sessionRepository.getSession();
+        
         // Reset navigation flag and UI state when returning to this screen
         isNavigatingToSelection = false;
         initCaptureUi();
