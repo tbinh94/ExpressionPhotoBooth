@@ -81,6 +81,14 @@ public class SharedPrefsSessionRepository implements SessionRepository {
                 photoEditsJson.put(entry.getKey(), toEditStateJson(entry.getValue()));
             }
             json.put("photoEditStates", photoEditsJson);
+
+            JSONArray handGestures = new JSONArray();
+            for (String g : state.getEnabledHandGestures()) handGestures.put(g);
+            json.put("enabledHandGestures", handGestures);
+
+            JSONArray faceExpressions = new JSONArray();
+            for (String e : state.getEnabledFaceExpressions()) faceExpressions.put(e);
+            json.put("enabledFaceExpressions", faceExpressions);
         } catch (JSONException ignored) {}
         return json;
     }
@@ -129,6 +137,21 @@ public class SharedPrefsSessionRepository implements SessionRepository {
                 state.setPhotoEditState(originalUri, onePhotoState);
             }
         }
+
+        JSONArray handGestures = json.optJSONArray("enabledHandGestures");
+        if (handGestures != null) {
+            List<String> list = new ArrayList<>();
+            for (int i = 0; i < handGestures.length(); i++) list.add(handGestures.optString(i));
+            state.setEnabledHandGestures(list);
+        }
+
+        JSONArray faceExpressions = json.optJSONArray("enabledFaceExpressions");
+        if (faceExpressions != null) {
+            List<String> list = new ArrayList<>();
+            for (int i = 0; i < faceExpressions.length(); i++) list.add(faceExpressions.optString(i));
+            state.setEnabledFaceExpressions(list);
+        }
+
         return state;
     }
 

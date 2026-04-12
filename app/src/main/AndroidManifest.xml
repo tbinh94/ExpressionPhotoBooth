@@ -59,6 +59,7 @@
         <activity android:name=".ResultActivity" android:exported="false" />
         <activity android:name=".GalleryActivity" android:exported="false" />
         <activity android:name=".FullImageActivity" android:exported="false" />
+        <activity android:name=".AiTriggerSettingsActivity" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

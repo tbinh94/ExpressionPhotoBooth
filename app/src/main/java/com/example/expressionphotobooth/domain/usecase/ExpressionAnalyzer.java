@@ -114,6 +114,11 @@ public class ExpressionAnalyzer {
                         }
 
                         boolean matched = expression.equals(targetExpression);
+                        // Allow either left or right tilt to match a tilt target
+                        if (!matched && (targetExpression.equals("TILT_RIGHT") || targetExpression.equals("TILT_LEFT"))) {
+                             matched = (expression.equals("TILT_RIGHT") || expression.equals("TILT_LEFT"));
+                        }
+                        
                         listener.onResult(new AnalysisResult(matched, faceBox, expression));
                     }
                 })

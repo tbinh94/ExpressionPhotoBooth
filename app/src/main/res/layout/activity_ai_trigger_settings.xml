@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/screen_bg">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back_24"
+            app:navigationIconTint="@color/text_primary"
+            app:title="@string/ai_settings_title"
+            app:titleTextColor="@color/text_primary" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ai_settings_description"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- Hand Gestures Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="20dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/screen_divider"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ai_settings_hand_gestures"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupHand"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:chipSpacingVertical="8dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipHandHi"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_hand_hi"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipHandHeart"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_hand_heart"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipHandThumbsUp"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_hand_thumbs_up"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipHandOpenPalm"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_hand_open_palm"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipHandFist"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_hand_fist"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipHandOk"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_hand_ok"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                    </com.google.android.material.chip.ChipGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Face Expressions Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="20dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/screen_divider"
+                android:layout_marginBottom="32dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ai_settings_face_expressions"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupFace"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:chipSpacingVertical="8dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFaceCentered"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_face_centered"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFaceSmile"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_face_smile"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFaceMouthOpen"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_face_mouth_open"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFaceWink"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_face_wink"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFaceTilt"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ai_trigger_face_tilt"
+                            app:chipBackgroundColor="@color/chip_bg_state_list"
+                            app:chipStrokeColor="@color/chip_stroke_state_list"
+                            android:textColor="@color/chip_text_state_list" />
+
+                    </com.google.android.material.chip.ChipGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="@string/ai_settings_save"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                android:backgroundTint="@color/app_blue"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

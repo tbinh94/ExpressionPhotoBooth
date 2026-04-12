@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private int maxPhotos;
     private int capturedCount = 0;
     private final List<Uri> savedImageUris = new ArrayList<>();
+    private List<String> shuffledTriggers = new ArrayList<>();
     private ProcessCameraProvider cameraProvider;
     private Camera camera;
     private CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
@@ -126,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isPortraitMode = false;
     private PortraitProcessor portraitProcessor;
     private boolean isNavigatingToSelection = false;
+    private String currentAiPrompt = "";
 
     @Override
     protected void attachBaseContext(android.content.Context newBase) {
@@ -230,9 +232,12 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        com.google.android.material.button.MaterialButtonToggleGroup modeGroup = findViewById(R.id.modeContainer);
+        com.google.android.material.button.MaterialButtonToggleGroup modeToggleGroup = findViewById(R.id.modeContainer);
         View aiSubGroup = findViewById(R.id.aiScrollContainer);
-        modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+        isExpressionMode = (modeToggleGroup.getCheckedButtonId() == R.id.btnModeExpression);
+        aiSubGroup.setVisibility(isExpressionMode ? View.VISIBLE : View.GONE);
+
+        modeToggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
                 if (checkedId == R.id.btnModeExpression) {
@@ -267,6 +272,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = findViewById(R.id.aiSelectionContainer);
+        // Initial sub-mode state based on UI defaults
+        isHandGestureMode = (aiSubSelector.getCheckedButtonId() == R.id.btnAiHand);
+        isVoiceTriggerMode = (aiSubSelector.getCheckedButtonId() == R.id.btnAiVoice);
+        isFaceExpressionMode = (aiSubSelector.getCheckedButtonId() == R.id.btnAiFace);
+
         aiSubSelector.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (checkedId == R.id.btnAiVoice && !hasAudioPermission()) {
@@ -319,8 +329,12 @@ public class MainActivity extends AppCompatActivity {
         toolbar.inflateMenu(R.menu.camera_menu);
         toolbar.setNavigationOnClickListener(v -> finish());
         toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_help) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.action_help) {
                 HelpDialogUtils.showHelpDialog(this);
+                return true;
+            } else if (itemId == R.id.action_ai_settings) {
+                startActivity(new Intent(this, AiTriggerSettingsActivity.class));
                 return true;
             }
             return false;
@@ -433,7 +447,43 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.aiSelectionContainer).setEnabled(false);
         
         updateCaptureStatus(getString(R.string.capture_status_starting));
+        
+        // Refresh session to get latest settings
+        sessionState = sessionRepository.getSession();
+        prepareShuffledTriggers();
+        
+        // Debug Toast to confirm trigger count
+        int enabledCount = (isHandGestureMode) ? sessionState.getEnabledHandGestures().size() : sessionState.getEnabledFaceExpressions().size();
+        Toast.makeText(this, "Active triggers: " + enabledCount + " (Shuffled into 6 slots)", Toast.LENGTH_SHORT).show();
+        
         startCountdownAndCapture();
+    }
+
+    private void prepareShuffledTriggers() {
+        shuffledTriggers.clear();
+        List<String> enabled;
+        if (isHandGestureMode) {
+            enabled = sessionState.getEnabledHandGestures();
+        } else {
+            enabled = sessionState.getEnabledFaceExpressions();
+        }
+
+        if (enabled.isEmpty()) {
+            // Fallback (should not happen with default values)
+            if (isHandGestureMode) {
+                enabled = java.util.Arrays.asList("HI", "HEART", "THUMBS_UP", "OPEN_PALM", "FIST", "OK_SIGN");
+            } else {
+                enabled = java.util.Arrays.asList("CENTERED", "SMILE", "MOUTH_OPEN", "WINK", "TILT_RIGHT", "TILT_LEFT");
+            }
+        }
+
+        // Fill up to maxPhotos (6) by cycling through enabled triggers
+        for (int i = 0; i < maxPhotos; i++) {
+            shuffledTriggers.add(enabled.get(i % enabled.size()));
+        }
+        
+        // Randomly shuffle the prepared list
+        java.util.Collections.shuffle(shuffledTriggers);
     }
 
     private boolean hasCameraPermission() {
@@ -584,71 +634,33 @@ public class MainActivity extends AppCompatActivity {
         int nextShot = capturedCount + 1;
         
         if (isExpressionMode) {
+            targetExpression = shuffledTriggers.get(capturedCount % shuffledTriggers.size());
+            
             if (isHandGestureMode) {
-                switch (nextShot) {
-                    case 1:
-                        targetExpression = "HI";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
-                        break;
-                    case 2:
-                        targetExpression = "HEART";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot));
-                        break;
-                    case 3:
-                        targetExpression = "THUMBS_UP";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_thumbs_up, nextShot));
-                        break;
-                    case 4:
-                        targetExpression = "OPEN_PALM";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_open_palm, nextShot));
-                        break;
-                    case 5:
-                        targetExpression = "FIST";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_fist, nextShot));
-                        break;
-                    case 6:
-                        targetExpression = "OK_SIGN";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_ok, nextShot));
-                        break;
-                    default:
-                        targetExpression = "HI";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
+                switch (targetExpression) {
+                    case "HI": currentAiPrompt = getString(R.string.main_capture_prompt_hand_hi, nextShot); break;
+                    case "HEART": currentAiPrompt = getString(R.string.main_capture_prompt_hand_heart, nextShot); break;
+                    case "THUMBS_UP": currentAiPrompt = getString(R.string.main_capture_prompt_hand_thumbs_up, nextShot); break;
+                    case "OPEN_PALM": currentAiPrompt = getString(R.string.main_capture_prompt_hand_open_palm, nextShot); break;
+                    case "FIST": currentAiPrompt = getString(R.string.main_capture_prompt_hand_fist, nextShot); break;
+                    case "OK_SIGN": currentAiPrompt = getString(R.string.main_capture_prompt_hand_ok, nextShot); break;
+                    default: currentAiPrompt = getString(R.string.main_capture_prompt_hand_hi, nextShot);
                 }
             } else if (isVoiceTriggerMode) {
-                updateCaptureStatus(getString(R.string.main_capture_prompt_voice, nextShot));
+                currentAiPrompt = getString(R.string.main_capture_prompt_voice, nextShot);
             } else {
-                // Face mode cycle
-                int step = (nextShot - 1) % 6;
-                switch (step) {
-                    case 0:
-                        targetExpression = "CENTERED";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_center, nextShot));
-                        break;
-                    case 1:
-                        targetExpression = "SMILE";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
-                        break;
-                    case 2:
-                        targetExpression = "MOUTH_OPEN";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_mouth_open, nextShot));
-                        break;
-                    case 3:
-                        targetExpression = "WINK";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_wink, nextShot));
-                        break;
-                    case 4:
-                        targetExpression = "TILT_RIGHT";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_tilt, nextShot));
-                        break;
-                    case 5:
-                        targetExpression = "TILT_LEFT";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_tilt, nextShot));
-                        break;
-                    default:
-                        targetExpression = "SMILE";
-                        updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
+                // Face mode
+                switch (targetExpression) {
+                    case "CENTERED": currentAiPrompt = getString(R.string.main_capture_prompt_face_center, nextShot); break;
+                    case "SMILE": currentAiPrompt = getString(R.string.main_capture_prompt_face_smile, nextShot); break;
+                    case "MOUTH_OPEN": currentAiPrompt = getString(R.string.main_capture_prompt_face_mouth_open, nextShot); break;
+                    case "WINK": currentAiPrompt = getString(R.string.main_capture_prompt_face_wink, nextShot); break;
+                    case "TILT_RIGHT":
+                    case "TILT_LEFT": currentAiPrompt = getString(R.string.main_capture_prompt_face_tilt, nextShot); break;
+                    default: currentAiPrompt = getString(R.string.main_capture_prompt_face_smile, nextShot);
                 }
             }
+            updateCaptureStatus(currentAiPrompt);
             
             // Clear countdown text area in AI mode
             tvCountdown.setText("");
@@ -698,8 +710,8 @@ public class MainActivity extends AppCompatActivity {
                     fallbackCountDownTimer = new android.os.CountDownTimer(10000, 1000) {
                         public void onTick(long millisUntilFinished) {
                             if (isCapturingSequence && (isWaitingForExpression || isWaitingForVoice)) {
-                                String msg = String.format(getString(R.string.fallback_countdown_msg), millisUntilFinished / 1000);
-                                tvCaptureStatus.setText(msg);
+                                String countdownMsg = String.format(getString(R.string.fallback_countdown_msg), millisUntilFinished / 1000);
+                                tvCaptureStatus.setText(currentAiPrompt + " (" + (millisUntilFinished / 1000) + "s)");
                             }
                         }
                         public void onFinish() {
@@ -709,7 +721,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }.start();
                 }
-            }, 1500);
+            }, 2000);
         } else {
             // Standard Countdown Mode
             runCountdown(3);
@@ -972,6 +984,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Reload session state in case settings were changed
+        sessionState = sessionRepository.getSession();
+        
         // Reset navigation flag and UI state when returning to this screen
         isNavigatingToSelection = false;
         initCaptureUi();

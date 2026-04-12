@@ -67,7 +67,7 @@
     <color name="home_toggle_ripple">#22F7A9D5</color>
     <color name="home_toggle_selected_bg">@color/camera_mode_primary</color>
     <color name="home_toggle_selected_text">@color/white</color>
-    <color name="home_menu_icon_tint">#2D4B8C</color>
+    <color name="home_menu_icon_tint">@color/white</color>
     <color name="home_brand_wordmark">#2D4B8C</color>
     <color name="home_neon_title">#F7A9D5</color>
     <color name="home_neon_glow">#66F7A9D5</color>
