@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isPortraitMode = false;
     private PortraitProcessor portraitProcessor;
     private boolean isNavigatingToSelection = false;
+    private String currentAiPrompt = "";
 
     @Override
     protected void attachBaseContext(android.content.Context newBase) {
@@ -637,28 +638,29 @@ public class MainActivity extends AppCompatActivity {
             
             if (isHandGestureMode) {
                 switch (targetExpression) {
-                    case "HI": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot)); break;
-                    case "HEART": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_heart, nextShot)); break;
-                    case "THUMBS_UP": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_thumbs_up, nextShot)); break;
-                    case "OPEN_PALM": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_open_palm, nextShot)); break;
-                    case "FIST": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_fist, nextShot)); break;
-                    case "OK_SIGN": updateCaptureStatus(getString(R.string.main_capture_prompt_hand_ok, nextShot)); break;
-                    default: updateCaptureStatus(getString(R.string.main_capture_prompt_hand_hi, nextShot));
+                    case "HI": currentAiPrompt = getString(R.string.main_capture_prompt_hand_hi, nextShot); break;
+                    case "HEART": currentAiPrompt = getString(R.string.main_capture_prompt_hand_heart, nextShot); break;
+                    case "THUMBS_UP": currentAiPrompt = getString(R.string.main_capture_prompt_hand_thumbs_up, nextShot); break;
+                    case "OPEN_PALM": currentAiPrompt = getString(R.string.main_capture_prompt_hand_open_palm, nextShot); break;
+                    case "FIST": currentAiPrompt = getString(R.string.main_capture_prompt_hand_fist, nextShot); break;
+                    case "OK_SIGN": currentAiPrompt = getString(R.string.main_capture_prompt_hand_ok, nextShot); break;
+                    default: currentAiPrompt = getString(R.string.main_capture_prompt_hand_hi, nextShot);
                 }
             } else if (isVoiceTriggerMode) {
-                updateCaptureStatus(getString(R.string.main_capture_prompt_voice, nextShot));
+                currentAiPrompt = getString(R.string.main_capture_prompt_voice, nextShot);
             } else {
-                // Face mode strings mapping
+                // Face mode
                 switch (targetExpression) {
-                    case "CENTERED": updateCaptureStatus(getString(R.string.main_capture_prompt_face_center, nextShot)); break;
-                    case "SMILE": updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot)); break;
-                    case "MOUTH_OPEN": updateCaptureStatus(getString(R.string.main_capture_prompt_face_mouth_open, nextShot)); break;
-                    case "WINK": updateCaptureStatus(getString(R.string.main_capture_prompt_face_wink, nextShot)); break;
-                    case "TILT_RIGHT": 
-                    case "TILT_LEFT": updateCaptureStatus(getString(R.string.main_capture_prompt_face_tilt, nextShot)); break;
-                    default: updateCaptureStatus(getString(R.string.main_capture_prompt_face_smile, nextShot));
+                    case "CENTERED": currentAiPrompt = getString(R.string.main_capture_prompt_face_center, nextShot); break;
+                    case "SMILE": currentAiPrompt = getString(R.string.main_capture_prompt_face_smile, nextShot); break;
+                    case "MOUTH_OPEN": currentAiPrompt = getString(R.string.main_capture_prompt_face_mouth_open, nextShot); break;
+                    case "WINK": currentAiPrompt = getString(R.string.main_capture_prompt_face_wink, nextShot); break;
+                    case "TILT_RIGHT":
+                    case "TILT_LEFT": currentAiPrompt = getString(R.string.main_capture_prompt_face_tilt, nextShot); break;
+                    default: currentAiPrompt = getString(R.string.main_capture_prompt_face_smile, nextShot);
                 }
             }
+            updateCaptureStatus(currentAiPrompt);
             
             // Clear countdown text area in AI mode
             tvCountdown.setText("");
@@ -708,8 +710,8 @@ public class MainActivity extends AppCompatActivity {
                     fallbackCountDownTimer = new android.os.CountDownTimer(10000, 1000) {
                         public void onTick(long millisUntilFinished) {
                             if (isCapturingSequence && (isWaitingForExpression || isWaitingForVoice)) {
-                                String msg = String.format(getString(R.string.fallback_countdown_msg), millisUntilFinished / 1000);
-                                tvCaptureStatus.setText(msg);
+                                String countdownMsg = String.format(getString(R.string.fallback_countdown_msg), millisUntilFinished / 1000);
+                                tvCaptureStatus.setText(currentAiPrompt + " (" + (millisUntilFinished / 1000) + "s)");
                             }
                         }
                         public void onFinish() {
@@ -719,7 +721,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }.start();
                 }
-            }, 1500);
+            }, 2000);
         } else {
             // Standard Countdown Mode
             runCountdown(3);
