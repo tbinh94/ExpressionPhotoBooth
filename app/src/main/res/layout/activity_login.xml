@@ -300,6 +300,25 @@
                             android:background="@color/screen_divider" />
                     </LinearLayout>
 
+                    <!-- Google Sign In Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGoogleSignIn"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:layout_marginTop="16dp"
+                        android:text="Tiếp tục với Google"
+                        android:textAllCaps="false"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        app:cornerRadius="27dp"
+                        app:strokeColor="@color/screen_divider"
+                        app:strokeWidth="1dp"
+                        app:icon="@drawable/ic_google_logo"
+                        app:iconGravity="textStart"
+                        app:iconTint="@android:color/transparent"
+                        app:iconPadding="12dp" />
+
                     <!-- Secondary Button (Go to Register or Back to Login) -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnRegister"
