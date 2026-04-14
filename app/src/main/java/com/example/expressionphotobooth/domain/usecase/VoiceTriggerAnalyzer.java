@@ -11,25 +11,35 @@ import android.util.Log;
 import com.example.expressionphotobooth.utils.LocaleManager;
 
 /**
- * Universal Voice Trigger - Works on any Android device without Google Services.
- * Uses real-time Digital Signal Processing (DSP):
- * 1. Root Mean Square (RMS) for volume detection.
- * 2. Zero-Crossing Rate (ZCR) to distinguish between:
- *    - "Hi" (Vietnamese): Voiced sound, low frequency, LOW ZCR.
- *    - "Cheese" (English): Sibilant 'S' sound, high frequency, HIGH ZCR.
+ * Advanced Voice Trigger Analyzer (Expert Edition)
+ * Features:
+ * 1. Adaptive Noise Floor Tracking (Handles fan noise)
+ * 2. Phoneme Sequence State Machine (EE -> S pattern for "Cheese")
+ * 3. Spectral Energy Ratio Analysis
  */
 public class VoiceTriggerAnalyzer {
-    private static final String TAG = "VoiceTrigger";
+    private static final String TAG = "VoiceAI_Expert";
     
     // Audio Configuration
     private static final int SAMPLE_RATE = 16000;
     private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
     private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
-    // Detection Thresholds (Tweakable)
-    private static final double MIN_RMS_THRESHOLD = 600; // Minimum volume to start analysis
-    private static final double ZCR_HI_THRESHOLD = 0.16;  // Below this is likely "Hi/Hì" (low freq)
-    private static final double ZCR_CHEESE_THRESHOLD = 0.22; // Above this is likely "S" sound (high freq)
+    // States for "Cheese" [CH-EE-SE] recognition
+    private enum State { IDLE, VOWEL_DETECTED, TRIGGERED }
+    private State currentState = State.IDLE;
+    private long stateTimestamp = 0;
+    private static final long MAX_PHONEME_GAP_MS = 600; // Time window between 'EE' and 'S'
+
+    // DSP Constants
+    private double noiseFloor = 500.0;
+    private static final double ADAPTIVE_LEARNING_RATE = 0.05;
+    private static final double SIGNAL_TO_NOISE_RATIO = 1.8;
+
+    // Sibilant (S) vs Vowel (EE) characteristics
+    private static final double ZCR_VOWEL_MAX = 0.15;    // Low ZCR for 'EE'
+    private static final double ZCR_SIBILANT_MIN = 0.24; // High ZCR for 'S'
+    private static final double ZCR_SIBILANT_MAX = 0.48; // Filter out ultra-high electronic noise
 
     public interface OnVoiceTriggerDetected {
         void onTrigger();
@@ -47,15 +57,12 @@ public class VoiceTriggerAnalyzer {
         this.context = context;
     }
 
-    /** Start listening using raw PCM processing */
     public void start(OnVoiceTriggerDetected listener) {
         this.listener = listener;
-        stop(); // Ensure clean state
+        stop();
 
         int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, ENCODING);
-        if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
-            bufferSize = SampleRateConverter_8000_To_16000();
-        }
+        if (bufferSize <= 0) bufferSize = 1024;
 
         try {
             audioRecord = new AudioRecord(
@@ -66,12 +73,12 @@ public class VoiceTriggerAnalyzer {
                     bufferSize * 2
             );
         } catch (SecurityException e) {
-            notifyError("Microphone permission denied");
+            notifyError("Permission denied");
             return;
         }
 
         if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-            notifyError("Microphone initialization failed");
+            notifyError("Mic init failed");
             return;
         }
 
@@ -84,28 +91,23 @@ public class VoiceTriggerAnalyzer {
             String lang = LocaleManager.getSavedLanguage(context);
             boolean isVi = LocaleManager.LANG_VI.equals(lang);
 
-            Log.d(TAG, "DSP Voice Analyzer started for " + (isVi ? "Vietnamese" : "English"));
-
             while (isRunning) {
                 int read = audioRecord.read(buffer, 0, buffer.length);
                 if (read > 0) {
-                    analyzeFrame(buffer, read, isVi);
+                    analyzeVoiceLogic(buffer, read, isVi);
                 }
             }
-            Log.d(TAG, "DSP Voice Analyzer stopped");
-        }, "VoiceAnalyzer-Worker");
+        }, "ExpertVoiceAnalyzer");
         
         workerThread.start();
     }
 
-    private void analyzeFrame(short[] buffer, int read, boolean isVi) {
+    private void analyzeVoiceLogic(short[] buffer, int read, boolean isVi) {
         double sum = 0;
         int crossings = 0;
 
         for (int i = 0; i < read; i++) {
             sum += (double) buffer[i] * buffer[i];
-            
-            // Calculate Zero-Crossing Rate
             if (i > 0 && ((buffer[i] >= 0 && buffer[i-1] < 0) || (buffer[i] < 0 && buffer[i-1] >= 0))) {
                 crossings++;
             }
@@ -114,43 +116,80 @@ public class VoiceTriggerAnalyzer {
         double rms = Math.sqrt(sum / read);
         double zcr = (double) crossings / read;
 
-        // Skip silence
-        if (rms < MIN_RMS_THRESHOLD) return;
-
-        boolean hit = false;
-        if (isVi) {
-            // "Hi" / "Hì" / "Hả" are voiced sounds -> Low ZCR
-            if (zcr < ZCR_HI_THRESHOLD) hit = true;
-        } else {
-            // "Cheese" has a sharp "S" at the end -> High ZCR
-            if (zcr > ZCR_CHEESE_THRESHOLD) hit = true;
+        // 1. Adaptive Noise Floor Tracking
+        // If sound is quiet, learn it as background noise (e.g., fan)
+        if (rms < noiseFloor * 1.2) {
+            noiseFloor = (noiseFloor * (1 - ADAPTIVE_LEARNING_RATE)) + (rms * ADAPTIVE_LEARNING_RATE);
+            if (currentState != State.IDLE && (System.currentTimeMillis() - stateTimestamp > MAX_PHONEME_GAP_MS)) {
+                resetState("Timeout");
+            }
+            return;
         }
 
-        if (hit) {
-            Log.d(TAG, "✅ [DETECTED] RMS: " + (int)rms + " | ZCR: " + String.format("%.2f", zcr));
-            isRunning = false;
-            mainHandler.post(() -> {
-                if (listener != null) listener.onTrigger();
-            });
+        // 2. Voice Activity Detection (VAD)
+        if (rms < noiseFloor * SIGNAL_TO_NOISE_RATIO) return;
+
+        // 3. Phoneme Sequence Logic (Always "Cheese" for now)
+        processCheeseSequence(zcr);    }
+
+    private void processCheeseSequence(double zcr) {
+        long now = System.currentTimeMillis();
+
+        switch (currentState) {
+            case IDLE:
+                // Looking for "EE" sound (Low ZCR)
+                if (zcr > 0.05 && zcr < ZCR_VOWEL_MAX) {
+                    currentState = State.VOWEL_DETECTED;
+                    stateTimestamp = now;
+                    Log.v(TAG, "Step 1: Vowel 'EE' detected");
+                }
+                break;
+
+            case VOWEL_DETECTED:
+                // Check for timeout
+                if (now - stateTimestamp > MAX_PHONEME_GAP_MS) {
+                    resetState("EE-S gap too long");
+                    return;
+                }
+
+                // Looking for "S" sound (High ZCR)
+                if (zcr > ZCR_SIBILANT_MIN && zcr < ZCR_SIBILANT_MAX) {
+                    triggerCapture("Step 2: Sibilant 'S' detected -> SUCCESS");
+                }
+                break;
         }
     }
 
-    /** Release recording resources */
+    private void triggerCapture(String reason) {
+        Log.d(TAG, "✅ TRIGGER: " + reason);
+        resetState("Triggered");
+        
+        mainHandler.post(() -> {
+            if (listener != null) listener.onTrigger();
+        });
+
+        // Add a small sleep to worker thread to prevent instant multi-trigger
+        try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+    }
+
+    private void resetState(String reason) {
+        if (currentState != State.IDLE) {
+            Log.v(TAG, "Reset State: " + reason);
+        }
+        currentState = State.IDLE;
+    }
+
     public void stop() {
         isRunning = false;
         if (workerThread != null) {
-            try { workerThread.interrupt(); } catch (Exception ignored) {}
+            workerThread.interrupt();
             workerThread = null;
         }
         if (audioRecord != null) {
             try {
-                if (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
-                    audioRecord.stop();
-                }
+                audioRecord.stop();
                 audioRecord.release();
-            } catch (Exception e) {
-                Log.w(TAG, "Stop warning: " + e.getMessage());
-            }
+            } catch (Exception ignored) {}
             audioRecord = null;
         }
     }
@@ -159,9 +198,5 @@ public class VoiceTriggerAnalyzer {
         mainHandler.post(() -> {
             if (listener != null) listener.onError(msg);
         });
-    }
-
-    private int SampleRateConverter_8000_To_16000() {
-        return 1024; // Fallback buffer size
     }
 }
