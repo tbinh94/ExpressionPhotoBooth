@@ -19,6 +19,7 @@ import com.google.ai.client.generativeai.type.Content;
 import com.google.ai.client.generativeai.type.GenerateContentResponse;
 import com.google.ai.client.generativeai.type.GenerationConfig;
 import com.google.ai.client.generativeai.type.HarmCategory;
+import com.google.ai.client.generativeai.type.RequestOptions;
 import com.google.ai.client.generativeai.type.SafetySetting;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -42,7 +43,7 @@ public class FirebaseAdminAiInsightsRepository implements AdminAiInsightsReposit
     
     // Sử dụng BuildConfig để bảo mật API Key
     private static final String GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY;
-    private static final String MODEL_NAME = "gemini-flash-latest"; // Cập nhật bản latest chuẩn nhất
+    private static final String MODEL_NAME = "gemini-1.5-flash-latest"; 
 
     private final Context appContext;
     private final GenerativeModelFutures model;
@@ -53,18 +54,29 @@ public class FirebaseAdminAiInsightsRepository implements AdminAiInsightsReposit
     public FirebaseAdminAiInsightsRepository(Context context) {
         this.appContext = context.getApplicationContext();
 
-        // 1. Setup GenerationConfig (Pipeline 4)
         GenerationConfig.Builder configBuilder = new GenerationConfig.Builder();
-        configBuilder.temperature = 0.2f; // Độ chính xác cao và ổn định
+        configBuilder.temperature = 0.2f; 
+        configBuilder.maxOutputTokens = 2048;
         GenerationConfig config = configBuilder.build();
 
-        // 2. Setup SafetySettings
         List<SafetySetting> safetySettings = new ArrayList<>();
         safetySettings.add(new SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.ONLY_HIGH));
         safetySettings.add(new SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.ONLY_HIGH));
 
-        // 3. Setup GenerativeModel
-        GenerativeModel gm = new GenerativeModel(MODEL_NAME, GEMINI_API_KEY, config, safetySettings);
+        Content systemInstruction = new Content.Builder()
+                .addText("Analyze photobooth stats. Output ONLY raw JSON matching structure. No markdown. Language: user's.")
+                .build();
+
+        GenerativeModel gm = new GenerativeModel(
+                MODEL_NAME,
+                GEMINI_API_KEY,
+                config,
+                safetySettings,
+                new RequestOptions(),
+                null,
+                null,
+                systemInstruction
+        );
         this.model = GenerativeModelFutures.from(gm);
     }
 
@@ -113,30 +125,9 @@ public class FirebaseAdminAiInsightsRepository implements AdminAiInsightsReposit
     }
 
     private String buildPrompt(AdminAiInsightRequest request) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("rangeMonths", request.getRangeMonths());
-        payload.put("languageTag", request.getLanguageTag());
-        payload.put("statsSnapshot", buildStatsSnapshot(request));
-
-        boolean isVi = isVietnamese(request.getLanguageTag());
-        String languageName = isVi ? "Vietnamese" : "English";
-
-        return "You are a product analytics assistant for a mobile photobooth app.\n" +
-                "CRITICAL REQUIREMENT: All text content in the JSON MUST be in " + languageName + ".\n" +
-                "Task: Analyze the provided admin dashboard metrics and return a structured insights report.\n" +
-                "Rules:\n" +
-                "1) Be flexible and realistic in your interpretations.\n" +
-                "2) Output ONLY raw JSON. Do NOT include markdown blocks like ```json ... ```.\n" +
-                "3) Response structure:\n" +
-                "{\n" +
-                "  \"summary\": \"Overall business health summary (in " + languageName + ")\",\n" +
-                "  \"insights\": [\"Trend insight 1 (in " + languageName + ")\", \"Trend insight 2 (in " + languageName + ")\"],\n" +
-                "  \"recommendations\": [\n" +
-                "    { \"title\": \"Strategy\", \"action\": \"Step\" }\n" +
-                "  ],\n" +
-                "  \"confidence\": 0.95\n" +
-                "}\n" +
-                "Input Data:\n" + gson.toJson(payload);
+        StringBuilder stats = new StringBuilder();
+        Map<String, Object> snapshot = buildStatsSnapshot(request);
+        return "Stats: " + gson.toJson(snapshot) + "\nLang: " + request.getLanguageTag();
     }
 
     private Map<String, Object> buildStatsSnapshot(AdminAiInsightRequest request) {

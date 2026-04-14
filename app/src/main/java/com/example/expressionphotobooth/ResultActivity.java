@@ -175,15 +175,15 @@ public class ResultActivity extends AppCompatActivity {
                     sessionRepository.saveSession(sessionState);
                     persistHistoryBaseRecord();
 
-                    // Save to user's local gallery
-                    saveToUserLocalGallery(finalBitmap);
-                    
-                    // Auto-save to public device gallery (Pictures/Photobooth)
-                    autoSaveToPublicGallery(finalBitmap);
+                    // Save to gallery (Only for registered users)
+                    if (!isGuestSession) {
+                        saveToUserLocalGallery(finalBitmap);
+                        autoSaveToPublicGallery(finalBitmap);
+                    }
 
-                    // Tự động bật popup đánh giá sau khi người dùng xem kết quả 1 lúc
+                    // Tự động bật popup đánh giá sau khi người dùng xem kết quả 1 lúc (Chỉ cho user thật)
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        if (!isFinishing()) showFeedbackBottomSheet(true);
+                        if (!isFinishing() && !isGuestSession) showFeedbackBottomSheet(true);
                     }, 1500);
 
                 } else {
@@ -220,7 +220,19 @@ public class ResultActivity extends AppCompatActivity {
 
         View cardRate = findViewById(R.id.cardRate);
         if (cardRate != null) {
-            cardRate.setOnClickListener(v -> showFeedbackBottomSheet(false));
+            cardRate.setOnClickListener(v -> {
+                if (isGuestSession) {
+                    HelpDialogUtils.showHistoryGuestRegisterCta(
+                            this,
+                            getString(R.string.home_history_user_only_title),
+                            getString(R.string.home_history_user_only_message),
+                            this::openRegisterFromGuest,
+                            null
+                    );
+                } else {
+                    showFeedbackBottomSheet(false);
+                }
+            });
             // Ensure child views don't block clicks from reachng the card
             cardRate.setFocusable(true);
             cardRate.setClickable(true);
@@ -626,6 +638,23 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void exportTimelapseVideo() {
+        // Guest Check: Guests cannot export video, prompt to login
+        if (isGuestSession) {
+            HelpDialogUtils.showHistoryGuestRegisterCta(
+                    this,
+                    getString(R.string.home_history_user_only_title),
+                    getString(R.string.home_history_user_only_message),
+                    () -> {
+                        // Redirect to Login
+                        Intent intent = new Intent(ResultActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    },
+                    null // If they cancel, do nothing
+            );
+            return;
+        }
+
         // RBAC Check: Verify user can perform this action on their own session
         if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
             Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
@@ -699,8 +728,8 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void saveCurrentResultAsPng() {
-        // RBAC Check: Verify user can save own session result
-        if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
+        // RBAC Check: Verify user can save own session result (Guest can download PNG)
+        if (!isGuestSession && rbacService != null && !rbacService.canAccessSession(currentUid)) {
             Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -736,6 +765,23 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void shareResult() {
+        // Guest Check: Guests cannot share, prompt to login
+        if (isGuestSession) {
+            HelpDialogUtils.showHistoryGuestRegisterCta(
+                    this,
+                    getString(R.string.home_history_user_only_title),
+                    getString(R.string.home_history_user_only_message),
+                    () -> {
+                        // Redirect to Login
+                        Intent intent = new Intent(ResultActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    },
+                    null
+            );
+            return;
+        }
+
         // RBAC Check: Verify user can share own session result
         if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
             Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
@@ -766,6 +812,7 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void showFeedbackBottomSheet(boolean autoTrigger) {
+        if (isGuestSession) return;
         if (autoTrigger && hasShownFeedback) {
             return;
         }

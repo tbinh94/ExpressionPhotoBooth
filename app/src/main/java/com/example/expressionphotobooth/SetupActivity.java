@@ -178,7 +178,6 @@ public class SetupActivity extends AppCompatActivity {
 
         List<Frame> themeFrames = new ArrayList<>();
         themeFrames.add(new Frame(9, R.drawable.frm4_16x9_food, "Food", EditState.FrameStyle.NONE));
-        themeFrames.add(new Frame(12, R.drawable.frm4_16x9_food, "Food", EditState.FrameStyle.NONE));
         concepts.add(new Concept(getString(R.string.setup_concept_theme), themeFrames));
 
         return concepts;

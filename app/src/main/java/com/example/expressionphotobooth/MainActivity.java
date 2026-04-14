@@ -234,6 +234,8 @@ public class MainActivity extends AppCompatActivity {
 
         com.google.android.material.button.MaterialButtonToggleGroup modeToggleGroup = findViewById(R.id.modeContainer);
         View aiSubGroup = findViewById(R.id.aiScrollContainer);
+        com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = findViewById(R.id.aiSelectionContainer);
+        
         isExpressionMode = (modeToggleGroup.getCheckedButtonId() == R.id.btnModeExpression);
         aiSubGroup.setVisibility(isExpressionMode ? View.VISIBLE : View.GONE);
 
@@ -256,12 +258,8 @@ public class MainActivity extends AppCompatActivity {
                     boolean isPremium = (currentUserRole == UserRole.PREMIUM && premiumUntil > System.currentTimeMillis());
                     
                     if (currentUserRole != UserRole.ADMIN && !isPremium) {
-                        group.check(R.id.btnModeCountdown); // Force back to auto
-                        String paymentUrl = "https://img.vietqr.io/image/MB-56111166662004-compact.png" +
-                                "?amount=50000&addInfo=Premium%20Sub%20" + authRepo.getCurrentEmail() +
-                                "&accountName=PHOTO%20BOOTH";
-                        HelpDialogUtils.showSubscriptionQR(this, paymentUrl);
-                        return;
+                        // Regular users can only use Voice, so we auto-switch it
+                        aiSubSelector.check(R.id.btnAiVoice);
                     }
                 }
                 
@@ -271,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        com.google.android.material.button.MaterialButtonToggleGroup aiSubSelector = findViewById(R.id.aiSelectionContainer);
+
         // Initial sub-mode state based on UI defaults
         isHandGestureMode = (aiSubSelector.getCheckedButtonId() == R.id.btnAiHand);
         isVoiceTriggerMode = (aiSubSelector.getCheckedButtonId() == R.id.btnAiVoice);
@@ -284,6 +282,20 @@ public class MainActivity extends AppCompatActivity {
                     group.check(R.id.btnAiFace);
                     Toast.makeText(this, "Microphone permission is required for Voice mode.", Toast.LENGTH_SHORT).show();
                     return;
+                }
+
+                // Logic: Registered users (non-premium) can only use Voice
+                boolean isPremium = (currentUserRole == UserRole.PREMIUM && premiumUntil > System.currentTimeMillis());
+                if (currentUserRole != UserRole.ADMIN && !isPremium) {
+                    if (checkedId == R.id.btnAiHand || checkedId == R.id.btnAiFace) {
+                        group.check(R.id.btnAiVoice);
+                        AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
+                        String paymentUrl = "https://img.vietqr.io/image/MB-56111166662004-compact.png" +
+                                "?amount=50000&addInfo=Premium%20Sub%20" + authRepo.getCurrentEmail() +
+                                "&accountName=PHOTO%20BOOTH";
+                        HelpDialogUtils.showSubscriptionQR(this, paymentUrl);
+                        return;
+                    }
                 }
 
                 isHandGestureMode = (checkedId == R.id.btnAiHand);
@@ -433,9 +445,16 @@ public class MainActivity extends AppCompatActivity {
         if (isExpressionMode) {
             AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
             boolean isPremium = (currentUserRole == UserRole.PREMIUM && premiumUntil > System.currentTimeMillis());
-            if (authRepo.isGuest() || (currentUserRole != UserRole.ADMIN && !isPremium)) {
-                 Toast.makeText(this, "Subscription required", Toast.LENGTH_SHORT).show();
-                 return;
+            boolean hasFullAccess = (currentUserRole == UserRole.ADMIN || isPremium);
+
+            if (authRepo.isGuest()) {
+                Toast.makeText(this, R.string.main_ai_login_required_title, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!hasFullAccess && (isHandGestureMode || isFaceExpressionMode)) {
+                Toast.makeText(this, "Premium subscription required for Gesture/Expression detection.", Toast.LENGTH_SHORT).show();
+                return;
             }
         }
 
@@ -450,11 +469,9 @@ public class MainActivity extends AppCompatActivity {
         
         // Refresh session to get latest settings
         sessionState = sessionRepository.getSession();
-        prepareShuffledTriggers();
-        
-        // Debug Toast to confirm trigger count
-        int enabledCount = (isHandGestureMode) ? sessionState.getEnabledHandGestures().size() : sessionState.getEnabledFaceExpressions().size();
-        Toast.makeText(this, "Active triggers: " + enabledCount + " (Shuffled into 6 slots)", Toast.LENGTH_SHORT).show();
+        if (isExpressionMode) {
+            prepareShuffledTriggers();
+        }
         
         startCountdownAndCapture();
     }
