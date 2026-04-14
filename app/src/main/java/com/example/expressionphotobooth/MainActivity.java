@@ -20,7 +20,7 @@ import android.widget.ImageView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
                 if (checkedId == R.id.btnAiVoice && !hasAudioPermission()) {
                     requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_CODE);
                     group.check(R.id.btnAiFace);
-                    Toast.makeText(this, "Microphone permission is required for Voice mode.", Toast.LENGTH_SHORT).show();
+                    Log.w(TAG, "Microphone permission is required for Voice mode.");
                     return;
                 }
 
@@ -448,12 +448,12 @@ public class MainActivity extends AppCompatActivity {
             boolean hasFullAccess = (currentUserRole == UserRole.ADMIN || isPremium);
 
             if (authRepo.isGuest()) {
-                Toast.makeText(this, R.string.main_ai_login_required_title, Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Login required for AI mode");
                 return;
             }
 
             if (!hasFullAccess && (isHandGestureMode || isFaceExpressionMode)) {
-                Toast.makeText(this, "Premium subscription required for Gesture/Expression detection.", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Premium subscription required for Gesture/Expression detection.");
                 return;
             }
         }
@@ -518,7 +518,7 @@ public class MainActivity extends AppCompatActivity {
             if (hasCameraPermission()) {
                 startCamera();
             } else {
-                Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Permissions not granted by the user.");
                 finish();
             }
             return;
@@ -526,7 +526,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == AUDIO_PERMISSION_CODE) {
             if (!hasAudioPermission()) {
-                Toast.makeText(this, "Voice mode remains disabled without microphone permission.", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Voice mode remains disabled without microphone permission.");
             }
         }
     }
@@ -692,7 +692,7 @@ public class MainActivity extends AppCompatActivity {
                     if (isVoiceTriggerMode) {
                         isWaitingForVoice = true;
                         updateCaptureStatus(getString(R.string.main_capture_prompt_voice_v2));
-                        Toast.makeText(this, getString(R.string.main_mic_active_toast), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Microphone session active for voice detection.");
 
                         
                         voiceTriggerAnalyzer.start(new VoiceTriggerAnalyzer.OnVoiceTriggerDetected() {
@@ -712,9 +712,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onError(String error) {
                                 Log.e(TAG, "Voice error: " + error);
-                                runOnUiThread(() ->
-                                    Toast.makeText(MainActivity.this, getString(R.string.main_mic_error_format, error), Toast.LENGTH_SHORT).show()
-                                );
+                                    Log.e(TAG, "Voice error: " + error);
                             }
                         });
                     } else {
@@ -894,9 +892,7 @@ public class MainActivity extends AppCompatActivity {
                     error -> {
                         Log.e(TAG, "Portrait processing failed: " + error);
                         if (original != decoded) original.recycle();
-                        runOnUiThread(() ->
-                                Toast.makeText(this, R.string.main_portrait_failed, Toast.LENGTH_SHORT).show()
-                        );
+                        Log.e(TAG, "Portrait processing failed: " + error);
                         // Fallback: dùng ảnh gốc không blur
                         onPhotoReady(photoFile);
                     }
