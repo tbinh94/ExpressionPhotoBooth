@@ -1,7 +1,36 @@
+    await writeCache(cacheKey, response);
+        cached: false
+        model: GEMINI_MODEL,
+      response = await callGemini(payload);
+    const cached = await readValidCache(cacheKey);
+  const parsed = JSON.parse(jsonText);
+  return normalizeModelResponse(parsed, payload.languageTag);
+  const jsonText = extractFirstJsonObject(responseText);
+  if (!jsonText) {
+    throw new Error("Model did not return JSON content.");
+  let responseText = "";
+  if (result && typeof result.text === "function") {
+    responseText = result.text();
+  } else if (result && typeof result.text === "string") {
+    responseText = result.text;
+  } else if (result && typeof result.outputText === "string") {
+    responseText = result.outputText;
+  }
+  const result = await ai.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: prompt,
+    config: {
+      temperature: 0.2,
+      topP: 0.9,
+      maxOutputTokens: 900,
+      responseMimeType: "application/json"
+    }
+  });
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { GoogleGenAI } = require("@google/genai");
 
 const {

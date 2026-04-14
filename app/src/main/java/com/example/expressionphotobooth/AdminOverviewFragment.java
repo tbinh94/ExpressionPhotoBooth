@@ -42,7 +42,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private static final int RANGE_3M = 3;
     private static final int RANGE_6M = 6;
     private static final int RANGE_12M = 12;
-    private static final long AI_ANALYZE_COOLDOWN_MS = 45_000L;
+    private static final long AI_ANALYZE_COOLDOWN_MS = 30000L; // 30 seconds cooldown
 
     private View bar5;
     private View bar4;
@@ -701,14 +701,5 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
             renderStats(latestStats, false, languageTag);
             resetAiInsightsState(languageTag);
         }
-    }
-
-    @Override
-    public void onDestroyView() {
-        if (aiCooldownTimer != null) {
-            aiCooldownTimer.cancel();
-            aiCooldownTimer = null;
-        }
-        super.onDestroyView();
     }
 }
