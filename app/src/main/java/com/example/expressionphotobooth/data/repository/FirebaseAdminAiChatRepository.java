@@ -17,42 +17,53 @@ import com.google.ai.client.generativeai.type.Content;
 import com.google.ai.client.generativeai.type.GenerateContentResponse;
 import com.google.ai.client.generativeai.type.GenerationConfig;
 import com.google.ai.client.generativeai.type.HarmCategory;
+import com.google.ai.client.generativeai.type.RequestOptions;
 import com.google.ai.client.generativeai.type.SafetySetting;
+import com.example.expressionphotobooth.domain.model.AdminDashboardStats;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class FirebaseAdminAiChatRepository implements AdminAiChatRepository {
     private static final String TAG = "AiChatRepo";
-    private static final String MODEL_NAME = "gemini-flash-latest"; // Dùng bản Flash cho tốc độ phản hồi nhanh
+    private static final String MODEL_NAME = "gemini-flash-latest"; // Use latest flash stable
 
     private final GenerativeModelFutures model;
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private final Gson gson = new Gson();
 
     public FirebaseAdminAiChatRepository() {
         // Lấy API Key từ BuildConfig (đã được cấu hình đọc từ local.properties)
         String apiKey = BuildConfig.GEMINI_API_KEY;
 
         GenerationConfig.Builder configBuilder = new GenerationConfig.Builder();
-        configBuilder.temperature = 0.7f;
-        configBuilder.maxOutputTokens = 150; // Giới hạn phản hồi ngắn để tiết kiệm token
+        configBuilder.temperature = 0.5f;
+        configBuilder.maxOutputTokens = 3000; // Extended capacity for long sessions
         GenerationConfig config = configBuilder.build();
 
         List<SafetySetting> safetySettings = new ArrayList<>();
         safetySettings.add(new SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.ONLY_HIGH));
         safetySettings.add(new SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.ONLY_HIGH));
 
-        GenerativeModel gm = new GenerativeModel(MODEL_NAME, apiKey, config, safetySettings);
+        Content systemInstruction = new Content.Builder()
+                .addText("You are Sparkle, a concise photobooth analytics bot. Use provided stats. Reply in 2-3 sentences. Same language as user.")
+                .build();
+
+        GenerativeModel gm = new GenerativeModel(
+                MODEL_NAME,
+                apiKey,
+                config,
+                safetySettings,
+                new RequestOptions(),
+                null,
+                null,
+                systemInstruction
+        );
         this.model = GenerativeModelFutures.from(gm);
     }
 
@@ -88,26 +99,18 @@ public class FirebaseAdminAiChatRepository implements AdminAiChatRepository {
     }
 
     private String buildPrompt(AdminAiChatRequest request) {
-        Map<String, Object> stats = new HashMap<>();
+        StringBuilder stats = new StringBuilder();
         if (request.getStatsSnapshot() != null) {
-            stats.put("totalAccounts", request.getStatsSnapshot().getTotalAccounts());
-            stats.put("totalReviews", request.getStatsSnapshot().getTotalReviews());
-            stats.put("averageRating", request.getStatsSnapshot().getAverageRating());
-            stats.put("imageDownloads", request.getStatsSnapshot().getImageDownloads());
-            stats.put("usersByMonth", request.getStatsSnapshot().getUsersByMonth());
-            stats.put("imageDownloadsByMonth", request.getStatsSnapshot().getImageDownloadsByMonth());
-            stats.put("reviewScoreByMonth", request.getStatsSnapshot().getReviewScoreByMonth());
+            AdminDashboardStats s = request.getStatsSnapshot();
+            stats.append("Acc=").append(s.getTotalAccounts());
+            stats.append(",Rev=").append(s.getTotalReviews());
+            stats.append(",Rat=").append(String.format(java.util.Locale.US, "%.1f", s.getAverageRating()));
+            stats.append(",DL=").append(s.getImageDownloads());
+            if (s.getUsersByMonth() != null && !s.getUsersByMonth().isEmpty()) stats.append(",Usr/Mo=").append(s.getUsersByMonth());
+            if (s.getImageDownloadsByMonth() != null && !s.getImageDownloadsByMonth().isEmpty()) stats.append(",DL/Mo=").append(s.getImageDownloadsByMonth());
+            if (s.getReviewScoreByMonth() != null && !s.getReviewScoreByMonth().isEmpty()) stats.append(",Rt/Mo=").append(s.getReviewScoreByMonth());
         }
 
-        return "You are Sparkle, a data analyst assistant for a photobooth app.\n" +
-                "You are helping the admin understand the application statistics.\n" +
-                "Language: " + request.getLanguageTag() + "\n" +
-                "Context Data:\n" + gson.toJson(stats) + "\n\n" +
-                "Admin's Question: \"" + request.getQuery() + "\"\n\n" +
-                "Rules:\n" +
-                "1) Answer concisely (under 3-4 sentences).\n" +
-                "2) Use the provided data to support your answer if possible.\n" +
-                "3) If you cannot answer, say so politely.\n" +
-                "4) Answer in the same language as the question.";
+        return "Stats: " + stats + "\nUser: " + request.getQuery();
     }
 }
