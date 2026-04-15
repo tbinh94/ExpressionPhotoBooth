@@ -301,6 +301,8 @@
                         app:strokeWidth="0dp" />
 
                 </com.google.android.material.button.MaterialButtonToggleGroup>
+
+
             </HorizontalScrollView>
 
             <!-- Centered Ratio Status + Dot counter -->
