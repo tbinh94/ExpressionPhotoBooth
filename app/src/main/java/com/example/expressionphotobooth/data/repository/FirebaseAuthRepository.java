@@ -69,6 +69,48 @@ public class FirebaseAuthRepository implements AuthRepository {
     }
 
     @Override
+    public void signInWithGoogle(String idToken, AuthCallback callback) {
+        com.google.firebase.auth.AuthCredential credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null);
+        firebaseAuth.signInWithCredential(credential)
+                .addOnSuccessListener(authResult -> {
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    if (user == null) {
+                        callback.onError("Đăng nhập Google thành công nhưng không lấy được thông tin.");
+                        return;
+                    }
+
+                    // Kiểm tra xem user đã có profile trong Firestore chưa
+                    firestore.collection(USERS_COLLECTION)
+                            .document(user.getUid())
+                            .get()
+                            .addOnSuccessListener(snapshot -> {
+                                if (snapshot.exists()) {
+                                    // User đã tồn tại, lấy role
+                                    UserRole role = UserRole.from(snapshot.getString("role"));
+                                    callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), role, false));
+                                } else {
+                                    // User mới, tạo profile mặc định
+                                    Map<String, Object> userDoc = new HashMap<>();
+                                    userDoc.put("email", user.getEmail());
+                                    userDoc.put("displayName", user.getDisplayName());
+                                    userDoc.put("role", UserRole.USER.toFirestoreValue());
+                                    userDoc.put("isActive", true);
+                                    userDoc.put("updatedAt", System.currentTimeMillis());
+                                    userDoc.put("createdAt", System.currentTimeMillis());
+
+                                    firestore.collection(USERS_COLLECTION)
+                                            .document(user.getUid())
+                                            .set(userDoc)
+                                            .addOnSuccessListener(unused -> callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), UserRole.USER, false)))
+                                            .addOnFailureListener(e -> callback.onError(safeMessage(e, "Đăng nhập Google thành công nhưng lỗi tạo hồ sơ.")));
+                                }
+                            })
+                            .addOnFailureListener(e -> callback.onError(safeMessage(e, "Lỗi kiểm tra hồ sơ người dùng.")));
+                })
+                .addOnFailureListener(e -> callback.onError(safeMessage(e, "Đăng nhập Google thất bại.")));
+    }
+
+    @Override
     public void register(String email, String password, String name, String birthday, AuthCallback callback) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(authResult -> {

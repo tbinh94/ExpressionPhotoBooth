@@ -1,4 +1,17 @@
 <resources>
+            <string name="home_title_our">OUR</string>
+            <string name="home_title_memories">MEMORIES</string>
+            <string name="home_title_photobooth">Photobooth</string>
+            <string name="ratio_square">1:1</string>
+            <string name="ratio_wide">16:9</string>
+            <string name="capture_failed">Chụp thất bại</string>
+            <string name="capture_countdown_default">3</string>
+            <string name="select_enough_for_result">Vui lòng chọn %1$d ảnh để tiếp tục</string>
+            <string name="batch_edit_start">Đang chỉnh sửa %1$d ảnh đã chọn</string>
+            <string name="batch_edit_completed">Đã hoàn thành chỉnh sửa ảnh đã chọn</string>
+            <string name="batch_edit_cancelled">Đã dừng chỉnh sửa hàng loạt</string>
+            <string name="selection_limit_reached">Chỉ được chọn tối đa %1$d ảnh</string>
+            <string name="setup_select_frame_required">Bạn phải chọn một khung hình trước khi tiếp tục!</string>
     <string name="app_name">Our Memories Photobooth</string>
 
     <string name="capture_photo">Chụp</string>
@@ -9,9 +22,9 @@
     <string name="no_result_to_show">Không có ảnh kết quả để hiển thị</string>
     <string name="no_result_to_save">Không có ảnh kết quả để lưu</string>
     <string name="no_images_for_video">Không có ảnh để tạo video</string>
-    <string name="exporting_video">Đang xuất video timelapse...</string>
-    <string name="video_exporting_btn">Đang tạo video...</string>
-    <string name="video_saving_btn">Đang lưu...</string>
+    <string name="exporting_video">Đang xuất video timelapse…</string>
+    <string name="video_exporting_btn">Đang tạo video…</string>
+    <string name="video_saving_btn">Đang lưu…</string>
     <string name="video_saved_success">Đã lưu video vào bộ sưu tập!</string>
     <string name="failed_save_video">Xuất video thất bại</string>
 
@@ -109,7 +122,7 @@
     <string name="result_rate_subtitle">Đánh giá giúp chúng mình nhé!</string>
     <string name="feedback_title">Đánh giá khoảnh khắc của bạn</string>
     <string name="feedback_subtitle">Bạn thấy bộ ảnh thế nào? Chia sẻ cảm nhận nhé!</string>
-    <string name="feedback_hint">Gửi đôi lời dễ thương cho chúng mình...</string>
+    <string name="feedback_hint">Gửi đôi lời dễ thương cho chúng mình…</string>
     <string name="feedback_submit">GỬI ĐÁNH GIÁ</string>
     <string name="feedback_thanks_with_rating">Cảm ơn bạn đã đánh giá %1$.1f sao!</string>
     <string name="feedback_submit_failed">Gửi đánh giá thất bại. Vui lòng thử lại.</string>
@@ -180,11 +193,12 @@
     <string name="auth_forgot_password">Quên mật khẩu?</string>
     <string name="auth_or">Hoặc</string>
     <string name="auth_sign_in">Đăng nhập</string>
+    <string name="auth_google_sign_in">Tiếp tục với Google</string>
     <string name="auth_register">Đăng ký</string>
     <string name="auth_confirm_register">Xác nhận đăng ký</string>
     <string name="auth_back_to_login">Quay lại đăng nhập</string>
     <string name="auth_sign_in_as_guest">Đăng nhập dưới tài khoản khách</string>
-    <string name="auth_loading">Đang xử lý...</string>
+    <string name="auth_loading">Đang xử lý…</string>
     <string name="auth_error_title">Lỗi xác thực</string>
     <string name="auth_sign_in_failed_title">Đăng nhập thất bại</string>
     <string name="auth_register_success_title">Đăng ký thành công</string>
@@ -202,7 +216,7 @@
     <string name="auth_sign_out">Đăng xuất</string>
     <string name="auth_sign_out_title">Đã đăng xuất</string>
     <string name="auth_sign_out_message">Bạn đã đăng xuất khỏi phiên hiện tại.</string>
-    <string name="auth_register_creating">Đang tạo tài khoản...</string>
+    <string name="auth_register_creating">Đang tạo tài khoản…</string>
 
     <string name="admin_dashboard_greeting">Xin chào Admin,</string>
     <string name="admin_nav_title">Bảng quản trị</string>
@@ -270,7 +284,7 @@
     <string name="admin_redirect_open_reviews">Mở trang đánh giá</string>
 
     <string name="admin_reviews_title">Quản lý đánh giá</string>
-    <string name="admin_reviews_search_hint">Tìm theo email hoặc nội dung...</string>
+    <string name="admin_reviews_search_hint">Tìm theo email hoặc nội dung…</string>
     <string name="admin_reviews_summary_average">Trung bình</string>
     <string name="admin_reviews_summary_total">Tổng</string>
     <string name="admin_reviews_summary_five_star">5 sao</string>
@@ -284,7 +298,7 @@
     <string name="admin_ai_overview_meta_compact">AI %1$d | Chưa %2$d</string>
     <string name="admin_ai_overview_meta_format">Đã đăng ký: %1$d  •  Chưa đăng ký: %2$d</string>
     <string name="admin_ai_insights_title">Phân tích AI</string>
-    <string name="admin_ai_insights_loading">Đang phân tích xu hướng...</string>
+    <string name="admin_ai_insights_loading">Đang phân tích xu hướng…</string>
     <string name="admin_ai_insights_tap_to_analyze">Nhấn Phân tích để tạo insight cho khoảng thời gian đang chọn.</string>
     <string name="admin_ai_insights_analyze_cta">Phân tích</string>
     <string name="admin_ai_insights_analyze_cooldown_format">Phân tích (%1$ds)</string>
@@ -318,7 +332,7 @@
     <string name="admin_review_time_placeholder">2 giờ trước</string>
     <string name="admin_review_star_symbol">★</string>
     <string name="admin_review_rating_placeholder">5</string>
-    <string name="admin_review_feedback_placeholder">Nội dung đánh giá ở đây...</string>
+    <string name="admin_review_feedback_placeholder">Nội dung đánh giá ở đây…</string>
     <string name="admin_review_no_content">(Không có nội dung)</string>
     <string name="fallback_countdown_msg">Nếu không nhận diện được, tự động chụp sau %1$ds</string>
     <string name="admin_overview_action_stickers_title">Quản lý Stickers</string>
@@ -345,7 +359,7 @@
     <string name="admin_users_save_success">Đã cập nhật quyền thành công!</string>
     <string name="admin_users_save_error">Lỗi khi cập nhật quyền</string>
     <string name="auth_forgot_password_email_required">Vui lòng nhập địa chỉ email để đặt lại mật khẩu.</string>
-    <string name="auth_forgot_password_sending">Đang gửi liên kết thiết lập lại...</string>
+    <string name="auth_forgot_password_sending">Đang gửi liên kết thiết lập lại…</string>
     <string name="auth_forgot_password_success_title">Đã gửi Email</string>
     <string name="auth_forgot_password_success_message">Liên kết đặt lại mật khẩu đã được gửi đến Gmail của bạn. Vui lòng kiểm tra hộp thư đến.</string>
     <string name="btn_gallery">✦ THƯ VIỆN ✦</string>
@@ -366,7 +380,7 @@
     <string name="gallery_no_feedback_data">Chưa có dữ liệu đánh giá</string>
     <string name="gallery_share_memory_chooser">Chia sẻ kỷ niệm</string>
     <string name="gallery_book_photo_count">%1$d ảnh</string>
-    <string name="gallery_book_exporting">Đang kết xuất Album...</string>
+    <string name="gallery_book_exporting">Đang kết xuất Album…</string>
     <string name="gallery_book_export_success">Đã lưu Album vào thư viện ảnh!</string>
     <string name="gallery_book_delete_title">Xóa album</string>
     <string name="gallery_book_delete_message">Xóa \"%1$s\"?</string>
@@ -450,7 +464,7 @@ những ảnh đã chụp trước đó</string>
     <string name="edit_sticker_size_format">%1$d%%</string>
     <string name="edit_sticker_picker_title">Chọn ảnh sticker</string>
     <string name="edit_sticker_cannot_delete_global">Bạn không thể xóa sticker hệ thống!</string>
-    <string name="edit_sticker_processing">Đang xử lý sticker...</string>
+    <string name="edit_sticker_processing">Đang xử lý sticker…</string>
     <string name="edit_nothing_to_undo">Không có thao tác để hoàn tác</string>
     <string name="edit_save_error_format">Lỗi khi lưu chỉnh sửa: %1$s</string>
     <string name="edit_photo_preview_content_desc">Xem trước ảnh đang chỉnh sửa</string>
@@ -461,11 +475,11 @@ những ảnh đã chụp trước đó</string>
     <string name="edit_intensity">Cường độ</string>
     <string name="edit_default_intensity_value">80</string>
     <string name="failed_save_image">Không thể lưu ảnh vào bộ sưu tập</string>
-    <string name="admin_ai_chat_search_hint">Hỏi AI về dữ liệu (VD: Xu hướng tháng này...)</string>
+    <string name="admin_ai_chat_search_hint">Hỏi AI về dữ liệu (VD: Xu hướng tháng này…)</string>
     <string name="admin_ai_chat_title">Trợ lý ảo Dữ liệu</string>
-    <string name="admin_ai_chat_input_hint">Gõ câu hỏi tại đây...</string>
+    <string name="admin_ai_chat_input_hint">Gõ câu hỏi tại đây…</string>
     <string name="admin_ai_chat_bot_name">Trợ lý Sparkle</string>
-    <string name="admin_ai_chat_thinking">Sparkle đang suy nghĩ...</string>
+    <string name="admin_ai_chat_thinking">Sparkle đang suy nghĩ…</string>
     <string name="admin_ai_chat_error">Lỗi khi kết nối với trợ lý AI.</string>
     <string name="admin_ai_chat_welcome">Xin chào! Tôi có thể giúp bạn phân tích dữ liệu ứng dụng. Bạn muốn hỏi gì?</string>
     <string name="ai_settings_title">Cấu hình AI Trigger</string>

@@ -15,9 +15,9 @@
     <string name="no_result_to_show">No result image to display</string>
     <string name="no_result_to_save">No result image to save</string>
     <string name="no_images_for_video">No captured images to create video</string>
-    <string name="exporting_video">Exporting timelapse video...</string>
-    <string name="video_exporting_btn">Generating video...</string>
-    <string name="video_saving_btn">Saving...</string>
+    <string name="exporting_video">Exporting timelapse video…</string>
+    <string name="video_exporting_btn">Generating video…</string>
+    <string name="video_saving_btn">Saving…</string>
     <string name="failed_save_video">Failed to export video</string>
     <string name="video_saved_success">Video saved to gallery!</string>
     <string name="title_selection">OUR MEMORIES</string>
@@ -168,7 +168,7 @@
     <string name="edit_sticker_size_format">%1$d%%</string>
     <string name="edit_sticker_picker_title">Select Sticker Image</string>
     <string name="edit_sticker_cannot_delete_global">System stickers cannot be deleted!</string>
-    <string name="edit_sticker_processing">Processing sticker...</string>
+    <string name="edit_sticker_processing">Processing sticker…</string>
     <string name="edit_nothing_to_undo">Nothing to undo</string>
     <string name="edit_save_error_format">Error saving edits: %1$s</string>
     <string name="edit_photo_preview_content_desc">Editing photo preview</string>
@@ -205,11 +205,12 @@
     <string name="auth_forgot_password">Forgot password?</string>
     <string name="auth_or">OR</string>
     <string name="auth_sign_in">Sign In</string>
+    <string name="auth_google_sign_in">Continue with Google</string>
     <string name="auth_register">Sign Up</string>
     <string name="auth_confirm_register">Confirm Register</string>
     <string name="auth_back_to_login">Back to Login</string>
     <string name="auth_sign_in_as_guest">Sign in as Guest</string>
-    <string name="auth_loading">Processing...</string>
+    <string name="auth_loading">Processing…</string>
     <string name="auth_error_title">Auth Error</string>
     <string name="auth_sign_in_failed_title">Sign In Failed</string>
     <string name="auth_register_success_title">Register Success</string>
@@ -260,7 +261,7 @@
     <string name="main_ai_voice_selected">Switched to: Voice trigger (Say \'Cheese\'!)</string>
     <string name="main_capture_prompt_voice">Shot %1$d: Say \'Cheese\' to capture!</string>
 
-    <string name="auth_register_creating">Creating account...</string>
+    <string name="auth_register_creating">Creating account…</string>
 
     <string name="admin_dashboard_greeting">Welcome Admin,</string>
     <string name="admin_nav_title">AdminPanel</string>
@@ -335,7 +336,7 @@
     <string name="admin_redirect_open_reviews">Open reviews page</string>
 
     <string name="admin_reviews_title">Review Management</string>
-    <string name="admin_reviews_search_hint">Search by email or content...</string>
+    <string name="admin_reviews_search_hint">Search by email or content…</string>
     <string name="admin_reviews_summary_average">Average</string>
     <string name="admin_reviews_summary_total">Total</string>
     <string name="admin_reviews_summary_five_star">5-star</string>
@@ -349,7 +350,7 @@
     <string name="admin_ai_overview_meta_compact">AI %1$d | Off %2$d</string>
     <string name="admin_ai_overview_meta_format">Registered: %1$d  •  Not registered: %2$d</string>
     <string name="admin_ai_insights_title">AI Insights</string>
-    <string name="admin_ai_insights_loading">Analyzing trends...</string>
+    <string name="admin_ai_insights_loading">Analyzing trends…</string>
     <string name="admin_ai_insights_tap_to_analyze">Tap Analyze to generate insights for the selected range.</string>
     <string name="admin_ai_insights_analyze_cta">Analyze</string>
     <string name="admin_ai_insights_analyze_cooldown_format">Analyze (%1$ds)</string>
@@ -383,7 +384,7 @@
     <string name="admin_review_time_placeholder">2 hours ago</string>
     <string name="admin_review_star_symbol">★</string>
     <string name="admin_review_rating_placeholder">5</string>
-    <string name="admin_review_feedback_placeholder">Review content appears here...</string>
+    <string name="admin_review_feedback_placeholder">Review content appears here…</string>
     <string name="admin_review_no_content">(No content)</string>
     <string name="fallback_countdown_msg">If not recognized, auto capture in %1$ds</string>
 
@@ -411,7 +412,7 @@
     <string name="admin_users_save_success">Role updated successfully!</string>
     <string name="admin_users_save_error">Failed to update role</string>
     <string name="auth_forgot_password_email_required">Please enter your email address to reset password.</string>
-    <string name="auth_forgot_password_sending">Sending reset link...</string>
+    <string name="auth_forgot_password_sending">Sending reset link…</string>
     <string name="auth_forgot_password_success_title">Email Sent</string>
     <string name="auth_forgot_password_success_message">A password reset link has been sent to your Gmail. Please check your inbox.</string>
     <string name="btn_gallery">✦ GALLERY ✦</string>
@@ -433,7 +434,7 @@
     <string name="gallery_no_feedback_data">No feedback data</string>
     <string name="gallery_share_memory_chooser">Share Memory</string>
     <string name="gallery_book_photo_count">%1$d photos</string>
-    <string name="gallery_book_exporting">Exporting Album...</string>
+    <string name="gallery_book_exporting">Exporting Album…</string>
     <string name="gallery_book_export_success">Album saved to gallery!</string>
     <string name="gallery_book_delete_title">Delete Book</string>
     <string name="gallery_book_delete_message">Delete \"%1$s\"?</string>
@@ -496,11 +497,11 @@ that you have taken before</string>
     <string name="main_portrait_processing">Applying portrait effect…</string>
     <string name="main_portrait_failed">Portrait effect failed, saved original</string>
     <string name="failed_save_image">Failed to save image to gallery</string>
-    <string name="admin_ai_chat_search_hint">Ask AI about data (e.g. Trends this month...)</string>
+    <string name="admin_ai_chat_search_hint">Ask AI about data (e.g. Trends this month…)</string>
     <string name="admin_ai_chat_title">Data Assistant</string>
-    <string name="admin_ai_chat_input_hint">Type your question here...</string>
+    <string name="admin_ai_chat_input_hint">Type your question here…</string>
     <string name="admin_ai_chat_bot_name">Sparkle Analysis</string>
-    <string name="admin_ai_chat_thinking">Sparkle is thinking...</string>
+    <string name="admin_ai_chat_thinking">Sparkle is thinking…</string>
     <string name="admin_ai_chat_error">Error connecting to AI assistant.</string>
     <string name="admin_ai_chat_welcome">Hello! I can help you analyze app data. What would you like to know?</string>
     <string name="ai_settings_title">AI Trigger Configuration</string>

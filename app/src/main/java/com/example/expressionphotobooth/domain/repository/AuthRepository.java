@@ -34,6 +34,8 @@ public interface AuthRepository {
 
     void signIn(String email, String password, AuthCallback callback);
 
+    void signInWithGoogle(String idToken, AuthCallback callback);
+
     void register(String email, String password, String name, String birthday, AuthCallback callback);
 
     void signInAsGuest(AuthCallback callback);

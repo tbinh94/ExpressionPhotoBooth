@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
         btnSignIn = findViewById(R.id.btnSignIn);
         btnRegister = findViewById(R.id.btnRegister);
         btnGuest = findViewById(R.id.btnGuest);
-        
+
         layoutLoadingOverlay = findViewById(R.id.layoutLoadingOverlay);
         tvLoadingMessage = findViewById(R.id.tvLoadingMessage);
 
