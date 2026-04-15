@@ -1,7 +1,16 @@
 package com.example.expressionphotobooth;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -42,6 +51,11 @@ public class AiTriggerSettingsActivity extends AppCompatActivity {
         loadSettings();
 
         findViewById(R.id.btnSave).setOnClickListener(v -> saveSettings());
+
+        View btnDevSkip = findViewById(R.id.btnDevSkip);
+        if (btnDevSkip != null) {
+            btnDevSkip.setOnClickListener(v -> skipToPhotoSelection());
+        }
     }
 
     private void initMaps() {
@@ -123,6 +137,30 @@ public class AiTriggerSettingsActivity extends AppCompatActivity {
         sessionRepository.saveSession(sessionState);
 
         Toast.makeText(this, R.string.ai_settings_saved, Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    private void skipToPhotoSelection() {
+        ArrayList<String> uriStrings = new ArrayList<>();
+        // Generate 6 blank white images to simulate a full capture sequence
+        for (int i = 0; i < 6; i++) {
+            File file = new File(getExternalFilesDir(null), "dev_blank_" + i + "_" + System.currentTimeMillis() + ".jpg");
+            try {
+                Bitmap bitmap = Bitmap.createBitmap(1200, 1200, Bitmap.Config.ARGB_8888);
+                bitmap.eraseColor(Color.WHITE);
+                try (FileOutputStream out = new FileOutputStream(file)) {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                }
+                bitmap.recycle();
+                uriStrings.add(Uri.fromFile(file).toString());
+            } catch (Exception e) {
+                Log.e("AiTriggerSettings", "Failed to create dev blank image", e);
+            }
+        }
+
+        Intent intent = new Intent(this, PhotoSelectionActivity.class);
+        intent.putStringArrayListExtra(IntentKeys.EXTRA_CAPTURED_IMAGES, uriStrings);
+        startActivity(intent);
         finish();
     }
 }

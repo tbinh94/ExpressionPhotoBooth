@@ -234,6 +234,17 @@
                 android:backgroundTint="@color/app_blue"
                 android:textColor="@color/white" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDevSkip"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="⏩ Skip to next page ( only for dev )"
+                android:textColor="#999999"
+                android:textSize="12sp"
+                android:textAllCaps="false" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
