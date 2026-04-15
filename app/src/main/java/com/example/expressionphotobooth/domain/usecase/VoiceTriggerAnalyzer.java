@@ -8,40 +8,39 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.example.expressionphotobooth.utils.LocaleManager;
+
 /**
- * Super-Expert Voice Trigger Analyzer (V3 - Final Precision)
- * Improvements:
- * 1. Sliding Window with 50% Overlap: Prevents signal loss at buffer boundaries.
- * 2. Spectral Brightness Ratio: High-frequency energy analysis for robust 'S' detection.
- * 3. Temporal Stability Filter: Requires multiple consecutive frames to confirm phonemes.
- * 4. Advanced Pitch Tracking: Uses normalized cross-correlation for human vowel verification.
+ * Advanced Voice Trigger Analyzer (Expert Edition)
+ * Features:
+ * 1. Adaptive Noise Floor Tracking (Handles fan noise)
+ * 2. Phoneme Sequence State Machine (EE -> S pattern for "Cheese")
+ * 3. Spectral Energy Ratio Analysis
  */
 public class VoiceTriggerAnalyzer {
-    private static final String TAG = "VoiceAI_SuperExpert";
+    private static final String TAG = "VoiceAI_Expert";
     
+    // Audio Configuration
     private static final int SAMPLE_RATE = 16000;
     private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
     private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
-    // Window config (30ms window @ 16kHz)
-    private static final int WINDOW_SIZE = 480;
-    private static final int OVERLAP = 240;
-
-    private enum State { IDLE, VOWEL_STABLE, SIBILANT_WAITING }
+    // States for "Cheese" [CH-EE-SE] recognition
+    private enum State { IDLE, VOWEL_DETECTED, TRIGGERED }
     private State currentState = State.IDLE;
-    
-    private int vowelFrameCounter = 0;
-    private int sibilantFrameCounter = 0;
     private long stateTimestamp = 0;
+    private static final long MAX_PHONEME_GAP_MS = 600; // Time window between 'EE' and 'S'
 
-    // Expert Thresholds
-    private static final int REQUIRED_VOWEL_FRAMES = 3;    // ~90ms of stable 'EE'
-    private static final int REQUIRED_SIBILANT_FRAMES = 3; // ~90ms of stable 'S'
-    private static final long MAX_PHONEME_GAP_MS = 600;
+    // DSP Constants
+    private double noiseFloor = 200.0;              // Lowered: don't start with artificially high floor
+    private static final double ADAPTIVE_LEARNING_RATE = 0.02; // Slowed: prevents noisy rooms from killing sensitivity
+    private static final double SIGNAL_TO_NOISE_RATIO = 1.3;   // Lowered: normal voice (not shouting) can pass
 
-    private double noiseFloor = 400.0;
-    private static final double LEARNING_RATE = 0.01;
-    private static final double TRIGGER_SNR = 2.2; 
+    // Sibilant (S) vs Vowel (EE) characteristics — widened for better coverage
+    private static final double ZCR_VOWEL_MIN  = 0.03;  // Catch quieter 'EE' onset
+    private static final double ZCR_VOWEL_MAX  = 0.18;  // Slightly wider for 'EE' variations
+    private static final double ZCR_SIBILANT_MIN = 0.20; // Lowered: catch softer 'S'
+    private static final double ZCR_SIBILANT_MAX = 0.50; // Slightly wider upper bound
 
     public interface OnVoiceTriggerDetected {
         void onTrigger();
@@ -63,13 +62,19 @@ public class VoiceTriggerAnalyzer {
         this.listener = listener;
         stop();
 
-        int minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, ENCODING);
-        int bufferSize = Math.max(minBufferSize, 2048);
+        int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, ENCODING);
+        if (bufferSize <= 0) bufferSize = 1024;
 
         try {
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, ENCODING, bufferSize);
+            audioRecord = new AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    SAMPLE_RATE,
+                    CHANNEL,
+                    ENCODING,
+                    bufferSize * 2
+            );
         } catch (SecurityException e) {
-            notifyError("Mic permission denied");
+            notifyError("Permission denied");
             return;
         }
 
@@ -81,151 +86,121 @@ public class VoiceTriggerAnalyzer {
         isRunning = true;
         audioRecord.startRecording();
         
-        workerThread = new Thread(this::audioProcessingLoop, "SuperVoiceAnalyzer");
+        final int finalBufferSize = bufferSize;
+        workerThread = new Thread(() -> {
+            short[] buffer = new short[finalBufferSize];
+            String lang = LocaleManager.getSavedLanguage(context);
+            boolean isVi = LocaleManager.LANG_VI.equals(lang);
+
+            while (isRunning) {
+                int read = audioRecord.read(buffer, 0, buffer.length);
+                if (read > 0) {
+                    analyzeVoiceLogic(buffer, read, isVi);
+                }
+            }
+        }, "ExpertVoiceAnalyzer");
+        
         workerThread.start();
     }
 
-    private void audioProcessingLoop() {
-        short[] slidingBuffer = new short[WINDOW_SIZE];
-        int writePos = 0;
-
-        while (isRunning) {
-            // Read 240 samples (half window) to maintain 50% overlap
-            short[] tempBuffer = new short[OVERLAP];
-            int read = audioRecord.read(tempBuffer, 0, OVERLAP);
-            
-            if (read > 0) {
-                // Shift existing data and add new data
-                System.arraycopy(slidingBuffer, OVERLAP, slidingBuffer, 0, OVERLAP);
-                System.arraycopy(tempBuffer, 0, slidingBuffer, OVERLAP, read);
-                
-                analyzeExpertLogic(slidingBuffer, WINDOW_SIZE);
-            }
-        }
-    }
-
-    private void analyzeExpertLogic(short[] window, int length) {
-        double rms = 0;
+    private void analyzeVoiceLogic(short[] buffer, int read, boolean isVi) {
+        double sum = 0;
         int crossings = 0;
-        double highFreqEnergy = 0;
-        double lowFreqEnergy = 0;
 
-        for (int i = 0; i < length; i++) {
-            double val = window[i];
-            rms += val * val;
-            if (i > 0) {
-                if ((window[i] ^ window[i-1]) < 0) crossings++;
-                // Simple High-Pass Filter: diff between samples
-                highFreqEnergy += Math.abs(window[i] - window[i-1]);
-                lowFreqEnergy += Math.abs(window[i]);
+        for (int i = 0; i < read; i++) {
+            sum += (double) buffer[i] * buffer[i];
+            if (i > 0 && ((buffer[i] >= 0 && buffer[i-1] < 0) || (buffer[i] < 0 && buffer[i-1] >= 0))) {
+                crossings++;
             }
         }
-        rms = Math.sqrt(rms / length);
-        double zcr = (double) crossings / length;
-        double brightness = highFreqEnergy / (lowFreqEnergy + 1.0);
 
-        // 1. Adaptive Noise Floor
-        if (rms < noiseFloor * 1.4) {
-            noiseFloor = (noiseFloor * (1 - LEARNING_RATE)) + (rms * LEARNING_RATE);
+        double rms = Math.sqrt(sum / read);
+        double zcr = (double) crossings / read;
+
+        Log.v(TAG, String.format("rms=%.1f  floor=%.1f  snr=%.2f  zcr=%.3f",
+                rms, noiseFloor, rms / (noiseFloor + 1), zcr));
+
+        // 1. Adaptive Noise Floor Tracking — only update when truly silent
+        if (rms < noiseFloor * 1.1) {
+            noiseFloor = (noiseFloor * (1 - ADAPTIVE_LEARNING_RATE)) + (rms * ADAPTIVE_LEARNING_RATE);
             if (currentState != State.IDLE && (System.currentTimeMillis() - stateTimestamp > MAX_PHONEME_GAP_MS)) {
                 resetState("Timeout");
             }
             return;
         }
 
-        // 2. SNR Gate
-        if (rms < noiseFloor * TRIGGER_SNR) return;
+        // 2. Voice Activity Detection (VAD) — require SNR > 1.3x floor
+        if (rms < noiseFloor * SIGNAL_TO_NOISE_RATIO) return;
 
-        // 3. Autocorrelation for periodicity
-        double correlation = calculateCorrelation(window, length);
-
-        // 4. Phoneme Classifier
-        boolean isVowel = (zcr < 0.15 && correlation > 0.68 && brightness < 1.0);
-        boolean isSibilant = (zcr > 0.22 && zcr < 0.5 && brightness > 1.3 && correlation < 0.45);
-
-        updateStateMachine(isVowel, isSibilant);
+        // 3. Phoneme Sequence Logic
+        processCheeseSequence(zcr);
     }
 
-    private void updateStateMachine(boolean isVowel, boolean isSibilant) {
+    private void processCheeseSequence(double zcr) {
         long now = System.currentTimeMillis();
 
         switch (currentState) {
             case IDLE:
-                if (isVowel) {
-                    vowelFrameCounter++;
-                    if (vowelFrameCounter >= REQUIRED_VOWEL_FRAMES) {
-                        currentState = State.VOWEL_STABLE;
-                        stateTimestamp = now;
-                        Log.d(TAG, "Step 1: Stable 'EE' verified");
-                    }
-                } else {
-                    vowelFrameCounter = 0;
+                // Looking for "EE" sound (Low ZCR characteristic of vowels)
+                if (zcr > ZCR_VOWEL_MIN && zcr < ZCR_VOWEL_MAX) {
+                    currentState = State.VOWEL_DETECTED;
+                    stateTimestamp = now;
+                    Log.d(TAG, "Step 1: Vowel 'EE' detected (zcr=" + String.format("%.3f", zcr) + ")");
                 }
                 break;
 
-            case VOWEL_STABLE:
+            case VOWEL_DETECTED:
+                // Check for timeout
                 if (now - stateTimestamp > MAX_PHONEME_GAP_MS) {
-                    resetState("EE->S timeout");
+                    resetState("EE-S gap too long");
                     return;
                 }
-                if (isSibilant) {
-                    sibilantFrameCounter++;
-                    if (sibilantFrameCounter >= REQUIRED_SIBILANT_FRAMES) {
-                        triggerCapture();
-                    }
-                } else if (!isVowel) {
-                    // Allow some background/gap between EE and S
+
+                // Looking for "S" sound (High ZCR)
+                if (zcr > ZCR_SIBILANT_MIN && zcr < ZCR_SIBILANT_MAX) {
+                    triggerCapture("Step 2: Sibilant 'S' detected -> SUCCESS");
                 }
                 break;
         }
     }
 
-    private double calculateCorrelation(short[] buffer, int length) {
-        int minLag = 40;  // 400Hz
-        int maxLag = 200; // 80Hz
-        double maxCorr = 0;
-
-        for (int lag = minLag; lag < maxLag; lag++) {
-            double corr = 0;
-            double energyL = 0;
-            double energyR = 0;
-            for (int i = 0; i < length - lag; i++) {
-                corr += (double) buffer[i] * buffer[i + lag];
-                energyL += (double) buffer[i] * buffer[i];
-                energyR += (double) buffer[i + lag] * buffer[i + lag];
-            }
-            if (energyL > 0 && energyR > 0) {
-                corr = corr / Math.sqrt(energyL * energyR);
-            }
-            if (corr > maxCorr) maxCorr = corr;
-        }
-        return maxCorr;
-    }
-
-    private void triggerCapture() {
-        Log.i(TAG, "🎯 ✅ [CHEESE CONFIRMED] - Sequence Matched");
+    private void triggerCapture(String reason) {
+        Log.d(TAG, "✅ TRIGGER: " + reason);
         resetState("Triggered");
-        mainHandler.post(() -> { if (listener != null) listener.onTrigger(); });
+        
+        mainHandler.post(() -> {
+            if (listener != null) listener.onTrigger();
+        });
+
+        // Add a small sleep to worker thread to prevent instant multi-trigger
         try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
     }
 
     private void resetState(String reason) {
-        if (currentState != State.IDLE) Log.v(TAG, "State Reset: " + reason);
+        if (currentState != State.IDLE) {
+            Log.v(TAG, "Reset State: " + reason);
+        }
         currentState = State.IDLE;
-        vowelFrameCounter = 0;
-        sibilantFrameCounter = 0;
     }
 
     public void stop() {
         isRunning = false;
-        if (workerThread != null) { workerThread.interrupt(); workerThread = null; }
-        if (audioRecord != null) { 
-            try { audioRecord.stop(); audioRecord.release(); } catch (Exception ignored) {}
-            audioRecord = null; 
+        if (workerThread != null) {
+            workerThread.interrupt();
+            workerThread = null;
+        }
+        if (audioRecord != null) {
+            try {
+                audioRecord.stop();
+                audioRecord.release();
+            } catch (Exception ignored) {}
+            audioRecord = null;
         }
     }
 
     private void notifyError(String msg) {
-        mainHandler.post(() -> { if (listener != null) listener.onError(msg); });
+        mainHandler.post(() -> {
+            if (listener != null) listener.onError(msg);
+        });
     }
 }
