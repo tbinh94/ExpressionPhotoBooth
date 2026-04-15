@@ -32,14 +32,15 @@ public class VoiceTriggerAnalyzer {
     private static final long MAX_PHONEME_GAP_MS = 600; // Time window between 'EE' and 'S'
 
     // DSP Constants
-    private double noiseFloor = 500.0;
-    private static final double ADAPTIVE_LEARNING_RATE = 0.05;
-    private static final double SIGNAL_TO_NOISE_RATIO = 1.8;
+    private double noiseFloor = 200.0;              // Lowered: don't start with artificially high floor
+    private static final double ADAPTIVE_LEARNING_RATE = 0.02; // Slowed: prevents noisy rooms from killing sensitivity
+    private static final double SIGNAL_TO_NOISE_RATIO = 1.3;   // Lowered: normal voice (not shouting) can pass
 
-    // Sibilant (S) vs Vowel (EE) characteristics
-    private static final double ZCR_VOWEL_MAX = 0.15;    // Low ZCR for 'EE'
-    private static final double ZCR_SIBILANT_MIN = 0.24; // High ZCR for 'S'
-    private static final double ZCR_SIBILANT_MAX = 0.48; // Filter out ultra-high electronic noise
+    // Sibilant (S) vs Vowel (EE) characteristics — widened for better coverage
+    private static final double ZCR_VOWEL_MIN  = 0.03;  // Catch quieter 'EE' onset
+    private static final double ZCR_VOWEL_MAX  = 0.18;  // Slightly wider for 'EE' variations
+    private static final double ZCR_SIBILANT_MIN = 0.20; // Lowered: catch softer 'S'
+    private static final double ZCR_SIBILANT_MAX = 0.50; // Slightly wider upper bound
 
     public interface OnVoiceTriggerDetected {
         void onTrigger();
@@ -116,9 +117,11 @@ public class VoiceTriggerAnalyzer {
         double rms = Math.sqrt(sum / read);
         double zcr = (double) crossings / read;
 
-        // 1. Adaptive Noise Floor Tracking
-        // If sound is quiet, learn it as background noise (e.g., fan)
-        if (rms < noiseFloor * 1.2) {
+        Log.v(TAG, String.format("rms=%.1f  floor=%.1f  snr=%.2f  zcr=%.3f",
+                rms, noiseFloor, rms / (noiseFloor + 1), zcr));
+
+        // 1. Adaptive Noise Floor Tracking — only update when truly silent
+        if (rms < noiseFloor * 1.1) {
             noiseFloor = (noiseFloor * (1 - ADAPTIVE_LEARNING_RATE)) + (rms * ADAPTIVE_LEARNING_RATE);
             if (currentState != State.IDLE && (System.currentTimeMillis() - stateTimestamp > MAX_PHONEME_GAP_MS)) {
                 resetState("Timeout");
@@ -126,22 +129,23 @@ public class VoiceTriggerAnalyzer {
             return;
         }
 
-        // 2. Voice Activity Detection (VAD)
+        // 2. Voice Activity Detection (VAD) — require SNR > 1.3x floor
         if (rms < noiseFloor * SIGNAL_TO_NOISE_RATIO) return;
 
-        // 3. Phoneme Sequence Logic (Always "Cheese" for now)
-        processCheeseSequence(zcr);    }
+        // 3. Phoneme Sequence Logic
+        processCheeseSequence(zcr);
+    }
 
     private void processCheeseSequence(double zcr) {
         long now = System.currentTimeMillis();
 
         switch (currentState) {
             case IDLE:
-                // Looking for "EE" sound (Low ZCR)
-                if (zcr > 0.05 && zcr < ZCR_VOWEL_MAX) {
+                // Looking for "EE" sound (Low ZCR characteristic of vowels)
+                if (zcr > ZCR_VOWEL_MIN && zcr < ZCR_VOWEL_MAX) {
                     currentState = State.VOWEL_DETECTED;
                     stateTimestamp = now;
-                    Log.v(TAG, "Step 1: Vowel 'EE' detected");
+                    Log.d(TAG, "Step 1: Vowel 'EE' detected (zcr=" + String.format("%.3f", zcr) + ")");
                 }
                 break;
 
