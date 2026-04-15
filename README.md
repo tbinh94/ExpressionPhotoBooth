@@ -88,7 +88,7 @@ app/src/main/java/com/example/expressionphotobooth/
 ---
 
 ## 👨‍💻 Development Team
-Developed with ❤️ by **Binh Ca, Duc Trong, Chi Mai, & Han Gia**.
+Developed with ❤️ by **Binh Ca, Duc Trong**.
 
 ---
 
