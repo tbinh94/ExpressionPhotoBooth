@@ -193,7 +193,7 @@
     <string name="auth_forgot_password">Quên mật khẩu?</string>
     <string name="auth_or">Hoặc</string>
     <string name="auth_sign_in">Đăng nhập</string>
-    <string name="auth_google_sign_in">Tiếp tục với Google</string>
+    <string name="auth_google_sign_in">Đăng nhập với Google</string>
     <string name="auth_register">Đăng ký</string>
     <string name="auth_confirm_register">Xác nhận đăng ký</string>
     <string name="auth_back_to_login">Quay lại đăng nhập</string>

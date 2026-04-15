@@ -9,9 +9,18 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 
 import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
@@ -27,11 +36,14 @@ import java.util.Locale;
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword, etName, etBirthday;
-    private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage;
+    private TextView tvLoginTitle, tvLoginSubtitle, tvLoadingMessage, tvGoogleSignInText;
     private View layoutRegisterExtra, tvForgotPassword, layoutLoadingOverlay;
     private MaterialButton btnSignIn, btnRegister, btnGuest;
+    private androidx.cardview.widget.CardView btnGoogleSignIn;
     private android.widget.ImageView btnLanguageToggle;
     private AuthRepository authRepository;
+    private GoogleSignInClient googleSignInClient;
+    private ActivityResultLauncher<Intent> googleSignInLauncher;
     private boolean isRegisterMode = false;
 
     @Override
@@ -87,10 +99,33 @@ public class LoginActivity extends AppCompatActivity {
 
         layoutLoadingOverlay = findViewById(R.id.layoutLoadingOverlay);
         tvLoadingMessage = findViewById(R.id.tvLoadingMessage);
+        btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn);
+        tvGoogleSignInText = btnGoogleSignIn.findViewById(R.id.tvGoogleSignInLabel);
+
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("423474439806-03n2s0gmpubr3pauaflmg7obpqsru07f.apps.googleusercontent.com")
+                .requestEmail()
+                .build();
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        googleSignInLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                        handleGoogleSignInResult(task);
+                    } else {
+                        setLoading(false, "");
+                    }
+                }
+        );
 
         etBirthday.setOnClickListener(v -> showDatePicker());
         tvForgotPassword.setOnClickListener(v -> doForgotPassword());
         btnGuest.setOnClickListener(v -> doSignInAsGuest());
+        btnGoogleSignIn.setOnClickListener(v -> doGoogleSignIn());
         btnSignIn.setOnClickListener(v -> {
             if (isRegisterMode) {
                 doRegister();
@@ -199,6 +234,11 @@ public class LoginActivity extends AppCompatActivity {
                     R.string.auth_sign_in_as_guest,
                     languageTag));
         }
+        if (tvGoogleSignInText != null) {
+            tvGoogleSignInText.setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
+                    R.string.auth_google_sign_in,
+                    languageTag));
+        }
         if (tvForgotPassword instanceof TextView) {
             ((TextView) tvForgotPassword).setText(com.example.expressionphotobooth.utils.LocaleManager.getString(this,
                     R.string.auth_forgot_password,
@@ -278,6 +318,48 @@ public class LoginActivity extends AppCompatActivity {
                 HelpDialogUtils.showCenteredNotice(LoginActivity.this, getString(R.string.auth_error_title), message, false);
             }
         });
+    }
+
+    private void doGoogleSignIn() {
+        setLoading(true, getString(R.string.auth_loading));
+        // Sign out first to clear cached account, so the account picker always appears
+        googleSignInClient.signOut().addOnCompleteListener(this, task ->
+                googleSignInLauncher.launch(googleSignInClient.getSignInIntent())
+        );
+    }
+
+    private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            String idToken = account.getIdToken();
+            if (idToken != null) {
+                authRepository.signInWithGoogle(idToken, new AuthRepository.AuthCallback() {
+                    @Override
+                    public void onSuccess(com.example.expressionphotobooth.domain.model.AuthSession session) {
+                        setLoading(false, "");
+                        routeByRole();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        setLoading(false, "");
+                        HelpDialogUtils.showCenteredNotice(LoginActivity.this, getString(R.string.auth_error_title), message, false);
+                    }
+                });
+            } else {
+                setLoading(false, "");
+                HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_error_title), "Không thể lấy ID Token từ Google.", false);
+            }
+        } catch (ApiException e) {
+            setLoading(false, "");
+            String errorMsg = "Lỗi đăng nhập Google (code: " + e.getStatusCode() + ")";
+            if (e.getStatusCode() == 12500) {
+                errorMsg = "Lỗi đăng nhập Google (12500). Kiểm tra SHA-1 trong Firebase Console.";
+            } else if (e.getStatusCode() == 12501) {
+                errorMsg = "Đăng nhập bị hủy.";
+            }
+            HelpDialogUtils.showCenteredNotice(this, getString(R.string.auth_error_title), errorMsg, false);
+        }
     }
 
     private void doRegister() {
@@ -397,6 +479,10 @@ public class LoginActivity extends AppCompatActivity {
         btnSignIn.setEnabled(!isLoading);
         btnRegister.setEnabled(!isLoading);
         btnGuest.setEnabled(!isLoading);
+        if (btnGoogleSignIn != null) {
+            btnGoogleSignIn.setEnabled(!isLoading);
+            btnGoogleSignIn.setAlpha(isLoading ? 0.5f : 1.0f);
+        }
     }
 
     private String getText(TextInputEditText editText) {
