@@ -42,6 +42,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
     private TextView tvStatVideoDownloadsLabel;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private boolean languageSwitchInProgress;
+    private String currentAdminName = "Administrator";
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -130,10 +131,16 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                         public void onSuccess(DocumentSnapshot snapshot) {
                             String displayName = snapshot.getString("displayName");
                             if (!TextUtils.isEmpty(displayName)) {
+                                currentAdminName = displayName;
                                 tvNavAvatarInitials.setText(resolveAvatarInitial(displayName));
                             }
                         }
                     });
+        }
+
+        View cardNavUserProfile = headerView.findViewById(R.id.cardNavUserProfile);
+        if (cardNavUserProfile != null) {
+            cardNavUserProfile.setOnClickListener(v -> showAdminProfilePopup(email));
         }
 
         findViewById(R.id.btnThemeToggle).setOnClickListener(v -> {
@@ -160,6 +167,32 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             boolean isDark = com.example.expressionphotobooth.utils.ThemeManager.MODE_DARK.equals(mode);
             btnThemeToggle.setImageResource(isDark ? R.drawable.ic_theme_sun_20 : R.drawable.ic_theme_moon_20);
         }
+    }
+
+    private void showAdminProfilePopup(String email) {
+        String displayEmail = TextUtils.isEmpty(email) ? "admin@expressionphotobooth.com" : email;
+        
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.layout_admin_profile_bottom_sheet, null);
+        
+        TextView tvProfileAvatar = view.findViewById(R.id.tvProfileAvatar);
+        TextView tvProfileName = view.findViewById(R.id.tvProfileName);
+        TextView tvProfileEmail = view.findViewById(R.id.tvProfileEmail);
+        View btnCloseProfile = view.findViewById(R.id.btnCloseProfile);
+        
+        tvProfileName.setText(currentAdminName);
+        tvProfileEmail.setText(displayEmail);
+        tvProfileAvatar.setText(resolveAvatarInitial(currentAdminName));
+        
+        btnCloseProfile.setOnClickListener(v -> dialog.dismiss());
+        
+        dialog.setContentView(view);
+        // Make background transparent so custom shape shows
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().findViewById(com.google.android.material.R.id.design_bottom_sheet)
+                  .setBackgroundResource(android.R.color.transparent);
+        }
+        dialog.show();
     }
 
     private void updateNavigationMenuTitles(String languageTag) {

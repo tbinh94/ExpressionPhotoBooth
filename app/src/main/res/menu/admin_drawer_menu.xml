@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Group 1: General -->
+    <!-- Group 1: General & Management -->
     <group android:id="@+id/group_overview" android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
@@ -11,10 +11,6 @@
             android:id="@+id/nav_user_flow"
             android:icon="@drawable/ic_visibility_24"
             android:title="@string/admin_menu_user_flow" />
-    </group>
-
-    <!-- Group 2: Management -->
-    <group android:id="@+id/group_management" android:checkableBehavior="single">
         <item
             android:id="@+id/nav_reviews"
             android:icon="@drawable/ic_star_24"

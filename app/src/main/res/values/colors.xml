@@ -105,4 +105,22 @@
 
     <!-- Gallery readability tuning -->
     <color name="gallery_overlay_scrim">#66000000</color>
+
+    <!-- Modern Home Gradient & Text Colors -->
+    <color name="home_grad_start">#E0E7FF</color>
+    <color name="home_grad_center">#F3E8FF</color>
+    <color name="home_grad_end">#FCE7F3</color>
+    
+    <color name="home_title_our_light">#1E293B</color>
+    <color name="home_title_our_dark">#FFFFFF</color>
+    <color name="home_title_memories_light">#F59E0B</color>
+    <color name="home_title_memories_dark">#FBBF24</color>
+    <color name="home_title_photobooth_light">#475569</color>
+    <color name="home_title_photobooth_dark">#E2E8F0</color>
+    <color name="home_icon_light">#1E293B</color>
+    <color name="home_icon_dark">#FFFFFF</color>
+    <color name="home_glass_bg_light">#33000000</color>
+    <color name="home_glass_bg_dark">#33FFFFFF</color>
+    <color name="home_glass_stroke_light">#26000000</color>
+    <color name="home_glass_stroke_dark">#4DFFFFFF</color>
 </resources>

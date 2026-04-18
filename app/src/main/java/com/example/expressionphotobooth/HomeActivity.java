@@ -49,10 +49,10 @@ public class HomeActivity extends AppCompatActivity {
     private static boolean isMuted = false;
     private AuthRepository authRepository;
     private DrawerLayout drawerLayout;
-    private MaterialButton btnMenu;
+    private View btnMenu;
     private MaterialButton btnDrawerSignOut;
     private MaterialButton btnAdmin;
-    private MaterialButton btnStart;
+    private View btnStart;
     private MaterialButton btnGallery;
     private View homeContentRoot;
     private View topBar;
@@ -76,6 +76,8 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvHomeOur;
     private TextView tvHomeMemories;
     private TextView tvHomePhotobooth;
+    private TextView tvStartText;
+    private ImageView ivMenuIcon;
     private View titleContainer;
     private View viewHomeBannerDimmer;
 
@@ -166,6 +168,8 @@ public class HomeActivity extends AppCompatActivity {
         tvHomeOur = findViewById(R.id.tvHomeOur);
         tvHomeMemories = findViewById(R.id.tvHomeMemories);
         tvHomePhotobooth = findViewById(R.id.tvHomePhotobooth);
+        tvStartText = findViewById(R.id.tvStartText);
+        ivMenuIcon = findViewById(R.id.ivMenuIcon);
         titleContainer = findViewById(R.id.titleContainer);
         tvDrawerChangeBanner = findViewById(R.id.tvDrawerChangeBanner);
 
@@ -389,12 +393,10 @@ public class HomeActivity extends AppCompatActivity {
                 & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
                 == android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
-        if (viewHomeBannerDimmer != null) {
-            viewHomeBannerDimmer.setVisibility(isNightMode ? View.VISIBLE : View.GONE);
-            viewHomeBannerDimmer.setAlpha(isNightMode ? 0.88f : 0f);
-        }
-
         String savedMode = ThemeManager.getSavedThemeMode(this);
+        
+        // Ensure UI updates to match the current theme configuration
+        updateTitleVisibility();
 
         // Temporarily clear listener to prevent infinite loop when setting checked state
         groupTheme.clearOnButtonCheckedListeners();
@@ -616,7 +618,7 @@ public class HomeActivity extends AppCompatActivity {
         if (tvDrawerLanguageLabel != null) tvDrawerLanguageLabel.setText(LocaleManager.getString(this, R.string.home_drawer_language, languageTag));
         if (tvDrawerThemeLabel != null) tvDrawerThemeLabel.setText(LocaleManager.getString(this, R.string.home_drawer_theme, languageTag));
         if (btnDrawerSignOut != null) btnDrawerSignOut.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
-        if (btnStart != null) btnStart.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));
+        if (tvStartText != null) tvStartText.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));
         if (btnGallery != null) btnGallery.setText(LocaleManager.getString(this, R.string.btn_gallery, languageTag));
         if (tvHomeOur != null) tvHomeOur.setText(LocaleManager.getString(this, R.string.home_title_our, languageTag));
         if (tvHomeMemories != null) tvHomeMemories.setText(LocaleManager.getString(this, R.string.home_title_memories, languageTag));
@@ -697,37 +699,50 @@ public class HomeActivity extends AppCompatActivity {
         boolean isNightMode = (getResources().getConfiguration().uiMode
                 & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
                 == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-        titleContainer.setVisibility(isCustom ? View.VISIBLE : View.GONE);
         
-        // Apply adaptive neon glow in dark mode and soft depth in light mode.
-        int shadowColor = isNightMode
-                ? ContextCompat.getColor(this, R.color.home_neon_glow)
-                : (isCustom ? 0xAA000000 : 0x66FFFFFF);
-        float radius = isNightMode ? 20f : (isCustom ? 12f : 8f);
-        float dy = isNightMode ? 0f : (isCustom ? 3f : 0f);
+        // Always show the beautiful title
+        titleContainer.setVisibility(View.VISIBLE);
+        
+        if (viewHomeBannerDimmer != null) {
+            viewHomeBannerDimmer.setVisibility(View.VISIBLE);
+            viewHomeBannerDimmer.setAlpha(isCustom ? 1.0f : (isNightMode ? 0.3f : 0f));
+        }
 
-        if (tvHomeOur != null) tvHomeOur.setShadowLayer(radius, 0f, dy, shadowColor);
-        if (tvHomeMemories != null) tvHomeMemories.setShadowLayer(radius, 0f, dy, shadowColor);
-        if (tvHomePhotobooth != null) tvHomePhotobooth.setShadowLayer(radius, 0f, dy/2, shadowColor);
+        // Determine if we should use dark text (only in light mode with NO custom banner)
+        boolean useDarkText = !isNightMode && !isCustom;
+        
+        int colorOur = ContextCompat.getColor(this, useDarkText ? R.color.home_title_our_light : R.color.home_title_our_dark);
+        int colorMemories = ContextCompat.getColor(this, useDarkText ? R.color.home_title_memories_light : R.color.home_title_memories_dark);
+        int colorPhotobooth = ContextCompat.getColor(this, useDarkText ? R.color.home_title_photobooth_light : R.color.home_title_photobooth_dark);
+        int colorIcon = ContextCompat.getColor(this, useDarkText ? R.color.home_icon_light : R.color.home_icon_dark);
+        int colorGlassBg = ContextCompat.getColor(this, useDarkText ? R.color.home_glass_bg_light : R.color.home_glass_bg_dark);
+        int colorGlassStroke = ContextCompat.getColor(this, useDarkText ? R.color.home_glass_stroke_light : R.color.home_glass_stroke_dark);
+        
+        if (tvHomeOur != null) tvHomeOur.setTextColor(colorOur);
+        if (tvHomeMemories != null) tvHomeMemories.setTextColor(colorMemories);
+        if (tvHomePhotobooth != null) tvHomePhotobooth.setTextColor(colorPhotobooth);
+        if (ivMenuIcon != null) ivMenuIcon.setColorFilter(colorIcon);
+        if (btnMenu != null) {
+            android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+            gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            gd.setColor(colorGlassBg);
+            gd.setStroke(Math.round(dpToPx(1f)), colorGlassStroke);
+            btnMenu.setBackground(gd);
+        }
 
-        // Enhance buttons for custom background
+        // Just handle elevation for buttons based on background
         if (btnStart != null) {
-            btnStart.setElevation(isCustom ? dpToPx(16f) : dpToPx(8f));
-            if (isCustom) {
-                btnStart.setStrokeWidth(Math.round(dpToPx(2f)));
-                btnStart.setStrokeColor(ContextCompat.getColorStateList(this, R.color.black_overlay_80));
-            } else {
-                btnStart.setStrokeWidth(0);
-            }
+            btnStart.setElevation(dpToPx(8f));
         }
         if (btnGallery != null) {
-            btnGallery.setElevation(isCustom ? dpToPx(12f) : dpToPx(4f));
-            if (isCustom) {
-                btnGallery.setStrokeWidth(Math.round(dpToPx(1.5f)));
-                btnGallery.setStrokeColor(ContextCompat.getColorStateList(this, R.color.black_overlay_60));
-            } else {
-                btnGallery.setStrokeWidth(0);
-            }
+            btnGallery.setElevation(dpToPx(0f));
+            btnGallery.setTextColor(colorIcon);
+            btnGallery.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGlassBg));
+        }
+        if (btnAdmin != null) {
+            btnAdmin.setTextColor(colorIcon);
+            btnAdmin.setIconTint(android.content.res.ColorStateList.valueOf(colorIcon));
+            btnAdmin.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGlassBg));
         }
     }
 
