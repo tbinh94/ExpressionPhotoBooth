@@ -143,7 +143,7 @@
     <dimen name="admin_nav_item_icon_padding">14dp</dimen>
     <dimen name="admin_nav_item_horizontal_padding">12dp</dimen>
     <dimen name="admin_nav_item_vertical_padding">3dp</dimen>
-    <dimen name="admin_nav_item_corner">14dp</dimen>
+    <dimen name="admin_nav_item_corner">50dp</dimen>
     <dimen name="admin_nav_item_inset_horizontal">10dp</dimen>
     <dimen name="admin_nav_item_inset_vertical">0dp</dimen>
     <dimen name="admin_nav_item_divider_inset">12dp</dimen>

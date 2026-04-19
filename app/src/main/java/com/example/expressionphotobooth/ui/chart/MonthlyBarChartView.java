@@ -30,7 +30,8 @@ public class MonthlyBarChartView extends View {
     private final Paint legendDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF reusableBarRect = new RectF();
     private final List<MonthlyChartPoint> points = new ArrayList<>();
-    private int barColor = Color.parseColor("#3D68E8");
+    private int barStartColor = Color.parseColor("#5A8AEE");
+    private int barEndColor = Color.parseColor("#4266B8");
     private boolean showYAxis = true;
     private String legendText = "";
     private float animationProgress = 0f;
@@ -55,11 +56,11 @@ public class MonthlyBarChartView extends View {
         axisPaint.setColor(Color.parseColor("#E2E8F0"));
         axisPaint.setStrokeWidth(dp(1.5f));
 
-        gridPaint.setColor(Color.parseColor("#F1F5F9"));
+        gridPaint.setColor(Color.parseColor("#E2E8F0"));
         gridPaint.setStrokeWidth(dp(1f));
 
         barPaint.setStyle(Paint.Style.FILL);
-        barPaint.setColor(barColor);
+        barPaint.setColor(barStartColor);
 
         labelPaint.setColor(Color.parseColor("#94A3B8"));
         labelPaint.setTextSize(sp(10.5f));
@@ -79,13 +80,14 @@ public class MonthlyBarChartView extends View {
         legendTextPaint.setFakeBoldText(true);
 
         legendDotPaint.setStyle(Paint.Style.FILL);
-        legendDotPaint.setColor(barColor);
+        legendDotPaint.setColor(barStartColor);
     }
 
-    public void setBarColor(int color) {
-        this.barColor = color;
-        barPaint.setColor(color);
-        legendDotPaint.setColor(color);
+    public void setBarColors(int startColor, int endColor) {
+        this.barStartColor = startColor;
+        this.barEndColor = endColor;
+        barPaint.setColor(startColor);
+        legendDotPaint.setColor(startColor);
         invalidate();
     }
 
@@ -165,23 +167,46 @@ public class MonthlyBarChartView extends View {
             canvas.drawText(legendText, lx + dp(20f), ly + dp(4.5f), legendTextPaint);
         }
 
-        // Horizontal Grid Lines
-        int gridCount = 5;
+        boolean isIntegerData = true;
+        for (MonthlyChartPoint point : points) {
+            if (point.getValue() != Math.floor(point.getValue())) {
+                isIntegerData = false;
+                break;
+            }
+        }
+        
+        if (isIntegerData) {
+            maxValue = (float) Math.ceil(maxValue);
+            if (maxValue < 4) maxValue = 4f;
+        }
+
+        // Horizontal Grid Lines (Dashed)
+        gridPaint.setPathEffect(new android.graphics.DashPathEffect(new float[]{dp(4f), dp(4f)}, 0f));
+        int gridCount = 4; // 0, 33%, 66%, 100%
         for (int i = 0; i < gridCount; i++) {
             float y = bottom - ((bottom - top) * i / (float)(gridCount - 1));
             canvas.drawLine(left, y, right, y, gridPaint);
             if (showYAxis) {
                 float v = (maxValue * i) / (float)(gridCount - 1);
-                String yText = v >= 10f ? String.format(Locale.getDefault(), "%.0f", v) : String.format(Locale.getDefault(), "%.1f", v);
+                String yText;
+                if (isIntegerData && v == Math.floor(v)) {
+                    yText = String.format(Locale.getDefault(), "%.0f", v);
+                } else {
+                    yText = String.format(Locale.getDefault(), "%.1f", v);
+                    if (yText.endsWith(",0") || yText.endsWith(".0")) {
+                        yText = yText.substring(0, yText.length() - 2);
+                    }
+                }
                 canvas.drawText(yText, left - dp(10f), y + dp(4f), yValuePaint);
             }
         }
+        gridPaint.setPathEffect(null);
 
         // Draw Bars
         float usableWidth = right - left;
         float slotWidth = usableWidth / points.size();
         float barWidth = slotWidth * 0.65f;
-        float maxBarWidth = dp(32f);
+        float maxBarWidth = dp(24f);
         if (barWidth > maxBarWidth) barWidth = maxBarWidth;
 
         for (int i = 0; i < points.size(); i++) {
@@ -194,11 +219,12 @@ public class MonthlyBarChartView extends View {
             reusableBarRect.set(centerX - barWidth / 2f, barTop, centerX + barWidth / 2f, bottom);
 
             // Gradient for bar
-            int endColor = adjustAlpha(barColor, 0.4f);
-            Shader shader = new LinearGradient(centerX, barTop, centerX, bottom, barColor, endColor, Shader.TileMode.CLAMP);
+            Shader shader = new LinearGradient(centerX, barTop, centerX, bottom, barStartColor, barEndColor, Shader.TileMode.CLAMP);
             barPaint.setShader(shader);
 
-            canvas.drawRoundRect(reusableBarRect, dp(8f), dp(8f), barPaint);
+            // Draw full capsule (radius = width / 2)
+            float radius = barWidth / 2f;
+            canvas.drawRoundRect(reusableBarRect, radius, radius, barPaint);
             barPaint.setShader(null); // Clear shader for next draws
 
             // Value label on top of bar

@@ -30,4 +30,12 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="BottomSheetDialogTheme" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
+    </style>
+
+    <style name="BottomSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+
 </resources>

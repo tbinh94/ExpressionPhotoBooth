@@ -65,6 +65,7 @@
 
     <!-- User card -->
     <LinearLayout
+        android:id="@+id/cardNavUserProfile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -72,7 +73,10 @@
         android:background="@drawable/shape_nav_user_card"
         android:paddingHorizontal="12dp"
         android:paddingVertical="13dp"
-        android:layout_marginBottom="6dp">
+        android:layout_marginBottom="6dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground">
 
         <!-- Avatar circle -->
         <FrameLayout

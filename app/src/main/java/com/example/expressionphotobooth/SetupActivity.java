@@ -86,9 +86,20 @@ public class SetupActivity extends AppCompatActivity {
             if (session == null) {
                 session = new SessionState();
             }
-            int requiredSelectionCount = FrameConfig.getSlotCountForFrame(selectedFrame.getImageResId());
+            int requiredSelectionCount;
+            if (selectedFrame.isRemote()) {
+                requiredSelectionCount = FrameConfig.getSlotCountForLayout(selectedFrame.getLayoutType());
+                session.setSelectedFrameBase64(selectedFrame.getRemoteBase64());
+                session.setSelectedFrameLayout(selectedFrame.getLayoutType());
+                session.setSelectedFirestoreFrameId(selectedFrame.getFirestoreId());
+                session.setSelectedFrameResId(-1);
+            } else {
+                requiredSelectionCount = FrameConfig.getSlotCountForFrame(selectedFrame.getImageResId());
+                session.setSelectedFrameResId(selectedFrame.getImageResId());
+                session.setSelectedFrameBase64(null);
+                session.setSelectedFrameLayout(null);
+            }
             session.setPhotoCount(requiredSelectionCount);
-            session.setSelectedFrameResId(selectedFrame.getImageResId());
             session.setEditState(new EditState());
             sessionRepository.saveSession(session);
 
@@ -124,43 +135,59 @@ public class SetupActivity extends AppCompatActivity {
         List<Frame> allFrames = new ArrayList<>();
         for (Concept c : baseConcepts) allFrames.addAll(c.getFrames());
 
-        // Fetch Top 3 from `top_frames` collection and insert as first row
-        frameStatsRepository.fetchTop3().addOnCompleteListener(task -> {
-            if (!task.isSuccessful() || task.getResult() == null || task.getResult().isEmpty()) {
-                // No trending data yet — just show regular concepts
-                return;
-            }
-
-            List<TopFrame> topFrames = frameStatsRepository.parseTopFrames(task.getResult());
-
-            // Build the trending frame list (in rank order, matched to local frames)
-            List<Frame> trendingFrames = new ArrayList<>();
-            Map<Integer, Integer> rankMap = new HashMap<>(); // frameId -> rank
-
-            for (TopFrame tf : topFrames) {
-                try {
-                    int fId = Integer.parseInt(tf.getFrameId());
-                    for (Frame f : allFrames) {
-                        if (f.getId() == fId) {
-                            trendingFrames.add(f);
-                            rankMap.put(fId, tf.getRank() > 0 ? tf.getRank() : (topFrames.indexOf(tf) + 1));
-                            break;
+        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("frames")
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(framesTask -> {
+                    List<Frame> remoteFrames = new ArrayList<>();
+                    if (framesTask.isSuccessful() && framesTask.getResult() != null) {
+                        for (com.google.firebase.firestore.QueryDocumentSnapshot doc : framesTask.getResult()) {
+                            String base64 = doc.getString("base64");
+                            String label = doc.getString("label");
+                            String layoutType = doc.getString("layoutType");
+                            if (base64 != null && label != null && layoutType != null) {
+                                int id = doc.getId().hashCode();
+                                remoteFrames.add(new Frame(id, base64, label, layoutType, doc.getId(), EditState.FrameStyle.NONE));
+                            }
                         }
                     }
-                } catch (NumberFormatException ignored) {}
-            }
+                    
+                    allFrames.addAll(remoteFrames);
 
-            if (trendingFrames.isEmpty()) return;
+                    frameStatsRepository.fetchTop3().addOnCompleteListener(topTask -> {
+                        List<Frame> trendingFrames = new ArrayList<>();
+                        Map<Integer, Integer> rankMap = new HashMap<>();
 
-            // Build final concept list: Trending first, then regular
-            List<Concept> finalConcepts = new ArrayList<>();
-            finalConcepts.add(new Concept(getString(R.string.setup_trending_frames), trendingFrames, true));
-            finalConcepts.addAll(baseConcepts);
+                        if (topTask.isSuccessful() && topTask.getResult() != null && !topTask.getResult().isEmpty()) {
+                            List<TopFrame> topFrames = frameStatsRepository.parseTopFrames(topTask.getResult());
+                            for (TopFrame tf : topFrames) {
+                                try {
+                                    int fId = Integer.parseInt(tf.getFrameId());
+                                    for (Frame f : allFrames) {
+                                        if (f.getId() == fId) {
+                                            trendingFrames.add(f);
+                                            rankMap.put(fId, tf.getRank() > 0 ? tf.getRank() : (topFrames.indexOf(tf) + 1));
+                                            break;
+                                        }
+                                    }
+                                } catch (NumberFormatException ignored) {}
+                            }
+                        }
 
-            ConceptAdapter finalAdapter = new ConceptAdapter(finalConcepts, -1, listener);
-            finalAdapter.setRankMap(rankMap);
-            rvConcepts.setAdapter(finalAdapter);
-        });
+                        List<Concept> finalConcepts = new ArrayList<>();
+                        if (!trendingFrames.isEmpty()) {
+                            finalConcepts.add(new Concept(getString(R.string.setup_trending_frames), trendingFrames, true));
+                        }
+                        if (!remoteFrames.isEmpty()) {
+                            finalConcepts.add(new Concept("Khung trực tuyến", remoteFrames));
+                        }
+                        finalConcepts.addAll(baseConcepts);
+
+                        ConceptAdapter finalAdapter = new ConceptAdapter(finalConcepts, -1, listener);
+                        finalAdapter.setRankMap(rankMap);
+                        rvConcepts.setAdapter(finalAdapter);
+                    });
+                });
     }
 
     private List<Concept> createConceptData() {

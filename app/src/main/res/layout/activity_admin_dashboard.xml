@@ -50,7 +50,7 @@
                             android:minHeight="0dp"
                             android:padding="0dp"
                             android:gravity="center"
-                            app:backgroundTint="@color/camera_mode_primary"
+                            app:backgroundTint="@android:color/transparent"
                             app:cornerRadius="12dp"
                             app:icon="@drawable/ic_menu_24"
                             app:iconGravity="textStart"
@@ -70,7 +70,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/admin_dashboard_greeting"
-                                android:textColor="@color/admin_subtitle_color"
+                                android:textColor="@color/white"
+                                android:alpha="0.8"
                                 android:textSize="14sp" />
 
                              <TextView
@@ -119,103 +120,183 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:paddingHorizontal="@dimen/admin_stats_padding_horizontal"
+                        android:clipToPadding="false"
+                        android:paddingBottom="8dp"
                         android:weightSum="3">
 
                         <!-- Card 1: Accounts -->
-                        <LinearLayout
+                        <com.google.android.material.card.MaterialCardView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/admin_stat_card_spacing"
                             android:layout_weight="1"
                             android:minHeight="@dimen/admin_stat_card_min_height"
-                            android:background="@drawable/shape_stat_card_blue"
-                            android:orientation="vertical"
-                            android:padding="@dimen/admin_stat_card_padding">
+                            app:cardBackgroundColor="@android:color/transparent"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="4dp"
+                            app:strokeWidth="0dp">
 
-                            <TextView
-                                android:id="@+id/tvStatTotalAccounts"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/admin_stat_value_text"
-                                android:textStyle="bold" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/shape_stat_card_blue"
+                                android:orientation="vertical"
+                                android:padding="@dimen/admin_stat_card_padding">
 
-                            <TextView
-                                android:id="@+id/tvStatAccountsLabel"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:minLines="2"
-                                android:maxLines="2"
-                                android:text="@string/admin_stat_accounts"
-                                android:textColor="@color/admin_subtitle_color"
-                                android:textSize="@dimen/admin_stat_label_text" />
-                        </LinearLayout>
+                                <com.google.android.material.card.MaterialCardView
+                                    android:layout_width="36dp"
+                                    android:layout_height="36dp"
+                                    app:cardBackgroundColor="#33FFFFFF"
+                                    app:cardCornerRadius="18dp"
+                                    app:cardElevation="0dp"
+                                    app:strokeWidth="0dp"
+                                    android:layout_marginBottom="8dp">
+
+                                    <ImageView
+                                        android:layout_width="20dp"
+                                        android:layout_height="20dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_person_24"
+                                        app:tint="@color/white"/>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <TextView
+                                    android:id="@+id/tvStatTotalAccounts"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="@color/white"
+                                    android:textSize="@dimen/admin_stat_value_text"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tvStatAccountsLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:minLines="2"
+                                    android:maxLines="2"
+                                    android:text="@string/admin_stat_accounts"
+                                    android:textColor="#E6FFFFFF"
+                                    android:textSize="@dimen/admin_stat_label_text" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
 
                         <!-- Card 2: Image downloads -->
-                        <LinearLayout
+                        <com.google.android.material.card.MaterialCardView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginHorizontal="@dimen/admin_stat_card_spacing"
+                            android:layout_weight="1"
                             android:minHeight="@dimen/admin_stat_card_min_height"
-                            android:background="@drawable/shape_stat_card_gold"
-                            android:orientation="vertical"
-                            android:padding="@dimen/admin_stat_card_padding">
+                            app:cardBackgroundColor="@android:color/transparent"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="4dp"
+                            app:strokeWidth="0dp">
 
-                        <TextView
-                                android:id="@+id/tvStatImageDownloads"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/admin_stat_value_text"
-                                android:textStyle="bold" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/shape_stat_card_gold"
+                                android:orientation="vertical"
+                                android:padding="@dimen/admin_stat_card_padding">
 
-                            <TextView
-                                android:id="@+id/tvStatImageDownloadsLabel"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:minLines="2"
-                                android:maxLines="2"
-                                android:text="@string/admin_stat_image_downloads"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/admin_stat_label_text" />
-                        </LinearLayout>
+                                <com.google.android.material.card.MaterialCardView
+                                    android:layout_width="36dp"
+                                    android:layout_height="36dp"
+                                    app:cardBackgroundColor="#33FFFFFF"
+                                    app:cardCornerRadius="18dp"
+                                    app:cardElevation="0dp"
+                                    app:strokeWidth="0dp"
+                                    android:layout_marginBottom="8dp">
+
+                                    <ImageView
+                                        android:layout_width="20dp"
+                                        android:layout_height="20dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_download_24"
+                                        app:tint="@color/white"/>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <TextView
+                                    android:id="@+id/tvStatImageDownloads"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="@color/white"
+                                    android:textSize="@dimen/admin_stat_value_text"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tvStatImageDownloadsLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:minLines="2"
+                                    android:maxLines="2"
+                                    android:text="@string/admin_stat_image_downloads"
+                                    android:textColor="#E6FFFFFF"
+                                    android:textSize="@dimen/admin_stat_label_text" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
 
                         <!-- Card 3: Video downloads -->
-                        <LinearLayout
+                        <com.google.android.material.card.MaterialCardView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginStart="@dimen/admin_stat_card_spacing"
+                            android:layout_weight="1"
                             android:minHeight="@dimen/admin_stat_card_min_height"
-                            android:background="@drawable/shape_stat_card_red"
-                            android:orientation="vertical"
-                            android:padding="@dimen/admin_stat_card_padding">
+                            app:cardBackgroundColor="@android:color/transparent"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="4dp"
+                            app:strokeWidth="0dp">
 
-                            <TextView
-                                android:id="@+id/tvStatVideoDownloads"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/admin_stat_value_text"
-                                android:textStyle="bold" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/shape_stat_card_red"
+                                android:orientation="vertical"
+                                android:padding="@dimen/admin_stat_card_padding">
 
-                            <TextView
-                                android:id="@+id/tvStatVideoDownloadsLabel"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:minLines="2"
-                                android:maxLines="2"
-                                android:text="@string/admin_stat_video_downloads"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/admin_stat_label_text" />
-                        </LinearLayout>
+                                <com.google.android.material.card.MaterialCardView
+                                    android:layout_width="36dp"
+                                    android:layout_height="36dp"
+                                    app:cardBackgroundColor="#33FFFFFF"
+                                    app:cardCornerRadius="18dp"
+                                    app:cardElevation="0dp"
+                                    app:strokeWidth="0dp"
+                                    android:layout_marginBottom="8dp">
+
+                                    <ImageView
+                                        android:layout_width="20dp"
+                                        android:layout_height="20dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_videocam_24"
+                                        app:tint="@color/white"/>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <TextView
+                                    android:id="@+id/tvStatVideoDownloads"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="@color/white"
+                                    android:textSize="@dimen/admin_stat_value_text"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tvStatVideoDownloadsLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:minLines="2"
+                                    android:maxLines="2"
+                                    android:text="@string/admin_stat_video_downloads"
+                                    android:textColor="#E6FFFFFF"
+                                    android:textSize="@dimen/admin_stat_label_text" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -241,7 +322,6 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_admin"
         app:menu="@menu/admin_drawer_menu"
-        app:itemBackground="@drawable/nav_item_background_selector"
         app:itemIconTint="@color/nav_item_icon_tint"
         app:itemTextColor="@color/nav_item_text_color"
         app:itemRippleColor="@color/nav_item_ripple"

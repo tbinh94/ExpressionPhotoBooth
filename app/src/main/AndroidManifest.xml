@@ -49,6 +49,7 @@
             android:theme="@style/Theme.ExpressionPhotoBooth.AdminDashboard" />
         <activity android:name=".AdminReviewsActivity" android:exported="false" />
         <activity android:name=".AdminStickersActivity" android:exported="false" />
+        <activity android:name=".AdminFramesActivity" android:exported="false" />
         <activity android:name=".AdminUsersActivity" android:exported="false" />
         <activity android:name=".HomeActivity" android:exported="false" />
 

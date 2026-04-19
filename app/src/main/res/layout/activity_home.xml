@@ -11,7 +11,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/homeContentRoot"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_home_modern_gradient">
 
         <ImageView
             android:id="@+id/ivHomeBanner"
@@ -30,9 +31,7 @@
             android:id="@+id/viewHomeBannerDimmer"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@drawable/bg_home_banner_overlay"
-            android:alpha="0.88"
-            android:visibility="gone"
+            android:background="@drawable/bg_home_dark_scrim"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -42,39 +41,31 @@
             android:id="@+id/topBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/home_top_bar_margin_top"
+            android:layout_marginTop="24dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="@dimen/home_top_bar_padding_horizontal"
+            android:paddingHorizontal="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <com.google.android.material.button.MaterialButton
+            <FrameLayout
                 android:id="@+id/btnMenu"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="@dimen/home_top_action_size"
-                android:layout_height="@dimen/home_top_action_size"
-                android:insetLeft="0dp"
-                android:insetTop="0dp"
-                android:insetRight="0dp"
-                android:insetBottom="0dp"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="0dp"
-                android:gravity="center"
-                app:backgroundTint="@color/home_top_action_bg"
-                app:cornerRadius="@dimen/home_top_action_corner_radius"
-                app:icon="@drawable/ic_menu_24"
-                app:iconGravity="textTop"
-                app:iconPadding="0dp"
-                app:iconSize="@dimen/home_top_action_icon_size"
-                app:iconTint="@color/home_menu_icon_tint" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/shape_glass_circle"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless">
+                
+                <ImageView
+                    android:id="@+id/ivMenuIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_menu_24"
+                    app:tint="#FFFFFF" />
+            </FrameLayout>
 
         </LinearLayout>
 
@@ -88,118 +79,118 @@
             app:layout_constraintBottom_toTopOf="@+id/mainContent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="0.12">
+            app:layout_constraintVertical_bias="0.25">
 
-            <com.example.expressionphotobooth.ui.OutlinedTextView
+            <TextView
                 android:id="@+id/tvHomeOur"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/home_title_our"
-                android:textColor="@color/home_neon_title"
-                android:textSize="@dimen/home_title_text_size"
+                android:textColor="#FFFFFF"
+                android:textSize="48sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-black"
-                android:includeFontPadding="false"
-                android:letterSpacing="@dimen/home_title_letter_spacing"
-                android:textScaleX="0.93"
-                android:shadowColor="@android:color/transparent"
+                android:letterSpacing="0.05"
+                android:shadowColor="#80000000"
                 android:shadowDx="0"
-                android:shadowDy="0"
-                android:shadowRadius="0"
-                app:strokeColor="@color/white"
-                app:strokeWidth="@dimen/home_title_stroke_width" />
+                android:shadowDy="4"
+                android:shadowRadius="8" />
 
-            <com.example.expressionphotobooth.ui.OutlinedTextView
+            <TextView
                 android:id="@+id/tvHomeMemories"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/home_memories_margin_top"
+                android:layout_marginTop="-12dp"
                 android:text="@string/home_title_memories"
-                android:textColor="@color/home_neon_title"
-                android:textSize="@dimen/home_title_text_size"
+                android:textColor="#FBBF24"
+                android:textSize="56sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-black"
-                android:includeFontPadding="false"
-                android:letterSpacing="@dimen/home_title_letter_spacing"
-                android:textScaleX="0.93"
-                android:shadowColor="@android:color/transparent"
+                android:letterSpacing="0.05"
+                android:shadowColor="#80000000"
                 android:shadowDx="0"
-                android:shadowDy="0"
-                android:shadowRadius="0"
-                app:strokeColor="@color/white"
-                app:strokeWidth="@dimen/home_title_stroke_width" />
+                android:shadowDy="4"
+                android:shadowRadius="8" />
 
             <TextView
                 android:id="@+id/tvHomePhotobooth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/home_photobooth_margin_top"
+                android:layout_marginTop="8dp"
                 android:text="@string/home_title_photobooth"
-                android:textColor="@color/home_brand_wordmark"
-                android:textSize="@dimen/home_subtitle_text_size"
+                android:textColor="#E2E8F0"
+                android:textSize="36sp"
                 android:fontFamily="@font/pacifico_regular"
-                android:includeFontPadding="false" />
+                android:shadowColor="#FF4081"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="12" />
 
         </LinearLayout>
-
 
         <LinearLayout
             android:id="@+id/mainContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxWidth="@dimen/home_content_max_width"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.86">
+            app:layout_constraintVertical_bias="0.85">
 
-            <com.google.android.material.button.MaterialButton
+            <FrameLayout
                 android:id="@+id/btnStart"
-                android:layout_width="@dimen/home_main_button_width"
-                android:layout_height="@dimen/home_main_button_height"
-                android:text="@string/btn_start_decorated"
-                android:textColor="@color/white"
-                android:textSize="@dimen/home_main_start_text_size"
-                android:textStyle="bold"
-                app:backgroundTint="@color/history_pill_pink"
-                app:cornerRadius="@dimen/home_main_button_corner_radius"
-                app:elevation="@dimen/home_main_start_elevation" />
+                android:layout_width="240dp"
+                android:layout_height="64dp"
+                android:background="@drawable/bg_home_start_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:elevation="8dp">
+                
+                <TextView
+                    android:id="@+id/tvStartText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="✦ BẮT ĐẦU ✦"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1" />
+            </FrameLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGallery"
-                android:layout_width="@dimen/home_main_button_width"
-                android:layout_height="@dimen/home_main_button_height"
-                android:layout_marginTop="@dimen/home_main_button_spacing"
+                android:layout_width="240dp"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/btn_gallery"
                 android:textColor="@color/white"
-                android:textSize="@dimen/home_main_gallery_text_size"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:visibility="gone"
-                app:backgroundTint="@color/home_gallery_button_bg"
-                app:cornerRadius="@dimen/home_main_button_corner_radius"
-                app:elevation="@dimen/home_main_gallery_elevation" />
+                app:backgroundTint="#33FFFFFF"
+                app:cornerRadius="28dp"
+                app:elevation="0dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAdmin"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/home_admin_height"
-                android:layout_marginTop="@dimen/home_admin_top_margin"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/admin_go_to_dashboard"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="@dimen/home_admin_text_size"
-                android:textStyle="bold"
+                android:textSize="14sp"
                 android:visibility="gone"
                 app:icon="@drawable/ic_settings_24"
                 app:iconTint="@color/white"
-                app:backgroundTint="@color/home_admin_chip_bg"
-                app:cornerRadius="@dimen/home_admin_corner_radius" />
+                app:backgroundTint="#1AFFFFFF"
+                app:cornerRadius="24dp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

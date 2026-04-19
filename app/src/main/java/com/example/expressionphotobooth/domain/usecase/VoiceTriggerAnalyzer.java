@@ -8,39 +8,42 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.example.expressionphotobooth.utils.LocaleManager;
-
 /**
- * Advanced Voice Trigger Analyzer (Expert Edition)
- * Features:
- * 1. Adaptive Noise Floor Tracking (Handles fan noise)
- * 2. Phoneme Sequence State Machine (EE -> S pattern for "Cheese")
- * 3. Spectral Energy Ratio Analysis
+ * Super-Expert Voice Trigger Analyzer (V3 - Final Precision)
+ * BỘ PHÂN TÍCH GIỌNG NÓI CHUYÊN GIA
+ * Phương pháp:
+ * 1. Adaptive Noise Floor: Tự động học và khử nhiễu môi trường (tiếng quạt, tiếng ồn trắng).
+ * 2. Autocorrelation (DSP): Nhận diện tính chu kỳ (Pitch) để phân biệt giọng người với tiếng ồn.
+ * 3. Phoneme State Machine: Máy trạng thái nhận diện trình tự âm học [EE -> S] của từ "Cheese".
  */
 public class VoiceTriggerAnalyzer {
-    private static final String TAG = "VoiceAI_Expert";
+    private static final String TAG = "VoiceAI_SuperExpert";
     
-    // Audio Configuration
+    // Cấu hình âm thanh: 16kHz, Đơn kênh, 16-bit PCM (Tiêu chuẩn cho nhận diện giọng nói)
     private static final int SAMPLE_RATE = 16000;
     private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
     private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
-    // States for "Cheese" [CH-EE-SE] recognition
-    private enum State { IDLE, VOWEL_DETECTED, TRIGGERED }
+    // Kích thước cửa sổ phân tích (30ms @ 16kHz)
+    private static final int WINDOW_SIZE = 480;
+    private static final int OVERLAP = 240; // Độ chồng lấp 50% để không bỏ sót tín hiệu
+
+    // Máy trạng thái nhận diện từ "Cheese"
+    private enum State { IDLE, VOWEL_STABLE, SIBILANT_WAITING }
     private State currentState = State.IDLE;
+    
+    private int vowelFrameCounter = 0;    // Đếm số frame âm "EE" ổn định
+    private int sibilantFrameCounter = 0; // Đếm số frame âm "S" ổn định
     private long stateTimestamp = 0;
-    private static final long MAX_PHONEME_GAP_MS = 600; // Time window between 'EE' and 'S'
 
-    // DSP Constants
-    private double noiseFloor = 200.0;              // Lowered: don't start with artificially high floor
-    private static final double ADAPTIVE_LEARNING_RATE = 0.02; // Slowed: prevents noisy rooms from killing sensitivity
-    private static final double SIGNAL_TO_NOISE_RATIO = 1.3;   // Lowered: normal voice (not shouting) can pass
+    // Các ngưỡng kỹ thuật (Thresholds) - Đã được tối ưu qua thực nghiệm
+    private static final int REQUIRED_VOWEL_FRAMES = 3;    // Cần ~90ms âm "EE" liên tục
+    private static final int REQUIRED_SIBILANT_FRAMES = 3; // Cần ~90ms âm "S" liên tục
+    private static final long MAX_PHONEME_GAP_MS = 600;    // Thời gian tối đa giữa âm EE và S
 
-    // Sibilant (S) vs Vowel (EE) characteristics — widened for better coverage
-    private static final double ZCR_VOWEL_MIN  = 0.03;  // Catch quieter 'EE' onset
-    private static final double ZCR_VOWEL_MAX  = 0.18;  // Slightly wider for 'EE' variations
-    private static final double ZCR_SIBILANT_MIN = 0.20; // Lowered: catch softer 'S'
-    private static final double ZCR_SIBILANT_MAX = 0.50; // Slightly wider upper bound
+    private double noiseFloor = 400.0;                     // Mức nhiễu nền cơ sở
+    private static final double LEARNING_RATE = 0.01;      // Tốc độ học nhiễu môi trường
+    private static final double TRIGGER_SNR = 2.2;         // Tỉ lệ Tín hiệu/Nhiễu tối thiểu để kích hoạt
 
     public interface OnVoiceTriggerDetected {
         void onTrigger();
@@ -58,149 +61,198 @@ public class VoiceTriggerAnalyzer {
         this.context = context;
     }
 
+    /**
+     * Khởi tạo và bắt đầu luồng ghi âm xử lý tín hiệu
+     */
     public void start(OnVoiceTriggerDetected listener) {
         this.listener = listener;
         stop();
 
-        int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, ENCODING);
-        if (bufferSize <= 0) bufferSize = 1024;
+        int minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, ENCODING);
+        int bufferSize = Math.max(minBufferSize, 2048);
 
         try {
-            audioRecord = new AudioRecord(
-                    MediaRecorder.AudioSource.MIC,
-                    SAMPLE_RATE,
-                    CHANNEL,
-                    ENCODING,
-                    bufferSize * 2
-            );
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, ENCODING, bufferSize);
         } catch (SecurityException e) {
-            notifyError("Permission denied");
+            notifyError("Quyền truy cập Micro bị từ chối");
             return;
         }
 
         if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-            notifyError("Mic init failed");
+            notifyError("Không thể khởi tạo Micro");
             return;
         }
 
         isRunning = true;
         audioRecord.startRecording();
         
-        final int finalBufferSize = bufferSize;
-        workerThread = new Thread(() -> {
-            short[] buffer = new short[finalBufferSize];
-            String lang = LocaleManager.getSavedLanguage(context);
-            boolean isVi = LocaleManager.LANG_VI.equals(lang);
-
-            while (isRunning) {
-                int read = audioRecord.read(buffer, 0, buffer.length);
-                if (read > 0) {
-                    analyzeVoiceLogic(buffer, read, isVi);
-                }
-            }
-        }, "ExpertVoiceAnalyzer");
-        
+        // Chạy luồng xử lý riêng để không gây lag giao diện (UI Thread)
+        workerThread = new Thread(this::audioProcessingLoop, "SuperVoiceAnalyzer");
         workerThread.start();
     }
 
-    private void analyzeVoiceLogic(short[] buffer, int read, boolean isVi) {
-        double sum = 0;
-        int crossings = 0;
-
-        for (int i = 0; i < read; i++) {
-            sum += (double) buffer[i] * buffer[i];
-            if (i > 0 && ((buffer[i] >= 0 && buffer[i-1] < 0) || (buffer[i] < 0 && buffer[i-1] >= 0))) {
-                crossings++;
+    /**
+     * Vòng lặp xử lý âm thanh sử dụng kỹ thuật Sliding Window (Cửa sổ trượt)
+     */
+    private void audioProcessingLoop() {
+        short[] slidingBuffer = new short[WINDOW_SIZE];
+        while (isRunning) {
+            short[] tempBuffer = new short[OVERLAP];
+            int read = audioRecord.read(tempBuffer, 0, OVERLAP);
+            
+            if (read > 0) {
+                // Dịch chuyển dữ liệu cũ và ghi đè dữ liệu mới vào 50% cuối cửa sổ
+                System.arraycopy(slidingBuffer, OVERLAP, slidingBuffer, 0, OVERLAP);
+                System.arraycopy(tempBuffer, 0, slidingBuffer, OVERLAP, read);
+                
+                // Bắt đầu phân tích cửa sổ âm thanh hiện tại
+                analyzeExpertLogic(slidingBuffer, WINDOW_SIZE);
             }
         }
+    }
 
-        double rms = Math.sqrt(sum / read);
-        double zcr = (double) crossings / read;
+    /**
+     * Logic phân tích DSP chuyên sâu
+     */
+    private void analyzeExpertLogic(short[] window, int length) {
+        double rms = 0;
+        int crossings = 0;
+        double highFreqEnergy = 0;
+        double lowFreqEnergy = 0;
 
-        Log.v(TAG, String.format("rms=%.1f  floor=%.1f  snr=%.2f  zcr=%.3f",
-                rms, noiseFloor, rms / (noiseFloor + 1), zcr));
+        // Trích xuất các đặc trưng âm học (Feature Extraction)
+        for (int i = 0; i < length; i++) {
+            double val = window[i];
+            rms += val * val;
+            if (i > 0) {
+                // Tính Zero Crossing Rate (ZCR) - Tần số cắt không
+                if ((window[i] ^ window[i-1]) < 0) crossings++;
+                
+                // Tính Spectral Brightness (Độ sáng phổ) bằng bộ lọc High-pass đơn giản
+                highFreqEnergy += Math.abs(window[i] - window[i-1]);
+                lowFreqEnergy += Math.abs(window[i]);
+            }
+        }
+        rms = Math.sqrt(rms / length); // Cường độ âm thanh (Volume)
+        double zcr = (double) crossings / length;
+        double brightness = highFreqEnergy / (lowFreqEnergy + 1.0);
 
-        // 1. Adaptive Noise Floor Tracking — only update when truly silent
-        if (rms < noiseFloor * 1.1) {
-            noiseFloor = (noiseFloor * (1 - ADAPTIVE_LEARNING_RATE)) + (rms * ADAPTIVE_LEARNING_RATE);
+        // BƯỚC 1: Cập nhật Noise Floor thích nghi (Chỉ học khi yên tĩnh)
+        if (rms < noiseFloor * 1.4) {
+            noiseFloor = (noiseFloor * (1 - LEARNING_RATE)) + (rms * LEARNING_RATE);
             if (currentState != State.IDLE && (System.currentTimeMillis() - stateTimestamp > MAX_PHONEME_GAP_MS)) {
-                resetState("Timeout");
+                resetState("Hết thời gian chờ âm S");
             }
             return;
         }
 
-        // 2. Voice Activity Detection (VAD) — require SNR > 1.3x floor
-        if (rms < noiseFloor * SIGNAL_TO_NOISE_RATIO) return;
+        // BƯỚC 2: Kiểm tra ngưỡng SNR (Tín hiệu phải lớn hơn nhiễu nền)
+        if (rms < noiseFloor * TRIGGER_SNR) return;
 
-        // 3. Phoneme Sequence Logic
-        processCheeseSequence(zcr);
+        // BƯỚC 3: Autocorrelation - Tính toán sự tự tương quan để tìm chu kỳ (Pitch)
+        // Đây là bước quan trọng nhất để phân biệt tiếng người với tiếng quạt
+        double correlation = calculateCorrelation(window, length);
+
+        // BƯỚC 4: Phân loại âm tiết (Phoneme Classification)
+        // Nguyên âm "EE": ZCR thấp, Tính chu kỳ cao (correlation > 0.68), Độ sáng thấp.
+        boolean isVowel = (zcr < 0.15 && correlation > 0.68 && brightness < 1.0);
+        // Phụ âm xì "S": ZCR cao, Độ sáng phổ cao, Không có tính chu kỳ (correlation thấp).
+        boolean isSibilant = (zcr > 0.22 && zcr < 0.5 && brightness > 1.3 && correlation < 0.45);
+
+        // Cập nhật máy trạng thái (State Machine)
+        updateStateMachine(isVowel, isSibilant);
     }
 
-    private void processCheeseSequence(double zcr) {
+    /**
+     * Cập nhật trạng thái nhận diện theo trình tự thời gian
+     */
+    private void updateStateMachine(boolean isVowel, boolean isSibilant) {
         long now = System.currentTimeMillis();
 
         switch (currentState) {
             case IDLE:
-                // Looking for "EE" sound (Low ZCR characteristic of vowels)
-                if (zcr > ZCR_VOWEL_MIN && zcr < ZCR_VOWEL_MAX) {
-                    currentState = State.VOWEL_DETECTED;
-                    stateTimestamp = now;
-                    Log.d(TAG, "Step 1: Vowel 'EE' detected (zcr=" + String.format("%.3f", zcr) + ")");
+                if (isVowel) {
+                    vowelFrameCounter++;
+                    if (vowelFrameCounter >= REQUIRED_VOWEL_FRAMES) {
+                        currentState = State.VOWEL_STABLE; // Xác nhận đã nói xong âm "EE" ổn định
+                        stateTimestamp = now;
+                        Log.d(TAG, "Bước 1: Đã nhận diện được nguyên âm 'EE' ổn định");
+                    }
+                } else {
+                    vowelFrameCounter = 0;
                 }
                 break;
 
-            case VOWEL_DETECTED:
-                // Check for timeout
+            case VOWEL_STABLE:
                 if (now - stateTimestamp > MAX_PHONEME_GAP_MS) {
-                    resetState("EE-S gap too long");
+                    resetState("Quá lâu không có âm S xì đuôi");
                     return;
                 }
-
-                // Looking for "S" sound (High ZCR)
-                if (zcr > ZCR_SIBILANT_MIN && zcr < ZCR_SIBILANT_MAX) {
-                    triggerCapture("Step 2: Sibilant 'S' detected -> SUCCESS");
+                if (isSibilant) {
+                    sibilantFrameCounter++;
+                    if (sibilantFrameCounter >= REQUIRED_SIBILANT_FRAMES) {
+                        triggerCapture(); // Khớp hoàn toàn chuỗi [EE -> S] của từ "Cheese"
+                    }
                 }
                 break;
         }
     }
 
-    private void triggerCapture(String reason) {
-        Log.d(TAG, "✅ TRIGGER: " + reason);
-        resetState("Triggered");
-        
-        mainHandler.post(() -> {
-            if (listener != null) listener.onTrigger();
-        });
+    /**
+     * Thuật toán tính toán sự tự tương quan (Cross-Correlation)
+     * Giúp xác định xem âm thanh có phải là "giọng người" hay không
+     */
+    private double calculateCorrelation(short[] buffer, int length) {
+        int minLag = 40;  // 400Hz (Giọng nữ/trẻ em)
+        int maxLag = 200; // 80Hz (Giọng nam trầm)
+        double maxCorr = 0;
 
-        // Add a small sleep to worker thread to prevent instant multi-trigger
+        for (int lag = minLag; lag < maxLag; lag++) {
+            double corr = 0;
+            double energyL = 0;
+            double energyR = 0;
+            for (int i = 0; i < length - lag; i++) {
+                corr += (double) buffer[i] * buffer[i + lag];
+                energyL += (double) buffer[i] * buffer[i];
+                energyR += (double) buffer[i + lag] * buffer[i + lag];
+            }
+            if (energyL > 0 && energyR > 0) {
+                corr = corr / Math.sqrt(energyL * energyR);
+            }
+            if (corr > maxCorr) maxCorr = corr;
+        }
+        return maxCorr;
+    }
+
+    /**
+     * Kích hoạt chụp ảnh và thông báo cho UI
+     */
+    private void triggerCapture() {
+        Log.i(TAG, "🎯 ✅ [CHEESE CONFIRMED] - Nhận diện thành công!");
+        resetState("Kích hoạt chụp");
+        mainHandler.post(() -> { if (listener != null) listener.onTrigger(); });
+        
+        // Cooldown 2s để tránh chụp liên tiếp
         try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
     }
 
     private void resetState(String reason) {
-        if (currentState != State.IDLE) {
-            Log.v(TAG, "Reset State: " + reason);
-        }
+        if (currentState != State.IDLE) Log.v(TAG, "Reset: " + reason);
         currentState = State.IDLE;
+        vowelFrameCounter = 0;
+        sibilantFrameCounter = 0;
     }
 
     public void stop() {
         isRunning = false;
-        if (workerThread != null) {
-            workerThread.interrupt();
-            workerThread = null;
-        }
-        if (audioRecord != null) {
-            try {
-                audioRecord.stop();
-                audioRecord.release();
-            } catch (Exception ignored) {}
-            audioRecord = null;
+        if (workerThread != null) { workerThread.interrupt(); workerThread = null; }
+        if (audioRecord != null) { 
+            try { audioRecord.stop(); audioRecord.release(); } catch (Exception ignored) {} 
+            audioRecord = null; 
         }
     }
 
     private void notifyError(String msg) {
-        mainHandler.post(() -> {
-            if (listener != null) listener.onError(msg);
-        });
+        mainHandler.post(() -> { if (listener != null) listener.onError(msg); });
     }
 }

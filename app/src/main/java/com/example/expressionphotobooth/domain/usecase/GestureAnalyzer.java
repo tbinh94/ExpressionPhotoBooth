@@ -119,7 +119,6 @@ public class GestureAnalyzer {
 
             gestureHistory.addLast(rawGesture);
             if (gestureHistory.size() > HISTORY_SIZE) gestureHistory.pollFirst();
-
             String confirmed = "NONE";
             java.util.Map<String, Integer> counts = new java.util.HashMap<>();
             for (String g : gestureHistory) {

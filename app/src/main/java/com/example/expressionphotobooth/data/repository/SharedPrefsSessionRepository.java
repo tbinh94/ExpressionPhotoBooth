@@ -55,6 +55,8 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         try {
             json.put("photoCount", state.getPhotoCount());
             json.put("selectedFrameResId", state.getSelectedFrameResId());
+            json.put("selectedFrameLayout", state.getSelectedFrameLayout());
+            json.put("selectedFirestoreFrameId", state.getSelectedFirestoreFrameId());
             json.put("flashEnabled", state.isFlashEnabled());
             json.put("screenFlashStrong", state.isScreenFlashStrong());
             json.put("selectedImageUri", state.getSelectedImageUri());
@@ -97,6 +99,10 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         SessionState state = new SessionState();
         state.setPhotoCount(json.optInt("photoCount", 4));
         state.setSelectedFrameResId(json.optInt("selectedFrameResId", -1));
+        String savedLayout = json.optString("selectedFrameLayout", null);
+        if (savedLayout != null && !savedLayout.isEmpty()) state.setSelectedFrameLayout(savedLayout);
+        String savedFsId = json.optString("selectedFirestoreFrameId", null);
+        if (savedFsId != null && !savedFsId.isEmpty()) state.setSelectedFirestoreFrameId(savedFsId);
         state.setFlashEnabled(json.optBoolean("flashEnabled", false));
         state.setScreenFlashStrong(json.optBoolean("screenFlashStrong", false));
         state.setSelectedImageUri(json.optString("selectedImageUri", null));

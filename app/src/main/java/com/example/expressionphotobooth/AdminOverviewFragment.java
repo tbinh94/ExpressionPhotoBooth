@@ -423,7 +423,8 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 chartUsersByMonth,
                 tvUsersByMonthEmpty,
                 toIntChartPoints(usersSlice),
-                ContextCompat.getColor(requireContext(), R.color.app_blue),
+                Color.parseColor("#5A8AEE"), // Muted Blue Start
+                Color.parseColor("#4266B8"), // Muted Blue End
                 localized.getString(R.string.admin_overview_legend_users),
                 animateVisuals
         );
@@ -432,7 +433,8 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 chartImageDownloadsByMonth,
                 tvImageDownloadsByMonthEmpty,
                 toIntChartPoints(imageSlice),
-                ContextCompat.getColor(requireContext(), R.color.app_pink),
+                Color.parseColor("#EDAA66"), // Earthy Gold Start
+                Color.parseColor("#C7843C"), // Earthy Gold End
                 localized.getString(R.string.admin_overview_legend_downloads),
                 animateVisuals
         );
@@ -441,7 +443,8 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 chartReviewScoreByMonth,
                 tvReviewScoreByMonthEmpty,
                 toDoubleChartPoints(reviewSlice),
-                Color.parseColor("#F5A623"),
+                Color.parseColor("#E86D6D"), // Muted Coral Start
+                Color.parseColor("#B84949"), // Muted Coral End
                 localized.getString(R.string.admin_overview_legend_review_score),
                 animateVisuals
         );
@@ -565,7 +568,8 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
             MonthlyBarChartView chartView,
             TextView emptyView,
             List<MonthlyChartPoint> points,
-            int color,
+            int startColor,
+            int endColor,
             String legend,
             boolean animate
     ) {
@@ -579,7 +583,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         }
         emptyView.setVisibility(View.GONE);
         chartView.setVisibility(View.VISIBLE);
-        chartView.setBarColor(color);
+        chartView.setBarColors(startColor, endColor);
         chartView.setShowYAxis(true);
         chartView.setLegendText(legend);
         chartView.setChartData(points, animate);
