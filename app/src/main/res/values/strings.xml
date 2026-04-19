@@ -275,6 +275,7 @@
     <string name="admin_menu_reviews">Review Management</string>
     <string name="admin_menu_stickers">Manage Stickers</string>
     <string name="admin_menu_users">User Management</string>
+    <string name="admin_menu_frames">Khung ảnh (Frames)</string>
     <string name="admin_menu_sign_out">Sign Out</string>
     <string name="admin_email_fallback">admin@photobooth.vn</string>
     <string name="admin_stat_accounts">Accounts</string>

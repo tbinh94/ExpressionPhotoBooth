@@ -246,6 +246,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             startActivity(new Intent(this, AdminReviewsActivity.class));
         } else if (id == R.id.nav_stickers) {
             startActivity(new Intent(this, AdminStickersActivity.class));
+        } else if (id == R.id.nav_frames) {
+            startActivity(new Intent(this, AdminFramesActivity.class));
         } else if (id == R.id.nav_users) {
             startActivity(new Intent(this, AdminUsersActivity.class));
         } else if (id == R.id.nav_sign_out) {

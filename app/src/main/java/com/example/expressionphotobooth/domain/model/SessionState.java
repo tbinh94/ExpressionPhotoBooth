@@ -8,6 +8,9 @@ import java.util.Map;
 public class SessionState {
     private int photoCount = 4;
     private int selectedFrameResId = -1;
+    private String selectedFrameBase64;
+    private String selectedFrameLayout;
+    private String selectedFirestoreFrameId;
     private final List<String> capturedImageUris = new ArrayList<>();
     private final List<String> timelapseImageUris = new ArrayList<>(); // Thêm list riêng cho timelapse
     private final Map<String, String> editedImageUris = new HashMap<>();
@@ -35,6 +38,30 @@ public class SessionState {
 
     public void setSelectedFrameResId(int selectedFrameResId) {
         this.selectedFrameResId = selectedFrameResId;
+    }
+
+    public String getSelectedFrameBase64() {
+        return selectedFrameBase64;
+    }
+
+    public void setSelectedFrameBase64(String base64) {
+        this.selectedFrameBase64 = base64;
+    }
+
+    public String getSelectedFrameLayout() {
+        return selectedFrameLayout;
+    }
+
+    public void setSelectedFrameLayout(String layout) {
+        this.selectedFrameLayout = layout;
+    }
+
+    public String getSelectedFirestoreFrameId() {
+        return selectedFirestoreFrameId;
+    }
+
+    public void setSelectedFirestoreFrameId(String id) {
+        this.selectedFirestoreFrameId = id;
     }
 
     public List<String> getCapturedImageUris() {

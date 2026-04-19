@@ -144,53 +144,38 @@ public class ResultActivity extends AppCompatActivity {
 
         // Chạy ngầm để xử lý ảnh nặng + Hiện loading tránh người dùng sốt ruột
         if (loadingOverlay != null) loadingOverlay.setVisibility(View.VISIBLE);
-        
-        new Thread(() -> {
-            List<String> imageUrisToCollage = new ArrayList<>();
-            Map<String, String> editedImageUris = sessionState.getEditedImageUris();
-            
-            for (String originalUri : sourceOriginalUris) {
-                String editedUri = (editedImageUris != null) ? editedImageUris.get(originalUri) : null;
-                imageUrisToCollage.add(editedUri != null ? editedUri : originalUri);
-            }
 
-            int selectedFrameResId = sessionState != null ? sessionState.getSelectedFrameResId() : -1;
+        int selectedFrameResId  = sessionState != null ? sessionState.getSelectedFrameResId() : -1;
+        String remoteLayout     = sessionState != null ? sessionState.getSelectedFrameLayout() : null;
+        String firestoreFrameId = sessionState != null ? sessionState.getSelectedFirestoreFrameId() : null;
+        String remoteBase64Mem  = sessionState != null ? sessionState.getSelectedFrameBase64() : null;
 
-            Bitmap finalBitmap;
-            if (selectedFrameResId != -1) {
-                // Use source originals so export can apply sticker in hole-space deterministically.
-                finalBitmap = createFramedCollage(new ArrayList<>(sourceOriginalUris), selectedFrameResId);
-            } else {
-                // TRƯỜNG HỢP LỖI HOẶC KHÔNG CHỌN FRAME -> Fallback về Collage dọc
-                finalBitmap = createVerticalCollageUseCase.execute(ResultActivity.this, imageUrisToCollage);
-            }
-
-            runOnUiThread(() -> {
-                if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
-                
-                if (finalBitmap != null) {
-                    resultUri = saveBitmapToCache(finalBitmap);
-                    ivFinalResult.setImageBitmap(finalBitmap);
-                    sessionState.setResultImageUri(resultUri != null ? resultUri.toString() : null);
-                    sessionRepository.saveSession(sessionState);
-                    persistHistoryBaseRecord();
-
-                    // Save to gallery (Only for registered users)
-                    if (!isGuestSession) {
-                        saveToUserLocalGallery(finalBitmap);
-                        autoSaveToPublicGallery(finalBitmap);
-                    }
-
-                    // Tự động bật popup đánh giá sau khi người dùng xem kết quả 1 lúc (Chỉ cho user thật)
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        if (!isFinishing() && !isGuestSession) showFeedbackBottomSheet(true);
-                    }, 1500);
-
-                } else {
-                    Toast.makeText(ResultActivity.this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }).start();
+        if (selectedFrameResId != -1) {
+            // Local drawable frame
+            startRenderThread(loadingOverlay, ivFinalResult, null, null);
+        } else if (remoteBase64Mem != null && remoteLayout != null) {
+            // Remote frame already in memory
+            startRenderThread(loadingOverlay, ivFinalResult, remoteBase64Mem, remoteLayout);
+        } else if (firestoreFrameId != null && remoteLayout != null) {
+            // Session restored from SharedPrefs — re-fetch base64 from Firestore
+            final String layout = remoteLayout;
+            com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    .collection("frames").document(firestoreFrameId)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        String fetched = null;
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            fetched = task.getResult().getString("base64");
+                        }
+                        if (fetched != null && sessionState != null) {
+                            sessionState.setSelectedFrameBase64(fetched);
+                        }
+                        startRenderThread(loadingOverlay, ivFinalResult, fetched, layout);
+                    });
+        } else {
+            // No frame selected
+            startRenderThread(loadingOverlay, ivFinalResult, null, null);
+        }
 
         findViewById(R.id.btnSavePng).setOnClickListener(v -> saveCurrentResultAsPng());
         btnSaveVideo = findViewById(R.id.btnSaveVideo);
@@ -238,6 +223,112 @@ public class ResultActivity extends AppCompatActivity {
             cardRate.setClickable(true);
         }
 
+    }
+
+    private void startRenderThread(View loadingOverlay, ImageView ivFinalResult,
+                                    String remoteBase64, String remoteLayout) {
+        int localFrameResId = sessionState != null ? sessionState.getSelectedFrameResId() : -1;
+        new Thread(() -> {
+            List<String> imageUrisToCollage = new ArrayList<>();
+            Map<String, String> editedImageUris = sessionState != null ? sessionState.getEditedImageUris() : null;
+            for (String originalUri : sourceOriginalUris) {
+                String editedUri = (editedImageUris != null) ? editedImageUris.get(originalUri) : null;
+                imageUrisToCollage.add(editedUri != null ? editedUri : originalUri);
+            }
+
+            Bitmap finalBitmap;
+            if (localFrameResId != -1) {
+                finalBitmap = createFramedCollage(new ArrayList<>(imageUrisToCollage), localFrameResId);
+            } else if (remoteBase64 != null && remoteLayout != null) {
+                finalBitmap = createRemoteFramedCollage(new ArrayList<>(imageUrisToCollage), remoteBase64, remoteLayout);
+            } else {
+                finalBitmap = createVerticalCollageUseCase.execute(ResultActivity.this, imageUrisToCollage);
+            }
+
+            runOnUiThread(() -> {
+                if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
+                if (finalBitmap != null) {
+                    resultUri = saveBitmapToCache(finalBitmap);
+                    ivFinalResult.setImageBitmap(finalBitmap);
+                    if (sessionState != null) {
+                        sessionState.setResultImageUri(resultUri != null ? resultUri.toString() : null);
+                        sessionRepository.saveSession(sessionState);
+                    }
+                    persistHistoryBaseRecord();
+                    if (!isGuestSession) {
+                        saveToUserLocalGallery(finalBitmap);
+                        autoSaveToPublicGallery(finalBitmap);
+                    }
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (!isFinishing() && !isGuestSession) showFeedbackBottomSheet(true);
+                    }, 1500);
+                } else {
+                    Toast.makeText(ResultActivity.this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }).start();
+    }
+
+    private Bitmap createRemoteFramedCollage(List<String> photoUris, String frameBase64, String layoutType) {
+        try {
+            byte[] frameBytes = android.util.Base64.decode(frameBase64, android.util.Base64.DEFAULT);
+            Bitmap frameBitmap = BitmapFactory.decodeByteArray(frameBytes, 0, frameBytes.length);
+            if (frameBitmap == null) return null;
+
+            final float EXPORT_SCALE_FACTOR = 4.0f;
+            int targetWidth = Math.round(frameBitmap.getWidth() * EXPORT_SCALE_FACTOR);
+            int targetHeight = Math.round(frameBitmap.getHeight() * EXPORT_SCALE_FACTOR);
+
+            Bitmap resultBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(resultBitmap);
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
+
+            java.util.List<Rect> holes = FrameConfig.getHolesForLayoutScaled(layoutType, frameBitmap.getWidth(), frameBitmap.getHeight());
+
+            for (int i = 0; i < Math.min(photoUris.size(), holes.size()); i++) {
+                String originalUri = photoUris.get(i);
+                Bitmap originalPhoto = decodeBitmap(Uri.parse(originalUri));
+                if (originalPhoto == null) continue;
+
+                EditState photoState = sessionState != null
+                        ? sessionState.getPhotoEditState(originalUri).copy()
+                        : new EditState();
+
+                Bitmap photoNoSticker = renderPhotoWithoutSticker(originalPhoto, photoState);
+                originalPhoto.recycle();
+                if (photoNoSticker == null) continue;
+
+                Rect hole = holes.get(i);
+                Rect scaledHole = new Rect(
+                        Math.round(hole.left * EXPORT_SCALE_FACTOR),
+                        Math.round(hole.top * EXPORT_SCALE_FACTOR),
+                        Math.round(hole.right * EXPORT_SCALE_FACTOR),
+                        Math.round(hole.bottom * EXPORT_SCALE_FACTOR)
+                );
+
+                RectF srcRectF = com.example.expressionphotobooth.utils.StickerPlacementMapper.calculateCenterCropRect(
+                        photoNoSticker.getWidth(), photoNoSticker.getHeight(),
+                        scaledHole.width(), scaledHole.height());
+
+                Rect srcRect = new Rect(
+                        Math.round(srcRectF.left), Math.round(srcRectF.top),
+                        Math.round(srcRectF.right), Math.round(srcRectF.bottom));
+
+                canvas.drawBitmap(photoNoSticker, srcRect, scaledHole, paint);
+                drawStickerForHole(canvas, scaledHole, srcRectF, photoNoSticker.getWidth(), photoNoSticker.getHeight(), photoState);
+                photoNoSticker.recycle();
+            }
+
+            // Draw frame on top
+            Bitmap scaledFrame = Bitmap.createScaledBitmap(frameBitmap, targetWidth, targetHeight, true);
+            canvas.drawBitmap(scaledFrame, 0, 0, paint);
+            scaledFrame.recycle();
+            frameBitmap.recycle();
+            return resultBitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private Bitmap createFramedCollage(List<String> photoUris, int frameResId) {
