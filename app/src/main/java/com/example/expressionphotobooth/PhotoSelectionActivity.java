@@ -253,7 +253,13 @@ public class PhotoSelectionActivity extends AppCompatActivity {
     }
 
     private int getRequiredSelectionCount() {
+        int requiredByFrame = sessionState.getPhotoCount();
         int capturedCount = sessionState.getCapturedImageUris().size();
+        
+        if (requiredByFrame > 0) {
+            return Math.min(requiredByFrame, Math.max(1, capturedCount));
+        }
+        
         if (capturedCount <= 0) {
             return FALLBACK_SELECTION_COUNT;
         }

@@ -700,8 +700,8 @@ public class HomeActivity extends AppCompatActivity {
                 & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
                 == android.content.res.Configuration.UI_MODE_NIGHT_YES;
         
-        // Always show the beautiful title
-        titleContainer.setVisibility(View.VISIBLE);
+        // Show title only for custom wallpaper
+        titleContainer.setVisibility(isCustom ? View.VISIBLE : View.GONE);
         
         if (viewHomeBannerDimmer != null) {
             viewHomeBannerDimmer.setVisibility(View.VISIBLE);
