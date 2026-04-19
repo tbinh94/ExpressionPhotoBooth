@@ -257,7 +257,6 @@ public class ResultActivity extends AppCompatActivity {
                     persistHistoryBaseRecord();
                     if (!isGuestSession) {
                         saveToUserLocalGallery(finalBitmap);
-                        autoSaveToPublicGallery(finalBitmap);
                     }
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         if (!isFinishing() && !isGuestSession) showFeedbackBottomSheet(true);
@@ -275,16 +274,24 @@ public class ResultActivity extends AppCompatActivity {
             Bitmap frameBitmap = BitmapFactory.decodeByteArray(frameBytes, 0, frameBytes.length);
             if (frameBitmap == null) return null;
 
+            // 1. Flood-fill: xóa nền trắng VÀ tự phát hiện vị trí các ô trống thực tế
+            java.util.List<Rect> detectedHoles = new java.util.ArrayList<>();
+            frameBitmap = applyFloodFillWhiteRemoval(frameBitmap, layoutType, detectedHoles);
+
             final float EXPORT_SCALE_FACTOR = 4.0f;
-            int targetWidth = Math.round(frameBitmap.getWidth() * EXPORT_SCALE_FACTOR);
+            int targetWidth  = Math.round(frameBitmap.getWidth()  * EXPORT_SCALE_FACTOR);
             int targetHeight = Math.round(frameBitmap.getHeight() * EXPORT_SCALE_FACTOR);
 
             Bitmap resultBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(resultBitmap);
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
 
-            java.util.List<Rect> holes = FrameConfig.getHolesForLayoutScaled(layoutType, frameBitmap.getWidth(), frameBitmap.getHeight());
+            // Sử dụng vị trí lỗ tự phát hiện; fallback về hardcoded nếu không tìm được
+            java.util.List<Rect> holes = detectedHoles.isEmpty()
+                    ? FrameConfig.getHolesForLayoutScaled(layoutType, frameBitmap.getWidth(), frameBitmap.getHeight())
+                    : detectedHoles;
 
+            // 2. Vẽ ảnh chụp vào đúng vị trí lỗ trống (SCALED)
             for (int i = 0; i < Math.min(photoUris.size(), holes.size()); i++) {
                 String originalUri = photoUris.get(i);
                 Bitmap originalPhoto = decodeBitmap(Uri.parse(originalUri));
@@ -300,9 +307,9 @@ public class ResultActivity extends AppCompatActivity {
 
                 Rect hole = holes.get(i);
                 Rect scaledHole = new Rect(
-                        Math.round(hole.left * EXPORT_SCALE_FACTOR),
-                        Math.round(hole.top * EXPORT_SCALE_FACTOR),
-                        Math.round(hole.right * EXPORT_SCALE_FACTOR),
+                        Math.round(hole.left   * EXPORT_SCALE_FACTOR),
+                        Math.round(hole.top    * EXPORT_SCALE_FACTOR),
+                        Math.round(hole.right  * EXPORT_SCALE_FACTOR),
                         Math.round(hole.bottom * EXPORT_SCALE_FACTOR)
                 );
 
@@ -319,7 +326,7 @@ public class ResultActivity extends AppCompatActivity {
                 photoNoSticker.recycle();
             }
 
-            // Draw frame on top
+            // 3. Vẽ frame (đã trong suốt ở vị trí lỗ) chồng lên ảnh
             Bitmap scaledFrame = Bitmap.createScaledBitmap(frameBitmap, targetWidth, targetHeight, true);
             canvas.drawBitmap(scaledFrame, 0, 0, paint);
             scaledFrame.recycle();
@@ -329,6 +336,100 @@ public class ResultActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Flood-fill white removal + auto-detection of transparent hole bounding boxes.
+     *
+     * Seeds the BFS from the CENTER QUARTER of each expected hole (based on layoutType),
+     * makes those pixels transparent, then computes the bounding box of every filled region.
+     * The bounding boxes are returned in {@code outHoles} sorted top-to-bottom so photos
+     * are placed in the correct order regardless of the uploaded frame's exact pixel dimensions.
+     */
+    private Bitmap applyFloodFillWhiteRemoval(Bitmap src, String layoutType,
+                                               java.util.List<Rect> outHoles) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        java.util.List<Rect> seedHoles = FrameConfig.getHolesForLayoutScaled(layoutType, w, h);
+        if (seedHoles.isEmpty()) return src;
+
+        Bitmap out = src.copy(Bitmap.Config.ARGB_8888, true);
+        int[] pixels = new int[w * h];
+        out.getPixels(pixels, 0, w, 0, 0, w, h);
+        boolean[] visited = new boolean[w * h];
+
+        for (Rect rect : seedHoles) {
+            int cx = rect.centerX();
+            int cy = rect.centerY();
+            int sx1 = Math.max(0,     cx - rect.width()  / 4);
+            int sx2 = Math.min(w - 1, cx + rect.width()  / 4);
+            int sy1 = Math.max(0,     cy - rect.height() / 4);
+            int sy2 = Math.min(h - 1, cy + rect.height() / 4);
+
+            // Bounding box for this hole's flood-fill region
+            int minX = w, maxX = 0, minY = h, maxY = 0;
+            boolean anySeedFound = false;
+
+            for (int sy = sy1; sy <= sy2; sy++) {
+                for (int sx = sx1; sx <= sx2; sx++) {
+                    int idx = sy * w + sx;
+                    if (visited[idx]) continue;
+                    int p = pixels[idx];
+                    int r = (p >> 16) & 0xff;
+                    int g = (p >>  8) & 0xff;
+                    int b = p & 0xff;
+                    int a = (p >> 24) & 0xff;
+                    if (a < 128 || r < 200 || g < 200 || b < 200) continue;
+
+                    // BFS
+                    java.util.ArrayDeque<Integer> q = new java.util.ArrayDeque<>();
+                    q.add(idx);
+                    visited[idx] = true;
+                    anySeedFound = true;
+
+                    while (!q.isEmpty()) {
+                        int curr = q.poll();
+                        pixels[curr] = 0x00000000;
+
+                        int currX = curr % w;
+                        int currY = curr / w;
+                        if (currX < minX) minX = currX;
+                        if (currX > maxX) maxX = currX;
+                        if (currY < minY) minY = currY;
+                        if (currY > maxY) maxY = currY;
+
+                        int[] ns = {curr - 1, curr + 1, curr - w, curr + w};
+                        for (int n : ns) {
+                            if (n < 0 || n >= w * h || visited[n]) continue;
+                            int nx2 = n % w;
+                            if (Math.abs(nx2 - currX) > 1) continue;
+                            int np = pixels[n];
+                            int nr = (np >> 16) & 0xff;
+                            int ng = (np >>  8) & 0xff;
+                            int nb = np & 0xff;
+                            int na = (np >> 24) & 0xff;
+                            if (na >= 128 && nr > 200 && ng > 200 && nb > 200) {
+                                visited[n] = true;
+                                q.add(n);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (anySeedFound && maxX >= minX && maxY >= minY) {
+                outHoles.add(new Rect(minX, minY, maxX, maxY));
+            }
+        }
+
+        // Sort top-to-bottom (then left-to-right) so photos are placed in reading order
+        outHoles.sort((a, b2) -> {
+            int rowDiff = a.top - b2.top;
+            return rowDiff != 0 ? rowDiff : (a.left - b2.left);
+        });
+
+        out.setPixels(pixels, 0, w, 0, 0, w, h);
+        return out;
     }
 
     private Bitmap createFramedCollage(List<String> photoUris, int frameResId) {

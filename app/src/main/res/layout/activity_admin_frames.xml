@@ -72,7 +72,7 @@
                         android:id="@+id/tvEmpty"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Chưa có khung ảnh nào"
+                        android:text="@string/admin_frames_empty"
                         android:gravity="center"
                         android:padding="40dp"
                         android:textColor="@color/text_secondary"
@@ -94,7 +94,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Tên Khung Ảnh"
+                    android:hint="@string/admin_frames_name_hint"
                     app:boxStrokeColor="#1B2A5C"
                     app:hintTextColor="#1B2A5C">
 
@@ -111,7 +111,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="Kiểu Layout"
+                    android:hint="@string/admin_frames_layout_hint"
                     app:boxStrokeColor="#1B2A5C"
                     app:hintTextColor="#1B2A5C">
 
@@ -127,7 +127,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="16dp"
-                    android:text="TẢI LÊN KHUNG ẢNH"
+                    android:text="@string/admin_frames_upload_btn"
                     app:cornerRadius="12dp"
                     app:backgroundTint="@color/thumb_pink"/>
 

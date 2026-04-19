@@ -112,6 +112,15 @@ public class AdminFrameAdapter extends RecyclerView.Adapter<AdminFrameAdapter.Fr
         String id = frame.getId() != null ? frame.getId() : "---";
         tvId.setText(id.length() > 16 ? id.substring(0, 16) + "…" : id);
 
+        // Delete button
+        MaterialButton btnDelete = view.findViewById(R.id.bsBtnDelete);
+        btnDelete.setOnClickListener(v -> {
+            sheet.dismiss();
+            if (deleteListener != null) {
+                deleteListener.onDelete(frame);
+            }
+        });
+
         // Close button
         MaterialButton btnClose = view.findViewById(R.id.bsBtnClose);
         btnClose.setOnClickListener(v -> sheet.dismiss());

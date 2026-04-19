@@ -56,6 +56,11 @@ public class AdminFramesActivity extends AppCompatActivity {
     };
 
     @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(com.example.expressionphotobooth.utils.LocaleManager.wrapContext(newBase));
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_frames);
@@ -144,6 +149,10 @@ public class AdminFramesActivity extends AppCompatActivity {
                     bitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, nw, nh, true);
                 }
 
+                // Lưu frame gốc (không xóa nền ở đây).
+                // Việc xóa nền trắng sẽ được thực hiện khi render tại ResultActivity,
+                // giúp admin không cần phải upload lại frame mỗi khi thay đổi thuật toán.
+
                 java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
                 bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 90, baos);
                 byte[] data = baos.toByteArray();
@@ -161,12 +170,86 @@ public class AdminFramesActivity extends AppCompatActivity {
         }).start();
     }
 
+    private android.graphics.Bitmap applyWhiteRemovalInHoles(android.graphics.Bitmap bitmap, String layoutCode) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        
+        java.util.List<android.graphics.Rect> holes = com.example.expressionphotobooth.utils.FrameConfig.getHolesForLayoutScaled(layoutCode, w, h);
+        
+        android.graphics.Bitmap transparentBitmap = bitmap.copy(android.graphics.Bitmap.Config.ARGB_8888, true);
+        int[] pixels = new int[w * h];
+        transparentBitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+        
+        boolean[] visited = new boolean[w * h];
+        
+        for (android.graphics.Rect rect : holes) {
+            // Chỉ bắt đầu tìm kiếm màu trắng từ vùng trung tâm của lỗ trống (tránh viền)
+            int cx = rect.centerX();
+            int cy = rect.centerY();
+            int startX = Math.max(0, cx - rect.width() / 4);
+            int endX = Math.min(w, cx + rect.width() / 4);
+            int startY = Math.max(0, cy - rect.height() / 4);
+            int endY = Math.min(h, cy + rect.height() / 4);
+
+            for (int y = startY; y < endY; y++) {
+                for (int x = startX; x < endX; x++) {
+                    int idx = y * w + x;
+                    if (visited[idx]) continue;
+
+                    int p = pixels[idx];
+                    int r = (p >> 16) & 0xff;
+                    int g = (p >> 8) & 0xff;
+                    int b = p & 0xff;
+
+                    // Nếu gặp pixel trắng, bắt đầu Flood Fill (loang màu) để xóa toàn bộ vùng trắng liền kề
+                    if (r > 240 && g > 240 && b > 240) {
+                        java.util.Queue<Integer> q = new java.util.LinkedList<>();
+                        q.add(idx);
+                        visited[idx] = true;
+
+                        while (!q.isEmpty()) {
+                            int curr = q.poll();
+                            pixels[curr] = 0x00FFFFFF; // Đổi thành trong suốt
+
+                            int currX = curr % w;
+                            int currY = curr / w;
+
+                            // Kiểm tra 4 hướng xung quanh
+                            int[] neighbors = {curr - 1, curr + 1, curr - w, curr + w};
+                            for (int n : neighbors) {
+                                if (n >= 0 && n < w * h && !visited[n]) {
+                                    int nx = n % w;
+                                    // Chặn trường hợp bị tràn lề màn hình
+                                    if (Math.abs(nx - currX) > 1) continue;
+
+                                    int np = pixels[n];
+                                    int nr = (np >> 16) & 0xff;
+                                    int ng = (np >> 8) & 0xff;
+                                    int nb = np & 0xff;
+
+                                    if (nr > 240 && ng > 240 && nb > 240) {
+                                        visited[n] = true;
+                                        q.add(n);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        transparentBitmap.setPixels(pixels, 0, w, 0, 0, w, h);
+        return transparentBitmap;
+    }
+
 
 
     private void saveFrameToFirestore(String label, String layoutCode, String base64) {
         Map<String, Object> data = new HashMap<>();
         data.put("label", label);
         data.put("layoutType", layoutCode);
+        data.put("slotCount", com.example.expressionphotobooth.utils.FrameConfig.getSlotCountForLayout(layoutCode));
         data.put("base64", base64);
         data.put("createdAt", System.currentTimeMillis());
 

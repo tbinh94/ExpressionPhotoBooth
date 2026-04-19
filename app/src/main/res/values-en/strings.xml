@@ -77,6 +77,11 @@
             <string name="admin_menu_user_flow">User Experience</string>
             <string name="admin_menu_reviews">Review Management</string>
             <string name="admin_menu_stickers">Manage Stickers</string>
+            <string name="admin_menu_frames">Frame Management</string>
+            <string name="admin_frames_empty">No frames available</string>
+            <string name="admin_frames_name_hint">Frame Name</string>
+            <string name="admin_frames_layout_hint">Layout Type</string>
+            <string name="admin_frames_upload_btn">UPLOAD FRAME</string>
             <string name="admin_menu_users">User Management</string>
             <string name="admin_menu_sign_out">Sign Out</string>
             <string name="admin_overview_range_7d">7D</string>
