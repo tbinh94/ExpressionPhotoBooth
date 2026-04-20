@@ -501,4 +501,7 @@ những ảnh đã chụp trước đó</string>
     <string name="ai_trigger_face_mouth_open">Há miệng 😮</string>
     <string name="ai_trigger_face_wink">Nháy mắt 😉</string>
     <string name="ai_trigger_face_tilt">Nghiêng đầu 🤳</string>
+    <string name="home_drawer_nav_label">ĐIỀU HƯỚNG</string>
+    <string name="admin_role_member">Thành viên</string>
+    <string name="admin_role_admin">Quản trị viên</string>
 </resources>

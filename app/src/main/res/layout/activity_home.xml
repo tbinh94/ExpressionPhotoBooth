@@ -205,38 +205,107 @@
         android:paddingTop="@dimen/home_drawer_padding_top"
         android:paddingBottom="@dimen/home_drawer_padding_bottom">
 
-        <TextView
-            android:id="@+id/tvDrawerOur"
+        <!-- ✦ Modern User Profile Header ✦ -->
+        <LinearLayout
+            android:id="@+id/cardNavUserProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:includeFontPadding="false"
-            android:fontFamily="serif"
-            android:gravity="center"
-            android:text="@string/home_drawer_our"
-            android:textAllCaps="true"
-            android:textColor="@color/home_drawer_text"
-            android:textSize="@dimen/home_drawer_title_text_size"
-            android:textStyle="bold" />
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/bg_bottom_sheet_rounded"
+            android:backgroundTint="#1AFFFFFF"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true">
+
+            <!-- Avatar with Glow -->
+            <FrameLayout
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/shape_nav_avatar">
+                
+                <TextView
+                    android:id="@+id/tvNavAvatarInitials"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="U"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivNavAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    app:shapeAppearanceOverlay="@style/CircleAppearance" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="14dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvNavUserName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="User Name"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/tvNavUserEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="user@example.com"
+                    android:textColor="#B0C4FF"
+                    android:textSize="12sp"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/tvNavUserRole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_nav_role_pill"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="2dp"
+                    android:text="Member"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_arrow_forward_24"
+                app:tint="#40FFFFFF" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/tvDrawerMemories"
+            android:id="@+id/tvDrawerNavLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/home_drawer_subtitle_top_margin"
-            android:includeFontPadding="false"
-            android:fontFamily="serif"
-            android:gravity="center"
-            android:text="@string/home_drawer_memories"
-            android:textAllCaps="true"
-            android:textColor="@color/home_drawer_text"
-            android:textSize="@dimen/home_drawer_title_text_size"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="@dimen/home_drawer_divider_top_margin"
-            android:background="@color/home_drawer_divider" />
+            android:text="ĐIỀU HƯỚNG"
+            android:textColor="#4DFFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="12dp"
+            android:paddingStart="8dp" />
 
         <TextView
             android:id="@+id/tvDrawerShowHistory"

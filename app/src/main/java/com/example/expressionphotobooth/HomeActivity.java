@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +29,8 @@ import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.example.expressionphotobooth.utils.ThemeManager;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.bumptech.glide.Glide;
 import android.net.Uri;
@@ -57,8 +60,8 @@ public class HomeActivity extends AppCompatActivity {
     private View homeContentRoot;
     private View topBar;
     private View drawerPanel;
-    private TextView tvDrawerOur;
-    private TextView tvDrawerMemories;
+    private View cardNavUserProfile;
+    private TextView tvDrawerNavLabel;
     private TextView tvDrawerShowHistory;
     private TextView tvDrawerAdminDashboard;
     private TextView tvDrawerUsageGuide;
@@ -80,6 +83,13 @@ public class HomeActivity extends AppCompatActivity {
     private ImageView ivMenuIcon;
     private View titleContainer;
     private View viewHomeBannerDimmer;
+
+    // User Profile Views
+    private TextView tvNavUserName;
+    private TextView tvNavUserEmail;
+    private TextView tvNavAvatarInitials;
+    private TextView tvNavUserRole;
+    private ImageView ivNavAvatar;
 
     private ImageView ivHomeBanner;
     private TextView tvDrawerChangeBanner;
@@ -116,10 +126,11 @@ public class HomeActivity extends AppCompatActivity {
         setupLanguageControls();
         setupThemeControls();
         updateLocalizedUi(LocaleManager.getCurrentLanguage(this));
-        checkAdminAccess();
         setupBannerPicker();
         loadSavedBanner();
         updateTitleVisibility();
+        updateUserNavProfile();
+        setupAvatarPicker();
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -146,8 +157,6 @@ public class HomeActivity extends AppCompatActivity {
         btnStart = findViewById(R.id.btnStart);
         btnGallery = findViewById(R.id.btnGallery);
 
-        tvDrawerOur = findViewById(R.id.tvDrawerOur);
-        tvDrawerMemories = findViewById(R.id.tvDrawerMemories);
         tvDrawerShowHistory = findViewById(R.id.tvDrawerShowHistory);
         tvDrawerAdminDashboard = findViewById(R.id.tvDrawerAdminDashboard);
         tvDrawerUsageGuide = findViewById(R.id.tvDrawerUsageGuide);
@@ -172,6 +181,14 @@ public class HomeActivity extends AppCompatActivity {
         ivMenuIcon = findViewById(R.id.ivMenuIcon);
         titleContainer = findViewById(R.id.titleContainer);
         tvDrawerChangeBanner = findViewById(R.id.tvDrawerChangeBanner);
+
+        tvNavUserName = findViewById(R.id.tvNavUserName);
+        tvNavUserEmail = findViewById(R.id.tvNavUserEmail);
+        tvNavAvatarInitials = findViewById(R.id.tvNavAvatarInitials);
+        tvNavUserRole = findViewById(R.id.tvNavUserRole);
+        ivNavAvatar = findViewById(R.id.ivNavAvatar);
+        cardNavUserProfile = findViewById(R.id.cardNavUserProfile);
+        tvDrawerNavLabel = findViewById(R.id.tvDrawerNavLabel);
 
         resizeCompoundStartIcon(tvDrawerShowHistory, R.dimen.home_drawer_item_icon_size);
         resizeCompoundStartIcon(tvDrawerChangeBanner, R.dimen.home_drawer_item_icon_size);
@@ -254,6 +271,13 @@ public class HomeActivity extends AppCompatActivity {
             drawerLayout.closeDrawer(GravityCompat.START);
             showChangeBannerDialog();
         });
+
+        if (cardNavUserProfile != null) {
+            cardNavUserProfile.setOnClickListener(v -> {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                showUserProfileDetail();
+            });
+        }
     }
 
     private void setupMainActions() {
@@ -531,18 +555,236 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void checkAdminAccess() {
+    private void updateUserNavProfile() {
+        if (authRepository == null) return;
+        String languageTag = LocaleManager.getCurrentLanguage(this);
+
+        // Get basic info from Firebase Auth
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String name = user.getDisplayName();
+            String email = user.getEmail();
+
+            if (tvNavUserName != null) {
+                tvNavUserName.setText(name != null && !name.isEmpty() ? name : "Anonymous User");
+            }
+            if (tvNavUserEmail != null) {
+                tvNavUserEmail.setText(email != null ? email : "no-email@booth.com");
+            }
+
+            // Load Avatar Image or Initials
+            if (ivNavAvatar != null && tvNavAvatarInitials != null) {
+                Uri photoUrl = user.getPhotoUrl();
+                if (photoUrl != null) {
+                    ivNavAvatar.setVisibility(View.VISIBLE);
+                    tvNavAvatarInitials.setVisibility(View.GONE);
+                    Glide.with(this)
+                        .load(photoUrl)
+                        .placeholder(R.drawable.shape_nav_avatar)
+                        .circleCrop()
+                        .into(ivNavAvatar);
+                } else {
+                    ivNavAvatar.setVisibility(View.GONE);
+                    tvNavAvatarInitials.setVisibility(View.VISIBLE);
+                }
+            }
+
+            // Initials for avatar fallback
+            if (tvNavAvatarInitials != null && user.getPhotoUrl() == null) {
+                String initials = "U";
+                if (name != null && !name.isEmpty()) {
+                    String[] parts = name.trim().split("\\s+");
+                    if (parts.length >= 2) {
+                        initials = (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase();
+                    } else if (parts.length == 1 && parts[0].length() >= 1) {
+                        initials = parts[0].substring(0, 1).toUpperCase();
+                    }
+                }
+                tvNavAvatarInitials.setText(initials);
+            }
+        }
+
+        // Fetch Role detail from Database/Repository
         authRepository.fetchCurrentRole(new AuthRepository.RoleCallback() {
             @Override
             public void onSuccess(UserRole role) {
-                if (role == UserRole.ADMIN) {
-                    tvDrawerAdminDashboard.setVisibility(View.VISIBLE);
-                    return;
+                if (tvNavUserRole != null) {
+                    int roleRes = (role == UserRole.ADMIN) ? R.string.admin_role_admin : R.string.admin_role_member;
+                    tvNavUserRole.setText(LocaleManager.getString(HomeActivity.this, roleRes, languageTag));
+                    tvNavUserRole.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        role == UserRole.ADMIN ? 0xFF3D68E8 : 0xFF6B7280 // Blue for Admin, Gray for Member
+                    ));
                 }
-                tvDrawerAdminDashboard.setVisibility(View.GONE);
+
+                // Handle Admin Menu visibility
+                if (tvDrawerAdminDashboard != null) {
+                    tvDrawerAdminDashboard.setVisibility(role == UserRole.ADMIN ? View.VISIBLE : View.GONE);
+                }
             }
             @Override
-            public void onError(String message) {}
+            public void onError(String message) {
+                if (tvNavUserRole != null) {
+                    tvNavUserRole.setText(LocaleManager.getString(HomeActivity.this, R.string.admin_role_member, languageTag));
+                }
+            }
+        });
+    }
+
+    private void showUserProfileDetail() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.TransparentBottomSheetDialog);
+        View view = getLayoutInflater().inflate(R.layout.layout_admin_profile_bottom_sheet, null);
+        
+        TextView tvProfileName = view.findViewById(R.id.tvProfileName);
+        TextView tvProfileEmail = view.findViewById(R.id.tvProfileEmail);
+        TextView tvProfileAvatar = view.findViewById(R.id.tvProfileAvatar);
+        ImageView ivProfileAvatar = view.findViewById(R.id.ivProfileAvatar);
+        View layoutProfileAvatar = view.findViewById(R.id.layoutProfileAvatar);
+        TextView btnChangeAvatar = view.findViewById(R.id.btnChangeAvatar);
+        TextView btnChangePassword = view.findViewById(R.id.btnChangePassword);
+        TextView btnClose = view.findViewById(R.id.btnCloseProfile);
+        
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String name = user.getDisplayName();
+            tvProfileName.setText(name != null && !name.isEmpty() ? name : "Anonymous User");
+            tvProfileEmail.setText(user.getEmail());
+            
+            Uri photoUrl = user.getPhotoUrl();
+            if (photoUrl != null && ivProfileAvatar != null) {
+                ivProfileAvatar.setVisibility(View.VISIBLE);
+                tvProfileAvatar.setVisibility(View.GONE);
+                Glide.with(this).load(photoUrl).circleCrop().into(ivProfileAvatar);
+            } else {
+                if (ivProfileAvatar != null) ivProfileAvatar.setVisibility(View.GONE);
+                tvProfileAvatar.setVisibility(View.VISIBLE);
+                String initials = "U";
+                if (name != null && !name.isEmpty()) {
+                    String[] parts = name.trim().split("\\s+");
+                    initials = parts.length >= 2 ? (parts[0].substring(0, 1) + parts[parts.length-1].substring(0, 1)) : parts[0].substring(0, 1);
+                }
+                tvProfileAvatar.setText(initials.toUpperCase());
+            }
+        }
+        
+        View.OnClickListener pickAvatarAction = v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pickAvatarMedia.launch(intent);
+        };
+
+        if (layoutProfileAvatar != null) layoutProfileAvatar.setOnClickListener(pickAvatarAction);
+        if (btnChangeAvatar != null) btnChangeAvatar.setOnClickListener(pickAvatarAction);
+
+        if (btnChangePassword != null) {
+            btnChangePassword.setOnClickListener(v -> {
+                dialog.dismiss();
+                showChangePasswordDialog();
+            });
+        }
+        
+        if (btnClose != null) btnClose.setOnClickListener(v -> dialog.dismiss());
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+    private void showChangePasswordDialog() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.TransparentBottomSheetDialog);
+        View view = getLayoutInflater().inflate(R.layout.layout_change_password_bottom_sheet, null);
+        
+        com.google.android.material.textfield.TextInputLayout tilCurrent = view.findViewById(R.id.tilCurrentPassword);
+        com.google.android.material.textfield.TextInputLayout tilNew = view.findViewById(R.id.tilNewPassword);
+        com.google.android.material.textfield.TextInputLayout tilConfirm = view.findViewById(R.id.tilConfirmPassword);
+        com.google.android.material.textfield.TextInputEditText etCurrent = view.findViewById(R.id.etCurrentPassword);
+        com.google.android.material.textfield.TextInputEditText etNew = view.findViewById(R.id.etNewPassword);
+        com.google.android.material.textfield.TextInputEditText etConfirm = view.findViewById(R.id.etConfirmPassword);
+        com.google.android.material.button.MaterialButton btnUpdate = view.findViewById(R.id.btnUpdatePassword);
+        com.google.android.material.progressindicator.LinearProgressIndicator progress = view.findViewById(R.id.progressUpdate);
+
+        btnUpdate.setOnClickListener(v -> {
+            String currentPass = etCurrent.getText().toString().trim();
+            String newPass = etNew.getText().toString().trim();
+            String confirmPass = etConfirm.getText().toString().trim();
+
+            // Reset errors
+            tilCurrent.setError(null);
+            tilNew.setError(null);
+            tilConfirm.setError(null);
+
+            // Validation
+            if (currentPass.isEmpty()) {
+                tilCurrent.setError("Vui lòng nhập mật khẩu hiện tại");
+                return;
+            }
+            if (newPass.length() < 6) {
+                tilNew.setError("Mật khẩu mới phải có ít nhất 6 ký tự");
+                return;
+            }
+            if (!newPass.equals(confirmPass)) {
+                tilConfirm.setError("Mật khẩu xác nhận không khớp");
+                return;
+            }
+
+            // Start Update Process
+            btnUpdate.setEnabled(false);
+            progress.setVisibility(View.VISIBLE);
+
+            com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null && user.getEmail() != null) {
+                // Step 1: Re-authenticate
+                AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPass);
+                user.reauthenticate(credential).addOnCompleteListener(reAuthTask -> {
+                    if (reAuthTask.isSuccessful()) {
+                        // Step 2: Update Password
+                        user.updatePassword(newPass).addOnCompleteListener(updateTask -> {
+                            progress.setVisibility(View.GONE);
+                            btnUpdate.setEnabled(true);
+                            if (updateTask.isSuccessful()) {
+                                dialog.dismiss();
+                                HelpDialogUtils.showCenteredNotice(this, "Thành công", 
+                                    "Mật khẩu của bạn đã được thay đổi an toàn.", true);
+                            } else {
+                                String err = updateTask.getException() != null ? updateTask.getException().getMessage() : "Lỗi không xác định";
+                                HelpDialogUtils.showCenteredNotice(this, "Lỗi cập nhật", err, false);
+                            }
+                        });
+                    } else {
+                        progress.setVisibility(View.GONE);
+                        btnUpdate.setEnabled(true);
+                        tilCurrent.setError("Mật khẩu hiện tại không chính xác");
+                        etCurrent.requestFocus();
+                    }
+                });
+            }
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+    private ActivityResultLauncher<Intent> pickAvatarMedia;
+    private void setupAvatarPicker() {
+        pickAvatarMedia = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri uri = result.getData().getData();
+                if (uri == null) return;
+                
+                com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+                if (user != null) {
+                    com.google.firebase.auth.UserProfileChangeRequest profileUpdates = new com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                            .setPhotoUri(uri)
+                            .build();
+
+                    user.updateProfile(profileUpdates)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "User profile updated.");
+                                    updateUserNavProfile();
+                                }
+                            });
+                }
+            }
         });
     }
 
@@ -608,8 +850,6 @@ public class HomeActivity extends AppCompatActivity {
 
 
     private void updateLocalizedUi(String languageTag) {
-        if (tvDrawerOur != null) tvDrawerOur.setText(LocaleManager.getString(this, R.string.home_drawer_our, languageTag));
-        if (tvDrawerMemories != null) tvDrawerMemories.setText(LocaleManager.getString(this, R.string.home_drawer_memories, languageTag));
         if (tvDrawerShowHistory != null) tvDrawerShowHistory.setText(LocaleManager.getString(this, R.string.home_drawer_show_history, languageTag));
         if (tvDrawerChangeBanner != null) tvDrawerChangeBanner.setText(LocaleManager.getString(this, R.string.home_drawer_change_banner, languageTag));
         if (tvDrawerUsageGuide != null) tvDrawerUsageGuide.setText(LocaleManager.getString(this, R.string.home_drawer_usage_guide, languageTag));
@@ -617,7 +857,9 @@ public class HomeActivity extends AppCompatActivity {
         if (tvDrawerMusicLabel != null) tvDrawerMusicLabel.setText(LocaleManager.getString(this, R.string.home_drawer_music, languageTag));
         if (tvDrawerLanguageLabel != null) tvDrawerLanguageLabel.setText(LocaleManager.getString(this, R.string.home_drawer_language, languageTag));
         if (tvDrawerThemeLabel != null) tvDrawerThemeLabel.setText(LocaleManager.getString(this, R.string.home_drawer_theme, languageTag));
+        if (tvDrawerNavLabel != null) tvDrawerNavLabel.setText(LocaleManager.getString(this, R.string.home_drawer_nav_label, languageTag));
         if (btnDrawerSignOut != null) btnDrawerSignOut.setText(LocaleManager.getString(this, R.string.auth_sign_out, languageTag));
+        updateUserNavProfile();
         if (tvStartText != null) tvStartText.setText(LocaleManager.getString(this, R.string.btn_start_decorated, languageTag));
         if (btnGallery != null) btnGallery.setText(LocaleManager.getString(this, R.string.btn_gallery, languageTag));
         if (tvHomeOur != null) tvHomeOur.setText(LocaleManager.getString(this, R.string.home_title_our, languageTag));
@@ -709,12 +951,14 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         // Determine if we should use dark text (only in light mode with NO custom banner)
+        // Optimization: Even with default banner, if it's too dark, we should use light text.
         boolean useDarkText = !isNightMode && !isCustom;
         
+        // Force white icon for menu if we have any banner for better consistency
+        int colorIcon = isCustom || isNightMode ? Color.WHITE : ContextCompat.getColor(this, R.color.home_icon_light);
         int colorOur = ContextCompat.getColor(this, useDarkText ? R.color.home_title_our_light : R.color.home_title_our_dark);
         int colorMemories = ContextCompat.getColor(this, useDarkText ? R.color.home_title_memories_light : R.color.home_title_memories_dark);
         int colorPhotobooth = ContextCompat.getColor(this, useDarkText ? R.color.home_title_photobooth_light : R.color.home_title_photobooth_dark);
-        int colorIcon = ContextCompat.getColor(this, useDarkText ? R.color.home_icon_light : R.color.home_icon_dark);
         int colorGlassBg = ContextCompat.getColor(this, useDarkText ? R.color.home_glass_bg_light : R.color.home_glass_bg_dark);
         int colorGlassStroke = ContextCompat.getColor(this, useDarkText ? R.color.home_glass_stroke_light : R.color.home_glass_stroke_dark);
         

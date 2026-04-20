@@ -16,12 +16,14 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/shape_bottom_sheet_handle" />
 
-    <!-- Avatar -->
     <FrameLayout
+        android:id="@+id/layoutProfileAvatar"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/shape_nav_avatar">
+        android:background="@drawable/shape_nav_avatar"
+        android:clickable="true"
+        android:focusable="true">
         
         <TextView
             android:id="@+id/tvProfileAvatar"
@@ -32,6 +34,24 @@
             android:textColor="#FFFFFF"
             android:textSize="32sp"
             android:textStyle="bold" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProfileAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:shapeAppearanceOverlay="@style/CircleAppearance" />
+
+        <!-- Edit Icon Overlay -->
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="bottom|end"
+            android:background="@drawable/shape_glass_circle"
+            android:padding="4dp"
+            android:src="@drawable/ic_edit_24"
+            app:tint="#FFFFFF" />
     </FrameLayout>
 
     <!-- Name -->
@@ -150,14 +170,56 @@
         </LinearLayout>
 
     </LinearLayout>
-    
+
+    <!-- Account Actions -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:layout_marginTop="8dp">
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BẢO MẬT &amp; CÀI ĐẶT"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnChangeAvatar"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thay đổi ảnh đại diện"
+            android:layout_marginBottom="8dp"
+            app:icon="@drawable/ic_person_24"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:cornerRadius="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnChangePassword"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đổi mật khẩu"
+            app:icon="@drawable/ic_settings_24"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:cornerRadius="12dp" />
+    </LinearLayout>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCloseProfile"
         style="?attr/materialButtonOutlinedStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:text="Đóng" />
 
 </LinearLayout>
