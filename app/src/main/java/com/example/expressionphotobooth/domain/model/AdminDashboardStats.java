@@ -113,5 +113,26 @@ public class AdminDashboardStats {
     public LinkedHashMap<String, Double> getReviewScoreByMonth() {
         return new LinkedHashMap<>(reviewScoreByMonth);
     }
+
+    // Helper methods for detail sheets
+    public java.util.List<Integer> getMonthlyUsers() {
+        return new java.util.ArrayList<>(usersByMonth.values());
+    }
+
+    public java.util.List<Integer> getMonthlyImageDownloads() {
+        return new java.util.ArrayList<>(imageDownloadsByMonth.values());
+    }
+
+    public int getTotalImageDownloads() {
+        return imageDownloads;
+    }
+
+    public java.util.List<Integer> getMonthlyReviewScores() {
+        java.util.List<Integer> scores = new java.util.ArrayList<>();
+        for (Double d : reviewScoreByMonth.values()) {
+            scores.add(d.intValue());
+        }
+        return scores;
+    }
 }
 

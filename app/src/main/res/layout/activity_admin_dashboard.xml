@@ -126,14 +126,18 @@
 
                         <!-- Card 1: Accounts -->
                         <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardStatAccounts"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/admin_stat_card_spacing"
                             android:layout_weight="1"
                             android:minHeight="@dimen/admin_stat_card_min_height"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:cardBackgroundColor="@android:color/transparent"
                             app:cardCornerRadius="16dp"
                             app:cardElevation="4dp"
+                            app:rippleColor="#33FFFFFF"
                             app:strokeWidth="0dp">
 
                             <LinearLayout
@@ -184,14 +188,18 @@
 
                         <!-- Card 2: Image downloads -->
                         <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardStatImageDownloads"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="@dimen/admin_stat_card_spacing"
                             android:layout_weight="1"
                             android:minHeight="@dimen/admin_stat_card_min_height"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:cardBackgroundColor="@android:color/transparent"
                             app:cardCornerRadius="16dp"
                             app:cardElevation="4dp"
+                            app:rippleColor="#33FFFFFF"
                             app:strokeWidth="0dp">
 
                             <LinearLayout
@@ -242,14 +250,18 @@
 
                         <!-- Card 3: Video downloads -->
                         <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardStatVideoDownloads"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/admin_stat_card_spacing"
                             android:layout_weight="1"
                             android:minHeight="@dimen/admin_stat_card_min_height"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:cardBackgroundColor="@android:color/transparent"
                             app:cardCornerRadius="16dp"
                             app:cardElevation="4dp"
+                            app:rippleColor="#33FFFFFF"
                             app:strokeWidth="0dp">
 
                             <LinearLayout

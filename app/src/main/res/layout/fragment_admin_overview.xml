@@ -511,10 +511,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
+            android:clickable="true"
+            android:focusable="true"
             app:cardCornerRadius="@dimen/admin_card_corner_radius_item"
             app:cardElevation="@dimen/admin_card_elevation"
             app:cardBackgroundColor="@color/surface_card"
             app:strokeColor="@color/admin_card_stroke"
+            app:rippleColor="#1A1A2A6C"
             app:strokeWidth="1dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -579,6 +582,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardUsersChart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
@@ -592,14 +596,35 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tvUsersChartTitle"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/admin_overview_users_chart_title"
-                    android:textColor="#5A8AEE"
-                    android:textStyle="bold"
-                    android:textSize="14sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+                    <TextView
+                        android:id="@+id/tvUsersChartTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/admin_overview_users_chart_title"
+                        android:textColor="@color/admin_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDetailUsersChart"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        app:icon="@drawable/ic_info_24"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/app_blue"
+                        app:iconPadding="0dp" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvUsersChartSubtitle"
@@ -630,6 +655,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardDownloadsChart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
@@ -643,14 +669,35 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tvDownloadsChartTitle"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/admin_overview_download_chart_title"
-                    android:textColor="#EDAA66"
-                    android:textStyle="bold"
-                    android:textSize="14sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+                    <TextView
+                        android:id="@+id/tvDownloadsChartTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/admin_overview_download_chart_title"
+                        android:textColor="@color/admin_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDetailDownloadsChart"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        app:icon="@drawable/ic_info_24"
+                        app:iconSize="18dp"
+                        app:iconTint="#EDAA66"
+                        app:iconPadding="0dp" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvDownloadsChartSubtitle"
@@ -681,6 +728,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardReviewsChart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -694,14 +742,35 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tvReviewScoreChartTitle"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/admin_overview_review_score_chart_title"
-                    android:textColor="#E86D6D"
-                    android:textStyle="bold"
-                    android:textSize="14sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+                    <TextView
+                        android:id="@+id/tvReviewScoreChartTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/admin_overview_review_score_chart_title"
+                        android:textColor="@color/admin_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDetailReviewsChart"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        app:icon="@drawable/ic_info_24"
+                        app:iconSize="18dp"
+                        app:iconTint="#E86D6D"
+                        app:iconPadding="0dp" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvReviewScoreChartSubtitle"
