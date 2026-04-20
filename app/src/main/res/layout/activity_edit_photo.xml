@@ -81,13 +81,11 @@
         android:layout_marginEnd="24dp"
         app:cardCornerRadius="20dp"
         app:cardElevation="10dp"
-        app:layout_constraintBottom_toTopOf="@id/editPanelCard"
         app:layout_constraintDimensionRatio="3:4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintVertical_bias="0.0"
-        app:layout_constraintHeight_max="360dp">
+        app:layout_constraintHeight_max="320dp">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -174,8 +172,24 @@
                 app:tabMode="fixed"
                 app:tabSelectedTextColor="@color/white"
                 app:tabTextColor="@color/screen_text_muted"
-                app:tabRippleColor="@android:color/transparent"
-                app:tabMaxWidth="0dp" />
+                app:tabRippleColor="@android:color/transparent">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/edit_section_filters" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/edit_section_backgrounds" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/edit_section_stickers" />
+
+            </com.google.android.material.tabs.TabLayout>
 
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
@@ -337,6 +351,45 @@
                             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                             app:spanCount="4" />
 
+                    </LinearLayout>
+
+                    <!-- ── BACKGROUNDS PANEL ── -->
+                    <LinearLayout
+                        android:id="@+id/panelBackgrounds"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="20dp"
+                            android:paddingTop="12dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/edit_select_background"
+                                android:textColor="@color/screen_subtitle"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvBackgrounds"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:clipToPadding="false"
+                            android:paddingHorizontal="12dp"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp"
+                            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                            app:spanCount="4" />
                     </LinearLayout>
 
                     <!-- ── STICKERS PANEL ── -->

@@ -45,7 +45,9 @@ import com.example.expressionphotobooth.domain.repository.HistoryRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.CreateTimelapseVideoUseCase;
 import com.example.expressionphotobooth.domain.usecase.CreateVerticalCollageUseCase;
+import com.example.expressionphotobooth.domain.usecase.PortraitProcessor;
 import com.example.expressionphotobooth.domain.usecase.RenderEditedBitmapUseCase;
+import androidx.annotation.Nullable;
 import com.example.expressionphotobooth.utils.FrameConfig;
 import com.example.expressionphotobooth.utils.StickerPlacementMapper;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -80,6 +82,7 @@ public class ResultActivity extends AppCompatActivity {
     private CreateTimelapseVideoUseCase createTimelapseVideoUseCase;
     private CreateVerticalCollageUseCase createVerticalCollageUseCase;
     private RenderEditedBitmapUseCase renderEditedBitmapUseCase;
+    private PortraitProcessor portraitProcessor;
     private MaterialButton btnSaveVideo;
     private List<String> sourceOriginalUris;
     private boolean hasShownFeedback = false;
@@ -131,6 +134,8 @@ public class ResultActivity extends AppCompatActivity {
         createTimelapseVideoUseCase = new CreateTimelapseVideoUseCase(new TimelapseVideoEncoder());
         createVerticalCollageUseCase = new CreateVerticalCollageUseCase();
         renderEditedBitmapUseCase = new RenderEditedBitmapUseCase(new BitmapEditRenderer());
+        portraitProcessor = new PortraitProcessor();
+        renderEditedBitmapUseCase.setPortraitProcessor(portraitProcessor);
         sourceOriginalUris = resolveSourceOriginalUris();
 
         if (sourceOriginalUris.isEmpty()) {
@@ -150,7 +155,7 @@ public class ResultActivity extends AppCompatActivity {
         String firestoreFrameId = sessionState != null ? sessionState.getSelectedFirestoreFrameId() : null;
         String remoteBase64Mem  = sessionState != null ? sessionState.getSelectedFrameBase64() : null;
 
-        if (selectedFrameResId != -1) {
+        if (selectedFrameResId > 0) {
             // Local drawable frame
             startRenderThread(loadingOverlay, ivFinalResult, null, null);
         } else if (remoteBase64Mem != null && remoteLayout != null) {
@@ -237,7 +242,7 @@ public class ResultActivity extends AppCompatActivity {
             }
 
             Bitmap finalBitmap;
-            if (localFrameResId != -1) {
+            if (localFrameResId > 0) {
                 finalBitmap = createFramedCollage(new ArrayList<>(imageUrisToCollage), localFrameResId);
             } else if (remoteBase64 != null && remoteLayout != null) {
                 finalBitmap = createRemoteFramedCollage(new ArrayList<>(imageUrisToCollage), remoteBase64, remoteLayout);
@@ -518,7 +523,7 @@ public class ResultActivity extends AppCompatActivity {
         EditState noSticker = state.copy();
         noSticker.setStickerStyle(EditState.StickerStyle.NONE);
         noSticker.setCustomStickerBase64(null);
-        return renderEditedBitmapUseCase.execute(this, source, noSticker);
+        return renderEditedBitmapUseCase.execute(this, source, noSticker, false);
     }
 
     private void drawStickerForHole(

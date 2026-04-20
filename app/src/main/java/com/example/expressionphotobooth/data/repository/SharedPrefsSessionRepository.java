@@ -166,7 +166,12 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         editJson.put("filterStyle", editState.getFilterStyle().name());
         editJson.put("frameStyle", editState.getFrameStyle().name());
         editJson.put("stickerStyle", editState.getStickerStyle().name());
+        editJson.put("backgroundStyle", editState.getBackgroundStyle().name());
+        editJson.put("customBackgroundBase64", editState.getCustomBackgroundBase64());
+        editJson.put("blurRadius", editState.getBlurRadius());
         editJson.put("customStickerBase64", editState.getCustomStickerBase64());
+        editJson.put("customStickerId", editState.getCustomStickerId());
+        editJson.put("fromStore", editState.isFromStore());
         editJson.put("filterIntensity", editState.getFilterIntensity());
         editJson.put("stickerX", editState.getStickerX());
         editJson.put("stickerY", editState.getStickerY());
@@ -176,6 +181,32 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         editJson.put("stickerCropTopNorm", editState.getStickerCropTopNorm());
         editJson.put("stickerCropRightNorm", editState.getStickerCropRightNorm());
         editJson.put("stickerCropBottomNorm", editState.getStickerCropBottomNorm());
+        editJson.put("stickerScale", editState.getStickerScale());
+        editJson.put("stickerRotation", editState.getStickerRotation());
+
+        // Multi-sticker list
+        JSONArray stickersArr = new JSONArray();
+        for (com.example.expressionphotobooth.domain.model.StickerItem si : editState.getStickerItems()) {
+            JSONObject sJson = new JSONObject();
+            sJson.put("style", si.getStyle().name());
+            sJson.put("customBase64", si.getCustomBase64());
+            sJson.put("customId", si.getCustomId());
+            sJson.put("fromStore", si.isFromStore());
+            sJson.put("cropX", si.getCropX());
+            sJson.put("cropY", si.getCropY());
+            sJson.put("absX", si.getAbsX());
+            sJson.put("absY", si.getAbsY());
+            sJson.put("cropL", si.getCropLeftNorm());
+            sJson.put("cropT", si.getCropTopNorm());
+            sJson.put("cropR", si.getCropRightNorm());
+            sJson.put("cropB", si.getCropBottomNorm());
+            sJson.put("scale", si.getScale());
+            sJson.put("rotation", si.getRotation());
+            stickersArr.put(sJson);
+        }
+        editJson.put("stickerItems", stickersArr);
+        editJson.put("activeStickerIndex", editState.getActiveStickerIndex());
+
         return editJson;
     }
 
@@ -187,7 +218,12 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         editState.setFilterStyle(parseEnum(EditState.FilterStyle.class, editJson.optString("filterStyle"), EditState.FilterStyle.NONE));
         editState.setFrameStyle(parseEnum(EditState.FrameStyle.class, editJson.optString("frameStyle"), EditState.FrameStyle.NONE));
         editState.setStickerStyle(parseEnum(EditState.StickerStyle.class, editJson.optString("stickerStyle"), EditState.StickerStyle.NONE));
+        editState.setBackgroundStyle(parseEnum(EditState.BackgroundStyle.class, editJson.optString("backgroundStyle"), EditState.BackgroundStyle.NONE));
+        editState.setCustomBackgroundBase64(editJson.optString("customBackgroundBase64", null));
+        editState.setBlurRadius((float) editJson.optDouble("blurRadius", 25.0));
         editState.setCustomStickerBase64(editJson.optString("customStickerBase64", null));
+        editState.setCustomStickerId(editJson.optString("customStickerId", null));
+        editState.setFromStore(editJson.optBoolean("fromStore", false));
         editState.setFilterIntensity((float) editJson.optDouble("filterIntensity", 0.8));
         editState.setStickerX((float) editJson.optDouble("stickerX", -1.0));
         editState.setStickerY((float) editJson.optDouble("stickerY", -1.0));
@@ -197,6 +233,36 @@ public class SharedPrefsSessionRepository implements SessionRepository {
         editState.setStickerCropTopNorm((float) editJson.optDouble("stickerCropTopNorm", -1.0));
         editState.setStickerCropRightNorm((float) editJson.optDouble("stickerCropRightNorm", -1.0));
         editState.setStickerCropBottomNorm((float) editJson.optDouble("stickerCropBottomNorm", -1.0));
+        editState.setStickerScale((float) editJson.optDouble("stickerScale", 1.0));
+        editState.setStickerRotation((float) editJson.optDouble("stickerRotation", 0.0));
+
+        JSONArray stickersArr = editJson.optJSONArray("stickerItems");
+        if (stickersArr != null) {
+            List<com.example.expressionphotobooth.domain.model.StickerItem> list = new ArrayList<>();
+            for (int i = 0; i < stickersArr.length(); i++) {
+                JSONObject sJson = stickersArr.optJSONObject(i);
+                if (sJson == null) continue;
+                com.example.expressionphotobooth.domain.model.StickerItem si = new com.example.expressionphotobooth.domain.model.StickerItem();
+                si.setStyle(parseEnum(EditState.StickerStyle.class, sJson.optString("style"), EditState.StickerStyle.NONE));
+                si.setCustomBase64(sJson.optString("customBase64", null));
+                si.setCustomId(sJson.optString("customId", null));
+                si.setFromStore(sJson.optBoolean("fromStore", false));
+                si.setCropX((float) sJson.optDouble("cropX", 0.5));
+                si.setCropY((float) sJson.optDouble("cropY", 0.5));
+                si.setAbsX((float) sJson.optDouble("absX", -1.0));
+                si.setAbsY((float) sJson.optDouble("absY", -1.0));
+                si.setCropLeftNorm((float) sJson.optDouble("cropL", -1.0));
+                si.setCropTopNorm((float) sJson.optDouble("cropT", -1.0));
+                si.setCropRightNorm((float) sJson.optDouble("cropR", -1.0));
+                si.setCropBottomNorm((float) sJson.optDouble("cropB", -1.0));
+                si.setScale((float) sJson.optDouble("scale", 1.0));
+                si.setRotation((float) sJson.optDouble("rotation", 0.0));
+                list.add(si);
+            }
+            editState.setStickerItems(list);
+        }
+        editState.setActiveStickerIndex(editJson.optInt("activeStickerIndex", -1));
+
         return editState;
     }
 

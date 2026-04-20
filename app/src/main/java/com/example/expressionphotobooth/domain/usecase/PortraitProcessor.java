@@ -9,6 +9,7 @@ import android.graphics.PorterDuffXfermode;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -80,42 +81,91 @@ public class PortraitProcessor {
     public void process(@NonNull Bitmap source,
                         @NonNull OnPortraitReady onReady,
                         @NonNull OnPortraitError onError) {
+        processWithBackground(source, null, onReady, onError);
+    }
+
+    /**
+     * Xử lý ảnh: tách người và ghép lên nền mới (hoặc làm mờ nền cũ nếu customBackground là null).
+     */
+    public void processWithBackground(@NonNull Bitmap source,
+                                      @Nullable Bitmap customBackground,
+                                      @NonNull OnPortraitReady onReady,
+                                      @NonNull OnPortraitError onError) {
 
         executor.execute(() -> {
             try {
-                InputImage inputImage = InputImage.fromBitmap(source, 0);
-                Task<SubjectSegmentationResult> task = segmenter.process(inputImage);
-                SubjectSegmentationResult result = Tasks.await(task);
-
-                FloatBuffer confidenceMask = result.getForegroundConfidenceMask();
-                if (confidenceMask == null) {
-                    onError.onError("Không phát hiện chủ thể trong ảnh");
-                    return;
-                }
-
-                int w = source.getWidth();
-                int h = source.getHeight();
-
-                // ── Bước 1: Tạo binary mask từ confidence map ──
-                Bitmap maskBitmap = createMask(confidenceMask, w, h);
-
-                // ── Bước 2: Blur toàn bộ ảnh gốc (Gaussian-like blur) ──
-                Bitmap blurredBg = stackBlur(source, BLUR_RADIUS);
-
-                // ── Bước 3: Composite (người sharp + nền blur) ──
-                Bitmap portrait = composite(source, blurredBg, maskBitmap);
-
-                maskBitmap.recycle();
-                blurredBg.recycle();
-
-                Log.d(TAG, "✅ Portrait processing complete: " + w + "x" + h);
+                Bitmap portrait = processSync(source, customBackground);
+                Log.d(TAG, "✅ Portrait processing complete");
                 onReady.onResult(portrait);
-
             } catch (Exception e) {
                 Log.e(TAG, "Portrait processing failed", e);
                 onError.onError(e.getMessage());
             }
         });
+    }
+
+    /**
+     * Phiên bản đồng bộ của processWithBackground.
+     * Cẩn thận: Không gọi hàm này trên UI Thread.
+     */
+    public Bitmap processSync(@NonNull Bitmap source, @Nullable Bitmap customBackground) throws Exception {
+        InputImage inputImage = InputImage.fromBitmap(source, 0);
+        Task<SubjectSegmentationResult> task = segmenter.process(inputImage);
+        SubjectSegmentationResult result = Tasks.await(task);
+
+        FloatBuffer confidenceMask = result.getForegroundConfidenceMask();
+        if (confidenceMask == null) {
+            return source; // Trả về ảnh gốc nếu không tách được
+        }
+
+        int w = source.getWidth();
+        int h = source.getHeight();
+
+        // ── Bước 1: Tạo binary mask ──
+        Bitmap maskBitmap = createMask(confidenceMask, w, h);
+
+        Bitmap backgroundToUse;
+        if (customBackground != null) {
+            backgroundToUse = scaleCenterCrop(customBackground, w, h);
+        } else {
+            backgroundToUse = stackBlur(source, BLUR_RADIUS);
+        }
+
+        // ── Bước 2: Composite ──
+        Bitmap portrait = composite(source, backgroundToUse, maskBitmap);
+
+        maskBitmap.recycle();
+        if (backgroundToUse != source && (customBackground == null || backgroundToUse != customBackground)) {
+            backgroundToUse.recycle();
+        }
+
+        return portrait;
+    }
+
+    /**
+     * Scale và Crop ảnh nền để khớp với kích thước ảnh đích.
+     */
+    private Bitmap scaleCenterCrop(Bitmap source, int newWidth, int newHeight) {
+        int sourceWidth = source.getWidth();
+        int sourceHeight = source.getHeight();
+
+        float xScale = (float) newWidth / sourceWidth;
+        float yScale = (float) newHeight / sourceHeight;
+        float scale = Math.max(xScale, yScale);
+
+        float scaledWidth = scale * sourceWidth;
+        float scaledHeight = scale * sourceHeight;
+
+        float left = (newWidth - scaledWidth) / 2;
+        float top = (newHeight - scaledHeight) / 2;
+
+        Bitmap target = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(target);
+        android.graphics.Matrix matrix = new android.graphics.Matrix();
+        matrix.postScale(scale, scale);
+        matrix.postTranslate(left, top);
+        canvas.drawBitmap(source, matrix, new Paint(Paint.FILTER_BITMAP_FLAG));
+        return target;
     }
 
     /**

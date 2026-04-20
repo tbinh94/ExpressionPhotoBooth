@@ -28,9 +28,7 @@
                 android:id="@+id/ivThumbPreview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerInside"
-                android:padding="8dp"
-                android:adjustViewBounds="true" />
+                android:scaleType="centerCrop" />
 
         </com.google.android.material.card.MaterialCardView>
 
