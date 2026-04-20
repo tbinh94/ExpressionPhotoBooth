@@ -538,4 +538,7 @@ that you have taken before</string>
     <string name="ai_trigger_face_mouth_open">Mouth Open 😮</string>
     <string name="ai_trigger_face_wink">Wink 😉</string>
     <string name="ai_trigger_face_tilt">Head Tilt 🤳</string>
+    <string name="home_drawer_nav_label">NAVIGATION</string>
+    <string name="admin_role_member">Member</string>
+    <string name="admin_role_admin">Administrator</string>
 </resources>
