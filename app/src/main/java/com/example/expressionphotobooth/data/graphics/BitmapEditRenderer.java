@@ -32,8 +32,14 @@ public class BitmapEditRenderer {
         // 2) Ve frame theo style duoc chon.
         // drawFrame(canvas, state.getFrameStyle(), source.getWidth(), source.getHeight());
 
-        // 3) Ve sticker icon len goc anh hoặc vị trí người dùng kéo thả.
-        drawSticker(context, canvas, state, source.getWidth(), source.getHeight());
+        // 3a) Legacy single sticker (REMOVED to prevent duplicates during migration).
+        // drawSticker(context, canvas, state, source.getWidth(), source.getHeight());
+
+        // 3b) New multi-sticker list.
+        java.util.List<com.example.expressionphotobooth.domain.model.StickerItem> stickerItems = state.getStickerItems();
+        for (com.example.expressionphotobooth.domain.model.StickerItem si : stickerItems) {
+            drawStickerItem(context, canvas, si, state, source.getWidth(), source.getHeight());
+        }
 
         return target;
     }
@@ -284,5 +290,66 @@ public class BitmapEditRenderer {
             default:
                 return 0;
         }
+    }
+
+    /**
+     * Draws a single {@link com.example.expressionphotobooth.domain.model.StickerItem}
+     * from the multi-sticker list onto the given canvas.
+     */
+    private void drawStickerItem(Context context, Canvas canvas,
+                                 com.example.expressionphotobooth.domain.model.StickerItem si,
+                                 EditState state, int width, int height) {
+        if (si == null || si.getStyle() == EditState.StickerStyle.NONE) return;
+
+        // Resolve the crop rect (frame hole boundary)
+        RectF cropRect;
+        float ln = si.getCropLeftNorm(), tn = si.getCropTopNorm(),
+              rn = si.getCropRightNorm(), bn = si.getCropBottomNorm();
+        if (ln >= 0f && tn >= 0f && rn > ln && bn > tn) {
+            cropRect = StickerPlacementMapper.fromNormalizedRect(new RectF(ln, tn, rn, bn), width, height);
+        } else {
+            cropRect = new RectF(0f, 0f, width, height);
+        }
+
+        float centerX = cropRect.left + StickerPlacementMapper.clamp01(si.getCropX()) * cropRect.width();
+        float centerY = cropRect.top  + StickerPlacementMapper.clamp01(si.getCropY()) * cropRect.height();
+
+        int minL = Math.min(width, height);
+        int size = Math.max(72, minL / 5);
+
+        Bitmap stickerBitmap = null;
+        Drawable drawable = null;
+
+        if (si.getStyle() == EditState.StickerStyle.CUSTOM && si.getCustomBase64() != null) {
+            try {
+                byte[] bytes = android.util.Base64.decode(si.getCustomBase64(), android.util.Base64.DEFAULT);
+                stickerBitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            int drawableId = resolveStickerDrawable(si.getStyle());
+            if (drawableId != 0) drawable = ContextCompat.getDrawable(context, drawableId);
+        }
+
+        if (stickerBitmap == null && drawable == null) return;
+
+        canvas.save();
+        canvas.translate(centerX, centerY);
+        canvas.scale(si.getScale(), si.getScale());
+        canvas.rotate(si.getRotation());
+
+        if (stickerBitmap != null) {
+            float ratio = (float) stickerBitmap.getWidth() / stickerBitmap.getHeight();
+            int w = ratio > 1 ? size : (int)(size * ratio);
+            int h = ratio > 1 ? (int)(size / ratio) : size;
+            Rect dest = new Rect(-w/2, -h/2, w/2, h/2);
+            canvas.drawBitmap(stickerBitmap, null, dest, new Paint(Paint.FILTER_BITMAP_FLAG));
+        } else {
+            int half = size / 2;
+            drawable.setBounds(-half, -half, half, half);
+            drawable.draw(canvas);
+        }
+        canvas.restore();
     }
 }

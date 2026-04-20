@@ -166,6 +166,16 @@
     <string name="edit_sticker_center">Center</string>
     <string name="edit_sticker_reset">Reset</string>
     <string name="edit_sticker_size_format">%1$d%%</string>
+    <string name="edit_section_backgrounds">Backgrounds</string>
+    <string name="edit_select_background">Select a Background</string>
+    <string name="edit_bg_studio">Studio</string>
+    <string name="edit_bg_beach">Beach</string>
+    <string name="edit_bg_space">Space</string>
+    <string name="edit_bg_vintage">Vintage</string>
+    <string name="edit_bg_blur">Blur</string>
+    <string name="edit_bg_picker_title">Select Background Image</string>
+    <string name="edit_bg_processing">Processing background…</string>
+    <string name="edit_applying_portrait">Applying AI background…</string>
     <string name="edit_sticker_picker_title">Select Sticker Image</string>
     <string name="edit_sticker_cannot_delete_global">System stickers cannot be deleted!</string>
     <string name="edit_sticker_processing">Processing sticker…</string>

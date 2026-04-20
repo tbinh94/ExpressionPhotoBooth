@@ -88,7 +88,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private ImageView ivFrameOverlay;
     private Chip chipActiveEdit;
     private TabLayout editTabLayout;
-    private LinearLayout panelFilters, panelFrames, panelStickers;
+    private LinearLayout panelFilters, panelFrames, panelStickers, panelBackgrounds;
     private LinearLayout filterIntensityRow;
     private SeekBar seekFilterIntensity;
     private TextView tvIntensityValue;
@@ -104,11 +104,13 @@ public class EditPhotoActivity extends AppCompatActivity {
     private View btnStickerReset;
 
     // RecyclerViews
-    private RecyclerView rvFilters, rvFrames, rvStickers;
+    private RecyclerView rvFilters, rvFrames, rvStickers, rvBackgrounds;
 
     // State
     private Bitmap originalBitmap;
     private Bitmap editedBitmap;
+    private Bitmap backgroundCachedBitmap;
+    private com.example.expressionphotobooth.domain.usecase.PortraitProcessor portraitProcessor;
     private SessionRepository sessionRepository;
     private SessionState sessionState;
     private EditState currentEditState;
@@ -138,6 +140,18 @@ public class EditPhotoActivity extends AppCompatActivity {
             this.value = value;
             this.base64 = null;
             this.imageUrl = null;
+            this.isRemovable = false;
+            this.isGlobal = false;
+        }
+
+        /** Constructor for items that show a URL-based preview image (e.g. asset backgrounds). */
+        ThumbItem(String label, String imageUrl, Object value) {
+            this.label = label;
+            this.drawableRes = 0;
+            this.colorRes = 0;
+            this.value = value;
+            this.base64 = null;
+            this.imageUrl = imageUrl;
             this.isRemovable = false;
             this.isGlobal = false;
         }
@@ -221,9 +235,14 @@ public class EditPhotoActivity extends AppCompatActivity {
             h.label.setVisibility(item.label.isEmpty() ? View.INVISIBLE : View.VISIBLE);
 
             if (item.imageUrl != null && !item.imageUrl.isEmpty()) {
+                Object loadSource = item.imageUrl;
+                if (item.imageUrl.startsWith("file:///android_asset/")) {
+                    loadSource = item.imageUrl.substring("file:///android_asset/".length());
+                }
                 Glide.with(h.itemView.getContext())
-                        .load(item.imageUrl)
+                        .load(loadSource instanceof String && ((String)loadSource).startsWith("http") ? android.net.Uri.parse((String)loadSource) : loadSource)
                         .placeholder(R.color.thumb_none)
+                        .centerCrop()
                         .into(h.preview);
                 h.preview.setBackground(null);
             } else if (item.base64 != null) {
@@ -283,6 +302,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private ThumbAdapter filtersAdapter;
     private ThumbAdapter framesAdapter;
     private ThumbAdapter stickersAdapter;
+    private ThumbAdapter backgroundsAdapter;
     private TabLayout stickerCategoryTabLayout;
 
     private enum StickerCategory {
@@ -311,6 +331,8 @@ public class EditPhotoActivity extends AppCompatActivity {
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
         sessionState = sessionRepository.getSession();
         renderEditedBitmapUseCase = new RenderEditedBitmapUseCase(new BitmapEditRenderer());
+        portraitProcessor = new com.example.expressionphotobooth.domain.usecase.PortraitProcessor();
+        renderEditedBitmapUseCase.setPortraitProcessor(portraitProcessor);
 
         // URI
         String selectedUriString = getIntent().getStringExtra(IntentKeys.EXTRA_SELECTED_IMAGE);
@@ -345,6 +367,9 @@ public class EditPhotoActivity extends AppCompatActivity {
         applyFrameOverlay();
 
         applyCurrentEditState();
+        if (currentEditState.getBackgroundStyle() != EditState.BackgroundStyle.NONE) {
+            refreshBackground();
+        }
         syncSelectionsToAdapters();
         loadGlobalStickers();
     }
@@ -357,6 +382,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         btnCompare        = findViewById(R.id.btnCompare);
         panelFilters      = findViewById(R.id.panelFilters);
         panelFrames       = findViewById(R.id.panelFrames);
+        panelBackgrounds  = findViewById(R.id.panelBackgrounds);
         panelStickers     = findViewById(R.id.panelStickers);
         filterIntensityRow = findViewById(R.id.filterIntensityRow);
         seekFilterIntensity = findViewById(R.id.seekFilterIntensity);
@@ -373,6 +399,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         btnStickerReset = findViewById(R.id.btnStickerReset);
         rvFilters         = findViewById(R.id.rvFilters);
         rvFrames          = findViewById(R.id.rvFrames);
+        rvBackgrounds     = findViewById(R.id.rvBackgrounds);
         rvStickers        = findViewById(R.id.rvStickers);
         stickerCategoryTabLayout = findViewById(R.id.stickerCategoryTabLayout);
     }
@@ -412,7 +439,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     }
 
     private int resolveSelectedFrameResId() {
-        if (sessionState != null && sessionState.getSelectedFrameResId() != -1) {
+        if (sessionState != null && sessionState.getSelectedFrameResId() > 0) {
             return sessionState.getSelectedFrameResId();
         }
         // Legacy bridge: old sessions may still rely on this pref value.
@@ -436,7 +463,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     }
 
     private int resolveOverlayFrameResId() {
-        if (selectedFrameResId != -1) {
+        if (selectedFrameResId > 0) {
             return selectedFrameResId;
         }
         EditState.FrameStyle frameStyle = currentEditState != null ? currentEditState.getFrameStyle() : null;
@@ -457,12 +484,15 @@ public class EditPhotoActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        if (portraitProcessor != null) portraitProcessor.close();
+        super.onDestroy();
+    }
+
     // ── Tab setup ─────────────────────────────────────────────────────────────
 
     private void setupTabs() {
-        editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_filters)));
-        editTabLayout.addTab(editTabLayout.newTab().setText(getString(R.string.edit_section_stickers)));
-
         editTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -477,9 +507,10 @@ public class EditPhotoActivity extends AppCompatActivity {
 
     private void showPanel(int index) {
         panelFilters.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
+        panelBackgrounds.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         panelFrames.setVisibility(View.GONE);
-        panelStickers.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
-        if (index == 1) {
+        panelStickers.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        if (index == 2) {
             updateStickerSizeUi();
         }
     }
@@ -520,6 +551,26 @@ public class EditPhotoActivity extends AppCompatActivity {
             updateFrame((EditState.FrameStyle) item.value);
         });
         rvFrames.setAdapter(framesAdapter);
+
+        // BACKGROUNDS
+        List<ThumbItem> backgroundItems = Arrays.asList(
+                new ThumbItem(getString(R.string.edit_option_none), R.drawable.ic_filter_none, R.color.thumb_none, EditState.BackgroundStyle.NONE),
+                new ThumbItem(getString(R.string.edit_bg_blur), R.drawable.ic_filter_soft, R.color.thumb_filter_soft, EditState.BackgroundStyle.BLUR),
+                new ThumbItem(getString(R.string.edit_bg_studio), "backgrounds/bg_studio.png", EditState.BackgroundStyle.STUDIO),
+                new ThumbItem(getString(R.string.edit_bg_beach), "backgrounds/bg_beach.png", EditState.BackgroundStyle.BEACH),
+                new ThumbItem(getString(R.string.edit_bg_space), "backgrounds/bg_space.png", EditState.BackgroundStyle.SPACE),
+                new ThumbItem(getString(R.string.edit_bg_vintage), "backgrounds/bg_vintage.png", EditState.BackgroundStyle.VINTAGE),
+                new ThumbItem("", R.drawable.ic_add_24, R.color.edit_accent, "ADD_BG")
+        );
+
+        backgroundsAdapter = new ThumbAdapter(backgroundItems, item -> {
+            if ("ADD_BG".equals(item.value)) {
+                openBackgroundPicker();
+            } else {
+                updateBackground((EditState.BackgroundStyle) item.value);
+            }
+        });
+        rvBackgrounds.setAdapter(backgroundsAdapter);
 
         stickersAdapter = new ThumbAdapter(new ArrayList<>(), item -> {
             if ("ADD_NEW".equals(item.value)) {
@@ -689,6 +740,51 @@ public class EditPhotoActivity extends AppCompatActivity {
         }
     }
 
+    private final androidx.activity.result.ActivityResultLauncher<Intent> backgroundPickerLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    handleCustomBackgroundPicked(result.getData().getData());
+                }
+            });
+
+    private void openBackgroundPicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        backgroundPickerLauncher.launch(Intent.createChooser(intent, getString(R.string.edit_bg_picker_title)));
+    }
+
+    private void handleCustomBackgroundPicked(Uri uri) {
+        if (uri == null) return;
+        Toast.makeText(this, R.string.edit_bg_processing, Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            try (InputStream is = getContentResolver().openInputStream(uri)) {
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                if (bitmap != null) {
+                    // Normalizing size for background to avoid OOM
+                    int maxDim = 1200;
+                    float ratio = (float) bitmap.getWidth() / bitmap.getHeight();
+                    int w = (ratio > 1) ? maxDim : (int) (maxDim * ratio);
+                    int h = (ratio > 1) ? (int) (maxDim / ratio) : maxDim;
+                    Bitmap scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
+                    
+                    java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                    scaled.compress(Bitmap.CompressFormat.JPEG, 85, baos);
+                    byte[] bytes = baos.toByteArray();
+                    String base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+                    
+                    runOnUiThread(() -> {
+                        pushToUndoStack();
+                        currentEditState.setBackgroundStyle(EditState.BackgroundStyle.CUSTOM);
+                        currentEditState.setCustomBackgroundBase64(base64);
+                        refreshBackground();
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
     private final androidx.activity.result.ActivityResultLauncher<Intent> stickerPickerLauncher =
             registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
@@ -801,17 +897,64 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void updateSticker(ThumbItem item) {
         pushToUndoStack();
         EditState.StickerStyle style = (EditState.StickerStyle) item.value;
-        currentEditState.setStickerStyle(style);
-        
-        if (style == EditState.StickerStyle.CUSTOM) {
-            currentEditState.setCustomStickerBase64(item.base64);
-            currentEditState.setCustomStickerId(item.id);
-            currentEditState.setFromStore(item.isGlobal);
-        } else {
+
+        if (style == EditState.StickerStyle.NONE) {
+            // Clear only the active sticker, or all if none active
+            int active = currentEditState.getActiveStickerIndex();
+            if (active >= 0 && active < currentEditState.getStickerItems().size()) {
+                currentEditState.removeSticker(active);
+            } else {
+                currentEditState.getStickerItems().clear();
+                currentEditState.setActiveStickerIndex(-1);
+            }
+            // Also clear legacy single-sticker fields
+            currentEditState.setStickerStyle(EditState.StickerStyle.NONE);
             currentEditState.setCustomStickerBase64(null);
             currentEditState.setCustomStickerId(null);
             currentEditState.setFromStore(false);
+        } else {
+            // Add a new sticker to the list
+            com.example.expressionphotobooth.domain.model.StickerItem si =
+                    new com.example.expressionphotobooth.domain.model.StickerItem();
+            si.setStyle(style);
+            if (style == EditState.StickerStyle.CUSTOM) {
+                si.setCustomBase64(item.base64);
+                si.setCustomId(item.id);
+                si.setFromStore(item.isGlobal);
+            }
+            // Inherit current frame crop bounds so placement is frame-aware
+            if (originalBitmap != null) {
+                RectF cropRect = resolveFrameCropRectForBitmap(
+                        originalBitmap.getWidth(), originalBitmap.getHeight());
+                RectF norm = com.example.expressionphotobooth.utils.StickerPlacementMapper
+                        .toNormalizedRect(cropRect, originalBitmap.getWidth(), originalBitmap.getHeight());
+                si.setCropLeftNorm(norm.left);
+                si.setCropTopNorm(norm.top);
+                si.setCropRightNorm(norm.right);
+                si.setCropBottomNorm(norm.bottom);
+                // Default position: top-right of crop rect
+                si.setCropX(0.84f);
+                si.setCropY(0.18f);
+                float absX = cropRect.left + 0.84f * cropRect.width();
+                float absY = cropRect.top  + 0.18f * cropRect.height();
+                si.setAbsX(absX / originalBitmap.getWidth());
+                si.setAbsY(absY / originalBitmap.getHeight());
+            }
+            currentEditState.addSticker(si);
+
+            // Keep legacy single-sticker in sync (used by old rendering path / export)
+            currentEditState.setStickerStyle(style);
+            if (style == EditState.StickerStyle.CUSTOM) {
+                currentEditState.setCustomStickerBase64(item.base64);
+                currentEditState.setCustomStickerId(item.id);
+                currentEditState.setFromStore(item.isGlobal);
+            } else {
+                currentEditState.setCustomStickerBase64(null);
+                currentEditState.setCustomStickerId(null);
+                currentEditState.setFromStore(false);
+            }
         }
+
         applyCurrentEditState();
         updateStickerSizeUi();
     }
@@ -852,6 +995,13 @@ public class EditPhotoActivity extends AppCompatActivity {
                     return;
                 }
                 float scale = MIN_STICKER_SCALE + (progress / 100f);
+                // Update active sticker in the new list
+                com.example.expressionphotobooth.domain.model.StickerItem active =
+                        currentEditState.getActiveSticker();
+                if (active != null) {
+                    active.setScale(scale);
+                }
+                // Also update legacy single-sticker scale for backward compat
                 currentEditState.setStickerScale(scale);
                 applyCurrentEditState();
                 tvStickerSizeValue.setText(getString(R.string.edit_sticker_size_format, Math.round(scale * 100f)));
@@ -923,11 +1073,16 @@ public class EditPhotoActivity extends AppCompatActivity {
     }
 
     private void applyStickerSizePreset(float presetScale) {
-        if (currentEditState == null || currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) {
+        boolean hasStickers = !currentEditState.getStickerItems().isEmpty();
+        if (currentEditState == null || (!hasStickers && currentEditState.getStickerStyle() == EditState.StickerStyle.NONE)) {
             return;
         }
         pushToUndoStack();
         float clamped = Math.max(MIN_STICKER_SCALE, Math.min(presetScale, MAX_STICKER_SCALE));
+        // Apply to active sticker in list
+        com.example.expressionphotobooth.domain.model.StickerItem active = currentEditState.getActiveSticker();
+        if (active != null) active.setScale(clamped);
+        // Also update legacy field
         currentEditState.setStickerScale(clamped);
         applyCurrentEditState();
         updateStickerSizeUi();
@@ -937,7 +1092,8 @@ public class EditPhotoActivity extends AppCompatActivity {
         if (stickerSizeRow == null || seekStickerSize == null || tvStickerSizeValue == null || currentEditState == null) {
             return;
         }
-        boolean show = currentEditState.getStickerStyle() != EditState.StickerStyle.NONE;
+        boolean show = !currentEditState.getStickerItems().isEmpty()
+                || currentEditState.getStickerStyle() != EditState.StickerStyle.NONE;
         stickerSizeRow.setVisibility(show ? View.VISIBLE : View.GONE);
         if (stickerSizePresetGroup != null) {
             stickerSizePresetGroup.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -945,7 +1101,11 @@ public class EditPhotoActivity extends AppCompatActivity {
         if (stickerQuickActionsRow != null) {
             stickerQuickActionsRow.setVisibility(show ? View.VISIBLE : View.GONE);
         }
-        float clamped = Math.max(MIN_STICKER_SCALE, Math.min(currentEditState.getStickerScale(), MAX_STICKER_SCALE));
+        // Read scale from active sticker, or fall back to legacy field
+        com.example.expressionphotobooth.domain.model.StickerItem active = currentEditState.getActiveSticker();
+        float clamped = active != null
+                ? Math.max(MIN_STICKER_SCALE, Math.min(active.getScale(), MAX_STICKER_SCALE))
+                : Math.max(MIN_STICKER_SCALE, Math.min(currentEditState.getStickerScale(), MAX_STICKER_SCALE));
         int progress = Math.round((clamped - MIN_STICKER_SCALE) * 100f);
         seekStickerSize.setProgress(progress);
         tvStickerSizeValue.setText(getString(R.string.edit_sticker_size_format, Math.round(clamped * 100f)));
@@ -998,17 +1158,42 @@ public class EditPhotoActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     private void setupStickerDrag() {
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            private long lastScaleRenderMs = 0;
+
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
-                if (currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) return false;
-                float currentScale = currentEditState.getStickerScale();
+                boolean hasStickers = !currentEditState.getStickerItems().isEmpty();
+                if (!hasStickers && currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) return false;
                 float factor = detector.getScaleFactor();
-                float newScale = currentScale * factor;
-                newScale = Math.max(MIN_STICKER_SCALE, Math.min(newScale, MAX_STICKER_SCALE));
-                currentEditState.setStickerScale(newScale);
+                // Scale active StickerItem
+                com.example.expressionphotobooth.domain.model.StickerItem active =
+                        currentEditState.getActiveSticker();
+                float currentScale;
+                if (active != null) {
+                    currentScale = active.getScale();
+                    float newScale = Math.max(MIN_STICKER_SCALE, Math.min(currentScale * factor, MAX_STICKER_SCALE));
+                    active.setScale(newScale);
+                    currentEditState.setStickerScale(newScale); // keep legacy in sync
+                } else {
+                    currentScale = currentEditState.getStickerScale();
+                    float newScale = Math.max(MIN_STICKER_SCALE, Math.min(currentScale * factor, MAX_STICKER_SCALE));
+                    currentEditState.setStickerScale(newScale);
+                }
+                // Throttle re-render to ~30fps during live pinch to reduce lag
+                long now = System.currentTimeMillis();
+                if (now - lastScaleRenderMs > 33) {
+                    lastScaleRenderMs = now;
+                    applyCurrentEditState();
+                    updateStickerSizeUi();
+                }
+                return true;
+            }
+
+            @Override
+            public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
+                // Always do a final render when the gesture ends so the result is accurate
                 applyCurrentEditState();
                 updateStickerSizeUi();
-                return true;
             }
         });
 
@@ -1019,7 +1204,8 @@ public class EditPhotoActivity extends AppCompatActivity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) {
+                boolean hasStickers = !currentEditState.getStickerItems().isEmpty();
+                if (!hasStickers && currentEditState.getStickerStyle() == EditState.StickerStyle.NONE) {
                     return false;
                 }
 
@@ -1052,10 +1238,20 @@ public class EditPhotoActivity extends AppCompatActivity {
 
                 RectF cropRect = resolveFrameCropRectForBitmap(imgWidth, imgHeight);
 
-                float sx = currentEditState.getStickerX();
-                float sy = currentEditState.getStickerY();
-                float cropX = currentEditState.getStickerCropX();
-                float cropY = currentEditState.getStickerCropY();
+                com.example.expressionphotobooth.domain.model.StickerItem active = currentEditState.getActiveSticker();
+                float sx, sy, cropX, cropY;
+
+                if (active != null) {
+                    sx = active.getAbsX();
+                    sy = active.getAbsY();
+                    cropX = active.getCropX();
+                    cropY = active.getCropY();
+                } else {
+                    sx = currentEditState.getStickerX();
+                    sy = currentEditState.getStickerY();
+                    cropX = currentEditState.getStickerCropX();
+                    cropY = currentEditState.getStickerCropY();
+                }
 
                 float bw = imgWidth;
                 float bh = imgHeight;
@@ -1104,10 +1300,18 @@ public class EditPhotoActivity extends AppCompatActivity {
                             float normCropX = StickerPlacementMapper.clamp01((clampedCenterX - cropRect.left) / Math.max(1f, cropRect.width()));
                             float normCropY = StickerPlacementMapper.clamp01((clampedCenterY - cropRect.top) / Math.max(1f, cropRect.height()));
 
+                            if (active != null) {
+                                active.setAbsX(clampedCenterX / bw);
+                                active.setAbsY(clampedCenterY / bh);
+                                active.setCropX(normCropX);
+                                active.setCropY(normCropY);
+                            }
+                            // Keep legacy fields in sync
                             currentEditState.setStickerX(clampedCenterX / bw);
                             currentEditState.setStickerY(clampedCenterY / bh);
                             currentEditState.setStickerCropX(normCropX);
                             currentEditState.setStickerCropY(normCropY);
+
                             applyCurrentEditState();
                             return true;
                         }
@@ -1174,6 +1378,71 @@ public class EditPhotoActivity extends AppCompatActivity {
         applyCurrentEditState();
     }
 
+    private void updateBackground(EditState.BackgroundStyle backgroundStyle) {
+        pushToUndoStack();
+        backgroundCachedBitmap = null; // Clear cache to show pending state
+        currentEditState.setBackgroundStyle(backgroundStyle);
+        currentEditState.setCustomBackgroundBase64(null);
+        refreshBackground();
+    }
+
+    private void refreshBackground() {
+        if (originalBitmap == null) return;
+
+        EditState.BackgroundStyle style = currentEditState.getBackgroundStyle();
+        Log.d("PortraitProcessor", "Refreshing background style: " + style);
+        
+        if (style == EditState.BackgroundStyle.NONE) {
+            backgroundCachedBitmap = null;
+            applyCurrentEditState();
+            return;
+        }
+
+        // Show loading indicator
+        Toast.makeText(this, getString(R.string.edit_applying_portrait), Toast.LENGTH_SHORT).show();
+
+        Bitmap bgToUse = null;
+        switch (style) {
+            case BLUR:
+                // Let PortraitProcessor handle blur by passing null as bg
+                break;
+            case STUDIO: bgToUse = loadAssetBitmap("bg_studio.png"); break;
+            case BEACH:  bgToUse = loadAssetBitmap("bg_beach.png"); break;
+            case SPACE:  bgToUse = loadAssetBitmap("bg_space.png"); break;
+            case VINTAGE: bgToUse = loadAssetBitmap("bg_vintage.png"); break;
+            case CUSTOM:
+                if (currentEditState.getCustomBackgroundBase64() != null) {
+                    byte[] bytes = android.util.Base64.decode(currentEditState.getCustomBackgroundBase64(), android.util.Base64.DEFAULT);
+                    bgToUse = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                }
+                break;
+        }
+
+        Log.d("PortraitProcessor", "bgToUse is " + (bgToUse == null ? "NULL" : "READY (" + bgToUse.getWidth() + "x" + bgToUse.getHeight() + ")"));
+
+        portraitProcessor.processWithBackground(originalBitmap, bgToUse, result -> {
+            runOnUiThread(() -> {
+                backgroundCachedBitmap = result;
+                applyCurrentEditState();
+            });
+        }, error -> {
+            runOnUiThread(() -> Toast.makeText(this, error, Toast.LENGTH_SHORT).show());
+        });
+    }
+
+    private Bitmap loadAssetBitmap(String name) {
+        try {
+            InputStream is = getAssets().open("backgrounds/" + name);
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            is.close();
+            if (bmp == null) Log.e("PortraitProcessor", "Failed to decode asset: " + name);
+            return bmp;
+        } catch (IOException e) {
+            Log.e("PortraitProcessor", "Failed to open asset: " + name, e);
+            return null;
+        }
+    }
+
     private void updateSticker(EditState.StickerStyle sticker) {
         pushToUndoStack();
         currentEditState.setStickerStyle(sticker);
@@ -1184,13 +1453,31 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void applyCurrentEditState() {
         if (originalBitmap == null) return;
         ensureStickerPlacementAlignedToSelectedFrame();
-        editedBitmap = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState);
+
+        // If a background was chosen but the async cache isn't ready yet, show the original
+        // and wait — refreshBackground() will call us again once the result is ready.
+        boolean backgroundPending = (currentEditState.getBackgroundStyle() != EditState.BackgroundStyle.NONE)
+                && (backgroundCachedBitmap == null);
+
+        Bitmap sourceForRender;
+        boolean skipBg;
+        if (backgroundPending) {
+            // Background processing is in progress: show original for now, skip re-processing
+            sourceForRender = originalBitmap;
+            skipBg = true;
+        } else {
+            sourceForRender = backgroundCachedBitmap != null ? backgroundCachedBitmap : originalBitmap;
+            skipBg = backgroundCachedBitmap != null;
+        }
+
+        editedBitmap = renderEditedBitmapUseCase.execute(this, sourceForRender, currentEditState, skipBg);
         ivEditingPhoto.setImageBitmap(editedBitmap);
         applyFrameOverlay();
         
         chipActiveEdit.setVisibility(
                 (currentEditState.getFilterStyle() != EditState.FilterStyle.NONE ||
-                        currentEditState.getStickerStyle() != EditState.StickerStyle.NONE)
+                        currentEditState.getStickerStyle() != EditState.StickerStyle.NONE ||
+                        currentEditState.getBackgroundStyle() != EditState.BackgroundStyle.NONE)
                         ? View.VISIBLE : View.GONE
         );
     }
@@ -1198,6 +1485,7 @@ public class EditPhotoActivity extends AppCompatActivity {
     private void syncSelectionsToAdapters() {
         filtersAdapter.setSelectedByValue(currentEditState.getFilterStyle());
         framesAdapter.setSelectedByValue(currentEditState.getFrameStyle());
+        backgroundsAdapter.setSelectedByValue(currentEditState.getBackgroundStyle());
         updateStickerCategorySelectionFromCurrentState();
         refreshStickerAdapter();
         stickersAdapter.setSelectedByValue(currentEditState.getStickerStyle());
@@ -1220,11 +1508,12 @@ public class EditPhotoActivity extends AppCompatActivity {
                 }
                 
                 // We use the use case directly to avoid UI thread dependencies.
-                Bitmap currentEdited = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState);
+                Bitmap currentEdited = renderEditedBitmapUseCase.execute(this, originalBitmap, currentEditState, false);
                 Uri currentEditedUri = saveToInternalCache(currentEdited, "edited_" + System.currentTimeMillis() + ".jpg");
 
+                // Always save the current photo's EditState (including sticker scale, background, etc.)
+                sessionState.setPhotoEditState(currentPhotoUri.toString(), currentEditState);
                 if (currentEditedUri != null) {
-                    sessionState.setPhotoEditState(currentPhotoUri.toString(), currentEditState);
                     sessionState.getEditedImageUris().put(currentPhotoUri.toString(), currentEditedUri.toString());
                 }
 
@@ -1238,7 +1527,7 @@ public class EditPhotoActivity extends AppCompatActivity {
                     if (otherOriginal != null) {
                         EditState otherState = sessionState.getPhotoEditState(uriStr);
                         // Filter is already updated in otherState by applyFilterToAllPhotos()
-                        Bitmap otherEdited = renderEditedBitmapUseCase.execute(this, otherOriginal, otherState);
+                        Bitmap otherEdited = renderEditedBitmapUseCase.execute(this, otherOriginal, otherState, false);
                         Uri otherEditedUri = saveToInternalCache(otherEdited, "edited_auto_" + System.currentTimeMillis() + ".jpg");
                         
                         if (otherEditedUri != null) {
@@ -1381,7 +1670,7 @@ public class EditPhotoActivity extends AppCompatActivity {
             return;
         }
 
-        Rect primaryHole = selectedFrameResId != -1 ? FrameConfig.getPrimaryHoleForFrame(selectedFrameResId) : null;
+        Rect primaryHole = selectedFrameResId > 0 ? FrameConfig.getPrimaryHoleForFrame(selectedFrameResId) : null;
         int ratioW = 3;
         int ratioH = 4;
         if (primaryHole != null && primaryHole.width() > 0 && primaryHole.height() > 0) {
