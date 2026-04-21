@@ -800,6 +800,139 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- System Health & Quotas Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSystemHealth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="@dimen/admin_card_corner_radius"
+            app:cardElevation="@dimen/admin_card_elevation"
+            app:cardBackgroundColor="@color/surface_card">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hệ Thống &amp; Tài Nguyên"
+                    android:textColor="@color/admin_text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Giám sát băng thông và hạn mức AI/Firebase"
+                    android:textColor="@color/admin_subtitle_color"
+                    android:textSize="11sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#F1F5F9" />
+
+                <!-- Gemini AI Quota -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Gemini AI (Requests)"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_primary" />
+                        <TextView
+                            android:id="@+id/tvQuotaGemini"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Healthy"
+                            android:textSize="11sp"
+                            android:textColor="#27A869"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/progressQuotaGemini"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:progress="35"
+                        app:indicatorColor="@color/app_blue"
+                        app:trackColor="#F1F5F9"
+                        app:trackCornerRadius="4dp" />
+                </LinearLayout>
+
+                <!-- Firebase Storage -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Firebase Storage"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_primary" />
+                        <TextView
+                            android:id="@+id/tvQuotaStorage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="68%"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_secondary" />
+                    </LinearLayout>
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/progressQuotaStorage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:progress="68"
+                        app:indicatorColor="#EDAA66"
+                        app:trackColor="#F1F5F9"
+                        app:trackCornerRadius="4dp" />
+                </LinearLayout>
+
+                <!-- API Latency -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_check_24"
+                        app:tint="#27A869" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="API Latency: 120ms (Optimal)"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_secondary" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
-

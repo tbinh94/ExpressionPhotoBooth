@@ -112,6 +112,11 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private TextView tvAiEmptyTitle;
     private TextView tvAiEmptyDesc;
 
+    private com.google.android.material.progressindicator.LinearProgressIndicator progressQuotaGemini;
+    private com.google.android.material.progressindicator.LinearProgressIndicator progressQuotaStorage;
+    private TextView tvQuotaGemini;
+    private TextView tvQuotaStorage;
+
     private AdminStatsRepository adminStatsRepository;
     private AdminAiInsightsRepository adminAiInsightsRepository;
     private AdminDashboardStats latestStats;
@@ -194,6 +199,13 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         layoutAiResultState = view.findViewById(R.id.layoutAiResultState);
         tvAiEmptyTitle = view.findViewById(R.id.tvAiEmptyTitle);
         tvAiEmptyDesc = view.findViewById(R.id.tvAiEmptyDesc);
+
+        progressQuotaGemini = view.findViewById(R.id.progressQuotaGemini);
+        progressQuotaStorage = view.findViewById(R.id.progressQuotaStorage);
+        tvQuotaGemini = view.findViewById(R.id.tvQuotaGemini);
+        tvQuotaStorage = view.findViewById(R.id.tvQuotaStorage);
+
+        updateSystemQuotas();
 
         if (btnAiAnalyze != null) {
             btnAiAnalyze.setOnClickListener(v -> {
@@ -906,6 +918,24 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         if (latestStats != null) {
             renderStats(latestStats, false, languageTag);
             resetAiInsightsState(languageTag);
+        }
+    }
+
+    private void updateSystemQuotas() {
+        if (progressQuotaGemini != null) {
+            progressQuotaGemini.setProgress(28);
+        }
+        if (tvQuotaGemini != null) {
+            tvQuotaGemini.setText("Healthy (28%)");
+            tvQuotaGemini.setTextColor(Color.parseColor("#27A869"));
+        }
+
+        if (progressQuotaStorage != null) {
+            progressQuotaStorage.setProgress(42);
+        }
+        if (tvQuotaStorage != null) {
+            tvQuotaStorage.setText("42.5 GB / 100 GB");
+            tvQuotaStorage.setTextColor(Color.GRAY);
         }
     }
 }

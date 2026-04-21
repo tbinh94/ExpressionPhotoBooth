@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.expressionphotobooth.ui.chart.AiRatioPieChartView;
+import com.example.expressionphotobooth.utils.AuditLogger;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
@@ -147,11 +148,13 @@ public class AdminReviewsActivity extends AppCompatActivity {
 
                 for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                     ReviewData data = new ReviewData(
+                        doc.getId(),
                         doc.getString("userEmail"),
                         doc.getDouble("rating"),
                         doc.getString("feedback"),
                         doc.getLong("timestamp"),
-                        doc.getString("date")
+                        doc.getString("date"),
+                        doc.getString("status")
                     );
                     allReviews.add(data);
 
@@ -165,7 +168,7 @@ public class AdminReviewsActivity extends AppCompatActivity {
             })
             .addOnFailureListener(e -> {
                 progressReviews.setVisibility(View.GONE);
-                Toast.makeText(this, getString(R.string.admin_reviews_error_load_format, e.getMessage()), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
             });
     }
 
@@ -256,10 +259,13 @@ public class AdminReviewsActivity extends AppCompatActivity {
         TextView tvRating = itemView.findViewById(R.id.tvReviewRating);
         TextView tvFeedback = itemView.findViewById(R.id.tvReviewFeedback);
         TextView tvTime = itemView.findViewById(R.id.tvReviewTime);
+        TextView tvStatus = itemView.findViewById(R.id.tvStatus);
+        View cardStatus = itemView.findViewById(R.id.cardStatus);
+        View btnChangeStatus = itemView.findViewById(R.id.btnChangeStatus);
 
-        tvEmail.setText(TextUtils.isEmpty(review.email) ? getString(R.string.admin_review_email_na) : review.email);
+        tvEmail.setText(TextUtils.isEmpty(review.email) ? "N/A" : review.email);
         tvRating.setText(String.format(Locale.getDefault(), "%d sao", (int) review.rating));
-        tvFeedback.setText(review.feedback.isEmpty() ? getString(R.string.admin_review_no_content) : review.feedback);
+        tvFeedback.setText(review.feedback.isEmpty() ? "(No content)" : review.feedback);
 
         if (review.timestamp != null && review.timestamp > 0) {
             tvTime.setText(DateUtils.getRelativeTimeSpanString(review.timestamp, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS));
@@ -268,6 +274,13 @@ public class AdminReviewsActivity extends AppCompatActivity {
         } else {
             tvTime.setText("");
         }
+
+        updateStatusUi(tvStatus, cardStatus, review.status);
+
+        btnChangeStatus.setOnClickListener(v -> {
+            String nextStatus = getNextStatus(review.status);
+            updateReviewStatus(review, nextStatus, tvStatus, cardStatus);
+        });
 
         // Set avatar letter
         TextView tvAvatar = itemView.findViewById(R.id.tvAvatar);
@@ -282,19 +295,58 @@ public class AdminReviewsActivity extends AppCompatActivity {
         containerReviews.addView(itemView);
     }
 
+    private void updateStatusUi(TextView tvStatus, View cardStatus, String status) {
+        if ("completed".equalsIgnoreCase(status)) {
+            tvStatus.setText("Completed");
+            tvStatus.setTextColor(Color.parseColor("#10B981"));
+            cardStatus.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#ECFDF5")));
+        } else if ("processing".equalsIgnoreCase(status)) {
+            tvStatus.setText("Processing");
+            tvStatus.setTextColor(Color.parseColor("#3B82F6"));
+            cardStatus.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#EFF6FF")));
+        } else {
+            tvStatus.setText("Pending");
+            tvStatus.setTextColor(Color.parseColor("#F59E0B"));
+            cardStatus.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#FFFBEB")));
+        }
+    }
+
+    private String getNextStatus(String current) {
+        if ("completed".equalsIgnoreCase(current)) return "pending";
+        if ("processing".equalsIgnoreCase(current)) return "completed";
+        return "processing";
+    }
+
+    private void updateReviewStatus(ReviewData review, String newStatus, TextView tvStatus, View cardStatus) {
+        if (review.id == null) return;
+        FirebaseFirestore.getInstance().collection("reviews").document(review.id)
+                .update("status", newStatus)
+                .addOnSuccessListener(aVoid -> {
+                    AuditLogger.logAction("UPDATE_REVIEW_STATUS", review.id, "New status: " + newStatus);
+                    review.status = newStatus;
+                    updateStatusUi(tvStatus, cardStatus, newStatus);
+                    Toast.makeText(this, "Status updated", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
     private static class ReviewData {
+        String id;
         String email;
         double rating;
         String feedback;
         Long timestamp;
         String date;
+        String status;
 
-        ReviewData(String email, Double rating, String feedback, Long timestamp, String date) {
+        ReviewData(String id, String email, Double rating, String feedback, Long timestamp, String date, String status) {
+            this.id = id;
             this.email = email != null ? email : "";
             this.rating = rating != null ? rating : 0.0;
             this.feedback = feedback != null ? feedback : "";
             this.timestamp = timestamp;
             this.date = date;
+            this.status = status != null ? status : "pending";
         }
     }
 }
