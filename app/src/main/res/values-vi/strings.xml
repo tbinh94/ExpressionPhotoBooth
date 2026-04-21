@@ -80,6 +80,7 @@
     <string name="language_badge_en">EN</string>
     <string name="language_badge_vi">VI</string>
     <string name="home_drawer_change_banner">Đổi ảnh bìa</string>
+    <string name="home_drawer_settings_label">--- SETTINGS ---</string>
     <string name="home_history_user_only_title">Chỉ dành cho thành viên</string>
     <string name="home_history_user_only_message">Lịch sử chỉ dành cho tài khoản đã đăng ký. Hãy đăng ký để lưu và xem lại phiên chụp.</string>
     <string name="home_gallery_user_only_title">Chỉ dành cho thành viên</string>
@@ -501,7 +502,16 @@ những ảnh đã chụp trước đó</string>
     <string name="ai_trigger_face_mouth_open">Há miệng 😮</string>
     <string name="ai_trigger_face_wink">Nháy mắt 😉</string>
     <string name="ai_trigger_face_tilt">Nghiêng đầu 🤳</string>
-    <string name="home_drawer_nav_label">ĐIỀU HƯỚNG</string>
+    <string name="home_drawer_nav_label">--- MENU ---</string>
     <string name="admin_role_member">Thành viên</string>
-    <string name="admin_role_admin">Quản trị viên</string>
+    <string name="admin_role_admin">Admin</string>
+    <string name="admin_role_premium">Thành viên Premium</string>
+    <string name="auth_anonymous_user">Người dùng ẩn danh</string>
+    <string name="profile_label_role">Vai trò</string>
+    <string name="profile_label_status">Trạng thái</string>
+    <string name="profile_status_online">Trực tuyến</string>
+    <string name="profile_section_security">BẢO MẬT &amp; CÀI ĐẶT</string>
+    <string name="profile_btn_change_avatar">Thay đổi ảnh đại diện</string>
+    <string name="profile_btn_change_password">Đổi mật khẩu</string>
+    <string name="profile_btn_close">Đóng</string>
 </resources>

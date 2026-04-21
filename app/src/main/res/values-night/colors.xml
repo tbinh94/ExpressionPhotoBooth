@@ -67,4 +67,5 @@
     <color name="home_grad_start">#0F172A</color>
     <color name="home_grad_center">#1E1B4B</color>
     <color name="home_grad_end">#312E81</color>
+    <color name="admin_text_primary">#F1F5F9</color>
 </resources>

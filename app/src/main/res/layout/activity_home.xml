@@ -205,271 +205,293 @@
         android:paddingTop="@dimen/home_drawer_padding_top"
         android:paddingBottom="@dimen/home_drawer_padding_bottom">
 
-        <!-- ✦ Modern User Profile Header ✦ -->
+        <!-- ✦ User Profile Header (Vertical Design) ✦ -->
         <LinearLayout
             android:id="@+id/cardNavUserProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="24dp"
-            android:background="@drawable/bg_bottom_sheet_rounded"
-            android:backgroundTint="#1AFFFFFF"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical"
+            android:background="@drawable/bg_home_glass_card"
+            android:orientation="vertical"
+            android:padding="20dp"
             android:clickable="true"
             android:focusable="true">
-
-            <!-- Avatar with Glow -->
-            <FrameLayout
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="@drawable/shape_nav_avatar">
-                
-                <TextView
-                    android:id="@+id/tvNavAvatarInitials"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="U"
-                    android:textColor="#FFFFFF"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivNavAvatar"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:visibility="gone"
-                    app:shapeAppearanceOverlay="@style/CircleAppearance" />
-            </FrameLayout>
-
+ 
+            <!-- Row 1: Avatar + Name -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:background="@drawable/shape_nav_avatar">
+                    
+                    <TextView
+                        android:id="@+id/tvNavAvatarInitials"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="U"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+     
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivNavAvatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        app:shapeAppearanceOverlay="@style/CircleAppearance" />
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/tvNavUserName"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
                     android:text="User Name"
                     android:textColor="#FFFFFF"
-                    android:textSize="17sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     android:ellipsize="end"
                     android:maxLines="1" />
-
-                <TextView
-                    android:id="@+id/tvNavUserEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="user@example.com"
-                    android:textColor="#B0C4FF"
-                    android:textSize="12sp"
-                    android:ellipsize="end"
-                    android:maxLines="1" />
-
-                <TextView
-                    android:id="@+id/tvNavUserRole"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:background="@drawable/bg_nav_role_pill"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="2dp"
-                    android:text="Member"
-                    android:textColor="#FFFFFF"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
             </LinearLayout>
+
+            <!-- Row 2: Email -->
+            <TextView
+                android:id="@+id/tvNavUserEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="user@example.com"
+                android:textColor="#94A3B8"
+                android:textSize="13sp"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <!-- Row 3: Role Badge -->
+            <TextView
+                android:id="@+id/tvNavUserRole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_nav_role_pill"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="3dp"
+                android:text="Member"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:letterSpacing="0.05" />
+        </LinearLayout>
+
+        <!-- === MENU === -->
+        <TextView
+            android:id="@+id/tvDrawerNavLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:gravity="center"
+            android:text="@string/home_drawer_nav_label"
+            android:textColor="#475569"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.2" />
+
+        <LinearLayout
+            android:id="@+id/itemGallery"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_drawer_item_clickable"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:clickable="true"
+            android:focusable="true">
+            
+            <TextView
+                android:id="@+id/tvDrawerShowHistory"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_grid_view_24"
+                android:drawablePadding="16dp"
+                android:drawableTint="#CBD5E1"
+                android:text="@string/home_drawer_show_history"
+                android:textColor="#F8FAFC"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <ImageView
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:src="@drawable/ic_arrow_forward_24"
-                app:tint="#40FFFFFF" />
+                app:tint="#4DFFFFFF" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvDrawerNavLabel"
+        <LinearLayout
+            android:id="@+id/itemBanner"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="ĐIỀU HƯỚNG"
-            android:textColor="#4DFFFFFF"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1"
-            android:layout_marginBottom="12dp"
-            android:paddingStart="8dp" />
-
-        <TextView
-            android:id="@+id/tvDrawerShowHistory"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/home_drawer_item_height"
-            android:layout_marginTop="@dimen/home_drawer_item_top_margin"
+            android:layout_height="52dp"
+            android:layout_marginBottom="4dp"
             android:background="@drawable/bg_drawer_item_clickable"
-            android:drawableStart="@drawable/ic_grid_view_24"
-            android:drawablePadding="@dimen/home_drawer_item_padding_horizontal"
-            android:drawableTint="@color/home_drawer_text"
-            android:fontFamily="serif"
             android:gravity="center_vertical"
-            android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
-            android:text="@string/home_drawer_show_history"
-            android:textColor="@color/home_drawer_text"
-            android:textSize="@dimen/home_drawer_item_text_size"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:clickable="true"
+            android:focusable="true">
+            
+            <TextView
+                android:id="@+id/tvDrawerChangeBanner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_image_24"
+                android:drawablePadding="16dp"
+                android:drawableTint="#CBD5E1"
+                android:text="@string/home_drawer_change_banner"
+                android:textColor="#F8FAFC"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvDrawerChangeBanner"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/home_drawer_item_height"
-            android:layout_marginTop="@dimen/home_drawer_item_secondary_top_margin"
-            android:background="@drawable/bg_drawer_item_clickable"
-            android:drawableStart="@drawable/ic_image_24"
-            android:drawablePadding="@dimen/home_drawer_item_padding_horizontal"
-            android:drawableTint="@color/home_drawer_text"
-            android:fontFamily="serif"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
-            android:text="@string/home_drawer_change_banner"
-            android:textColor="@color/home_drawer_text"
-            android:textSize="@dimen/home_drawer_item_text_size"
-            android:textStyle="bold" />
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_arrow_forward_24"
+                app:tint="#4DFFFFFF" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvDrawerUsageGuide"
+        <LinearLayout
+            android:id="@+id/itemGuide"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/home_drawer_item_height"
-            android:layout_marginTop="@dimen/home_drawer_item_secondary_top_margin"
+            android:layout_height="52dp"
+            android:layout_marginBottom="4dp"
             android:background="@drawable/bg_drawer_item_clickable"
-            android:drawableStart="@drawable/ic_help_24"
-            android:drawablePadding="@dimen/home_drawer_item_padding_horizontal"
-            android:drawableTint="@color/home_drawer_text"
-            android:fontFamily="serif"
             android:gravity="center_vertical"
-            android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
-            android:text="@string/home_drawer_usage_guide"
-            android:textColor="@color/home_drawer_text"
-            android:textSize="@dimen/home_drawer_item_text_size"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:clickable="true"
+            android:focusable="true">
+            
+            <TextView
+                android:id="@+id/tvDrawerUsageGuide"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_help_24"
+                android:drawablePadding="16dp"
+                android:drawableTint="#CBD5E1"
+                android:text="@string/home_drawer_usage_guide"
+                android:textColor="#F8FAFC"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_arrow_forward_24"
+                app:tint="#4DFFFFFF" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvDrawerAdminDashboard"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/home_drawer_item_height"
-            android:layout_marginTop="@dimen/home_drawer_item_secondary_top_margin"
+            android:layout_height="52dp"
+            android:layout_marginBottom="4dp"
             android:background="@drawable/bg_drawer_item_clickable"
             android:drawableStart="@drawable/ic_settings_24"
-            android:drawablePadding="@dimen/home_drawer_item_padding_horizontal"
-            android:drawableTint="@color/home_drawer_text"
-            android:fontFamily="serif"
+            android:drawablePadding="16dp"
+            android:drawableTint="#CBD5E1"
             android:gravity="center_vertical"
-            android:paddingHorizontal="@dimen/home_drawer_item_padding_horizontal"
+            android:paddingHorizontal="16dp"
             android:text="@string/admin_go_to_dashboard"
-            android:textColor="@color/home_drawer_text"
-            android:textSize="@dimen/home_drawer_item_text_size"
+            android:textColor="#F8FAFC"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:visibility="gone" />
 
-        <LinearLayout
+        <!-- === SETTINGS === -->
+        <TextView
+            android:id="@+id/tvDrawerSettingsLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/home_drawer_section_top_margin"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
+            android:gravity="center"
+            android:text="@string/home_drawer_settings_label"
+            android:textColor="#475569"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.2" />
+
+        <!-- Music Setting -->
+        <LinearLayout
+            android:id="@+id/itemMusic"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_drawer_item_clickable"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:id="@+id/tvDrawerMusicLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:fontFamily="serif"
+                android:drawableStart="@drawable/ic_volume_up"
+                android:drawablePadding="16dp"
+                android:drawableTint="#CBD5E1"
                 android:text="@string/home_drawer_music"
-                android:textColor="@color/home_drawer_text"
-                android:textSize="@dimen/home_drawer_label_text_size"
+                android:textColor="#F8FAFC"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/groupMusicState"
-                android:layout_width="@dimen/home_drawer_toggle_width"
-                android:layout_height="@dimen/home_drawer_toggle_height"
-                android:background="@drawable/bg_drawer_spinner"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnMusicOn"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    app:icon="@drawable/ic_volume_up"
-                    app:iconGravity="textTop"
-                    app:iconPadding="0dp"
-                    app:iconSize="22dp"
-                    app:iconTint="@color/home_toggle_text"
-                    app:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
-                    app:rippleColor="@color/home_toggle_ripple" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnMusicOff"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    app:icon="@drawable/ic_volume_off"
-                    app:iconGravity="textTop"
-                    app:iconPadding="0dp"
-                    app:iconSize="22dp"
-                    app:iconTint="@color/home_toggle_text"
-                    app:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
-                    app:rippleColor="@color/home_toggle_ripple" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchMusic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="@color/white"
+                app:trackTint="#4DFFFFFF" />
         </LinearLayout>
 
+        <!-- Theme Setting -->
         <LinearLayout
+            android:id="@+id/itemTheme"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/home_drawer_music_language_gap"
+            android:layout_height="52dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_drawer_item_clickable"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:id="@+id/tvDrawerThemeLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:fontFamily="serif"
+                android:drawableStart="@drawable/ic_auto_awesome"
+                android:drawablePadding="16dp"
+                android:drawableTint="#CBD5E1"
                 android:text="@string/home_drawer_theme"
-                android:textColor="@color/home_drawer_text"
-                android:textSize="@dimen/home_drawer_label_text_size"
+                android:textColor="#F8FAFC"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/groupTheme"
-                android:layout_width="@dimen/home_drawer_theme_toggle_width"
-                android:layout_height="@dimen/home_drawer_toggle_height"
+                android:layout_width="110dp"
+                android:layout_height="32dp"
                 android:background="@drawable/bg_drawer_spinner"
                 app:selectionRequired="true"
                 app:singleSelection="true">
@@ -482,19 +504,13 @@
                     android:layout_weight="1"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
                     android:padding="0dp"
                     app:icon="@drawable/ic_theme_sun_20"
                     app:iconGravity="textTop"
-                    app:iconPadding="0dp"
-                    app:iconSize="22dp"
+                    app:iconSize="18dp"
                     app:iconTint="@color/home_toggle_text"
                     app:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
-                    app:rippleColor="@color/home_toggle_ripple" />
+                    app:cornerRadius="12dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnThemeDark"
@@ -504,19 +520,13 @@
                     android:layout_weight="1"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
                     android:padding="0dp"
                     app:icon="@drawable/ic_theme_moon_20"
                     app:iconGravity="textTop"
-                    app:iconPadding="0dp"
-                    app:iconSize="22dp"
+                    app:iconSize="18dp"
                     app:iconTint="@color/home_toggle_text"
                     app:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
-                    app:rippleColor="@color/home_toggle_ripple" />
+                    app:cornerRadius="12dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnThemeSystem"
@@ -526,79 +536,80 @@
                     android:layout_weight="1"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
                     android:padding="0dp"
-                    app:icon="@drawable/ic_auto_awesome"
+                    app:icon="@drawable/ic_sparkle"
                     app:iconGravity="textTop"
-                    app:iconPadding="0dp"
-                    app:iconSize="22dp"
+                    app:iconSize="18dp"
                     app:iconTint="@color/home_toggle_text"
                     app:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="@dimen/home_drawer_toggle_corner_radius"
-                    app:rippleColor="@color/home_toggle_ripple" />
+                    app:cornerRadius="12dp" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </LinearLayout>
 
+        <!-- Language Setting -->
         <LinearLayout
+            android:id="@+id/itemLanguage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/home_drawer_music_language_gap"
+            android:layout_height="52dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_drawer_item_clickable"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:clickable="true"
+            android:focusable="true">
 
             <TextView
                 android:id="@+id/tvDrawerLanguageLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:fontFamily="serif"
+                android:drawableStart="@drawable/ic_language_24"
+                android:drawablePadding="16dp"
+                android:drawableTint="#CBD5E1"
                 android:text="@string/home_drawer_language"
-                android:textColor="@color/home_drawer_text"
-                android:textSize="@dimen/home_drawer_label_text_size"
+                android:textColor="#F8FAFC"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/btnLanguageToggle"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:id="@+id/ivLanguageFlag"
+                android:layout_width="24dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="12dp"
                 android:src="@drawable/ic_flag_vn"
                 android:scaleType="centerCrop"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                app:shapeAppearanceOverlay="@style/CircleAppearance" />
+                app:shapeAppearanceOverlay="@style/RoundedAppearance" />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_arrow_forward_24"
+                app:tint="#4DFFFFFF" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="@dimen/home_drawer_bottom_divider_margin_bottom"
-            android:background="@color/home_drawer_divider" />
-
+  
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDrawerSignOut"
-            android:layout_width="@dimen/home_drawer_sign_out_width"
-            android:layout_height="@dimen/home_drawer_sign_out_height"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/home_drawer_sign_out_margin_top"
-            android:layout_marginBottom="@dimen/home_drawer_sign_out_margin_bottom"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginBottom="16dp"
             android:text="@string/auth_sign_out"
             android:textAllCaps="false"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/home_drawer_sign_out_text_size"
+            android:textColor="#EF4444"
+            android:textSize="15sp"
             android:textStyle="bold"
-            app:backgroundTint="@color/history_pill_pink"
-            app:cornerRadius="@dimen/home_drawer_sign_out_corner_radius" />
+            app:icon="@drawable/ic_logout_24"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconTint="#EF4444"
+            android:background="@drawable/bg_drawer_item_clickable" />
 
     </LinearLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>
-

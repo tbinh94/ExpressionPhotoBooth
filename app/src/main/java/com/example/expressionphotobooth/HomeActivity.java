@@ -68,10 +68,12 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvDrawerMusicLabel;
     private TextView tvDrawerLanguageLabel;
     private TextView tvDrawerThemeLabel;
-    private MaterialButtonToggleGroup groupMusicState;
+    private com.google.android.material.materialswitch.MaterialSwitch switchMusic;
     private MaterialButtonToggleGroup groupTheme;
-    private MaterialButton btnMusicOn;
-    private com.google.android.material.button.MaterialButton btnMusicOff;
+    private View itemGallery;
+    private View itemBanner;
+    private View itemGuide;
+    private View itemLanguage;
     private android.widget.ImageView btnLanguageToggle;
     private com.google.android.material.button.MaterialButton btnThemeLight;
     private MaterialButton btnThemeDark;
@@ -163,11 +165,13 @@ public class HomeActivity extends AppCompatActivity {
         tvDrawerMusicLabel = findViewById(R.id.tvDrawerMusicLabel);
         tvDrawerLanguageLabel = findViewById(R.id.tvDrawerLanguageLabel);
         tvDrawerThemeLabel = findViewById(R.id.tvDrawerThemeLabel);
-        groupMusicState = findViewById(R.id.groupMusicState);
+        switchMusic = findViewById(R.id.switchMusic);
         groupTheme = findViewById(R.id.groupTheme);
-        btnMusicOn = findViewById(R.id.btnMusicOn);
-        btnMusicOff = findViewById(R.id.btnMusicOff);
-        btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
+        itemGallery = findViewById(R.id.itemGallery);
+        itemBanner = findViewById(R.id.itemBanner);
+        itemGuide = findViewById(R.id.itemGuide);
+        itemLanguage = findViewById(R.id.itemLanguage);
+        btnLanguageToggle = findViewById(R.id.ivLanguageFlag);
         btnThemeLight = findViewById(R.id.btnThemeLight);
         btnThemeDark = findViewById(R.id.btnThemeDark);
         btnThemeSystem = findViewById(R.id.btnThemeSystem);
@@ -194,6 +198,9 @@ public class HomeActivity extends AppCompatActivity {
         resizeCompoundStartIcon(tvDrawerChangeBanner, R.dimen.home_drawer_item_icon_size);
         resizeCompoundStartIcon(tvDrawerUsageGuide, R.dimen.home_drawer_item_icon_size);
         resizeCompoundStartIcon(tvDrawerAdminDashboard, R.dimen.home_drawer_item_icon_size);
+        resizeCompoundStartIcon(tvDrawerMusicLabel, R.dimen.home_drawer_item_icon_size);
+        resizeCompoundStartIcon(tvDrawerThemeLabel, R.dimen.home_drawer_item_icon_size);
+        resizeCompoundStartIcon(tvDrawerLanguageLabel, R.dimen.home_drawer_item_icon_size);
     }
 
     private void applySystemInsets() {
@@ -228,6 +235,54 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupDrawerActions() {
+        if (itemGallery != null) {
+            itemGallery.setOnClickListener(v -> openGalleryIfAllowed());
+        }
+
+        if (itemBanner != null) {
+            itemBanner.setOnClickListener(v -> {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                showChangeBannerDialog();
+            });
+        }
+
+        if (itemGuide != null) {
+            itemGuide.setOnClickListener(v -> {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                showUsageGuideDialog();
+            });
+        }
+
+        if (tvDrawerAdminDashboard != null) {
+            tvDrawerAdminDashboard.setOnClickListener(v -> {
+                startActivity(new Intent(HomeActivity.this, AdminDashboardActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.START);
+                finish();
+            });
+        }
+
+        if (itemLanguage != null) {
+            itemLanguage.setOnClickListener(v -> {
+                String updated = LocaleManager.toggleLanguageWithoutRecreate(HomeActivity.this);
+                updateLocalizedUi(updated);
+            });
+        }
+
+        if (btnDrawerSignOut != null) {
+            btnDrawerSignOut.setOnClickListener(v -> {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                handleSignOut();
+            });
+        }
+
+        if (cardNavUserProfile != null) {
+            cardNavUserProfile.setOnClickListener(v -> {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                showUserProfileDetail();
+            });
+        }
+
+        // Maintain the drawer slide animation
         drawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -248,36 +303,6 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
-
-        tvDrawerShowHistory.setOnClickListener(v -> openGalleryIfAllowed());
-
-        tvDrawerUsageGuide.setOnClickListener(v -> {
-            drawerLayout.closeDrawer(GravityCompat.START);
-            showUsageGuideDialog();
-        });
-
-        tvDrawerAdminDashboard.setOnClickListener(v -> {
-            startActivity(new Intent(HomeActivity.this, AdminDashboardActivity.class));
-            drawerLayout.closeDrawer(GravityCompat.START);
-            finish();
-        });
-
-        btnDrawerSignOut.setOnClickListener(v -> {
-            drawerLayout.closeDrawer(GravityCompat.START);
-            handleSignOut();
-        });
-
-        tvDrawerChangeBanner.setOnClickListener(v -> {
-            drawerLayout.closeDrawer(GravityCompat.START);
-            showChangeBannerDialog();
-        });
-
-        if (cardNavUserProfile != null) {
-            cardNavUserProfile.setOnClickListener(v -> {
-                drawerLayout.closeDrawer(GravityCompat.START);
-                showUserProfileDetail();
-            });
-        }
     }
 
     private void setupMainActions() {
@@ -306,17 +331,11 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupMusicControls() {
-        groupMusicState.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) {
-                return;
-            }
-            if (checkedId == R.id.btnMusicOn) {
-                setMusicEnabled(true);
-            } else if (checkedId == R.id.btnMusicOff) {
-                setMusicEnabled(false);
-            }
-            updateMusicControls();
-        });
+        if (switchMusic != null) {
+            switchMusic.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                setMusicEnabled(isChecked);
+            });
+        }
         updateMusicControls();
     }
 
@@ -384,13 +403,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateMusicControls() {
-        int checkedId = isMuted ? R.id.btnMusicOff : R.id.btnMusicOn;
-        if (groupMusicState.getCheckedButtonId() != checkedId) {
-            groupMusicState.check(checkedId);
+        if (switchMusic != null) {
+            switchMusic.setChecked(!isMuted);
         }
-        boolean onChecked = !isMuted;
-        updateSegmentButtonState(btnMusicOn, onChecked);
-        updateSegmentButtonState(btnMusicOff, !onChecked);
     }
 
     private void updateLanguageControls(String languageTag) {
@@ -559,73 +574,57 @@ public class HomeActivity extends AppCompatActivity {
         if (authRepository == null) return;
         String languageTag = LocaleManager.getCurrentLanguage(this);
 
-        // Get basic info from Firebase Auth
-        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            String name = user.getDisplayName();
-            String email = user.getEmail();
-
-            if (tvNavUserName != null) {
-                tvNavUserName.setText(name != null && !name.isEmpty() ? name : "Anonymous User");
-            }
-            if (tvNavUserEmail != null) {
-                tvNavUserEmail.setText(email != null ? email : "no-email@booth.com");
-            }
-
-            // Load Avatar Image or Initials
-            if (ivNavAvatar != null && tvNavAvatarInitials != null) {
-                Uri photoUrl = user.getPhotoUrl();
-                if (photoUrl != null) {
-                    ivNavAvatar.setVisibility(View.VISIBLE);
-                    tvNavAvatarInitials.setVisibility(View.GONE);
-                    Glide.with(this)
-                        .load(photoUrl)
-                        .placeholder(R.drawable.shape_nav_avatar)
-                        .circleCrop()
-                        .into(ivNavAvatar);
-                } else {
-                    ivNavAvatar.setVisibility(View.GONE);
-                    tvNavAvatarInitials.setVisibility(View.VISIBLE);
+        authRepository.fetchProfile(new AuthRepository.ProfileCallback() {
+            @Override
+            public void onSuccess(String displayName, String email, String photoUrl, UserRole role) {
+                if (tvNavUserName != null) {
+                    tvNavUserName.setText(displayName != null && !displayName.isEmpty() ? displayName : LocaleManager.getString(HomeActivity.this, R.string.auth_anonymous_user, languageTag));
                 }
-            }
+                if (tvNavUserEmail != null) {
+                    tvNavUserEmail.setText(email != null ? email : "no-email@booth.com");
+                }
 
-            // Initials for avatar fallback
-            if (tvNavAvatarInitials != null && user.getPhotoUrl() == null) {
-                String initials = "U";
-                if (name != null && !name.isEmpty()) {
-                    String[] parts = name.trim().split("\\s+");
-                    if (parts.length >= 2) {
-                        initials = (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase();
-                    } else if (parts.length == 1 && parts[0].length() >= 1) {
-                        initials = parts[0].substring(0, 1).toUpperCase();
+                // Role Badge
+                if (tvNavUserRole != null) {
+                    int roleRes = R.string.admin_role_member;
+                    int roleColor = 0xFF6B7280;
+                    if (role == UserRole.ADMIN) {
+                        roleRes = R.string.admin_role_admin;
+                        roleColor = 0xFF3D68E8;
+                    } else if (role == UserRole.PREMIUM) {
+                        roleRes = R.string.admin_role_premium;
+                        roleColor = 0xFFEAB308;
+                    }
+                    tvNavUserRole.setText(LocaleManager.getString(HomeActivity.this, roleRes, languageTag));
+                    tvNavUserRole.setBackgroundTintList(android.content.res.ColorStateList.valueOf(roleColor));
+                }
+
+                // Avatar
+                if (ivNavAvatar != null && tvNavAvatarInitials != null) {
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        ivNavAvatar.setVisibility(View.VISIBLE);
+                        tvNavAvatarInitials.setVisibility(View.GONE);
+                        Glide.with(HomeActivity.this).load(photoUrl).circleCrop().into(ivNavAvatar);
+                    } else {
+                        ivNavAvatar.setVisibility(View.GONE);
+                        tvNavAvatarInitials.setVisibility(View.VISIBLE);
+                        String initials = "U";
+                        if (displayName != null && !displayName.isEmpty()) {
+                            String[] parts = displayName.trim().split("\\s+");
+                            initials = parts.length >= 2 ? (parts[0].substring(0, 1) + parts[parts.length-1].substring(0, 1)) : parts[0].substring(0, 1);
+                        }
+                        tvNavAvatarInitials.setText(initials.toUpperCase());
                     }
                 }
-                tvNavAvatarInitials.setText(initials);
-            }
-        }
 
-        // Fetch Role detail from Database/Repository
-        authRepository.fetchCurrentRole(new AuthRepository.RoleCallback() {
-            @Override
-            public void onSuccess(UserRole role) {
-                if (tvNavUserRole != null) {
-                    int roleRes = (role == UserRole.ADMIN) ? R.string.admin_role_admin : R.string.admin_role_member;
-                    tvNavUserRole.setText(LocaleManager.getString(HomeActivity.this, roleRes, languageTag));
-                    tvNavUserRole.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                        role == UserRole.ADMIN ? 0xFF3D68E8 : 0xFF6B7280 // Blue for Admin, Gray for Member
-                    ));
-                }
-
-                // Handle Admin Menu visibility
                 if (tvDrawerAdminDashboard != null) {
                     tvDrawerAdminDashboard.setVisibility(role == UserRole.ADMIN ? View.VISIBLE : View.GONE);
                 }
             }
+
             @Override
             public void onError(String message) {
-                if (tvNavUserRole != null) {
-                    tvNavUserRole.setText(LocaleManager.getString(HomeActivity.this, R.string.admin_role_member, languageTag));
-                }
+                Log.e(TAG, "Error fetching profile: " + message);
             }
         });
     }
@@ -644,28 +643,43 @@ public class HomeActivity extends AppCompatActivity {
         TextView btnChangePassword = view.findViewById(R.id.btnChangePassword);
         TextView btnClose = view.findViewById(R.id.btnCloseProfile);
         
-        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            String name = user.getDisplayName();
-            tvProfileName.setText(name != null && !name.isEmpty() ? name : "Anonymous User");
-            tvProfileEmail.setText(user.getEmail());
-            
-            Uri photoUrl = user.getPhotoUrl();
-            if (photoUrl != null && ivProfileAvatar != null) {
-                ivProfileAvatar.setVisibility(View.VISIBLE);
-                tvProfileAvatar.setVisibility(View.GONE);
-                Glide.with(this).load(photoUrl).circleCrop().into(ivProfileAvatar);
-            } else {
-                if (ivProfileAvatar != null) ivProfileAvatar.setVisibility(View.GONE);
-                tvProfileAvatar.setVisibility(View.VISIBLE);
-                String initials = "U";
-                if (name != null && !name.isEmpty()) {
-                    String[] parts = name.trim().split("\\s+");
-                    initials = parts.length >= 2 ? (parts[0].substring(0, 1) + parts[parts.length-1].substring(0, 1)) : parts[0].substring(0, 1);
+        authRepository.fetchProfile(new AuthRepository.ProfileCallback() {
+            @Override
+            public void onSuccess(String displayName, String email, String photoUrl, UserRole role) {
+                String languageTag = LocaleManager.getCurrentLanguage(HomeActivity.this);
+                tvProfileName.setText(displayName != null && !displayName.isEmpty() ? displayName : LocaleManager.getString(HomeActivity.this, R.string.auth_anonymous_user, languageTag));
+                tvProfileEmail.setText(email);
+
+                if (photoUrl != null && !photoUrl.isEmpty() && ivProfileAvatar != null) {
+                    ivProfileAvatar.setVisibility(View.VISIBLE);
+                    tvProfileAvatar.setVisibility(View.GONE);
+                    Glide.with(HomeActivity.this).load(photoUrl).circleCrop().into(ivProfileAvatar);
+                } else {
+                    if (ivProfileAvatar != null) ivProfileAvatar.setVisibility(View.GONE);
+                    tvProfileAvatar.setVisibility(View.VISIBLE);
+                    String initials = "U";
+                    if (displayName != null && !displayName.isEmpty()) {
+                        String[] parts = displayName.trim().split("\\s+");
+                        initials = parts.length >= 2 ? (parts[0].substring(0, 1) + parts[parts.length-1].substring(0, 1)) : parts[0].substring(0, 1);
+                    }
+                    tvProfileAvatar.setText(initials.toUpperCase());
                 }
-                tvProfileAvatar.setText(initials.toUpperCase());
+
+                // Set Role in Detail
+                TextView tvProfileRoleValue = view.findViewById(R.id.tvProfileRoleValue);
+                if (tvProfileRoleValue != null) {
+                    int roleRes = R.string.admin_role_member;
+                    if (role == UserRole.ADMIN) roleRes = R.string.admin_role_admin;
+                    else if (role == UserRole.PREMIUM) roleRes = R.string.admin_role_premium;
+                    tvProfileRoleValue.setText(LocaleManager.getString(HomeActivity.this, roleRes, languageTag));
+                }
             }
-        }
+
+            @Override
+            public void onError(String message) {
+                Log.e(TAG, "Error fetching profile for detail: " + message);
+            }
+        });
         
         View.OnClickListener pickAvatarAction = v -> {
             dialog.dismiss();
@@ -780,6 +794,17 @@ public class HomeActivity extends AppCompatActivity {
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     Log.d(TAG, "User profile updated.");
+                                    authRepository.updateProfilePhoto(uri.toString(), new AuthRepository.SimpleCallback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            Log.d(TAG, "User profile photo synced to DB.");
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            Log.e(TAG, "Failed to sync profile photo to DB: " + message);
+                                        }
+                                    });
                                     updateUserNavProfile();
                                 }
                             });

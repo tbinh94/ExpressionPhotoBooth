@@ -93,6 +93,7 @@ public class FirebaseAuthRepository implements AuthRepository {
                                     Map<String, Object> userDoc = new HashMap<>();
                                     userDoc.put("email", user.getEmail());
                                     userDoc.put("displayName", user.getDisplayName());
+                                    userDoc.put("photoUrl", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null);
                                     userDoc.put("role", UserRole.USER.toFirestoreValue());
                                     userDoc.put("isActive", true);
                                     userDoc.put("updatedAt", System.currentTimeMillis());
@@ -123,6 +124,7 @@ public class FirebaseAuthRepository implements AuthRepository {
                     Map<String, Object> userDoc = new HashMap<>();
                     userDoc.put("email", user.getEmail());
                     userDoc.put("displayName", name);
+                    userDoc.put("photoUrl", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null);
                     userDoc.put("birthday", birthday);
                     userDoc.put("role", UserRole.USER.toFirestoreValue());
                     userDoc.put("isActive", true);
@@ -249,6 +251,63 @@ public class FirebaseAuthRepository implements AuthRepository {
                             .addOnFailureListener(e -> callback.onError(safeMessage(e, "Không thể gửi email đặt lại mật khẩu.")));
                 })
                 .addOnFailureListener(e -> callback.onError(safeMessage(e, "Lỗi khi kiểm tra thông tin tài khoản.")));
+    }
+
+    @Override
+    public void fetchProfile(ProfileCallback callback) {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        if (user == null) {
+            callback.onError("User not logged in");
+            return;
+        }
+
+        if (user.isAnonymous()) {
+            callback.onSuccess("Guest", null, null, UserRole.USER);
+            return;
+        }
+
+        firestore.collection(USERS_COLLECTION)
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    String email = user.getEmail();
+                    String photoUrl = user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null;
+                    String displayName = user.getDisplayName();
+                    UserRole role = UserRole.USER;
+
+                    if (snapshot.exists()) {
+                        String dbName = snapshot.getString("displayName");
+                        if (dbName != null && !dbName.isEmpty()) {
+                            displayName = dbName;
+                        }
+                        role = UserRole.from(snapshot.getString("role"));
+                    }
+                    callback.onSuccess(displayName, email, photoUrl, role);
+                })
+                .addOnFailureListener(e -> {
+                    // Fallback to Auth details if Firestore fails
+                    callback.onSuccess(user.getDisplayName(), user.getEmail(), 
+                        user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null, UserRole.USER);
+                });
+    }
+
+    @Override
+    public void updateProfilePhoto(String photoUrl, SimpleCallback callback) {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        if (user == null) {
+            callback.onError("User not logged in");
+            return;
+        }
+
+        Map<String, Object> update = new HashMap<>();
+        update.put("photoUrl", photoUrl);
+        update.put("updatedAt", System.currentTimeMillis());
+
+        firestore.collection(USERS_COLLECTION)
+                .document(user.getUid())
+                .update(update)
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError(safeMessage(e, "Lỗi cập nhật ảnh đại diện lên database.")));
     }
 
     @Override

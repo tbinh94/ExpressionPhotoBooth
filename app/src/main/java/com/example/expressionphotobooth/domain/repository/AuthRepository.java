@@ -19,6 +19,11 @@ public interface AuthRepository {
         void onError(String message);
     }
 
+    interface ProfileCallback {
+        void onSuccess(String displayName, String email, String photoUrl, UserRole role);
+        void onError(String message);
+    }
+
     interface SimpleCallback {
         void onSuccess();
         void onError(String message);
@@ -46,6 +51,9 @@ public interface AuthRepository {
 
     void sendPasswordResetEmail(String email, SimpleCallback callback);
 
+    void fetchProfile(ProfileCallback callback);
+
+    void updateProfilePhoto(String photoUrl, SimpleCallback callback);
+
     void signOut();
 }
-

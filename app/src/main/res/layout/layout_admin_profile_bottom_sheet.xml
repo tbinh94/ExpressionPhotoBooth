@@ -111,63 +111,21 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Vai trò"
+                android:text="@string/profile_label_role"
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
                 
             <TextView
+                android:id="@+id/tvProfileRoleValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Quản trị viên hệ thống"
+                android:text="Member"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Status -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
-            
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_sparkle"
-                app:tint="#27A869" />
-                
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="16dp"
-                android:text="Trạng thái"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-                
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-                
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_marginEnd="6dp"
-                    android:background="@drawable/shape_online_dot" />
-                    
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Trực tuyến"
-                    android:textColor="#27A869"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
+
 
     </LinearLayout>
 
@@ -182,7 +140,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="BẢO MẬT &amp; CÀI ĐẶT"
+            android:text="@string/profile_section_security"
             android:textColor="@color/text_secondary"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -194,7 +152,7 @@
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Thay đổi ảnh đại diện"
+            android:text="@string/profile_btn_change_avatar"
             android:layout_marginBottom="8dp"
             app:icon="@drawable/ic_person_24"
             app:iconGravity="textStart"
@@ -206,7 +164,7 @@
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Đổi mật khẩu"
+            android:text="@string/profile_btn_change_password"
             app:icon="@drawable/ic_settings_24"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
@@ -220,6 +178,6 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="16dp"
-        android:text="Đóng" />
+        android:text="@string/profile_btn_close" />
 
 </LinearLayout>

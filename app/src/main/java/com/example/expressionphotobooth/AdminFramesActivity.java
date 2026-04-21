@@ -251,6 +251,8 @@ public class AdminFramesActivity extends AppCompatActivity {
         data.put("layoutType", layoutCode);
         data.put("slotCount", com.example.expressionphotobooth.utils.FrameConfig.getSlotCountForLayout(layoutCode));
         data.put("base64", base64);
+        data.put("type", "admin");
+        data.put("isGlobal", true);
         data.put("createdAt", System.currentTimeMillis());
 
         FirebaseFirestore.getInstance().collection("frames")
