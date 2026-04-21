@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:paddingBottom="40dp">
+
+    <!-- Thẻ nội dung chính (Glass Card) -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:layout_marginHorizontal="24dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_glass_card"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Khoảng trống phía trên -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="60dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Unlock 4 VIP\nSTICKERS!"
+                android:textAlignment="center"
+                android:textColor="#2D3436"
+                android:textSize="28sp"
+                android:lineSpacingMultiplier="1.0"
+                android:textStyle="bold" />
+
+            <!-- Lưới Sticker mô phỏng mẫu STICKERAD.png -->
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:columnCount="2"
+                android:rowCount="2">
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_margin="8dp"
+                    android:padding="8dp"
+                    android:background="@drawable/shape_glass_circle"
+                    android:src="@drawable/ic_sticker_crown" />
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_margin="8dp"
+                    android:padding="8dp"
+                    android:background="@drawable/shape_glass_circle"
+                    android:src="@drawable/ic_sticker_heart" />
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_margin="8dp"
+                    android:padding="8dp"
+                    android:background="@drawable/shape_glass_circle"
+                    android:src="@drawable/ic_sticker_smile" />
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_margin="8dp"
+                    android:padding="8dp"
+                    android:background="@drawable/shape_glass_circle"
+                    android:src="@drawable/ic_sticker_sparkle" />
+            </GridLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:paddingHorizontal="16dp"
+                android:text="Share your masterpiece and get this\nexclusive VIP pack for FREE!"
+                android:textColor="#636E72"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnShareClaim"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="32dp"
+                app:backgroundTint="@null"
+                android:background="@drawable/btn_reward_gradient"
+                android:text="SHARE &amp; GET REWARD"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:icon="@drawable/ic_share_24"
+                app:iconGravity="textStart"
+                app:iconSize="20dp"
+                app:iconTint="@android:color/white"
+                app:cornerRadius="30dp" />
+
+            <TextView
+                android:id="@+id/btnMaybeLater"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:padding="8dp"
+                android:text="No thanks"
+                android:textColor="#B2BEC3"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Biểu tượng chính (Vương miện hoặc Rương) -->
+    <ImageView
+        android:id="@+id/ivRewardPreview"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_gravity="top|center_horizontal"
+        android:elevation="12dp"
+        android:src="@drawable/ic_sticker_crown"
+        android:scaleType="centerInside" />
+
+</FrameLayout>

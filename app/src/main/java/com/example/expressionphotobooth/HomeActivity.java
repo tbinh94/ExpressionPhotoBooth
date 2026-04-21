@@ -28,6 +28,8 @@ import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.example.expressionphotobooth.utils.ThemeManager;
+import com.example.expressionphotobooth.utils.ViralRewardManager;
+import com.example.expressionphotobooth.utils.AuditLogger;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -39,8 +41,11 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String PREF_HOME = "home_preferences";
@@ -51,6 +56,7 @@ public class HomeActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private static boolean isMuted = false;
     private AuthRepository authRepository;
+    private ViralRewardManager viralRewardManager;
     private DrawerLayout drawerLayout;
     private View btnMenu;
     private MaterialButton btnDrawerSignOut;
@@ -96,6 +102,7 @@ public class HomeActivity extends AppCompatActivity {
     private ImageView ivHomeBanner;
     private TextView tvDrawerChangeBanner;
     private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
+    private ListenerRegistration globalBannerListener;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -111,6 +118,8 @@ public class HomeActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
 
         authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        viralRewardManager = new ViralRewardManager(this);
+
         if (!authRepository.isLoggedIn()) {
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();
@@ -129,6 +138,8 @@ public class HomeActivity extends AppCompatActivity {
         setupThemeControls();
         updateLocalizedUi(LocaleManager.getCurrentLanguage(this));
         setupBannerPicker();
+        
+        listenForGlobalBanner();
         loadSavedBanner();
         updateTitleVisibility();
         updateUserNavProfile();
@@ -146,6 +157,18 @@ public class HomeActivity extends AppCompatActivity {
                 setEnabled(true);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (globalBannerListener != null) {
+            globalBannerListener.remove();
+        }
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
     private void bindViews() {
@@ -561,15 +584,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-    }
-
     private void updateUserNavProfile() {
         if (authRepository == null) return;
         String languageTag = LocaleManager.getCurrentLanguage(this);
@@ -854,10 +868,6 @@ public class HomeActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
-    private float dpToPx(float dp) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
-    }
-
     private void resizeCompoundStartIcon(TextView view, int sizeDimenRes) {
         if (view == null) {
             return;
@@ -959,10 +969,48 @@ public class HomeActivity extends AppCompatActivity {
         updateTitleVisibility();
     }
 
+    private void loadSavedBanner() {
+        String savedUri = getSharedPreferences(PREF_HOME, MODE_PRIVATE).getString(KEY_BANNER_URI, null);
+        if (savedUri != null && ivHomeBanner != null) {
+            Glide.with(this).load(Uri.parse(savedUri)).centerCrop().into(ivHomeBanner);
+        }
+    }
+
+    private void listenForGlobalBanner() {
+        globalBannerListener = FirebaseFirestore.getInstance().collection("settings").document("app_config")
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
+
+                    if (snapshot != null && snapshot.exists()) {
+                        String globalUri = snapshot.getString("globalBannerUri");
+                        if (globalUri != null && !globalUri.isEmpty()) {
+                            // Global banner found, override local
+                            if (ivHomeBanner != null) {
+                                Glide.with(this).load(globalUri).centerCrop().into(ivHomeBanner);
+                            }
+                            // Store a temporary flag to indicate we are using a global banner
+                            getSharedPreferences(PREF_HOME, MODE_PRIVATE).edit().putBoolean("is_global_banner", true).apply();
+                        } else {
+                            // No global banner, fallback to local
+                            getSharedPreferences(PREF_HOME, MODE_PRIVATE).edit().putBoolean("is_global_banner", false).apply();
+                            loadSavedBanner();
+                        }
+                        updateTitleVisibility();
+                    }
+                });
+    }
+
     private void updateTitleVisibility() {
         if (titleContainer == null) return;
-        String savedUri = getSharedPreferences(PREF_HOME, MODE_PRIVATE).getString(KEY_BANNER_URI, null);
-        boolean isCustom = savedUri != null;
+        
+        SharedPreferences prefs = getSharedPreferences(PREF_HOME, MODE_PRIVATE);
+        String savedUri = prefs.getString(KEY_BANNER_URI, null);
+        boolean isGlobal = prefs.getBoolean("is_global_banner", false);
+        boolean isCustom = isGlobal || savedUri != null;
+        
         boolean isNightMode = (getResources().getConfiguration().uiMode
                 & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
                 == android.content.res.Configuration.UI_MODE_NIGHT_YES;
@@ -976,7 +1024,6 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         // Determine if we should use dark text (only in light mode with NO custom banner)
-        // Optimization: Even with default banner, if it's too dark, we should use light text.
         boolean useDarkText = !isNightMode && !isCustom;
         
         // Force white icon for menu if we have any banner for better consistency
@@ -991,6 +1038,7 @@ public class HomeActivity extends AppCompatActivity {
         if (tvHomeMemories != null) tvHomeMemories.setTextColor(colorMemories);
         if (tvHomePhotobooth != null) tvHomePhotobooth.setTextColor(colorPhotobooth);
         if (ivMenuIcon != null) ivMenuIcon.setColorFilter(colorIcon);
+        
         if (btnMenu != null) {
             android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
             gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
@@ -999,7 +1047,6 @@ public class HomeActivity extends AppCompatActivity {
             btnMenu.setBackground(gd);
         }
 
-        // Just handle elevation for buttons based on background
         if (btnStart != null) {
             btnStart.setElevation(dpToPx(8f));
         }
@@ -1039,11 +1086,16 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void loadSavedBanner() {
-        String savedUri = getSharedPreferences(PREF_HOME, MODE_PRIVATE).getString(KEY_BANNER_URI, null);
-        if (savedUri == null || ivHomeBanner == null) {
-            return;
+    /**
+     * Call this when a photo capture session is completed to check for rewards
+     */
+    public void onCaptureCompleted(Uri savedPhotoUri) {
+        if (viralRewardManager != null) {
+            viralRewardManager.checkAndShowRewardPopup(savedPhotoUri);
         }
-        Glide.with(this).load(Uri.parse(savedUri)).centerCrop().into(ivHomeBanner);
+    }
+
+    private float dpToPx(float dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 }
