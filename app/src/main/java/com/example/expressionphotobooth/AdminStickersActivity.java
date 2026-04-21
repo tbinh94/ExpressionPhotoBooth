@@ -162,6 +162,7 @@ public class AdminStickersActivity extends AppCompatActivity {
                 data.put("label", label);
                 data.put("base64", base64);
                 data.put("type", "admin");
+                data.put("isGlobal", true);
                 data.put("timestamp", System.currentTimeMillis());
 
                 FirebaseFirestore.getInstance().collection("stickers")

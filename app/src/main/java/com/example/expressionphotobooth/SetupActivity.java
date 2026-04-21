@@ -140,6 +140,9 @@ public class SetupActivity extends AppCompatActivity {
                 .get()
                 .addOnCompleteListener(framesTask -> {
                     List<Frame> remoteFrames = new ArrayList<>();
+                    if (!framesTask.isSuccessful()) {
+                        android.util.Log.e("SetupActivity", "Error fetching frames: ", framesTask.getException());
+                    }
                     if (framesTask.isSuccessful() && framesTask.getResult() != null) {
                         for (com.google.firebase.firestore.QueryDocumentSnapshot doc : framesTask.getResult()) {
                             String base64 = doc.getString("base64");

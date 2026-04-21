@@ -8,6 +8,8 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import com.example.expressionphotobooth.R;
 
 public class AiRatioPieChartView extends View {
     private final Paint registeredPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -33,11 +35,12 @@ public class AiRatioPieChartView extends View {
     }
 
     private void init() {
+        Context context = getContext();
         registeredPaint.setStyle(Paint.Style.FILL);
-        registeredPaint.setColor(0xFF3D68E8);
+        registeredPaint.setColor(ContextCompat.getColor(context, R.color.app_blue));
 
         unregisteredPaint.setStyle(Paint.Style.FILL);
-        unregisteredPaint.setColor(0xFFE2E8F0);
+        unregisteredPaint.setColor(ContextCompat.getColor(context, R.color.admin_card_stroke));
     }
 
     public void setData(int registered, int total) {

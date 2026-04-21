@@ -88,6 +88,7 @@
     <string name="language_badge_en">EN</string>
     <string name="language_badge_vi">VI</string>
     <string name="home_drawer_change_banner">Change Cover Photo</string>
+    <string name="home_drawer_settings_label">--- SETTINGS ---</string>
     <string name="home_history_user_only_title">Members only</string>
     <string name="home_history_user_only_message">History is available for registered users. Please sign up to save and view your sessions.</string>
     <string name="home_gallery_user_only_title">Members only</string>
@@ -538,7 +539,16 @@ that you have taken before</string>
     <string name="ai_trigger_face_mouth_open">Mouth Open 😮</string>
     <string name="ai_trigger_face_wink">Wink 😉</string>
     <string name="ai_trigger_face_tilt">Head Tilt 🤳</string>
-    <string name="home_drawer_nav_label">NAVIGATION</string>
+    <string name="home_drawer_nav_label">--- MENU ---</string>
     <string name="admin_role_member">Member</string>
-    <string name="admin_role_admin">Administrator</string>
+    <string name="admin_role_admin">Admin</string>
+    <string name="admin_role_premium">Premium Member</string>
+    <string name="auth_anonymous_user">Anonymous User</string>
+    <string name="profile_label_role">Role</string>
+    <string name="profile_label_status">Status</string>
+    <string name="profile_status_online">Online</string>
+    <string name="profile_section_security">SECURITY &amp; SETTINGS</string>
+    <string name="profile_btn_change_avatar">Change Profile Picture</string>
+    <string name="profile_btn_change_password">Change Password</string>
+    <string name="profile_btn_close">Close</string>
 </resources>

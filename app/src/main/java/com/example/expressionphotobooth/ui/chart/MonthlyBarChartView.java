@@ -11,6 +11,8 @@ import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import androidx.core.content.ContextCompat;
+import com.example.expressionphotobooth.R;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -53,29 +55,35 @@ public class MonthlyBarChartView extends View {
     }
 
     private void init() {
-        axisPaint.setColor(Color.parseColor("#E2E8F0"));
+        Context context = getContext();
+        int axisColor = ContextCompat.getColor(context, R.color.admin_card_stroke);
+        int labelColor = ContextCompat.getColor(context, R.color.text_disabled);
+        int primaryTextColor = ContextCompat.getColor(context, R.color.admin_text_primary);
+        int secondaryTextColor = ContextCompat.getColor(context, R.color.text_secondary);
+
+        axisPaint.setColor(axisColor);
         axisPaint.setStrokeWidth(dp(1.5f));
 
-        gridPaint.setColor(Color.parseColor("#E2E8F0"));
+        gridPaint.setColor(axisColor);
         gridPaint.setStrokeWidth(dp(1f));
 
         barPaint.setStyle(Paint.Style.FILL);
         barPaint.setColor(barStartColor);
 
-        labelPaint.setColor(Color.parseColor("#94A3B8"));
+        labelPaint.setColor(labelColor);
         labelPaint.setTextSize(sp(10.5f));
         labelPaint.setTextAlign(Paint.Align.CENTER);
 
-        valuePaint.setColor(Color.parseColor("#1E293B"));
+        valuePaint.setColor(primaryTextColor);
         valuePaint.setTextSize(sp(10f));
         valuePaint.setFakeBoldText(true);
         valuePaint.setTextAlign(Paint.Align.CENTER);
 
-        yValuePaint.setColor(Color.parseColor("#94A3B8"));
+        yValuePaint.setColor(labelColor);
         yValuePaint.setTextSize(sp(9f));
         yValuePaint.setTextAlign(Paint.Align.RIGHT);
 
-        legendTextPaint.setColor(Color.parseColor("#475569"));
+        legendTextPaint.setColor(secondaryTextColor);
         legendTextPaint.setTextSize(sp(12f));
         legendTextPaint.setFakeBoldText(true);
 

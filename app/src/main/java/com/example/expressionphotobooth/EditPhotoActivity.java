@@ -235,13 +235,10 @@ public class EditPhotoActivity extends AppCompatActivity {
             h.label.setVisibility(item.label.isEmpty() ? View.INVISIBLE : View.VISIBLE);
 
             if (item.imageUrl != null && !item.imageUrl.isEmpty()) {
-                Object loadSource = item.imageUrl;
-                if (item.imageUrl.startsWith("file:///android_asset/")) {
-                    loadSource = item.imageUrl.substring("file:///android_asset/".length());
-                }
                 Glide.with(h.itemView.getContext())
-                        .load(loadSource instanceof String && ((String)loadSource).startsWith("http") ? android.net.Uri.parse((String)loadSource) : loadSource)
+                        .load(item.imageUrl)
                         .placeholder(R.color.thumb_none)
+                        .error(R.drawable.ic_filter_none)
                         .centerCrop()
                         .into(h.preview);
                 h.preview.setBackground(null);
@@ -543,9 +540,9 @@ public class EditPhotoActivity extends AppCompatActivity {
         // FRAMES
         List<ThumbItem> frameItems = Arrays.asList(
                 new ThumbItem(getString(R.string.edit_option_none),    R.drawable.ic_filter_none, R.color.thumb_none,         EditState.FrameStyle.NONE),
-                new ThumbItem(getString(R.string.edit_frame_cortis),   0, R.color.thumb_frame_cortis, EditState.FrameStyle.CORTIS),
-                new ThumbItem(getString(R.string.edit_frame_aespa),    0, R.color.thumb_frame_aespa,  EditState.FrameStyle.AESPA),
-                new ThumbItem(getString(R.string.edit_frame_t1),       0, R.color.thumb_frame_t1,     EditState.FrameStyle.T1)
+                new ThumbItem(getString(R.string.edit_frame_cortis),   R.drawable.frm_3x4_movie, R.color.thumb_frame_cortis, EditState.FrameStyle.CORTIS),
+                new ThumbItem(getString(R.string.edit_frame_aespa),    R.drawable.frm3_16x9_blue_canvas, R.color.thumb_frame_aespa,  EditState.FrameStyle.AESPA),
+                new ThumbItem(getString(R.string.edit_frame_t1),       R.drawable.frm_3x4_pig_hero, R.color.thumb_frame_t1,     EditState.FrameStyle.T1)
         );
         framesAdapter = new ThumbAdapter(frameItems, item -> {
             updateFrame((EditState.FrameStyle) item.value);
@@ -556,10 +553,10 @@ public class EditPhotoActivity extends AppCompatActivity {
         List<ThumbItem> backgroundItems = Arrays.asList(
                 new ThumbItem(getString(R.string.edit_option_none), R.drawable.ic_filter_none, R.color.thumb_none, EditState.BackgroundStyle.NONE),
                 new ThumbItem(getString(R.string.edit_bg_blur), R.drawable.ic_filter_soft, R.color.thumb_filter_soft, EditState.BackgroundStyle.BLUR),
-                new ThumbItem(getString(R.string.edit_bg_studio), "backgrounds/bg_studio.png", EditState.BackgroundStyle.STUDIO),
-                new ThumbItem(getString(R.string.edit_bg_beach), "backgrounds/bg_beach.png", EditState.BackgroundStyle.BEACH),
-                new ThumbItem(getString(R.string.edit_bg_space), "backgrounds/bg_space.png", EditState.BackgroundStyle.SPACE),
-                new ThumbItem(getString(R.string.edit_bg_vintage), "backgrounds/bg_vintage.png", EditState.BackgroundStyle.VINTAGE),
+                new ThumbItem(getString(R.string.edit_bg_studio), "file:///android_asset/backgrounds/bg_studio.png", EditState.BackgroundStyle.STUDIO),
+                new ThumbItem(getString(R.string.edit_bg_beach), "file:///android_asset/backgrounds/bg_beach.png", EditState.BackgroundStyle.BEACH),
+                new ThumbItem(getString(R.string.edit_bg_space), "file:///android_asset/backgrounds/bg_space.png", EditState.BackgroundStyle.SPACE),
+                new ThumbItem(getString(R.string.edit_bg_vintage), "file:///android_asset/backgrounds/bg_vintage.png", EditState.BackgroundStyle.VINTAGE),
                 new ThumbItem("", R.drawable.ic_add_24, R.color.edit_accent, "ADD_BG")
         );
 
