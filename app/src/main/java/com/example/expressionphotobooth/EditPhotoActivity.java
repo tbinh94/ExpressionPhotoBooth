@@ -307,6 +307,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         Y2K,
         KPOP,
         CAMERA,
+        VIP,
         STORE
     }
 
@@ -410,6 +411,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_y2k)));
         stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_kpop)));
         stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_camera)));
+        stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText("VIP"));
         stickerCategoryTabLayout.addTab(stickerCategoryTabLayout.newTab().setText(getString(R.string.edit_sticker_tab_store)));
 
         stickerCategoryTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -683,11 +685,30 @@ public class EditPhotoActivity extends AppCompatActivity {
         AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
         // Removed local sticker loading logic as everything is now in Firestore
 
+        // Hiển thị Sticker VIP đã mở khóa
+        if (category == StickerCategory.VIP) {
+            List<ThumbItem> vipItems = new ArrayList<>();
+            for (ThumbItem item : globalStickers) {
+                if ("★ VIP".equals(item.label)) {
+                    vipItems.add(item);
+                }
+            }
+            if (vipItems.isEmpty()) {
+                vipItems.add(new ThumbItem("No VIP yet", 0, R.color.thumb_none, null));
+            }
+            return vipItems;
+        }
+
         // Add Global Store stickers if this is STORE category
         if (category == StickerCategory.STORE) {
             List<ThumbItem> storeItems = new ArrayList<>();
             storeItems.add(new ThumbItem("", R.drawable.ic_add_24, R.color.edit_accent, "ADD_NEW"));
-            storeItems.addAll(globalStickers);
+            // Lọc ra các sticker thường (không phải VIP) để hiện trong Store
+            for (ThumbItem item : globalStickers) {
+                if (!"★ VIP".equals(item.label)) {
+                    storeItems.add(item);
+                }
+            }
             return storeItems;
         }
 
@@ -1686,58 +1707,85 @@ public class EditPhotoActivity extends AppCompatActivity {
         String uid = authRepository.getCurrentUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        db.collection("stickers")
-                .whereEqualTo("type", "admin")
+        db.collection("users").document(uid != null ? uid : "unknown")
                 .get()
-                .addOnSuccessListener(adminSnap -> {
-                    List<ThumbItem> temp = new ArrayList<>();
-                    temp.add(new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none, EditState.StickerStyle.NONE));
+                .addOnSuccessListener(userDoc -> {
+                    boolean isRewardUnlocked = userDoc.exists() && Boolean.TRUE.equals(userDoc.getBoolean("viralRewardUnlocked"));
 
-                    for (QueryDocumentSnapshot doc : adminSnap) {
-                        ThumbItem item = new ThumbItem(doc.getId(), doc.getString("label"), doc.getString("base64"), null, EditState.StickerStyle.CUSTOM);
-                        item.isGlobal = true;
-                        temp.add(item);
-                    }
+                    db.collection("stickers")
+                            .whereEqualTo("type", "admin")
+                            .get()
+                            .addOnSuccessListener(adminSnap -> {
+                                List<ThumbItem> temp = new ArrayList<>();
+                                temp.add(new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none, EditState.StickerStyle.NONE));
 
-                    if (uid != null) {
-                        db.collection("stickers")
-                                .whereEqualTo("type", "user")
-                                .whereEqualTo("userId", uid)
-                                .get()
-                                .addOnSuccessListener(userSnap -> {
-                                    for (QueryDocumentSnapshot doc : userSnap) {
-                                        ThumbItem item = new ThumbItem(doc.getId(), "Me", doc.getString("base64"), null, EditState.StickerStyle.CUSTOM);
-                                        item.isRemovable = true;
-                                        temp.add(item);
-                                    }
-                                    globalStickers.clear();
-                                    globalStickers.addAll(temp);
-                                    refreshStickerAdapter();
-                                });
-                    } else {
+                                for (QueryDocumentSnapshot doc : adminSnap) {
+                                    ThumbItem item = new ThumbItem(doc.getId(), doc.getString("label"), doc.getString("base64"), null, EditState.StickerStyle.CUSTOM);
+                                    item.isGlobal = true;
+                                    temp.add(item);
+                                }
+
+                                if (isRewardUnlocked) {
+                                    db.collection("stickers")
+                                            .whereEqualTo("type", "reward")
+                                            .get()
+                                            .addOnSuccessListener(rewardSnap -> {
+                                                for (QueryDocumentSnapshot doc : rewardSnap) {
+                                                    ThumbItem item = new ThumbItem(doc.getId(), "★ VIP", doc.getString("base64"), null, EditState.StickerStyle.CUSTOM);
+                                                    item.isGlobal = true;
+                                                    temp.add(item);
+                                                }
+                                                fetchUserStickersAndRefresh(db, uid, temp);
+                                            })
+                                            .addOnFailureListener(e -> fetchUserStickersAndRefresh(db, uid, temp));
+                                } else {
+                                    fetchUserStickersAndRefresh(db, uid, temp);
+                                }
+                            });
+                });
+    }
+
+    private void fetchUserStickersAndRefresh(FirebaseFirestore db, String uid, List<ThumbItem> temp) {
+        if (uid != null) {
+            db.collection("stickers")
+                    .whereEqualTo("type", "user")
+                    .whereEqualTo("userId", uid)
+                    .get()
+                    .addOnSuccessListener(userSnap -> {
+                        for (QueryDocumentSnapshot doc : userSnap) {
+                            ThumbItem item = new ThumbItem(doc.getId(), "Me", doc.getString("base64"), null, EditState.StickerStyle.CUSTOM);
+                            item.isRemovable = true;
+                            temp.add(item);
+                        }
                         globalStickers.clear();
                         globalStickers.addAll(temp);
-                        refreshStickerAdapter();
-                    }
-                });
+                        runOnUiThread(this::refreshStickerAdapter);
+                    })
+                    .addOnFailureListener(e -> {
+                        globalStickers.clear();
+                        globalStickers.addAll(temp);
+                        runOnUiThread(this::refreshStickerAdapter);
+                    });
+        } else {
+            globalStickers.clear();
+            globalStickers.addAll(temp);
+            runOnUiThread(this::refreshStickerAdapter);
+        }
     }
 
     private void deleteCustomSticker(ThumbItem item) {
         if (item == null || item.id == null) return;
         
-        // Anti-deletion safeguard: Users cannot delete global stickers
         if (item.isGlobal) {
             Toast.makeText(this, R.string.edit_sticker_cannot_delete_global, Toast.LENGTH_SHORT).show();
             return;
         }
         
-        // SILENT DELETE
         FirebaseFirestore.getInstance().collection("stickers")
                 .document(item.id)
                 .delete()
                 .addOnSuccessListener(v -> {
-                    loadGlobalStickers(); // Reload list
-                    // Corrected check: reset current selection if the deleted sticker was active
+                    loadGlobalStickers();
                     if (currentEditState.getStickerStyle() == EditState.StickerStyle.CUSTOM && 
                         item.id.equals(currentEditState.getCustomStickerId())) {
                         updateSticker(new ThumbItem(getString(R.string.edit_option_none), 0, R.color.thumb_none, EditState.StickerStyle.NONE));

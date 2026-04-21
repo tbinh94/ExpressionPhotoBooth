@@ -69,6 +69,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.List;
 import java.util.Map;
+import com.example.expressionphotobooth.utils.ViralRewardManager;
 
 public class ResultActivity extends AppCompatActivity {
     @Override
@@ -99,6 +100,7 @@ public class ResultActivity extends AppCompatActivity {
     private SecureImageStorageService secureImageStorageService;
     private RBACService rbacService;
     private UserRole currentUserRole;
+    private ViralRewardManager viralRewardManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +130,7 @@ public class ResultActivity extends AppCompatActivity {
         
         // Initialize RBAC service with user info
         initializeRBAC();
+        viralRewardManager = new ViralRewardManager(this);
 
         toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
@@ -998,14 +1001,19 @@ public class ResultActivity extends AppCompatActivity {
 
         Uri contentUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
 
-        Intent shareIntent = new Intent();
-        shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        shareIntent.setDataAndType(contentUri, getContentResolver().getType(contentUri));
-        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-        shareIntent.setType("image/png");
-
-        startActivity(Intent.createChooser(shareIntent, getString(R.string.result_share)));
+        // Sử dụng ViralRewardManager để hiển thị Popup Chia sẻ & Nhận quà
+        if (viralRewardManager != null) {
+            viralRewardManager.checkAndShowRewardPopup(contentUri);
+        } else {
+            // Fallback về share mặc định nếu manager lỗi
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            shareIntent.setDataAndType(contentUri, getContentResolver().getType(contentUri));
+            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+            shareIntent.setType("image/png");
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.result_share)));
+        }
     }
 
     private void showFeedbackBottomSheet(boolean autoTrigger) {

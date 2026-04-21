@@ -28,6 +28,8 @@ import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.example.expressionphotobooth.utils.ThemeManager;
+import com.example.expressionphotobooth.utils.ViralRewardManager;
+import com.example.expressionphotobooth.utils.AuditLogger;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -54,6 +56,7 @@ public class HomeActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private static boolean isMuted = false;
     private AuthRepository authRepository;
+    private ViralRewardManager viralRewardManager;
     private DrawerLayout drawerLayout;
     private View btnMenu;
     private MaterialButton btnDrawerSignOut;
@@ -115,6 +118,8 @@ public class HomeActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
 
         authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        viralRewardManager = new ViralRewardManager(this);
+
         if (!authRepository.isLoggedIn()) {
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();
@@ -1080,6 +1085,16 @@ public class HomeActivity extends AppCompatActivity {
             updateTitleVisibility();
         });
     }
+
+    /**
+     * Call this when a photo capture session is completed to check for rewards
+     */
+    public void onCaptureCompleted(Uri savedPhotoUri) {
+        if (viralRewardManager != null) {
+            viralRewardManager.checkAndShowRewardPopup(savedPhotoUri);
+        }
+    }
+
     private float dpToPx(float dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }

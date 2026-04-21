@@ -932,6 +932,57 @@
                         android:textColor="@color/text_secondary" />
                 </LinearLayout>
 
+                <!-- Campaign Management Section -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#F1F5F9" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Chiến dịch Viral Reward"
+                            android:textColor="@color/admin_text_primary"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tự động hiện Popup chia sẻ nhận quà"
+                            android:textColor="@color/admin_subtitle_color"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchViralCampaign"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTestViralPopup"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Xem thử Popup (Test Preview)"
+                    android:textAllCaps="false"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_visibility_24"
+                    app:strokeColor="@color/app_blue"
+                    android:textColor="@color/app_blue" />
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

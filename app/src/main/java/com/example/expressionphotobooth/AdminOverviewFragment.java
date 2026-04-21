@@ -13,6 +13,9 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.example.expressionphotobooth.utils.AuditLogger;
+import com.google.firebase.firestore.FirebaseFirestore;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -154,10 +157,37 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         tvBigAvg = view.findViewById(R.id.tvBigAvg);
         tvBigTotal = view.findViewById(R.id.tvBigTotal);
         tvBig5Star = view.findViewById(R.id.tvBig5Star);
-        tvChartSubtitle = view.findViewById(R.id.tvChartSubtitle);
-        tvLastReviewAt = view.findViewById(R.id.tvLastReviewAt);
-        tvTotalReviewsLabel = view.findViewById(R.id.tvTotalReviewsLabel);
         tvFiveStarLabel = view.findViewById(R.id.tvFiveStarLabel);
+
+        // Viral Campaign Management
+        com.google.android.material.materialswitch.MaterialSwitch switchCampaign = view.findViewById(R.id.switchViralCampaign);
+        if (switchCampaign != null) {
+            FirebaseFirestore.getInstance().collection("app_config").document("viral_campaign")
+                    .get().addOnSuccessListener(doc -> {
+                        if (doc.exists() && doc.contains("isActive")) {
+                            switchCampaign.setChecked(doc.getBoolean("isActive"));
+                        }
+                    });
+
+            switchCampaign.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                FirebaseFirestore.getInstance().collection("app_config").document("viral_campaign")
+                        .update("isActive", isChecked)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(getContext(), "Campaign: " + (isChecked ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
+                            AuditLogger.logAction("CAMPAIGN_TOGGLE", "Admin changed viral campaign status to " + isChecked);
+                        });
+            });
+        }
+
+        MaterialButton btnTestPopup = view.findViewById(R.id.btnTestViralPopup);
+        if (btnTestPopup != null) {
+            btnTestPopup.setOnClickListener(v -> {
+                // Tạo một bản sao manager để test nhanh giao diện
+                com.example.expressionphotobooth.utils.ViralRewardManager testManager = 
+                    new com.example.expressionphotobooth.utils.ViralRewardManager(requireActivity());
+                testManager.checkAndShowRewardPopup(null); // Truyền null để test nhanh
+            });
+        }
         tvRangeTitle = view.findViewById(R.id.tvRangeTitle);
         tvUsersChartTitle = view.findViewById(R.id.tvUsersChartTitle);
         tvUsersChartSubtitle = view.findViewById(R.id.tvUsersChartSubtitle);
