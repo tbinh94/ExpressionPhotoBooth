@@ -418,6 +418,7 @@
                         android:textStyle="bold" />
 
                     <LinearLayout
+                        android:id="@+id/layoutAiInsightRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -439,6 +440,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/layoutAiInsightRow2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -460,6 +462,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/layoutAiInsightRow3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -481,6 +484,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/layoutAiRecommendationRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"

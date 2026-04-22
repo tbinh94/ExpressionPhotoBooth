@@ -1,10 +1,11 @@
 package com.example.expressionphotobooth.domain.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AdminAiInsights {
+public class AdminAiInsights implements Serializable {
     private final String summary;
     private final List<String> insights;
     private final List<String> recommendations;

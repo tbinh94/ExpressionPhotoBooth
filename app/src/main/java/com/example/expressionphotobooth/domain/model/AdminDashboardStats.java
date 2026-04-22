@@ -1,9 +1,10 @@
 package com.example.expressionphotobooth.domain.model;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class AdminDashboardStats {
+public class AdminDashboardStats implements Serializable {
     private final int totalAccounts;
     private final int totalReviews;
     private final double averageRating;
