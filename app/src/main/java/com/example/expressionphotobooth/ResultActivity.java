@@ -370,22 +370,8 @@ public class ResultActivity extends AppCompatActivity {
                 photoNoSticker.recycle();
             }
 
-            // [DEBUG ONLY] Vẽ viền đỏ quanh detected holes để kiểm tra vị trí
-            if (BuildConfig.DEBUG) {
-                Paint debugPaint = new Paint();
-                debugPaint.setStyle(Paint.Style.STROKE);
-                debugPaint.setStrokeWidth(6f);
-                debugPaint.setColor(android.graphics.Color.RED);
-                for (Rect h : holes) {
-                    RectF hf = new RectF(
-                            h.left   * EXPORT_SCALE_FACTOR,
-                            h.top    * EXPORT_SCALE_FACTOR,
-                            h.right  * EXPORT_SCALE_FACTOR,
-                            h.bottom * EXPORT_SCALE_FACTOR
-                    );
-                    canvas.drawRect(hf, debugPaint);
-                }
-            }
+            // Debug overlay removed as positions are now verified
+
 
             // 3. Vẽ frame (đã trong suốt ở vị trí lỗ) chồng lên ảnh
             Bitmap scaledFrame = Bitmap.createScaledBitmap(frameBitmap, targetWidth, targetHeight, true);
@@ -400,18 +386,23 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     /**
-     * Full-image scan: finds ALL connected white regions in the frame, makes them transparent,
-     * and returns their bounding boxes sorted top-to-bottom.
-     *
-     * Does NOT rely on hardcoded reference coordinates — works for any frame size.
-     * A region is a "hole" if its area >= 0.5% of total frame area.
+     * Tách biệt logic xử lý cho hai loại layout:
+     * 16x9_3 (Frame giấy xé) -> Dùng Full Scan để nhận diện hình dạng phức tạp.
+     * Các loại khác -> Dùng Seed BFS để ổn định vị trí.
      */
     private Bitmap applyFloodFillWhiteRemoval(Bitmap src, String layoutType,
                                                java.util.List<Rect> outHoles) {
+        if ("16x9_3".equals(layoutType)) {
+            return applyFullScanHoleDetection(src, layoutType, outHoles);
+        } else {
+            return applySeedBasedHoleDetection(src, layoutType, outHoles);
+        }
+    }
+
+    private Bitmap applyFullScanHoleDetection(Bitmap src, String layoutType, java.util.List<Rect> outHoles) {
         int w = src.getWidth();
         int h = src.getHeight();
 
-        // Step 1: Downsample large frames to MAX_DIM for fast hole detection
         final int MAX_DIM = 600;
         float dsScale = 1f;
         Bitmap workSrc = src;
@@ -428,11 +419,9 @@ public class ResultActivity extends AppCompatActivity {
         boolean[] dsVisited = new boolean[dw * dh];
         if (workSrc != src) workSrc.recycle();
 
-        // Minimum hole area = 0.5% of downsampled frame
         int minHoleArea = Math.max(30, (dw * dh) / 200);
-        java.util.List<int[]> dsRegions = new java.util.ArrayList<>(); // [minX,minY,maxX,maxY]
+        java.util.List<int[]> dsRegions = new java.util.ArrayList<>();
 
-        // Step 2: Scan every pixel, BFS from any unvisited white pixel
         for (int y = 0; y < dh; y++) {
             for (int x = 0; x < dw; x++) {
                 int idx = y * dw + x;
@@ -475,76 +464,53 @@ public class ResultActivity extends AppCompatActivity {
             }
         }
 
-        // Step 3: Keep only expectedCount largest regions (by bounding-box area)
         int expectedCount = FrameConfig.getSlotCountForLayout(layoutType);
-        dsRegions.sort((a2, b2) -> Integer.compare(b2[4], a2[4])); // largest first
+        dsRegions.sort((a, b) -> Integer.compare(b[4], a[4]));
         while (dsRegions.size() > expectedCount) dsRegions.remove(dsRegions.size() - 1);
-        // Sort top-to-bottom
-        dsRegions.sort((a2, b2) -> a2[1] != b2[1] ? a2[1] - b2[1] : a2[0] - b2[0]);
+        dsRegions.sort((a, b) -> a[1] != b[1] ? a[1] - b[1] : a[0] - b[0]);
 
-        android.util.Log.d("RemoteFrame", "FullScan: " + dsRegions.size() + " holes in "
-                + dw + "x" + dh + " dsScale=" + dsScale);
+        if (dsRegions.isEmpty()) return src;
 
-        if (dsRegions.isEmpty()) return src; // no holes found — caller uses hardcoded fallback
-
-        // Step 4: Apply flood-fill on ORIGINAL full-res bitmap, seeded from center of each ds region
         Bitmap out = src.copy(Bitmap.Config.ARGB_8888, true);
         int[] origPixels = new int[w * h];
         out.getPixels(origPixels, 0, w, 0, 0, w, h);
         boolean[] origVisited = new boolean[w * h];
 
         for (int[] reg : dsRegions) {
-            // Scale ds bounding box back to original pixel space
-            int ox1 = Math.max(0,     Math.round(reg[0] / dsScale));
-            int oy1 = Math.max(0,     Math.round(reg[1] / dsScale));
+            int ox1 = Math.max(0, Math.round(reg[0] / dsScale));
+            int oy1 = Math.max(0, Math.round(reg[1] / dsScale));
             int ox2 = Math.min(w - 1, Math.round(reg[2] / dsScale));
             int oy2 = Math.min(h - 1, Math.round(reg[3] / dsScale));
-            int margin = Math.max(5, Math.min(ox2 - ox1, oy2 - oy1) / 10);
-
-            // Find nearest white pixel to center within scaled bounds
+            
             int seedX = (ox1 + ox2) / 2, seedY = (oy1 + oy2) / 2;
             int seedIdx = -1;
             int maxRadius = Math.max(ox2 - ox1, oy2 - oy1) / 2;
-            outerSearch:
-            for (int radius = 0; radius <= maxRadius; radius++) {
-                for (int dy = -radius; dy <= radius; dy++) {
-                    for (int dx = -radius; dx <= radius; dx++) {
-                        if (Math.abs(dx) != radius && Math.abs(dy) != radius) continue;
+            outer: for (int r = 0; r <= maxRadius; r++) {
+                for (int dy = -r; dy <= r; dy++) {
+                    for (int dx = -r; dx <= r; dx++) {
+                        if (Math.abs(dx) != r && Math.abs(dy) != r) continue;
                         int sx = seedX + dx, sy = seedY + dy;
                         if (sx < ox1 || sx > ox2 || sy < oy1 || sy > oy2) continue;
                         int si = sy * w + sx;
                         if (origVisited[si]) continue;
                         int sp = origPixels[si];
-                        if (((sp >> 24) & 0xff) >= 128
-                                && ((sp >> 16) & 0xff) > 180
-                                && ((sp >>  8) & 0xff) > 180
-                                && (sp & 0xff) > 180) {
-                            seedIdx = si; break outerSearch;
+                        if (((sp >> 24) & 0xff) >= 128 && ((sp >> 16) & 0xff) > 180 && ((sp >> 8) & 0xff) > 180 && (sp & 0xff) > 180) {
+                            seedIdx = si; break outer;
                         }
                     }
                 }
             }
 
             if (seedIdx < 0) {
-                // Fallback: treat scaled bounding box as the hole directly
                 outHoles.add(new Rect(ox1, oy1, ox2, oy2));
-                for (int fy = oy1; fy <= oy2; fy++)
-                    for (int fx = ox1; fx <= ox2; fx++) {
-                        int fi = fy * w + fx;
-                        int fp = origPixels[fi];
-                        if (((fp >> 24) & 0xff) >= 128
-                                && ((fp >> 16) & 0xff) > 180
-                                && ((fp >>  8) & 0xff) > 180
-                                && (fp & 0xff) > 180) origPixels[fi] = 0x00000000;
-                    }
                 continue;
             }
 
-            // BFS on original image constrained within scaled bounds (+margin)
             java.util.ArrayDeque<Integer> q = new java.util.ArrayDeque<>();
             q.add(seedIdx);
             origVisited[seedIdx] = true;
             int minX = seedX, maxX = seedX, minY = seedY, maxY = seedY;
+            int margin = Math.max(5, Math.min(ox2 - ox1, oy2 - oy1) / 10);
             while (!q.isEmpty()) {
                 int curr = q.poll();
                 origPixels[curr] = 0x00000000;
@@ -559,22 +525,67 @@ public class ResultActivity extends AppCompatActivity {
                     if (nx < ox1 - margin || nx > ox2 + margin) continue;
                     if (ny < oy1 - margin || ny > oy2 + margin) continue;
                     int np = origPixels[n];
-                    if (((np >> 24) & 0xff) >= 128
-                            && ((np >> 16) & 0xff) > 180
-                            && ((np >>  8) & 0xff) > 180
-                            && (np & 0xff) > 180) {
-                        origVisited[n] = true;
-                        q.add(n);
+                    if (((np >> 24) & 0xff) >= 128 && ((np >> 16) & 0xff) > 180 && ((np >> 8) & 0xff) > 180 && (np & 0xff) > 180) {
+                        origVisited[n] = true; q.add(n);
                     }
                 }
             }
             outHoles.add(new Rect(minX, minY, maxX, maxY));
-            android.util.Log.d("RemoteFrame", "  Hole BFS: " + minX + "," + minY
-                    + " -> " + maxX + "," + maxY);
         }
-
-        outHoles.sort((a2, b2) -> a2.top != b2.top ? a2.top - b2.top : a2.left - b2.left);
         out.setPixels(origPixels, 0, w, 0, 0, w, h);
+        return out;
+    }
+
+    private Bitmap applySeedBasedHoleDetection(Bitmap src, String layoutType, java.util.List<Rect> outHoles) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        java.util.List<Rect> seedHoles = FrameConfig.getHolesForLayoutScaled(layoutType, w, h);
+        if (seedHoles.isEmpty()) return src;
+
+        Bitmap out = src.copy(Bitmap.Config.ARGB_8888, true);
+        int[] pixels = new int[w * h];
+        out.getPixels(pixels, 0, w, 0, 0, w, h);
+        boolean[] visited = new boolean[w * h];
+
+        for (Rect rect : seedHoles) {
+            int cx = rect.centerX(), cy = rect.centerY();
+            int sx1 = Math.max(0, cx - rect.width()/4), sx2 = Math.min(w-1, cx + rect.width()/4);
+            int sy1 = Math.max(0, cy - rect.height()/4), sy2 = Math.min(h-1, cy + rect.height()/4);
+
+            int minX = w, maxX = 0, minY = h, maxY = 0;
+            boolean found = false;
+
+            for (int sy = sy1; sy <= sy2; sy++) {
+                for (int sx = sx1; sx <= sx2; sx++) {
+                    int idx = sy * w + sx;
+                    if (visited[idx]) continue;
+                    int p = pixels[idx];
+                    if (((p >> 24) & 0xff) < 128 || ((p >> 16) & 0xff) < 180 || ((p >> 8) & 0xff) < 180 || (p & 0xff) < 180) continue;
+
+                    java.util.ArrayDeque<Integer> q = new java.util.ArrayDeque<>();
+                    q.add(idx); visited[idx] = true; found = true;
+                    while (!q.isEmpty()) {
+                        int curr = q.poll();
+                        pixels[curr] = 0x00000000;
+                        int curX = curr % w, curY = curr / w;
+                        if (curX < minX) minX = curX; if (curX > maxX) maxX = curX;
+                        if (curY < minY) minY = curY; if (curY > maxY) maxY = curY;
+                        int[] ns = {curr - 1, curr + 1, curr - w, curr + w};
+                        for (int n : ns) {
+                            if (n < 0 || n >= w*h || visited[n]) continue;
+                            if (Math.abs(n % w - curX) > 1) continue;
+                            int np = pixels[n];
+                            if (((np >> 24) & 0xff) >= 128 && ((np >> 16) & 0xff) > 180 && ((np >> 8) & 0xff) > 180 && (np & 0xff) > 180) {
+                                visited[n] = true; q.add(n);
+                            }
+                        }
+                    }
+                }
+            }
+            if (found) outHoles.add(new Rect(minX, minY, maxX, maxY));
+            else outHoles.add(new Rect(rect.left, rect.top, rect.right, rect.bottom)); // fallback to seed rect
+        }
+        out.setPixels(pixels, 0, w, 0, 0, w, h);
         return out;
     }
 
