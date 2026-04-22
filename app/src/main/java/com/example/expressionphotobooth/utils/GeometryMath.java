@@ -16,15 +16,22 @@ public final class GeometryMath {
         float srcAspect = srcWidth / srcHeight;
         float dstAspect = dstWidth / dstHeight;
 
+        float cropWidth, cropHeight;
+        float left = 0, top = 0;
+
         if (srcAspect > dstAspect) {
-            float cropWidth = srcHeight * dstAspect;
-            float left = (srcWidth - cropWidth) / 2f;
-            return new CropRect(left, 0f, left + cropWidth, srcHeight);
+            // Source is wider than destination - crop width
+            cropWidth = srcHeight * dstAspect;
+            cropHeight = srcHeight;
+            left = (srcWidth - cropWidth) / 2f;
+        } else {
+            // Source is taller than destination - crop height
+            cropWidth = srcWidth;
+            cropHeight = srcWidth / dstAspect;
+            top = (srcHeight - cropHeight) / 2f;
         }
 
-        float cropHeight = srcWidth / dstAspect;
-        float top = (srcHeight - cropHeight) / 2f;
-        return new CropRect(0f, top, srcWidth, top + cropHeight);
+        return new CropRect(left, top, left + cropWidth, top + cropHeight);
     }
 
     public static float clamp01(float value) {
