@@ -66,7 +66,17 @@ public class FirebaseAdminAiInsightsRepository implements AdminAiInsightsReposit
         safetySettings.add(new SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.ONLY_HIGH));
 
         Content systemInstruction = new Content.Builder()
-                .addText("Analyze photobooth stats. Output ONLY raw JSON matching structure. No markdown. Language: user's.")
+                .addText("You are an expert Photo Booth Business Analyst. Analyze the provided usage stats and provide deep insights.\n" +
+                        "Output ONLY raw JSON matching this structure:\n" +
+                        "{\n" +
+                        "  \"summary\": \"Brief executive summary of the performance\",\n" +
+                        "  \"insights\": [\"Key trend or observation 1\", \"Key trend or observation 2\", \"Key trend or observation 3\"],\n" +
+                        "  \"recommendations\": [\n" +
+                        "    {\"title\": \"Short Title\", \"action\": \"Practical recommendation\"}\n" +
+                        "  ],\n" +
+                        "  \"confidence\": 0.95\n" +
+                        "}\n" +
+                        "Strictly follow the language requested (Tag). No markdown blocks. No extra conversational text.")
                 .build();
 
         GenerativeModel gm = new GenerativeModel(

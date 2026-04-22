@@ -112,6 +112,10 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
 
     private View layoutAiEmptyState;
     private View layoutAiResultState;
+    private View layoutAiInsightRow1;
+    private View layoutAiInsightRow2;
+    private View layoutAiInsightRow3;
+    private View layoutAiRecommendationRow;
     private TextView tvAiEmptyTitle;
     private TextView tvAiEmptyDesc;
 
@@ -123,6 +127,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private AdminStatsRepository adminStatsRepository;
     private AdminAiInsightsRepository adminAiInsightsRepository;
     private AdminDashboardStats latestStats;
+    private AdminAiInsights latestAiInsights;
     private int selectedRangeMonths = RANGE_6M;
     private int aiRequestSerial = 0;
     private boolean aiInsightsLoading = false;
@@ -227,6 +232,10 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         btnAiAnalyze = view.findViewById(R.id.btnAiAnalyze);
         layoutAiEmptyState = view.findViewById(R.id.layoutAiEmptyState);
         layoutAiResultState = view.findViewById(R.id.layoutAiResultState);
+        layoutAiInsightRow1 = view.findViewById(R.id.layoutAiInsightRow1);
+        layoutAiInsightRow2 = view.findViewById(R.id.layoutAiInsightRow2);
+        layoutAiInsightRow3 = view.findViewById(R.id.layoutAiInsightRow3);
+        layoutAiRecommendationRow = view.findViewById(R.id.layoutAiRecommendationRow);
         tvAiEmptyTitle = view.findViewById(R.id.tvAiEmptyTitle);
         tvAiEmptyDesc = view.findViewById(R.id.tvAiEmptyDesc);
 
@@ -305,7 +314,36 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
             tvStatVideoDownloads = getActivity().findViewById(R.id.tvStatVideoDownloads);
         }
 
-        loadStats();
+        // Restore state if available
+        if (savedInstanceState != null) {
+            latestStats = (AdminDashboardStats) savedInstanceState.getSerializable("latest_stats");
+            latestAiInsights = (AdminAiInsights) savedInstanceState.getSerializable("latest_ai_insights");
+            selectedRangeMonths = savedInstanceState.getInt("selected_range", RANGE_6M);
+        }
+
+        if (latestStats != null) {
+            String languageTag = LocaleManager.getCurrentLanguage(requireContext());
+            renderStats(latestStats, false, languageTag);
+            if (latestAiInsights != null) {
+                renderAiInsights(latestAiInsights, languageTag);
+            } else {
+                resetAiInsightsState(languageTag);
+            }
+        } else {
+            loadStats();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (latestStats != null) {
+            outState.putSerializable("latest_stats", latestStats);
+        }
+        if (latestAiInsights != null) {
+            outState.putSerializable("latest_ai_insights", latestAiInsights);
+        }
+        outState.putInt("selected_range", selectedRangeMonths);
     }
 
     private void bindRangeSelector() {
@@ -358,22 +396,9 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     }
 
     private void resetAiInsightsState(String languageTag) {
-        Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
+        // We no longer nullify latestAiInsights or hide the result state here 
+        // to satisfy the user request of keeping results visible when changing range.
         setAiInsightsLoading(false, languageTag);
-        
-        // Show Welcome (Empty) state, Hide Results
-        if (layoutAiEmptyState != null) layoutAiEmptyState.setVisibility(View.VISIBLE);
-        if (layoutAiResultState != null) layoutAiResultState.setVisibility(View.GONE);
-        
-        if (tvAiInsightsSubtitle != null) {
-            tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_tap_to_analyze));
-        }
-        if (tvAiSummary != null) tvAiSummary.setText("");
-        if (tvAiInsightLine1 != null) tvAiInsightLine1.setText("");
-        if (tvAiInsightLine2 != null) tvAiInsightLine2.setText("");
-        if (tvAiInsightLine3 != null) tvAiInsightLine3.setText("");
-        if (tvAiRecommendation != null) tvAiRecommendation.setText("");
-        
         refreshAnalyzeButtonState(languageTag);
     }
 
@@ -718,6 +743,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 if (!isAdded() || requestId != aiRequestSerial) {
                     return;
                 }
+                latestAiInsights = insights;
                 renderAiInsights(insights, languageTag);
             }
 
@@ -782,28 +808,46 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         }
 
         if (tvAiSummary != null) {
-            tvAiSummary.setText(insights.getSummary());
+            String summary = insights.getSummary();
+            tvAiSummary.setText(summary);
+            tvAiSummary.setVisibility(summary != null && !summary.isEmpty() ? View.VISIBLE : View.GONE);
         }
 
         List<String> lines = insights.getInsights();
         if (tvAiInsightLine1 != null) {
-            tvAiInsightLine1.setText(lines.size() > 0 ? "- " + lines.get(0) : "");
+            String text = (lines != null && lines.size() > 0) ? lines.get(0) : "";
+            tvAiInsightLine1.setText(text);
+            if (layoutAiInsightRow1 != null) {
+                layoutAiInsightRow1.setVisibility(text.isEmpty() ? View.GONE : View.VISIBLE);
+            }
         }
         if (tvAiInsightLine2 != null) {
-            tvAiInsightLine2.setText(lines.size() > 1 ? "- " + lines.get(1) : "");
+            String text = (lines != null && lines.size() > 1) ? lines.get(1) : "";
+            tvAiInsightLine2.setText(text);
+            if (layoutAiInsightRow2 != null) {
+                layoutAiInsightRow2.setVisibility(text.isEmpty() ? View.GONE : View.VISIBLE);
+            }
         }
         if (tvAiInsightLine3 != null) {
-            tvAiInsightLine3.setText(lines.size() > 2 ? "- " + lines.get(2) : "");
+            String text = (lines != null && lines.size() > 2) ? lines.get(2) : "";
+            tvAiInsightLine3.setText(text);
+            if (layoutAiInsightRow3 != null) {
+                layoutAiInsightRow3.setVisibility(text.isEmpty() ? View.GONE : View.VISIBLE);
+            }
         }
 
         List<String> actions = insights.getRecommendations();
         if (tvAiRecommendation != null) {
-            if (!actions.isEmpty()) {
+            String text = (actions != null && !actions.isEmpty()) ? actions.get(0) : "";
+            if (!text.isEmpty()) {
                 tvAiRecommendation.setText(localized.getString(
                         R.string.admin_ai_insights_recommendation_format,
-                        actions.get(0)));
+                        text));
             } else {
                 tvAiRecommendation.setText("");
+            }
+            if (layoutAiRecommendationRow != null) {
+                layoutAiRecommendationRow.setVisibility(text.isEmpty() ? View.GONE : View.VISIBLE);
             }
         }
     }
