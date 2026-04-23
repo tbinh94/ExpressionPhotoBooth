@@ -345,6 +345,8 @@
     <string name="admin_sticker_success">Đã thêm sticker mới!</string>
     <string name="admin_sticker_error">Lỗi khi tải lên sticker!</string>
     <string name="admin_sticker_empty">Chưa có sticker custom nào.</string>
+    <string name="admin_sticker_delete_confirm">Xóa vĩnh viễn sticker này?</string>
+    <string name="admin_sticker_deleted">Đã xóa sticker thành công</string>
     <string name="admin_go_to_dashboard">Quản trị hệ thống</string>
     <string name="main_subscription_required_title">Yêu cầu trả phí Premium</string>
     <string name="main_subscription_required_message">Tính năng AI (Pose/Expression) yêu cầu gói thành viên tháng để sử dụng.\nGiá: 50.000 VNĐ / tháng</string>

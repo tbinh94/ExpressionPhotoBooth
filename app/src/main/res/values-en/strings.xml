@@ -437,6 +437,8 @@
     <string name="admin_sticker_success">New sticker added!</string>
     <string name="admin_sticker_error">Failed to upload sticker!</string>
     <string name="admin_sticker_empty">No custom stickers yet.</string>
+    <string name="admin_sticker_delete_confirm">Permanently delete this sticker?</string>
+    <string name="admin_sticker_deleted">Sticker deleted successfully</string>
     <string name="admin_go_to_dashboard">Admin Dashboard</string>
     <string name="btn_gallery">✦ GALLERY ✦</string>
     <string name="gallery_title">My Memories</string>

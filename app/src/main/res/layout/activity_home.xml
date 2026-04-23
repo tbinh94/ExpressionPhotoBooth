@@ -300,7 +300,7 @@
             android:layout_marginBottom="12dp"
             android:gravity="center"
             android:text="@string/home_drawer_nav_label"
-            android:textColor="#475569"
+            android:textColor="#94A3B8"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.2" />
@@ -427,7 +427,7 @@
             android:layout_marginBottom="12dp"
             android:gravity="center"
             android:text="@string/home_drawer_settings_label"
-            android:textColor="#475569"
+            android:textColor="#94A3B8"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.2" />
