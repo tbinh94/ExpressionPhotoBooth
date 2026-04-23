@@ -551,4 +551,7 @@ that you have taken before</string>
     <string name="profile_btn_change_avatar">Change Profile Picture</string>
     <string name="profile_btn_change_password">Change Password</string>
     <string name="profile_btn_close">Close</string>
+    <string name="home_guest_profile_title">Unlock Profile Features</string>
+    <string name="home_guest_profile_message">Personalizing your profile and changing security settings are only available for registered members. Join our community to unlock these features!</string>
+    <string name="home_guest_profile_cta">Sign Up Now</string>
 </resources>

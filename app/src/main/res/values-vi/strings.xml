@@ -514,4 +514,7 @@ những ảnh đã chụp trước đó</string>
     <string name="profile_btn_change_avatar">Thay đổi ảnh đại diện</string>
     <string name="profile_btn_change_password">Đổi mật khẩu</string>
     <string name="profile_btn_close">Đóng</string>
+    <string name="home_guest_profile_title">Mở khóa tính năng hồ sơ</string>
+    <string name="home_guest_profile_message">Cá nhân hóa hồ sơ và thay đổi cài đặt bảo mật chỉ dành cho thành viên chính thức. Hãy tham gia cộng đồng của chúng mình để mở khóa các tính năng này!</string>
+    <string name="home_guest_profile_cta">Đăng ký ngay</string>
 </resources>

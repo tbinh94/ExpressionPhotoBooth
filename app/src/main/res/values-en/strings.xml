@@ -534,4 +534,7 @@ that you have taken before</string>
     <string name="edit_fine_tune_selection">Fine-tune your selection</string>
     <string name="edit_intensity">Intensity</string>
     <string name="edit_default_intensity_value">80</string>
+    <string name="home_guest_profile_title">Unlock Profile Features</string>
+    <string name="home_guest_profile_message">Personalizing your profile and changing security settings are only available for registered members. Join our community to unlock these features!</string>
+    <string name="home_guest_profile_cta">Sign Up Now</string>
 </resources>
