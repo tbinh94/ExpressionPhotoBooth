@@ -214,19 +214,10 @@ public class ResultActivity extends AppCompatActivity {
         View cardRate = findViewById(R.id.cardRate);
         if (cardRate != null) {
             cardRate.setOnClickListener(v -> {
-                if (isGuestSession) {
-                    HelpDialogUtils.showHistoryGuestRegisterCta(
-                            this,
-                            getString(R.string.home_history_user_only_title),
-                            getString(R.string.home_history_user_only_message),
-                            this::openRegisterFromGuest,
-                            null
-                    );
-                } else {
-                    showFeedbackBottomSheet(false);
-                }
+                // Guests are now allowed to provide feedback
+                showFeedbackBottomSheet(false);
             });
-            // Ensure child views don't block clicks from reachng the card
+            // Ensure child views don't block clicks from reaching the card
             cardRate.setFocusable(true);
             cardRate.setClickable(true);
         }
@@ -267,7 +258,7 @@ public class ResultActivity extends AppCompatActivity {
                         saveToUserLocalGallery(finalBitmap);
                     }
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        if (!isFinishing() && !isGuestSession) showFeedbackBottomSheet(true);
+                        if (!isFinishing()) showFeedbackBottomSheet(true);
                     }, 1500);
                 } else {
                     Toast.makeText(ResultActivity.this, R.string.no_result_to_show, Toast.LENGTH_SHORT).show();
@@ -1053,7 +1044,7 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void showFeedbackBottomSheet(boolean autoTrigger) {
-        if (isGuestSession) return;
+        // hasShownFeedback prevents multiple auto-triggers in the same session
         if (autoTrigger && hasShownFeedback) {
             return;
         }
@@ -1061,27 +1052,36 @@ public class ResultActivity extends AppCompatActivity {
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View bottomSheetView = getLayoutInflater().inflate(R.layout.layout_feedback_bottom_sheet, null);
+        if (bottomSheetView == null) return;
         bottomSheetDialog.setContentView(bottomSheetView);
 
         RatingBar ratingBar = bottomSheetView.findViewById(R.id.ratingBar);
         TextInputEditText etFeedback = bottomSheetView.findViewById(R.id.etFeedback);
         MaterialButton btnSubmit = bottomSheetView.findViewById(R.id.btnSubmitFeedback);
 
+        if (ratingBar == null || etFeedback == null || btnSubmit == null) return;
+
         ratingBar.setOnRatingBarChangeListener((rb, rating, fromUser) -> {
-            if (fromUser) {
-                int toneType = ToneGenerator.TONE_PROP_BEEP;
-                if (rating >= 5) toneType = ToneGenerator.TONE_DTMF_0;
-                else if (rating >= 4) toneType = ToneGenerator.TONE_DTMF_1;
-                else if (rating >= 3) toneType = ToneGenerator.TONE_DTMF_2;
-                else if (rating >= 2) toneType = ToneGenerator.TONE_DTMF_3;
-                else toneType = ToneGenerator.TONE_DTMF_4;
-                
-                toneGenerator.startTone(toneType, 150);
+            if (fromUser && toneGenerator != null) {
+                try {
+                    int toneType = ToneGenerator.TONE_PROP_BEEP;
+                    if (rating >= 5) toneType = ToneGenerator.TONE_DTMF_0;
+                    else if (rating >= 4) toneType = ToneGenerator.TONE_DTMF_1;
+                    else if (rating >= 3) toneType = ToneGenerator.TONE_DTMF_2;
+                    else if (rating >= 2) toneType = ToneGenerator.TONE_DTMF_3;
+                    else toneType = ToneGenerator.TONE_DTMF_4;
+                    
+                    toneGenerator.startTone(toneType, 150);
+                } catch (Exception ignored) {}
             }
         });
 
         btnSubmit.setOnClickListener(v -> {
             float rating = ratingBar.getRating();
+            if (rating <= 0) {
+                Toast.makeText(this, R.string.feedback_hint, Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             // Ensure Telex composing text is committed before reading the final feedback value.
             etFeedback.clearComposingText();
@@ -1093,41 +1093,54 @@ public class ResultActivity extends AppCompatActivity {
 
             btnSubmit.setEnabled(false);
             etFeedback.postDelayed(() -> {
-                String feedback = etFeedback.getText() != null ? etFeedback.getText().toString().trim() : "";
+                try {
+                    String feedback = etFeedback.getText() != null ? etFeedback.getText().toString().trim() : "";
 
-                AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
-                String uid = authRepository.getCurrentUid();
-                String email = authRepository.getCurrentEmail();
+                    AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
+                    String uid = authRepo.getCurrentUid();
+                    String email = authRepo.getCurrentEmail();
 
-                Map<String, Object> review = new HashMap<>();
-                review.put("userId", uid);
-                review.put("userEmail", email);
-                review.put("rating", rating);
-                review.put("feedback", feedback);
-                review.put("createdAt", FieldValue.serverTimestamp());
-                review.put("timestamp", System.currentTimeMillis());
-                review.put("date", new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
+                    // Fallback for Guest users
+                    if (uid == null) uid = "anonymous_guest_" + System.currentTimeMillis();
+                    if (email == null) email = "Guest";
 
-                FirebaseFirestore.getInstance().collection("reviews")
-                    .add(review)
-                    .addOnSuccessListener(doc -> {
-                        if (!isGuestSession && historyRepository != null && uid != null && historySessionId != null) {
-                            historyRepository.updateFeedback(uid, historySessionId, rating, feedback);
-                        }
-                        adminStatsRepository.recordReviewSubmitted();
-                        Toast.makeText(this, getString(R.string.feedback_thanks_with_rating, rating), Toast.LENGTH_SHORT).show();
-                        hasShownFeedback = true;
-                        bottomSheetDialog.dismiss();
-                    })
-                    .addOnFailureListener(e -> {
-                        btnSubmit.setEnabled(true);
-                        Toast.makeText(this, R.string.feedback_submit_failed, Toast.LENGTH_SHORT).show();
-                    });
-            }, 90L);
+                    Map<String, Object> review = new HashMap<>();
+                    review.put("userId", uid);
+                    review.put("userEmail", email);
+                    review.put("rating", rating);
+                    review.put("feedback", feedback);
+                    review.put("createdAt", FieldValue.serverTimestamp());
+                    review.put("timestamp", System.currentTimeMillis());
+                    review.put("isGuest", isGuestSession);
+                    review.put("date", new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()));
+
+                    FirebaseFirestore.getInstance().collection("reviews")
+                        .add(review)
+                        .addOnSuccessListener(doc -> {
+                            if (!isGuestSession && historyRepository != null && authRepo.getCurrentUid() != null && historySessionId != null) {
+                                historyRepository.updateFeedback(authRepo.getCurrentUid(), historySessionId, rating, feedback);
+                            }
+                            if (adminStatsRepository != null) {
+                                adminStatsRepository.recordReviewSubmitted();
+                            }
+                            Toast.makeText(this, getString(R.string.feedback_thanks_with_rating, rating), Toast.LENGTH_SHORT).show();
+                            hasShownFeedback = true;
+                            bottomSheetDialog.dismiss();
+                        })
+                        .addOnFailureListener(e -> {
+                            btnSubmit.setEnabled(true);
+                            String errorMsg = e.getMessage() != null ? e.getMessage() : getString(R.string.feedback_submit_failed);
+                            Toast.makeText(this, getString(R.string.feedback_submit_failed) + ": " + errorMsg, Toast.LENGTH_LONG).show();
+                        });
+                } catch (Exception e) {
+                    btnSubmit.setEnabled(true);
+                    Toast.makeText(this, R.string.feedback_submit_failed, Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }, 100L);
         });
 
         bottomSheetDialog.show();
-
     }
 
     private List<String> resolveSourceOriginalUris() {
