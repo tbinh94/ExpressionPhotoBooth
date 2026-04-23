@@ -22,7 +22,57 @@ import com.example.expressionphotobooth.utils.LocaleManager;
 import java.util.List;
 import java.util.Locale;
 
+import android.widget.ProgressBar;
+import android.widget.LinearLayout;
+
 public final class HelpDialogUtils {
+
+    private static AlertDialog loadingDialog;
+
+    public static void showLoading(Context context, String message) {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            return;
+        }
+
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setGravity(android.view.Gravity.CENTER);
+        int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, context.getResources().getDisplayMetrics());
+        layout.setPadding(padding, padding, padding, padding);
+        layout.setBackgroundResource(R.drawable.bg_history_pill_cta);
+
+        ProgressBar progressBar = new ProgressBar(context);
+        progressBar.setIndeterminate(true);
+        progressBar.setIndeterminateTintList(ColorStateList.valueOf(Color.WHITE));
+        layout.addView(progressBar);
+
+        if (!TextUtils.isEmpty(message)) {
+            TextView textView = new TextView(context);
+            textView.setText(message);
+            textView.setTextColor(Color.WHITE);
+            textView.setGravity(android.view.Gravity.CENTER);
+            textView.setPadding(0, padding / 2, 0, 0);
+            layout.addView(textView);
+        }
+
+        loadingDialog = new MaterialAlertDialogBuilder(context)
+                .setView(layout)
+                .setCancelable(false)
+                .create();
+
+        if (loadingDialog.getWindow() != null) {
+            loadingDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        loadingDialog.show();
+    }
+
+    public static void hideLoading() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+            loadingDialog = null;
+        }
+    }
 
     private HelpDialogUtils() {
     }

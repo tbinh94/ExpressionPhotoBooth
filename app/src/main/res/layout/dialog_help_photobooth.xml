@@ -8,7 +8,7 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#FFFDFEFF"
+        app:cardBackgroundColor="@color/surface_card"
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp"
         app:strokeColor="#332A5298"
@@ -60,7 +60,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:lineSpacingExtra="3dp"
-                        android:textColor="@color/text_secondary"
+                        android:textColor="@color/text_primary"
                         android:textSize="13sp" />
 
                     <LinearLayout
@@ -87,7 +87,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:lineSpacingExtra="3dp"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -115,7 +115,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:lineSpacingExtra="3dp"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -143,7 +143,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:lineSpacingExtra="3dp"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -171,7 +171,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:lineSpacingExtra="3dp"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -199,7 +199,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:lineSpacingExtra="3dp"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -227,7 +227,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:lineSpacingExtra="3dp"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -255,7 +255,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:lineSpacingExtra="3dp"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -283,7 +283,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:lineSpacingExtra="3dp"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/text_primary"
                             android:textSize="14sp" />
                     </LinearLayout>
                 </LinearLayout>

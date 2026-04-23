@@ -1157,10 +1157,12 @@ public class EditPhotoActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         ivEditingPhoto.setImageBitmap(originalBitmap);
+                        if (chipActiveEdit != null) chipActiveEdit.setVisibility(View.VISIBLE);
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         ivEditingPhoto.setImageBitmap(editedBitmap != null ? editedBitmap : originalBitmap);
+                        if (chipActiveEdit != null) chipActiveEdit.setVisibility(View.GONE);
                         break;
                 }
                 return true;
@@ -1492,12 +1494,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         ivEditingPhoto.setImageBitmap(editedBitmap);
         applyFrameOverlay();
         
-        chipActiveEdit.setVisibility(
-                (currentEditState.getFilterStyle() != EditState.FilterStyle.NONE ||
-                        currentEditState.getStickerStyle() != EditState.StickerStyle.NONE ||
-                        currentEditState.getBackgroundStyle() != EditState.BackgroundStyle.NONE)
-                        ? View.VISIBLE : View.GONE
-        );
+        // chipActiveEdit visibility is now handled exclusively by the comparison eye icon touch listener
     }
 
     private void syncSelectionsToAdapters() {

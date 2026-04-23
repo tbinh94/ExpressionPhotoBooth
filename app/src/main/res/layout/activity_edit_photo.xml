@@ -121,7 +121,8 @@
                 android:textSize="11sp"
                 app:chipBackgroundColor="#88000000"
                 app:chipMinHeight="24dp"
-                app:chipStrokeWidth="0dp" />
+                app:chipStrokeWidth="0dp"
+                android:visibility="gone" />
 
         </FrameLayout>
     </androidx.cardview.widget.CardView>

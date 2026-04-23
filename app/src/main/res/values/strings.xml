@@ -415,6 +415,10 @@
     <string name="admin_sticker_empty">No custom stickers yet.</string>
     <string name="admin_sticker_delete_confirm">Permanently delete this sticker?</string>
     <string name="admin_sticker_deleted">Sticker deleted successfully</string>
+    <string name="home_banner_preview_title">Cover Photo Preview</string>
+    <string name="home_banner_preview_subtitle">This image will be set as your home background</string>
+    <string name="home_banner_preview_apply">Apply Now</string>
+    <string name="home_banner_preview_cancel">Cancel</string>
     <string name="admin_go_to_dashboard">Admin Dashboard</string>
     <string name="main_subscription_required_title">Premium Required</string>
     <string name="main_subscription_required_message">AI Detection features (Pose/Expression) require a monthly premium membership.\nPrice: 50.000 VND / month</string>

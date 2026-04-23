@@ -46,6 +46,12 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.widget.Toast;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String PREF_HOME = "home_preferences";
@@ -1089,23 +1095,127 @@ public class HomeActivity extends AppCompatActivity {
             if (uri == null) {
                 return;
             }
-            // Persist permission for internal storage URIs if possible
-            try {
-                final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                getContentResolver().takePersistableUriPermission(uri, takeFlags);
-            } catch (SecurityException e) {
-                // Not a persistable URI, fine for many pickers
-            }
-
-            if (ivHomeBanner != null) {
-                Glide.with(this).load(uri).centerCrop().into(ivHomeBanner);
-            }
-            getSharedPreferences(PREF_HOME, MODE_PRIVATE)
-                    .edit()
-                    .putString(KEY_BANNER_URI, uri.toString())
-                    .apply();
-            updateTitleVisibility();
+            showBannerPreviewDialog(uri);
         });
+    }
+
+    private float bannerRotation = 0f;
+    private float bannerScale = 1.0f;
+
+    private void showBannerPreviewDialog(Uri uri) {
+        String languageTag = LocaleManager.getCurrentLanguage(this);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.TransparentBottomSheetDialog);
+        View view = getLayoutInflater().inflate(R.layout.dialog_banner_preview, null);
+
+        TextView tvTitle = view.findViewById(R.id.tvPreviewTitle);
+        TextView tvSubtitle = view.findViewById(R.id.tvPreviewSubtitle);
+        ImageView ivPreview = view.findViewById(R.id.ivBannerPreview);
+        MaterialButton btnRotateLeft = view.findViewById(R.id.btnRotateLeft);
+        MaterialButton btnRotateRight = view.findViewById(R.id.btnRotateRight);
+        MaterialButton btnZoomIn = view.findViewById(R.id.btnZoomIn);
+        MaterialButton btnZoomOut = view.findViewById(R.id.btnZoomOut);
+        MaterialButton btnCancel = view.findViewById(R.id.btnCancel);
+        MaterialButton btnApply = view.findViewById(R.id.btnApply);
+
+        tvTitle.setText(LocaleManager.getString(this, R.string.home_banner_preview_title, languageTag));
+        tvSubtitle.setText(LocaleManager.getString(this, R.string.home_banner_preview_subtitle, languageTag));
+        btnApply.setText(LocaleManager.getString(this, R.string.home_banner_preview_apply, languageTag));
+        btnCancel.setText(LocaleManager.getString(this, R.string.home_banner_preview_cancel, languageTag));
+
+        bannerRotation = 0f;
+        bannerScale = 1.0f;
+
+        Glide.with(this).load(uri).into(ivPreview);
+
+        btnRotateLeft.setOnClickListener(v -> {
+            bannerRotation -= 90f;
+            ivPreview.setRotation(bannerRotation);
+        });
+
+        btnRotateRight.setOnClickListener(v -> {
+            bannerRotation += 90f;
+            ivPreview.setRotation(bannerRotation);
+        });
+
+        btnZoomIn.setOnClickListener(v -> {
+            bannerScale += 0.1f;
+            ivPreview.setScaleX(bannerScale);
+            ivPreview.setScaleY(bannerScale);
+        });
+
+        btnZoomOut.setOnClickListener(v -> {
+            if (bannerScale > 0.5f) {
+                bannerScale -= 0.1f;
+                ivPreview.setScaleX(bannerScale);
+                ivPreview.setScaleY(bannerScale);
+            }
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnApply.setOnClickListener(v -> {
+            dialog.dismiss();
+            processAndSaveBanner(uri, bannerRotation, bannerScale);
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+    private void processAndSaveBanner(Uri uri, float rotation, float scale) {
+        String languageTag = LocaleManager.getCurrentLanguage(this);
+        // Show loading
+        HelpDialogUtils.showLoading(this, "Đang xử lý ảnh...");
+
+        new Thread(() -> {
+            try {
+                InputStream is = getContentResolver().openInputStream(uri);
+                Bitmap source = BitmapFactory.decodeStream(is);
+                if (source == null) throw new Exception("Failed to decode");
+
+                // Apply matrix
+                android.graphics.Matrix matrix = new android.graphics.Matrix();
+                matrix.postRotate(rotation);
+                matrix.postScale(scale, scale);
+
+                Bitmap result = Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+                
+                // Save to internal storage
+                File file = new File(getFilesDir(), "custom_banner_" + System.currentTimeMillis() + ".jpg");
+                java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
+                result.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+                fos.close();
+
+                Uri resultUri = Uri.fromFile(file);
+
+                runOnUiThread(() -> {
+                    HelpDialogUtils.hideLoading();
+                    if (ivHomeBanner != null) {
+                        Glide.with(this).load(resultUri).centerCrop().into(ivHomeBanner);
+                    }
+                    getSharedPreferences(PREF_HOME, MODE_PRIVATE)
+                            .edit()
+                            .putString(KEY_BANNER_URI, resultUri.toString())
+                            .apply();
+                    updateTitleVisibility();
+                    
+                    HelpDialogUtils.showHistoryStyledNotice(
+                            this,
+                            R.drawable.ic_success_circle,
+                            LocaleManager.getString(this, R.string.admin_sticker_success, languageTag),
+                            "",
+                            LocaleManager.getString(this, R.string.common_ok, languageTag),
+                            null
+                    );
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    HelpDialogUtils.hideLoading();
+                    Toast.makeText(this, "Lỗi xử lý ảnh: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
     }
 
     /**
