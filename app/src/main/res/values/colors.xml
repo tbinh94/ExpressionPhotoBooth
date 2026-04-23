@@ -119,9 +119,9 @@
     <color name="home_title_photobooth_dark">#E2E8F0</color>
     <color name="home_icon_light">#1E293B</color>
     <color name="home_icon_dark">#FFFFFF</color>
-    <color name="home_glass_bg_light">#33000000</color>
+    <color name="home_glass_bg_light">#CCFFFFFF</color>
     <color name="home_glass_bg_dark">#33FFFFFF</color>
-    <color name="home_glass_stroke_light">#26000000</color>
+    <color name="home_glass_stroke_light">#FFFFFF</color>
     <color name="home_glass_stroke_dark">#4DFFFFFF</color>
     <color name="admin_text_primary">#1E293B</color>
 </resources>

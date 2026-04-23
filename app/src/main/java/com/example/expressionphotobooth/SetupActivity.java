@@ -163,13 +163,15 @@ public class SetupActivity extends AppCompatActivity {
 
                         if (topTask.isSuccessful() && topTask.getResult() != null && !topTask.getResult().isEmpty()) {
                             List<TopFrame> topFrames = frameStatsRepository.parseTopFrames(topTask.getResult());
+                            int displayRank = 1;
                             for (TopFrame tf : topFrames) {
+                                if (displayRank > 3) break;
                                 try {
                                     int fId = Integer.parseInt(tf.getFrameId());
                                     for (Frame f : allFrames) {
                                         if (f.getId() == fId) {
                                             trendingFrames.add(f);
-                                            rankMap.put(fId, tf.getRank() > 0 ? tf.getRank() : (topFrames.indexOf(tf) + 1));
+                                            rankMap.put(fId, displayRank++);
                                             break;
                                         }
                                     }

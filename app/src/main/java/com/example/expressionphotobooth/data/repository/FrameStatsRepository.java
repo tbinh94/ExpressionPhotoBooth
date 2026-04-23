@@ -34,7 +34,7 @@ import java.util.Map;
 public class FrameStatsRepository {
 
     private static final String COLLECTION = "top_frames";
-    private static final int TOP_LIMIT = 3;
+    private static final int TOP_LIMIT = 20;
 
     private final FirebaseFirestore db;
 
