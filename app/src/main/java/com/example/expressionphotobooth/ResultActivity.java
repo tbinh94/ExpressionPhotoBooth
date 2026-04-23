@@ -246,9 +246,9 @@ public class ResultActivity extends AppCompatActivity {
 
             Bitmap finalBitmap;
             if (localFrameResId > 0) {
-                finalBitmap = createFramedCollage(new ArrayList<>(imageUrisToCollage), localFrameResId);
+                finalBitmap = createFramedCollage(sourceOriginalUris, localFrameResId);
             } else if (remoteBase64 != null && remoteLayout != null) {
-                finalBitmap = createRemoteFramedCollage(new ArrayList<>(imageUrisToCollage), remoteBase64, remoteLayout);
+                finalBitmap = createRemoteFramedCollage(sourceOriginalUris, remoteBase64, remoteLayout);
             } else {
                 finalBitmap = createVerticalCollageUseCase.execute(ResultActivity.this, imageUrisToCollage);
             }
@@ -282,9 +282,9 @@ public class ResultActivity extends AppCompatActivity {
             Bitmap frameBitmap = BitmapFactory.decodeByteArray(frameBytes, 0, frameBytes.length);
             if (frameBitmap == null) return null;
 
-            // 1. Flood-fill: xóa nền trắng VÀ tự phát hiện vị trí các ô trống thực tế
+            // 1. Tự phát hiện vị trí các ô trống thực tế từ frame đã được làm trong suốt
             java.util.List<Rect> detectedHoles = new java.util.ArrayList<>();
-            frameBitmap = applyFloodFillWhiteRemoval(frameBitmap, layoutType, detectedHoles);
+            findExistingTransparentHoles(frameBitmap, layoutType, detectedHoles);
 
             final float EXPORT_SCALE_FACTOR = 4.0f;
             int targetWidth  = Math.round(frameBitmap.getWidth()  * EXPORT_SCALE_FACTOR);
@@ -309,18 +309,26 @@ public class ResultActivity extends AppCompatActivity {
             }
 
             // 2. Vẽ ảnh chụp vào đúng vị trí lỗ trống (SCALED)
+            Map<String, String> editedImageUris = sessionState != null ? sessionState.getEditedImageUris() : null;
             for (int i = 0; i < Math.min(photoUris.size(), holes.size()); i++) {
                 String originalUri = photoUris.get(i);
-                Bitmap originalPhoto = decodeBitmap(Uri.parse(originalUri));
-                if (originalPhoto == null) continue;
+                String editedUri = (editedImageUris != null) ? editedImageUris.get(originalUri) : null;
+                String uriToUse = (editedUri != null) ? editedUri : originalUri;
+
+                Bitmap photoToDecode = decodeBitmap(Uri.parse(uriToUse));
+                if (photoToDecode == null) continue;
 
                 EditState photoState = sessionState != null
                         ? sessionState.getPhotoEditState(originalUri).copy()
                         : new EditState();
 
-                Bitmap photoNoSticker = renderPhotoWithoutSticker(originalPhoto, photoState);
-                originalPhoto.recycle();
-                if (photoNoSticker == null) continue;
+                Bitmap photoNoSticker = renderPhotoWithoutSticker(photoToDecode, photoState);
+                
+                // FALLBACK: Nếu AI lỗi (photoNoSticker null), dùng ảnh gốc (photoToDecode)
+                Bitmap finalPhotoToDraw = (photoNoSticker != null) ? photoNoSticker : photoToDecode;
+                if (photoNoSticker == null) {
+                    android.util.Log.w("ResultActivity", "AI rendering null, falling back to original photo.");
+                }
 
                 Rect hole = holes.get(i);
                 // Scale hole to export resolution
@@ -331,8 +339,8 @@ public class ResultActivity extends AppCompatActivity {
                         hole.bottom * EXPORT_SCALE_FACTOR
                 );
 
-                int photoW = photoNoSticker.getWidth();
-                int photoH = photoNoSticker.getHeight();
+                int photoW = finalPhotoToDraw.getWidth();
+                int photoH = finalPhotoToDraw.getHeight();
                 float holeW = scaledHoleF.width();
                 float holeH = scaledHoleF.height();
 
@@ -359,7 +367,7 @@ public class ResultActivity extends AppCompatActivity {
                 // Clip to hole bounds to prevent photo from bleeding into adjacent slots
                 canvas.save();
                 canvas.clipRect(scaledHoleF);
-                canvas.drawBitmap(photoNoSticker, matrix, paint);
+                canvas.drawBitmap(finalPhotoToDraw, matrix, paint);
                 canvas.restore();
 
                 // Sticker: reuse srcRectF for placement mapping
@@ -367,7 +375,10 @@ public class ResultActivity extends AppCompatActivity {
                 Rect scaledHoleRect = new Rect(Math.round(scaledHoleF.left), Math.round(scaledHoleF.top),
                         Math.round(scaledHoleF.right), Math.round(scaledHoleF.bottom));
                 drawStickerForHole(canvas, scaledHoleRect, srcRectF, photoW, photoH, photoState);
-                photoNoSticker.recycle();
+                
+                // Giải phóng bộ nhớ an toàn
+                if (photoNoSticker != null && photoNoSticker != photoToDecode) photoNoSticker.recycle();
+                photoToDecode.recycle();
             }
 
             // Debug overlay removed as positions are now verified
@@ -385,208 +396,77 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Tách biệt logic xử lý cho hai loại layout:
-     * 16x9_3 (Frame giấy xé) -> Dùng Full Scan để nhận diện hình dạng phức tạp.
-     * Các loại khác -> Dùng Seed BFS để ổn định vị trí.
-     */
-    private Bitmap applyFloodFillWhiteRemoval(Bitmap src, String layoutType,
-                                               java.util.List<Rect> outHoles) {
-        if ("16x9_3".equals(layoutType)) {
-            return applyFullScanHoleDetection(src, layoutType, outHoles);
-        } else {
-            return applySeedBasedHoleDetection(src, layoutType, outHoles);
-        }
-    }
-
-    private Bitmap applyFullScanHoleDetection(Bitmap src, String layoutType, java.util.List<Rect> outHoles) {
-        int w = src.getWidth();
-        int h = src.getHeight();
-
-        final int MAX_DIM = 600;
-        float dsScale = 1f;
-        Bitmap workSrc = src;
-        if (w > MAX_DIM || h > MAX_DIM) {
-            dsScale = Math.min((float) MAX_DIM / w, (float) MAX_DIM / h);
-            int dsW = Math.max(1, Math.round(w * dsScale));
-            int dsH = Math.max(1, Math.round(h * dsScale));
-            workSrc = Bitmap.createScaledBitmap(src, dsW, dsH, true);
-        }
-        int dw = workSrc.getWidth();
-        int dh = workSrc.getHeight();
-        int[] dsPixels = new int[dw * dh];
-        workSrc.getPixels(dsPixels, 0, dw, 0, 0, dw, dh);
-        boolean[] dsVisited = new boolean[dw * dh];
-        if (workSrc != src) workSrc.recycle();
-
-        int minHoleArea = Math.max(30, (dw * dh) / 200);
-        java.util.List<int[]> dsRegions = new java.util.ArrayList<>();
-
-        for (int y = 0; y < dh; y++) {
-            for (int x = 0; x < dw; x++) {
-                int idx = y * dw + x;
-                if (dsVisited[idx]) continue;
-                int p = dsPixels[idx];
-                int r = (p >> 16) & 0xff;
-                int g = (p >>  8) & 0xff;
-                int b = p & 0xff;
-                int a = (p >> 24) & 0xff;
-                dsVisited[idx] = true;
-                if (a < 128 || r < 180 || g < 180 || b < 180) continue;
-
-                java.util.ArrayDeque<Integer> q = new java.util.ArrayDeque<>();
-                q.add(idx);
-                int minX = x, maxX = x, minY = y, maxY = y, area = 0;
-                while (!q.isEmpty()) {
-                    int curr = q.poll();
-                    area++;
-                    int cx = curr % dw, cy = curr / dw;
-                    if (cx < minX) minX = cx; if (cx > maxX) maxX = cx;
-                    if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
-                    int[] ns = {curr - 1, curr + 1, curr - dw, curr + dw};
-                    for (int n : ns) {
-                        if (n < 0 || n >= dw * dh || dsVisited[n]) continue;
-                        if (Math.abs(n % dw - cx) > 1) continue;
-                        int np = dsPixels[n];
-                        int na = (np >> 24) & 0xff;
-                        int nr = (np >> 16) & 0xff;
-                        int ng = (np >>  8) & 0xff;
-                        int nb = np & 0xff;
-                        if (na >= 128 && nr > 180 && ng > 180 && nb > 180) {
-                            dsVisited[n] = true;
-                            q.add(n);
-                        }
-                    }
-                }
-                if (area >= minHoleArea) {
-                    dsRegions.add(new int[]{minX, minY, maxX, maxY, area});
-                }
-            }
-        }
-
-        int expectedCount = FrameConfig.getSlotCountForLayout(layoutType);
-        dsRegions.sort((a, b) -> Integer.compare(b[4], a[4]));
-        while (dsRegions.size() > expectedCount) dsRegions.remove(dsRegions.size() - 1);
-        dsRegions.sort((a, b) -> a[1] != b[1] ? a[1] - b[1] : a[0] - b[0]);
-
-        if (dsRegions.isEmpty()) return src;
-
-        Bitmap out = src.copy(Bitmap.Config.ARGB_8888, true);
-        int[] origPixels = new int[w * h];
-        out.getPixels(origPixels, 0, w, 0, 0, w, h);
-        boolean[] origVisited = new boolean[w * h];
-
-        for (int[] reg : dsRegions) {
-            int ox1 = Math.max(0, Math.round(reg[0] / dsScale));
-            int oy1 = Math.max(0, Math.round(reg[1] / dsScale));
-            int ox2 = Math.min(w - 1, Math.round(reg[2] / dsScale));
-            int oy2 = Math.min(h - 1, Math.round(reg[3] / dsScale));
-            
-            int seedX = (ox1 + ox2) / 2, seedY = (oy1 + oy2) / 2;
-            int seedIdx = -1;
-            int maxRadius = Math.max(ox2 - ox1, oy2 - oy1) / 2;
-            outer: for (int r = 0; r <= maxRadius; r++) {
-                for (int dy = -r; dy <= r; dy++) {
-                    for (int dx = -r; dx <= r; dx++) {
-                        if (Math.abs(dx) != r && Math.abs(dy) != r) continue;
-                        int sx = seedX + dx, sy = seedY + dy;
-                        if (sx < ox1 || sx > ox2 || sy < oy1 || sy > oy2) continue;
-                        int si = sy * w + sx;
-                        if (origVisited[si]) continue;
-                        int sp = origPixels[si];
-                        if (((sp >> 24) & 0xff) >= 128 && ((sp >> 16) & 0xff) > 180 && ((sp >> 8) & 0xff) > 180 && (sp & 0xff) > 180) {
-                            seedIdx = si; break outer;
-                        }
-                    }
-                }
-            }
-
-            if (seedIdx < 0) {
-                outHoles.add(new Rect(ox1, oy1, ox2, oy2));
-                continue;
-            }
-
-            java.util.ArrayDeque<Integer> q = new java.util.ArrayDeque<>();
-            q.add(seedIdx);
-            origVisited[seedIdx] = true;
-            int minX = seedX, maxX = seedX, minY = seedY, maxY = seedY;
-            int margin = Math.max(5, Math.min(ox2 - ox1, oy2 - oy1) / 10);
-            while (!q.isEmpty()) {
-                int curr = q.poll();
-                origPixels[curr] = 0x00000000;
-                int cx = curr % w, cy = curr / w;
-                if (cx < minX) minX = cx; if (cx > maxX) maxX = cx;
-                if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
-                int[] ns = {curr - 1, curr + 1, curr - w, curr + w};
-                for (int n : ns) {
-                    if (n < 0 || n >= w * h || origVisited[n]) continue;
-                    int nx = n % w, ny = n / w;
-                    if (Math.abs(nx - cx) > 1) continue;
-                    if (nx < ox1 - margin || nx > ox2 + margin) continue;
-                    if (ny < oy1 - margin || ny > oy2 + margin) continue;
-                    int np = origPixels[n];
-                    if (((np >> 24) & 0xff) >= 128 && ((np >> 16) & 0xff) > 180 && ((np >> 8) & 0xff) > 180 && (np & 0xff) > 180) {
-                        origVisited[n] = true; q.add(n);
-                    }
-                }
-            }
-            outHoles.add(new Rect(minX, minY, maxX, maxY));
-        }
-        out.setPixels(origPixels, 0, w, 0, 0, w, h);
-        return out;
-    }
-
-    private Bitmap applySeedBasedHoleDetection(Bitmap src, String layoutType, java.util.List<Rect> outHoles) {
-        int w = src.getWidth();
-        int h = src.getHeight();
-        java.util.List<Rect> seedHoles = FrameConfig.getHolesForLayoutScaled(layoutType, w, h);
-        if (seedHoles.isEmpty()) return src;
-
-        Bitmap out = src.copy(Bitmap.Config.ARGB_8888, true);
+    private void findExistingTransparentHoles(Bitmap src, String layoutType, java.util.List<Rect> outHoles) {
+        int w = src.getWidth(), h = src.getHeight();
         int[] pixels = new int[w * h];
-        out.getPixels(pixels, 0, w, 0, 0, w, h);
+        src.getPixels(pixels, 0, w, 0, 0, w, h);
         boolean[] visited = new boolean[w * h];
-
-        for (Rect rect : seedHoles) {
-            int cx = rect.centerX(), cy = rect.centerY();
-            int sx1 = Math.max(0, cx - rect.width()/4), sx2 = Math.min(w-1, cx + rect.width()/4);
-            int sy1 = Math.max(0, cy - rect.height()/4), sy2 = Math.min(h-1, cy + rect.height()/4);
-
-            int minX = w, maxX = 0, minY = h, maxY = 0;
-            boolean found = false;
-
-            for (int sy = sy1; sy <= sy2; sy++) {
-                for (int sx = sx1; sx <= sx2; sx++) {
-                    int idx = sy * w + sx;
-                    if (visited[idx]) continue;
-                    int p = pixels[idx];
-                    if (((p >> 24) & 0xff) < 128 || ((p >> 16) & 0xff) < 180 || ((p >> 8) & 0xff) < 180 || (p & 0xff) < 180) continue;
-
+        for (int y = 0; y < h; y += 10) {
+            for (int x = 0; x < w; x += 10) {
+                int idx = y * w + x;
+                if (!visited[idx] && ((pixels[idx] >> 24) & 0xff) < 100) {
+                    int minX = x, maxX = x, minY = y, maxY = y;
                     java.util.ArrayDeque<Integer> q = new java.util.ArrayDeque<>();
-                    q.add(idx); visited[idx] = true; found = true;
+                    q.add(idx); visited[idx] = true;
                     while (!q.isEmpty()) {
-                        int curr = q.poll();
-                        pixels[curr] = 0x00000000;
-                        int curX = curr % w, curY = curr / w;
-                        if (curX < minX) minX = curX; if (curX > maxX) maxX = curX;
-                        if (curY < minY) minY = curY; if (curY > maxY) maxY = curY;
+                        int curr = q.poll(), cx = curr % w, cy = curr / w;
+                        if (cx < minX) minX = cx; if (cx > maxX) maxX = cx;
+                        if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
                         int[] ns = {curr - 1, curr + 1, curr - w, curr + w};
                         for (int n : ns) {
-                            if (n < 0 || n >= w*h || visited[n]) continue;
-                            if (Math.abs(n % w - curX) > 1) continue;
-                            int np = pixels[n];
-                            if (((np >> 24) & 0xff) >= 128 && ((np >> 16) & 0xff) > 180 && ((np >> 8) & 0xff) > 180 && (np & 0xff) > 180) {
+                            if (n >= 0 && n < w*h && !visited[n] && Math.abs(n%w-cx) <= 1 && ((pixels[n]>>24)&0xff) < 100) {
                                 visited[n] = true; q.add(n);
                             }
                         }
                     }
+                    if ((maxX - minX) > w / 15 && (maxY - minY) > h / 15) outHoles.add(new Rect(minX, minY, maxX, maxY));
                 }
             }
-            if (found) outHoles.add(new Rect(minX, minY, maxX, maxY));
-            else outHoles.add(new Rect(rect.left, rect.top, rect.right, rect.bottom)); // fallback to seed rect
         }
-        out.setPixels(pixels, 0, w, 0, 0, w, h);
-        return out;
+        
+        int expectedCount = FrameConfig.getSlotCountForLayout(layoutType);
+        
+        // Split merged holes if we have fewer than expected
+        while (outHoles.size() > 0 && outHoles.size() < expectedCount) {
+            Rect largest = null;
+            int maxArea = 0;
+            for (Rect r : outHoles) {
+                int area = r.width() * r.height();
+                if (area > maxArea) {
+                    maxArea = area;
+                    largest = r;
+                }
+            }
+            if (largest == null) break;
+            
+            outHoles.remove(largest);
+            // Bias towards vertical split because photo strips usually merge vertically
+            if (largest.height() > largest.width() * 0.8) {
+                int midY = largest.top + largest.height() / 2;
+                outHoles.add(new Rect(largest.left, largest.top, largest.right, midY));
+                outHoles.add(new Rect(largest.left, midY, largest.right, largest.bottom));
+            } else {
+                int midX = largest.left + largest.width() / 2;
+                outHoles.add(new Rect(largest.left, largest.top, midX, largest.bottom));
+                outHoles.add(new Rect(midX, largest.top, largest.right, largest.bottom));
+            }
+        }
+
+        // Remove noise if we have more than expected
+        if (outHoles.size() > expectedCount) {
+            outHoles.sort((a, b) -> Integer.compare(b.width() * b.height(), a.width() * a.height()));
+            while (outHoles.size() > expectedCount) {
+                outHoles.remove(outHoles.size() - 1);
+            }
+        }
+        
+        // Sort holes from top to bottom, left to right
+        outHoles.sort((a, b) -> {
+            if (Math.abs(a.top - b.top) > h / 10) {
+                return Integer.compare(a.top, b.top);
+            }
+            return Integer.compare(a.left, b.left);
+        });
     }
 
     private Bitmap createFramedCollage(List<String> photoUris, int frameResId) {
@@ -612,18 +492,24 @@ public class ResultActivity extends AppCompatActivity {
         List<Rect> holes = FrameConfig.getHolesForFrame(frameResId);
 
         // 3. VẼ CÁC ẢNH CHỤP (SCALED)
+        Map<String, String> editedImageUris = sessionState != null ? sessionState.getEditedImageUris() : null;
         for (int i = 0; i < Math.min(photoUris.size(), holes.size()); i++) {
             String originalUri = photoUris.get(i);
-            Bitmap originalPhoto = decodeBitmap(Uri.parse(originalUri));
-            if (originalPhoto == null) continue;
+            String editedUri = (editedImageUris != null) ? editedImageUris.get(originalUri) : null;
+            String uriToUse = (editedUri != null) ? editedUri : originalUri;
+
+            Bitmap photoToDecode = decodeBitmap(Uri.parse(uriToUse));
+            if (photoToDecode == null) continue;
 
             EditState photoState = sessionState != null
                     ? sessionState.getPhotoEditState(originalUri).copy()
                     : new EditState();
 
-            Bitmap photoNoSticker = renderPhotoWithoutSticker(originalPhoto, photoState);
-            originalPhoto.recycle();
-            if (photoNoSticker == null) continue;
+            Bitmap photoNoSticker = renderPhotoWithoutSticker(photoToDecode, photoState);
+            if (photoNoSticker == null) {
+                photoToDecode.recycle();
+                continue;
+            }
 
             // Tính toán khung lỗ (hole) và nhân với hệ số scale
             Rect hole = holes.get(i);
@@ -655,6 +541,7 @@ public class ResultActivity extends AppCompatActivity {
             drawStickerForHole(canvas, scaledHole, srcRectF, photoNoSticker.getWidth(), photoNoSticker.getHeight(), photoState);
             
             photoNoSticker.recycle();
+            photoToDecode.recycle();
         }
 
         // 4. VẼ FRAME CHỒNG LÊN TRÊN (SCALED)
