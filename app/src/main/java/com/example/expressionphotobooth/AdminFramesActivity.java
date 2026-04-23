@@ -149,9 +149,8 @@ public class AdminFramesActivity extends AppCompatActivity {
                     bitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, nw, nh, true);
                 }
 
-                // Lưu frame gốc (không xóa nền ở đây).
-                // Việc xóa nền trắng sẽ được thực hiện khi render tại ResultActivity,
-                // giúp admin không cần phải upload lại frame mỗi khi thay đổi thuật toán.
+                // Xóa nền trắng từ các ô trống trước khi lưu
+                bitmap = applyWhiteRemovalInHoles(bitmap, layoutCode);
 
                 java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
                 bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 90, baos);
@@ -173,26 +172,29 @@ public class AdminFramesActivity extends AppCompatActivity {
     private android.graphics.Bitmap applyWhiteRemovalInHoles(android.graphics.Bitmap bitmap, String layoutCode) {
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
-        
-        java.util.List<android.graphics.Rect> holes = com.example.expressionphotobooth.utils.FrameConfig.getHolesForLayoutScaled(layoutCode, w, h);
-        
         android.graphics.Bitmap transparentBitmap = bitmap.copy(android.graphics.Bitmap.Config.ARGB_8888, true);
+        transparentBitmap.setHasAlpha(true);
         int[] pixels = new int[w * h];
         transparentBitmap.getPixels(pixels, 0, w, 0, 0, w, h);
-        
-        boolean[] visited = new boolean[w * h];
-        
-        for (android.graphics.Rect rect : holes) {
-            // Chỉ bắt đầu tìm kiếm màu trắng từ vùng trung tâm của lỗ trống (tránh viền)
-            int cx = rect.centerX();
-            int cy = rect.centerY();
-            int startX = Math.max(0, cx - rect.width() / 4);
-            int endX = Math.min(w, cx + rect.width() / 4);
-            int startY = Math.max(0, cy - rect.height() / 4);
-            int endY = Math.min(h, cy + rect.height() / 4);
 
-            for (int y = startY; y < endY; y++) {
-                for (int x = startX; x < endX; x++) {
+        if (layoutCode.endsWith("_3")) {
+            // Full scan for 3 slots: make white pixels transparent
+            for (int i = 0; i < pixels.length; i++) {
+                int p = pixels[i];
+                int r = (p >> 16) & 0xff;
+                int g = (p >> 8) & 0xff;
+                int b = p & 0xff;
+                if (r > 240 && g > 240 && b > 240) {
+                    pixels[i] = 0x00000000;
+                }
+            }
+        } else {
+            // Flood fill + neighbor search for 4 slots to find large white regions
+            boolean[] visited = new boolean[w * h];
+            int minArea = (w * h) / 100; // 1% of total area
+
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
                     int idx = y * w + x;
                     if (visited[idx]) continue;
 
@@ -200,45 +202,50 @@ public class AdminFramesActivity extends AppCompatActivity {
                     int r = (p >> 16) & 0xff;
                     int g = (p >> 8) & 0xff;
                     int b = p & 0xff;
+                    int a = (p >> 24) & 0xff;
 
-                    // Nếu gặp pixel trắng, bắt đầu Flood Fill (loang màu) để xóa toàn bộ vùng trắng liền kề
-                    if (r > 240 && g > 240 && b > 240) {
+                    if (a > 100 && r > 240 && g > 240 && b > 240) {
+                        java.util.List<Integer> region = new java.util.ArrayList<>();
                         java.util.Queue<Integer> q = new java.util.LinkedList<>();
                         q.add(idx);
                         visited[idx] = true;
+                        region.add(idx);
 
                         while (!q.isEmpty()) {
                             int curr = q.poll();
-                            pixels[curr] = 0x00FFFFFF; // Đổi thành trong suốt
+                            int cx = curr % w;
 
-                            int currX = curr % w;
-                            int currY = curr / w;
-
-                            // Kiểm tra 4 hướng xung quanh
                             int[] neighbors = {curr - 1, curr + 1, curr - w, curr + w};
                             for (int n : neighbors) {
                                 if (n >= 0 && n < w * h && !visited[n]) {
                                     int nx = n % w;
-                                    // Chặn trường hợp bị tràn lề màn hình
-                                    if (Math.abs(nx - currX) > 1) continue;
+                                    if (Math.abs(nx - cx) > 1) continue;
 
                                     int np = pixels[n];
+                                    int na = (np >> 24) & 0xff;
                                     int nr = (np >> 16) & 0xff;
                                     int ng = (np >> 8) & 0xff;
                                     int nb = np & 0xff;
 
-                                    if (nr > 240 && ng > 240 && nb > 240) {
+                                    if (na > 100 && nr > 240 && ng > 240 && nb > 240) {
                                         visited[n] = true;
                                         q.add(n);
+                                        region.add(n);
                                     }
                                 }
+                            }
+                        }
+
+                        if (region.size() > minArea) {
+                            for (int i : region) {
+                                pixels[i] = 0x00000000;
                             }
                         }
                     }
                 }
             }
         }
-        
+
         transparentBitmap.setPixels(pixels, 0, w, 0, 0, w, h);
         return transparentBitmap;
     }

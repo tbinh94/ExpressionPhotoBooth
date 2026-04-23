@@ -147,7 +147,7 @@ public class AiTriggerSettingsActivity extends AppCompatActivity {
             File file = new File(getExternalFilesDir(null), "dev_blank_" + i + "_" + System.currentTimeMillis() + ".jpg");
             try {
                 Bitmap bitmap = Bitmap.createBitmap(1200, 1200, Bitmap.Config.ARGB_8888);
-                bitmap.eraseColor(Color.WHITE);
+                bitmap.eraseColor(Color.BLACK);
                 try (FileOutputStream out = new FileOutputStream(file)) {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
                 }
