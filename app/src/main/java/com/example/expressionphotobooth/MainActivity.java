@@ -240,6 +240,19 @@ public class MainActivity extends AppCompatActivity {
         isExpressionMode = (modeToggleGroup.getCheckedButtonId() == R.id.btnModeExpression);
         aiSubGroup.setVisibility(isExpressionMode ? View.VISIBLE : View.GONE);
 
+        // Professional Role-based UI management: Hide Gesture mode for Guest users
+        AuthRepository authRepoCheck = ((AppContainer) getApplication()).getAuthRepository();
+        if (authRepoCheck.isGuest()) {
+            View btnAiHand = findViewById(R.id.btnAiHand);
+            if (btnAiHand != null) {
+                btnAiHand.setVisibility(View.GONE);
+            }
+            // Ensure we don't default to a hidden button
+            if (aiSubSelector.getCheckedButtonId() == R.id.btnAiHand) {
+                aiSubSelector.check(R.id.btnAiFace);
+            }
+        }
+
         modeToggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
@@ -340,6 +353,15 @@ public class MainActivity extends AppCompatActivity {
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.topAppBar);
         toolbar.inflateMenu(R.menu.camera_menu);
+        
+        // Professional Role-based UI management: Hide AI Settings for Guest users
+        if (((AppContainer) getApplication()).getAuthRepository().isGuest()) {
+            android.view.MenuItem aiSettingsItem = toolbar.getMenu().findItem(R.id.action_ai_settings);
+            if (aiSettingsItem != null) {
+                aiSettingsItem.setVisible(false);
+            }
+        }
+
         toolbar.setNavigationOnClickListener(v -> finish());
         toolbar.setOnMenuItemClickListener(item -> {
             int itemId = item.getItemId();

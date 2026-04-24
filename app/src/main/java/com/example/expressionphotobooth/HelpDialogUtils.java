@@ -317,16 +317,13 @@ public final class HelpDialogUtils {
         MaterialButton btnSecondary = dialogView.findViewById(R.id.btnDialogSecondary);
         MaterialButton btnPrimary = dialogView.findViewById(R.id.btnDialogPrimary);
 
+        String languageTag = LocaleManager.getCurrentLanguage(context);
         ivIcon.setImageResource(R.drawable.ic_person_add_24);
-        ivIcon.setColorFilter(Color.parseColor("#2E58AE"));
+        ivIcon.setColorFilter(androidx.core.content.ContextCompat.getColor(context, R.color.app_blue));
         tvTitle.setText(title);
         tvMessage.setText(message);
-        btnSecondary.setText(R.string.history_popup_cancel);
-        btnPrimary.setText(LocaleManager.getString(
-                context,
-                R.string.home_guest_register_now,
-                LocaleManager.getCurrentLanguage(context)
-        ));
+        btnSecondary.setText(LocaleManager.getString(context, R.string.history_popup_cancel, languageTag));
+        btnPrimary.setText(LocaleManager.getString(context, R.string.home_guest_register_now, languageTag));
         btnPrimary.setBackgroundResource(R.drawable.bg_history_pill_cta);
         btnPrimary.setTextColor(Color.WHITE);
         btnPrimary.setIconResource(R.drawable.ic_person_add_24);

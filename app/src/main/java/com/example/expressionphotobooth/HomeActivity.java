@@ -301,7 +301,18 @@ public class HomeActivity extends AppCompatActivity {
         if (cardNavUserProfile != null) {
             cardNavUserProfile.setOnClickListener(v -> {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                showUserProfileDetail();
+                if (authRepository.isGuest()) {
+                    String languageTag = LocaleManager.getCurrentLanguage(this);
+                    HelpDialogUtils.showHistoryGuestRegisterCta(
+                            this,
+                            LocaleManager.getString(this, R.string.home_guest_profile_title, languageTag),
+                            LocaleManager.getString(this, R.string.home_guest_profile_message, languageTag),
+                            this::openRegisterFromGuest,
+                            null
+                    );
+                } else {
+                    showUserProfileDetail();
+                }
             });
         }
 
@@ -701,14 +712,25 @@ public class HomeActivity extends AppCompatActivity {
             pickAvatarMedia.launch(intent);
         };
 
-        if (layoutProfileAvatar != null) layoutProfileAvatar.setOnClickListener(pickAvatarAction);
-        if (btnChangeAvatar != null) btnChangeAvatar.setOnClickListener(pickAvatarAction);
+        if (layoutProfileAvatar != null) {
+            if (authRepository.isGuest()) {
+                layoutProfileAvatar.setClickable(false);
+                if (btnChangeAvatar != null) btnChangeAvatar.setVisibility(View.GONE);
+            } else {
+                layoutProfileAvatar.setOnClickListener(pickAvatarAction);
+                if (btnChangeAvatar != null) btnChangeAvatar.setOnClickListener(pickAvatarAction);
+            }
+        }
 
         if (btnChangePassword != null) {
-            btnChangePassword.setOnClickListener(v -> {
-                dialog.dismiss();
-                showChangePasswordDialog();
-            });
+            if (authRepository.isGuest()) {
+                btnChangePassword.setVisibility(View.GONE);
+            } else {
+                btnChangePassword.setOnClickListener(v -> {
+                    dialog.dismiss();
+                    showChangePasswordDialog();
+                });
+            }
         }
         
         if (btnClose != null) btnClose.setOnClickListener(v -> dialog.dismiss());

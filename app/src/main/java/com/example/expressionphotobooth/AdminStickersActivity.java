@@ -39,6 +39,7 @@ import java.util.Map;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.bumptech.glide.Glide;
+import com.example.expressionphotobooth.utils.LocaleManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -108,9 +109,10 @@ public class AdminStickersActivity extends AppCompatActivity {
     }
 
     private void openImagePicker() {
-        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/png");
-        pickImageLauncher.launch(intent);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        pickImageLauncher.launch(Intent.createChooser(intent, "Select Sticker Image"));
     }
 
     private void handleImageResult(Uri uri) {
@@ -127,14 +129,21 @@ public class AdminStickersActivity extends AppCompatActivity {
                 // Use ML Kit Subject Segmentation to extract the subject (Messenger style)
                 InputImage inputImage = InputImage.fromBitmap(bitmap, 0);
                 
-                // Synchronously wait for the segmentation to complete on this background thread
-                Task<Bitmap> task = segmenter.process(inputImage)
-                        .continueWith(t -> {
-                            if (!t.isSuccessful()) throw t.getException();
-                            return t.getResult().getForegroundBitmap();
-                        });
+                Bitmap extractedSubject = null;
+                try {
+                    // Synchronously wait for the segmentation to complete on this background thread
+                    Task<Bitmap> task = segmenter.process(inputImage)
+                            .continueWith(t -> {
+                                if (!t.isSuccessful()) throw t.getException();
+                                return t.getResult().getForegroundBitmap();
+                            });
 
-                Bitmap extractedSubject = Tasks.await(task);
+                    extractedSubject = Tasks.await(task, 10, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (Exception mlError) {
+                    Log.e("AdminStickers", "ML Kit segmentation failed: " + mlError.getMessage());
+                    // This is where the SecurityException would be caught
+                }
+
                 if (extractedSubject == null) {
                     // Fallback to basic white removal if segmentation fails
                     extractedSubject = applyBasicWhiteRemoval(bitmap);
@@ -172,7 +181,15 @@ public class AdminStickersActivity extends AppCompatActivity {
                                 progress.setVisibility(View.GONE);
                                 btnUpload.setEnabled(true);
                                 etLabel.setText("");
-                                Toast.makeText(this, "Sticker added globally", Toast.LENGTH_SHORT).show();
+                                String languageTag = LocaleManager.getCurrentLanguage(this);
+                                HelpDialogUtils.showHistoryStyledNotice(
+                                        this,
+                                        R.drawable.ic_success_circle,
+                                        LocaleManager.getString(this, R.string.admin_sticker_success, languageTag),
+                                        "",
+                                        LocaleManager.getString(this, R.string.common_ok, languageTag),
+                                        null
+                                );
                                 loadStickers();
                             });
                         })
@@ -180,7 +197,15 @@ public class AdminStickersActivity extends AppCompatActivity {
                             runOnUiThread(() -> {
                                 progress.setVisibility(View.GONE);
                                 btnUpload.setEnabled(true);
-                                Toast.makeText(this, "DB Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                String languageTag = LocaleManager.getCurrentLanguage(this);
+                                HelpDialogUtils.showHistoryStyledNotice(
+                                        this,
+                                        R.drawable.ic_error_circle,
+                                        "Firestore Error",
+                                        e.getMessage(),
+                                        LocaleManager.getString(this, R.string.common_ok, languageTag),
+                                        null
+                                );
                             });
                         });
 
@@ -188,7 +213,15 @@ public class AdminStickersActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     progress.setVisibility(View.GONE);
                     btnUpload.setEnabled(true);
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    String languageTag = LocaleManager.getCurrentLanguage(this);
+                    HelpDialogUtils.showHistoryStyledNotice(
+                            this,
+                            R.drawable.ic_error_circle,
+                            "Processing Error",
+                            e.getMessage(),
+                            LocaleManager.getString(this, R.string.common_ok, languageTag),
+                            null
+                    );
                 });
             }
         }).start();
@@ -213,16 +246,35 @@ public class AdminStickersActivity extends AppCompatActivity {
 
     private void deleteSticker(String id) {
         if (id == null) return;
-        FirebaseFirestore.getInstance().collection("stickers")
-                .document(id)
-                .delete()
-                .addOnSuccessListener(v -> {
-                    Toast.makeText(this, "Sticker deleted", Toast.LENGTH_SHORT).show();
-                    loadStickers();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        String languageTag = LocaleManager.getCurrentLanguage(this);
+        HelpDialogUtils.showHistoryStyledConfirm(
+                this,
+                R.drawable.ic_delete_24,
+                LocaleManager.getString(this, R.string.admin_sticker_delete_confirm, languageTag),
+                "",
+                LocaleManager.getString(this, R.string.history_popup_ok, languageTag),
+                LocaleManager.getString(this, R.string.history_popup_cancel, languageTag),
+                () -> {
+                    FirebaseFirestore.getInstance().collection("stickers")
+                            .document(id)
+                            .delete()
+                            .addOnSuccessListener(v -> {
+                                HelpDialogUtils.showHistoryStyledNotice(
+                                        this,
+                                        R.drawable.ic_success_circle,
+                                        LocaleManager.getString(this, R.string.admin_sticker_deleted, languageTag),
+                                        "",
+                                        LocaleManager.getString(this, R.string.common_ok, languageTag),
+                                        null
+                                );
+                                loadStickers();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                },
+                null
+        );
     }
 
     private void loadStickers() {

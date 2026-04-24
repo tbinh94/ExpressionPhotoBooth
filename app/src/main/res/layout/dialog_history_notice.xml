@@ -8,10 +8,10 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#FDFDFF"
+        app:cardBackgroundColor="@color/surface_card"
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp"
-        app:strokeColor="#3A94A9E5"
+        app:strokeColor="@color/admin_card_stroke"
         app:strokeWidth="1dp">
 
         <LinearLayout
@@ -27,7 +27,7 @@
                 android:layout_gravity="center_horizontal"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_help_24"
-                app:tint="#2E58AE" />
+                app:tint="@color/app_blue" />
 
             <TextView
                 android:id="@+id/tvDialogTitle"
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:textColor="#2E58AE"
+                android:textColor="@color/text_primary"
                 android:textSize="19sp"
                 android:textStyle="bold" />
 
@@ -46,7 +46,7 @@
                 android:layout_marginTop="6dp"
                 android:gravity="center"
                 android:lineSpacingExtra="1dp"
-                android:textColor="#3F4F74"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
             <LinearLayout
@@ -64,7 +64,7 @@
                     android:background="@drawable/bg_history_pill_pink"
                     android:text="@string/history_popup_cancel"
                     android:textAllCaps="false"
-                    android:textColor="#1D1D1D"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold"
                     app:backgroundTint="@null"
                     app:cornerRadius="18dp" />
