@@ -7,9 +7,14 @@ import java.nio.charset.StandardCharsets;
 import android.util.Base64;
 
 /**
- * Utility class for password hashing using SHA-256
- * Provides secure password handling before storage or transmission
+ * Utility class for password hashing using SHA-256.
+ *
+ * @deprecated Firebase Authentication handles all password security (hashing, salting,
+ * transmission encryption) server-side. Do NOT use this class to pre-hash passwords
+ * before passing them to Firebase Auth — doing so would break authentication.
+ * This class is kept only for potential future non-auth data integrity checks.
  */
+@Deprecated
 public class PasswordSecurityUtil {
     private static final String HASH_ALGORITHM = "SHA-256";
     private static final int SALT_LENGTH = 16;

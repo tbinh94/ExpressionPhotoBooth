@@ -372,6 +372,13 @@ public class EditPhotoActivity extends AppCompatActivity {
         loadGlobalStickers();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh stickers in case they were unlocked via sharing in ResultActivity
+        loadGlobalStickers();
+    }
+
     private void bindViews() {
         ivEditingPhoto    = findViewById(R.id.ivEditingPhoto);
         ivFrameOverlay    = findViewById(R.id.ivFrameOverlay);

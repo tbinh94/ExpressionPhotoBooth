@@ -13,6 +13,7 @@
             <string name="selection_limit_reached">Chỉ được chọn tối đa %1$d ảnh</string>
             <string name="setup_select_frame_required">Bạn phải chọn một khung hình trước khi tiếp tục!</string>
     <string name="app_name">Our Memories Photobooth</string>
+    <string name="common_ok">Đã hiểu</string>
 
     <string name="capture_photo">Chụp</string>
     <string name="camera_permission_required">Cần quyền camera để tiếp tục</string>
@@ -219,6 +220,28 @@
     <string name="auth_sign_out_message">Bạn đã đăng xuất khỏi phiên hiện tại.</string>
     <string name="auth_register_creating">Đang tạo tài khoản…</string>
 
+    <!-- Phase 3: Confirm Password & Strength -->
+    <string name="auth_confirm_password">Xác nhận mật khẩu</string>
+    <string name="auth_passwords_do_not_match">Mật khẩu xác nhận không khớp.</string>
+    <string name="auth_pwd_strength_label">Độ mạnh mật khẩu</string>
+    <string name="auth_pwd_strength_weak">Yếu</string>
+    <string name="auth_pwd_strength_fair">Trung bình</string>
+    <string name="auth_pwd_strength_good">Tốt</string>
+    <string name="auth_pwd_strength_strong">Mạnh 🔒</string>
+
+    <!-- Phase 3: Email Verification -->
+    <string name="auth_verify_email_title">Xác thực Email</string>
+    <string name="auth_verify_email_message">Một liên kết xác thực đã được gửi tới %1$s. Vui lòng kiểm tra hộp thư và xác thực để đăng nhập.</string>
+    <string name="auth_verify_email_not_verified_title">Email chưa xác thực</string>
+    <string name="auth_verify_email_not_verified_message">Địa chỉ email của bạn chưa được xác thực. Bạn không thể truy cập tài khoản cho đến khi xác thực thành công.</string>
+    <string name="auth_verify_resend">Gửi lại Email</string>
+    <string name="auth_verify_resend_success">Đã gửi lại email xác thực. Vui lòng kiểm tra hộp thư của bạn.</string>
+    <!-- Phase 1: Rate limiting -->
+    <string name="auth_rate_limit_title">Quá Nhiều Yêu Cầu</string>
+    <string name="auth_rate_limit_message">Vui lòng đợi %1$d giây trước khi thử lại.</string>
+    <!-- Phase 1: Forgot password -->
+    <string name="auth_forgot_password_neutral_message">Nếu email này đã đăng ký, một liên kết đặt lại đã được gửi. Vui lòng kiểm tra hộp thư.</string>
+    <string name="auth_google_token_error">Không thể lấy Google ID Token. Vui lòng thử lại.</string>
     <string name="admin_dashboard_greeting">Xin chào Admin,</string>
     <string name="admin_nav_title">Bảng quản trị</string>
     <string name="admin_nav_version">v2.4.0</string>

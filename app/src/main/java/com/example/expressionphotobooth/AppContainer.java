@@ -32,7 +32,7 @@ public class AppContainer extends Application {
 		ThemeManager.applySavedTheme(this);
 		LocaleManager.applySavedLocale(this);
 		sessionRepository = new SharedPrefsSessionRepository(this);
-		authRepository = new FirebaseAuthRepository();
+		authRepository = new FirebaseAuthRepository(this);
 		adminStatsRepository = new FirebaseAdminStatsRepository();
 		adminAiInsightsRepository = new FirebaseAdminAiInsightsRepository(this);
 		adminAiChatRepository = new FirebaseAdminAiChatRepository();

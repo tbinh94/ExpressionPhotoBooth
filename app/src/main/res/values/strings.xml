@@ -205,7 +205,7 @@
     <string name="edit_summary_default">Filter: None  •  Frame: None  •  Sticker: None</string>
     <string name="edit_filter_applied_all">Filter applied to all photos</string>
 
-    <string name="common_ok">Got it</string>
+    <string name="common_ok">Đã hiểu</string>
 
     <string name="auth_title">Welcome Back</string>
     <string name="auth_subtitle">Please sign in to continue</string>
@@ -239,6 +239,30 @@
     <string name="auth_sign_out">Sign Out</string>
     <string name="auth_sign_out_title">Signed Out</string>
     <string name="auth_sign_out_message">You have signed out from current session.</string>
+    <!-- Rate limiting -->
+    <string name="auth_rate_limit_title">Too Many Attempts</string>
+    <string name="auth_rate_limit_message">Please wait %1$d seconds before trying again.</string>
+    <!-- Forgot password - neutral message (anti user-enumeration) -->
+    <string name="auth_forgot_password_neutral_message">If this email is registered, a reset link has been sent. Please check your inbox.</string>
+    <!-- Google sign-in error -->
+    <string name="auth_google_token_error">Unable to retrieve Google ID Token. Please try again.</string>
+    <!-- Phase 3: Confirm Password -->
+    <string name="auth_confirm_password">Confirm Password</string>
+    <string name="auth_passwords_do_not_match">Passwords do not match. Please re-enter.</string>
+    <!-- Phase 3: Password Strength -->
+    <string name="auth_pwd_strength_label">Password strength:</string>
+    <string name="auth_pwd_strength_weak">Weak</string>
+    <string name="auth_pwd_strength_fair">Fair</string>
+    <string name="auth_pwd_strength_good">Good</string>
+    <string name="auth_pwd_strength_strong">Strong 🔒</string>
+    <!-- Phase 3: Email Verification -->
+    <string name="auth_verify_email_title">Verify Your Email</string>
+    <string name="auth_verify_email_message">A verification link has been sent to %1$s. Please check your inbox and verify before signing in.</string>
+    <string name="auth_verify_email_not_verified_title">Email Not Verified</string>
+    <string name="auth_verify_email_not_verified_message">Your email has not been verified yet. Please check your inbox for the verification link.\n\nDid not receive it?</string>
+    <string name="auth_verify_resend">Resend Email</string>
+    <string name="auth_verify_resend_success">Verification email resent. Please check your inbox.</string>
+    <string name="auth_verify_resend_failed">Failed to resend. Please try again later.</string>
 
     <!-- Admin Dashboard Strings -->
 

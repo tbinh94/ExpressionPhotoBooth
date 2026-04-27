@@ -26,6 +26,8 @@ public class LauncherActivity extends AppCompatActivity {
             return;
         }
 
+        // Phase 2: fetchCurrentRole() serves from SharedPreferences cache on repeat launches,
+        // avoiding a Firestore round-trip every time the app is opened.
         authRepository.fetchCurrentRole(new AuthRepository.RoleCallback() {
             @Override
             public void onSuccess(UserRole role) {
