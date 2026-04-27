@@ -105,12 +105,12 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private TextView tvAiInsightLine2;
     private TextView tvAiInsightLine3;
     private TextView tvAiRecommendation;
-    private ProgressBar progressAiInsights;
     private MaterialButton btnAiAnalyze;
     private View cardAiChatSearch;
     private TextView tvAiChatPrompt;
 
     private View layoutAiEmptyState;
+    private View layoutAiLoadingState;
     private View layoutAiResultState;
     private View layoutAiInsightRow1;
     private View layoutAiInsightRow2;
@@ -133,6 +133,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private boolean aiInsightsLoading = false;
     private long aiCooldownUntilMillis = 0L;
     private CountDownTimer aiCooldownTimer;
+    private ValueAnimator sparkleAnimator;
 
     @Nullable
     @Override
@@ -228,9 +229,10 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         tvAiInsightLine2 = view.findViewById(R.id.tvAiInsightLine2);
         tvAiInsightLine3 = view.findViewById(R.id.tvAiInsightLine3);
         tvAiRecommendation = view.findViewById(R.id.tvAiRecommendation);
-        progressAiInsights = view.findViewById(R.id.progressAiInsights);
         btnAiAnalyze = view.findViewById(R.id.btnAiAnalyze);
+        View btnAiReAnalyze = view.findViewById(R.id.btnAiReAnalyze);
         layoutAiEmptyState = view.findViewById(R.id.layoutAiEmptyState);
+        layoutAiLoadingState = view.findViewById(R.id.layoutAiLoadingState);
         layoutAiResultState = view.findViewById(R.id.layoutAiResultState);
         layoutAiInsightRow1 = view.findViewById(R.id.layoutAiInsightRow1);
         layoutAiInsightRow2 = view.findViewById(R.id.layoutAiInsightRow2);
@@ -247,25 +249,26 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         updateSystemQuotas();
 
         if (btnAiAnalyze != null) {
-            btnAiAnalyze.setOnClickListener(v -> {
-                if (latestStats == null) {
-                    return;
-                }
-                String languageTag = LocaleManager.getCurrentLanguage(requireContext());
-                long remainingMillis = aiCooldownUntilMillis - System.currentTimeMillis();
-                if (remainingMillis > 0L) {
-                    int seconds = (int) Math.ceil(remainingMillis / 1000d);
-                    Toast.makeText(
-                            requireContext(),
-                            LocaleManager.createLocalizedContext(requireContext(), languageTag)
-                                    .getString(R.string.admin_ai_insights_wait_to_retry_format, seconds),
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    return;
-                }
-                startAnalyzeCooldown(languageTag);
-                loadAiInsights(latestStats, languageTag);
+            btnAiAnalyze.setOnClickListener(v -> handleAnalyzeClick());
+        }
+        if (btnAiReAnalyze != null) {
+            btnAiReAnalyze.setOnClickListener(v -> handleAnalyzeClick());
+        }
+        
+        android.widget.ImageView ivAiEmptySparkle = view.findViewById(R.id.ivAiEmptySparkle);
+        if (ivAiEmptySparkle != null) {
+            sparkleAnimator = ValueAnimator.ofFloat(0.4f, 1.0f);
+            sparkleAnimator.setDuration(1500);
+            sparkleAnimator.setRepeatMode(ValueAnimator.REVERSE);
+            sparkleAnimator.setRepeatCount(ValueAnimator.INFINITE);
+            sparkleAnimator.setInterpolator(new DecelerateInterpolator());
+            sparkleAnimator.addUpdateListener(animation -> {
+                float alpha = (float) animation.getAnimatedValue();
+                ivAiEmptySparkle.setAlpha(alpha);
+                ivAiEmptySparkle.setScaleX(0.8f + (alpha * 0.2f));
+                ivAiEmptySparkle.setScaleY(0.8f + (alpha * 0.2f));
             });
+            sparkleAnimator.start();
         }
 
         cardAiChatSearch = view.findViewById(R.id.cardAiChatSearch);
@@ -335,6 +338,15 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (sparkleAnimator != null) {
+            sparkleAnimator.cancel();
+            sparkleAnimator = null;
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if (latestStats != null) {
@@ -370,6 +382,22 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         }
     }
 
+    private void handleAnalyzeClick() {
+        if (latestStats == null) return;
+        String languageTag = LocaleManager.getCurrentLanguage(requireContext());
+        long remainingMillis = aiCooldownUntilMillis - System.currentTimeMillis();
+        if (remainingMillis > 0L) {
+            int seconds = (int) Math.ceil(remainingMillis / 1000d);
+            Toast.makeText(requireContext(),
+                    LocaleManager.createLocalizedContext(requireContext(), languageTag)
+                            .getString(R.string.admin_ai_insights_wait_to_retry_format, seconds),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        startAnalyzeCooldown(languageTag);
+        loadAiInsights(latestStats, languageTag);
+    }
+
     private void loadStats() {
         adminStatsRepository.fetchDashboardStats(new AdminStatsRepository.StatsCallback() {
             @Override
@@ -396,8 +424,11 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     }
 
     private void resetAiInsightsState(String languageTag) {
-        // We no longer nullify latestAiInsights or hide the result state here 
-        // to satisfy the user request of keeping results visible when changing range.
+        if (latestAiInsights == null) {
+            if (layoutAiEmptyState != null) layoutAiEmptyState.setVisibility(View.VISIBLE);
+            if (layoutAiResultState != null) layoutAiResultState.setVisibility(View.GONE);
+            if (layoutAiLoadingState != null) layoutAiLoadingState.setVisibility(View.GONE);
+        }
         setAiInsightsLoading(false, languageTag);
         refreshAnalyzeButtonState(languageTag);
     }
@@ -768,21 +799,17 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private void setAiInsightsLoading(boolean loading, String languageTag) {
         aiInsightsLoading = loading;
         Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
-        if (progressAiInsights != null) {
-            progressAiInsights.setVisibility(loading ? View.VISIBLE : View.GONE);
-        }
         refreshAnalyzeButtonState(languageTag);
         
         if (loading) {
             if (tvAiInsightsSubtitle != null) {
                 tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_loading));
             }
-            // Dim the card slightly while loading
-            if (layoutAiEmptyState != null) layoutAiEmptyState.setAlpha(0.5f);
-            if (layoutAiResultState != null) layoutAiResultState.setAlpha(0.5f);
+            if (layoutAiEmptyState != null) layoutAiEmptyState.setVisibility(View.GONE);
+            if (layoutAiResultState != null) layoutAiResultState.setVisibility(View.GONE);
+            if (layoutAiLoadingState != null) layoutAiLoadingState.setVisibility(View.VISIBLE);
         } else {
-            if (layoutAiEmptyState != null) layoutAiEmptyState.setAlpha(1.0f);
-            if (layoutAiResultState != null) layoutAiResultState.setAlpha(1.0f);
+            if (layoutAiLoadingState != null) layoutAiLoadingState.setVisibility(View.GONE);
         }
     }
 

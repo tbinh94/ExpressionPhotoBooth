@@ -139,7 +139,8 @@ public class FirebaseAdminAiInsightsRepository implements AdminAiInsightsReposit
     private String buildPrompt(AdminAiInsightRequest request) {
         StringBuilder stats = new StringBuilder();
         Map<String, Object> snapshot = buildStatsSnapshot(request);
-        return "Stats: " + gson.toJson(snapshot) + "\nLang: " + request.getLanguageTag();
+        String langName = isVietnamese(request.getLanguageTag()) ? "Vietnamese" : "English";
+        return "Stats: " + gson.toJson(snapshot) + "\n\nIMPORTANT INSTRUCTION: You MUST respond ENTIRELY in " + langName + " language. Do NOT use any other language.";
     }
 
     private Map<String, Object> buildStatsSnapshot(AdminAiInsightRequest request) {

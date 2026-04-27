@@ -1112,8 +1112,8 @@ public class HomeActivity extends AppCompatActivity {
         ImageView ivPreview = view.findViewById(R.id.ivBannerPreview);
         MaterialButton btnRotateLeft = view.findViewById(R.id.btnRotateLeft);
         MaterialButton btnRotateRight = view.findViewById(R.id.btnRotateRight);
-        MaterialButton btnZoomIn = view.findViewById(R.id.btnZoomIn);
-        MaterialButton btnZoomOut = view.findViewById(R.id.btnZoomOut);
+        MaterialButton btnReset = view.findViewById(R.id.btnReset);
+        com.google.android.material.slider.Slider sliderZoom = view.findViewById(R.id.sliderZoom);
         MaterialButton btnCancel = view.findViewById(R.id.btnCancel);
         MaterialButton btnApply = view.findViewById(R.id.btnApply);
 
@@ -1137,18 +1137,19 @@ public class HomeActivity extends AppCompatActivity {
             ivPreview.setRotation(bannerRotation);
         });
 
-        btnZoomIn.setOnClickListener(v -> {
-            bannerScale += 0.1f;
+        btnReset.setOnClickListener(v -> {
+            bannerRotation = 0f;
+            bannerScale = 1.0f;
+            ivPreview.setRotation(bannerRotation);
             ivPreview.setScaleX(bannerScale);
             ivPreview.setScaleY(bannerScale);
+            sliderZoom.setValue(1.0f);
         });
 
-        btnZoomOut.setOnClickListener(v -> {
-            if (bannerScale > 0.5f) {
-                bannerScale -= 0.1f;
-                ivPreview.setScaleX(bannerScale);
-                ivPreview.setScaleY(bannerScale);
-            }
+        sliderZoom.addOnChangeListener((slider, value, fromUser) -> {
+            bannerScale = value;
+            ivPreview.setScaleX(bannerScale);
+            ivPreview.setScaleY(bannerScale);
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());

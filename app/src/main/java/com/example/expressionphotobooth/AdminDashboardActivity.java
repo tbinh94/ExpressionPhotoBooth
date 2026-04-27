@@ -43,6 +43,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private boolean languageSwitchInProgress;
     private String currentAdminName = "Administrator";
+    private androidx.activity.result.ActivityResultLauncher<Intent> pickAvatarMedia;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -57,6 +58,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_admin_dashboard);
         overridePendingTransition(0, 0);
+
+        setupAvatarPicker();
 
         AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
         if (!authRepository.isLoggedIn()) {
@@ -392,12 +395,42 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         TextView tvProfileName = view.findViewById(R.id.tvProfileName);
         TextView tvProfileEmail = view.findViewById(R.id.tvProfileEmail);
         View btnCloseProfile = view.findViewById(R.id.btnCloseProfile);
+        View btnChangeAvatar = view.findViewById(R.id.btnChangeAvatar);
+        View btnChangePassword = view.findViewById(R.id.btnChangePassword);
+        View layoutProfileAvatar = view.findViewById(R.id.layoutProfileAvatar);
+        android.widget.ImageView ivProfileAvatar = view.findViewById(R.id.ivProfileAvatar);
         
         tvProfileName.setText(currentAdminName);
         tvProfileEmail.setText(displayEmail);
-        tvProfileAvatar.setText(resolveAvatarInitial(currentAdminName));
+        
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getPhotoUrl() != null) {
+            ivProfileAvatar.setVisibility(View.VISIBLE);
+            tvProfileAvatar.setVisibility(View.GONE);
+            com.bumptech.glide.Glide.with(this).load(user.getPhotoUrl()).circleCrop().into(ivProfileAvatar);
+        } else {
+            ivProfileAvatar.setVisibility(View.GONE);
+            tvProfileAvatar.setVisibility(View.VISIBLE);
+            tvProfileAvatar.setText(resolveAvatarInitial(currentAdminName));
+        }
         
         btnCloseProfile.setOnClickListener(v -> dialog.dismiss());
+        
+        View.OnClickListener pickAvatarAction = v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pickAvatarMedia.launch(intent);
+        };
+        
+        if (layoutProfileAvatar != null) layoutProfileAvatar.setOnClickListener(pickAvatarAction);
+        if (btnChangeAvatar != null) btnChangeAvatar.setOnClickListener(pickAvatarAction);
+        
+        if (btnChangePassword != null) {
+            btnChangePassword.setOnClickListener(v -> {
+                dialog.dismiss();
+                showChangePasswordDialog();
+            });
+        }
         
         dialog.setContentView(view);
         // Make background transparent so custom shape shows
@@ -406,6 +439,102 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                   .setBackgroundResource(android.R.color.transparent);
         }
         dialog.show();
+    }
+
+    private void showChangePasswordDialog() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.TransparentBottomSheetDialog);
+        View view = getLayoutInflater().inflate(R.layout.layout_change_password_bottom_sheet, null);
+        
+        com.google.android.material.textfield.TextInputLayout tilCurrent = view.findViewById(R.id.tilCurrentPassword);
+        com.google.android.material.textfield.TextInputLayout tilNew = view.findViewById(R.id.tilNewPassword);
+        com.google.android.material.textfield.TextInputLayout tilConfirm = view.findViewById(R.id.tilConfirmPassword);
+        com.google.android.material.textfield.TextInputEditText etCurrent = view.findViewById(R.id.etCurrentPassword);
+        com.google.android.material.textfield.TextInputEditText etNew = view.findViewById(R.id.etNewPassword);
+        com.google.android.material.textfield.TextInputEditText etConfirm = view.findViewById(R.id.etConfirmPassword);
+        com.google.android.material.button.MaterialButton btnUpdate = view.findViewById(R.id.btnUpdatePassword);
+        com.google.android.material.progressindicator.LinearProgressIndicator progress = view.findViewById(R.id.progressUpdate);
+
+        btnUpdate.setOnClickListener(v -> {
+            String currentPass = etCurrent.getText().toString().trim();
+            String newPass = etNew.getText().toString().trim();
+            String confirmPass = etConfirm.getText().toString().trim();
+
+            tilCurrent.setError(null);
+            tilNew.setError(null);
+            tilConfirm.setError(null);
+
+            if (currentPass.isEmpty()) {
+                tilCurrent.setError("Vui lòng nhập mật khẩu hiện tại");
+                return;
+            }
+            if (newPass.length() < 6) {
+                tilNew.setError("Mật khẩu mới phải có ít nhất 6 ký tự");
+                return;
+            }
+            if (!newPass.equals(confirmPass)) {
+                tilConfirm.setError("Mật khẩu xác nhận không khớp");
+                return;
+            }
+
+            btnUpdate.setEnabled(false);
+            progress.setVisibility(View.VISIBLE);
+
+            com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null && user.getEmail() != null) {
+                com.google.firebase.auth.AuthCredential credential = com.google.firebase.auth.EmailAuthProvider.getCredential(user.getEmail(), currentPass);
+                user.reauthenticate(credential).addOnCompleteListener(reAuthTask -> {
+                    if (reAuthTask.isSuccessful()) {
+                        user.updatePassword(newPass).addOnCompleteListener(updateTask -> {
+                            progress.setVisibility(View.GONE);
+                            btnUpdate.setEnabled(true);
+                            if (updateTask.isSuccessful()) {
+                                dialog.dismiss();
+                                android.widget.Toast.makeText(this, "Mật khẩu đã được thay đổi an toàn.", android.widget.Toast.LENGTH_SHORT).show();
+                            } else {
+                                String err = updateTask.getException() != null ? updateTask.getException().getMessage() : "Lỗi không xác định";
+                                android.widget.Toast.makeText(this, "Lỗi: " + err, android.widget.Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        progress.setVisibility(View.GONE);
+                        btnUpdate.setEnabled(true);
+                        tilCurrent.setError("Mật khẩu hiện tại không chính xác");
+                        etCurrent.requestFocus();
+                    }
+                });
+            }
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+    private void setupAvatarPicker() {
+        pickAvatarMedia = registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                android.net.Uri uri = result.getData().getData();
+                if (uri == null) return;
+                
+                com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+                if (user != null) {
+                    com.google.firebase.auth.UserProfileChangeRequest profileUpdates = new com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                            .setPhotoUri(uri)
+                            .build();
+
+                    user.updateProfile(profileUpdates).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+                            authRepository.updateProfilePhoto(uri.toString(), new AuthRepository.SimpleCallback() {
+                                @Override public void onSuccess() {}
+                                @Override public void onError(String message) {}
+                            });
+                            android.widget.Toast.makeText(this, "Cập nhật ảnh đại diện thành công", android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private void updateNavigationMenuTitles(String languageTag) {

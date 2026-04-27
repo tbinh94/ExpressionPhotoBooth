@@ -120,6 +120,32 @@
             android:layout_marginBottom="12dp"
             android:background="#F1F5F9" />
 
+        <!-- Hiển thị phản hồi từ Admin nếu có -->
+        <LinearLayout
+            android:id="@+id/layoutAdminReply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_home_glass_card"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phản hồi / Ghi chú:"
+                android:textColor="#3B82F6"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+            <TextView
+                android:id="@+id/tvAdminReply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp" />
+        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -159,9 +185,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:padding="0dp"
-                android:text="Change Status"
+                android:text="Xử lý"
                 android:textAllCaps="false"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textColor="@color/app_blue"
                 app:icon="@drawable/ic_edit_24"
                 app:iconSize="14dp"

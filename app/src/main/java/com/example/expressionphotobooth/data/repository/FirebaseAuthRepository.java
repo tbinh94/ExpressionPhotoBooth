@@ -105,43 +105,56 @@ public class FirebaseAuthRepository implements AuthRepository {
                         callback.onError("Không tìm thấy tài khoản sau khi đăng nhập.");
                         return;
                     }
-                    // Phase 3: Block sign-in if email is not yet verified
-                    if (!user.isEmailVerified()) {
-                        // Sign out immediately — do not grant a session token
-                        firebaseAuth.signOut();
-                        callback.onError("EMAIL_NOT_VERIFIED:" + user.getEmail());
-                        return;
-                    }
-                    // Fast path: use cached role to skip the Firestore round-trip
+                    
+                    // Fast path: use cached role
                     UserRole cached = getCachedRole();
                     if (cached != null) {
-                        callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), cached, false));
+                        handleVerificationAndSuccess(user, cached, callback);
                         refreshRoleInBackground(user.getUid());
                         return;
                     }
-                    // Slow path: fetch from Firestore
-                    fetchRoleFromFirestore(user, callback);
+                    
+                    // Slow path: fetch from Firestore first, then handle verification
+                    firestore.collection(USERS_COLLECTION)
+                            .document(user.getUid())
+                            .get()
+                            .addOnSuccessListener(snapshot -> {
+                                UserRole role = snapshot.exists()
+                                        ? UserRole.from(snapshot.getString("role"))
+                                        : UserRole.USER;
+                                cacheRole(role);
+                                handleVerificationAndSuccess(user, role, callback);
+                            })
+                            .addOnFailureListener(e -> {
+                                firebaseAuth.signOut();
+                                callback.onError(safeMessage(e, "Không thể lấy thông tin phân quyền."));
+                            });
                 })
                 .addOnFailureListener(e -> callback.onError(safeMessage(e, "Đăng nhập thất bại. Vui lòng thử lại.")));
     }
 
-    /** Fetch role from Firestore, update cache, and call back with full AuthSession. */
-    private void fetchRoleFromFirestore(FirebaseUser user, AuthCallback callback) {
-        firestore.collection(USERS_COLLECTION)
-                .document(user.getUid())
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    UserRole role = snapshot.exists()
-                            ? UserRole.from(snapshot.getString("role"))
-                            : UserRole.USER;
-                    cacheRole(role);
-                    callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), role, false));
-                })
-                .addOnFailureListener(e -> {
-                    // Gracefully fall back to USER role; user should not be blocked
-                    cacheRole(UserRole.USER);
-                    callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), UserRole.USER, false));
-                });
+    private void handleVerificationAndSuccess(FirebaseUser user, UserRole role, AuthCallback callback) {
+        // Phase 3 exception: Admins and the default admin@gmail.com can bypass email verification
+        boolean isAdmin = role == UserRole.ADMIN || (user.getEmail() != null && user.getEmail().equals("admin@gmail.com"));
+        
+        // Phase 3 exception: Legacy users (created before April 28, 2026) are grandfathered in
+        boolean isLegacy = false;
+        try {
+            long cutoffTime = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).parse("2026-04-28").getTime();
+            if (user.getMetadata() != null && user.getMetadata().getCreationTimestamp() < cutoffTime) {
+                isLegacy = true;
+            }
+        } catch (Exception e) {
+            // Ignored, fallback to false
+        }
+        
+        if (!isAdmin && !isLegacy && !user.isEmailVerified()) {
+            firebaseAuth.signOut();
+            callback.onError("EMAIL_NOT_VERIFIED:" + user.getEmail());
+            return;
+        }
+        
+        callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), role, false));
     }
 
     /** Background refresh: keeps cache up-to-date without user-visible latency. */
