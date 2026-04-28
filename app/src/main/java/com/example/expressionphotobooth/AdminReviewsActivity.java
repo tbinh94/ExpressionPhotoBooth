@@ -334,7 +334,11 @@ public class AdminReviewsActivity extends AppCompatActivity {
 
         TextView tvSheetUserEmail = view.findViewById(R.id.tvSheetUserEmail);
         TextView tvSheetFeedback = view.findViewById(R.id.tvSheetFeedback);
-        com.google.android.material.chip.ChipGroup chipGroupStatus = view.findViewById(R.id.chipGroupStatus);
+        
+        com.google.android.material.button.MaterialButton btnStatusPending = view.findViewById(R.id.btnStatusPending);
+        com.google.android.material.button.MaterialButton btnStatusProcessing = view.findViewById(R.id.btnStatusProcessing);
+        com.google.android.material.button.MaterialButton btnStatusCompleted = view.findViewById(R.id.btnStatusCompleted);
+        
         EditText etAdminReply = view.findViewById(R.id.etAdminReply);
         View btnReplyViaEmail = view.findViewById(R.id.btnReplyViaEmail);
         View btnCancel = view.findViewById(R.id.btnCancel);
@@ -346,20 +350,90 @@ public class AdminReviewsActivity extends AppCompatActivity {
             etAdminReply.setText(review.adminReply);
         }
 
-        // Set initial chip
-        if ("completed".equalsIgnoreCase(review.status)) {
-            chipGroupStatus.check(R.id.chipCompleted);
-        } else if ("processing".equalsIgnoreCase(review.status)) {
-            chipGroupStatus.check(R.id.chipProcessing);
-        } else {
-            chipGroupStatus.check(R.id.chipPending);
-        }
+        final String[] selectedStatus = { review.status != null ? review.status : "pending" };
+
+        Runnable updateStatusButtonsUi = () -> {
+            if ("completed".equalsIgnoreCase(selectedStatus[0])) {
+                btnStatusCompleted.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#10B981")));
+                btnStatusCompleted.setTextColor(Color.WHITE);
+                
+                btnStatusProcessing.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#00000000")));
+                btnStatusProcessing.setTextColor(Color.parseColor("#3B82F6"));
+                btnStatusProcessing.setStrokeColor(android.content.res.ColorStateList.valueOf(Color.parseColor("#3B82F6")));
+                
+                btnStatusPending.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#00000000")));
+                btnStatusPending.setTextColor(Color.parseColor("#F59E0B"));
+                btnStatusPending.setStrokeColor(android.content.res.ColorStateList.valueOf(Color.parseColor("#F59E0B")));
+            } else if ("processing".equalsIgnoreCase(selectedStatus[0])) {
+                btnStatusCompleted.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#00000000")));
+                btnStatusCompleted.setTextColor(Color.parseColor("#10B981"));
+                btnStatusCompleted.setStrokeColor(android.content.res.ColorStateList.valueOf(Color.parseColor("#10B981")));
+                
+                btnStatusProcessing.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#3B82F6")));
+                btnStatusProcessing.setTextColor(Color.WHITE);
+                
+                btnStatusPending.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#00000000")));
+                btnStatusPending.setTextColor(Color.parseColor("#F59E0B"));
+                btnStatusPending.setStrokeColor(android.content.res.ColorStateList.valueOf(Color.parseColor("#F59E0B")));
+            } else {
+                btnStatusCompleted.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#00000000")));
+                btnStatusCompleted.setTextColor(Color.parseColor("#10B981"));
+                btnStatusCompleted.setStrokeColor(android.content.res.ColorStateList.valueOf(Color.parseColor("#10B981")));
+                
+                btnStatusProcessing.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#00000000")));
+                btnStatusProcessing.setTextColor(Color.parseColor("#3B82F6"));
+                btnStatusProcessing.setStrokeColor(android.content.res.ColorStateList.valueOf(Color.parseColor("#3B82F6")));
+                
+                btnStatusPending.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#F59E0B")));
+                btnStatusPending.setTextColor(Color.WHITE);
+            }
+        };
+
+        updateStatusButtonsUi.run();
+
+        btnStatusPending.setOnClickListener(v -> {
+            selectedStatus[0] = "pending";
+            updateStatusButtonsUi.run();
+        });
+        btnStatusProcessing.setOnClickListener(v -> {
+            selectedStatus[0] = "processing";
+            updateStatusButtonsUi.run();
+        });
+        btnStatusCompleted.setOnClickListener(v -> {
+            selectedStatus[0] = "completed";
+            updateStatusButtonsUi.run();
+        });
 
         btnReplyViaEmail.setOnClickListener(v -> {
+            String emailText;
+            if (review.rating >= 4.0) {
+                emailText = "Chào bạn,\n\n" +
+                        "Cảm ơn bạn đã sử dụng dịch vụ của Our Memories Photobooth và dành thời gian đánh giá " + ((int) review.rating) + " sao cho chúng tôi!\n\n" +
+                        "Chúng tôi rất vui khi biết bạn hài lòng với trải nghiệm này. Đội ngũ của chúng tôi luôn nỗ lực mang lại những bức hình đẹp và kỷ niệm đáng nhớ nhất cho khách hàng.\n\n" +
+                        "Nếu bạn có thêm bất kỳ đóng góp nào để giúp dịch vụ ngày một tốt hơn, đừng ngần ngại phản hồi nhé!\n\n" +
+                        "Chúc bạn một ngày tuyệt vời!\n" +
+                        "Trân trọng,\n" +
+                        "Đội ngũ Our Memories Photobooth";
+            } else {
+                emailText = "Chào bạn,\n\n" +
+                        "Lời đầu tiên, Our Memories Photobooth xin chân thành gửi lời xin lỗi vì đã chưa mang lại trải nghiệm tốt nhất cho bạn trong lần sử dụng dịch vụ vừa qua.\n\n" +
+                        "Chúng tôi đã ghi nhận đánh giá " + ((int) review.rating) + " sao cùng phản hồi của bạn" + 
+                        (TextUtils.isEmpty(review.feedback) ? "." : ": \"" + review.feedback + "\".") + "\n\n" +
+                        "Đội ngũ quản trị đang rà soát lại quy trình để cải thiện chất lượng dịch vụ ngay lập tức. Rất hy vọng sẽ có cơ hội được đón tiếp và phục vụ bạn tốt hơn trong những lần tiếp theo.\n\n" +
+                        "Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ lại với chúng tôi qua email này.\n\n" +
+                        "Trân trọng,\n" +
+                        "Đội ngũ Our Memories Photobooth";
+            }
+
             android.content.Intent emailIntent = new android.content.Intent(android.content.Intent.ACTION_SENDTO);
-            emailIntent.setData(android.net.Uri.parse("mailto:" + review.email));
+            String uriString = "mailto:" + android.net.Uri.encode(review.email) +
+                    "?subject=" + android.net.Uri.encode("Phản hồi đánh giá - Our Memories Photobooth") +
+                    "&body=" + android.net.Uri.encode(emailText);
+            emailIntent.setData(android.net.Uri.parse(uriString));
+            
             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Phản hồi đánh giá - Our Memories Photobooth");
-            emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Chào bạn,\nCảm ơn bạn đã đóng góp ý kiến:\n\"" + review.feedback + "\"\n\n");
+            emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, emailText);
+
             try {
                 startActivity(emailIntent);
             } catch (android.content.ActivityNotFoundException e) {
@@ -370,13 +444,8 @@ public class AdminReviewsActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
         btnSave.setOnClickListener(v -> {
-            String newStatus = "pending";
-            int checkedId = chipGroupStatus.getCheckedChipId();
-            if (checkedId == R.id.chipCompleted) newStatus = "completed";
-            else if (checkedId == R.id.chipProcessing) newStatus = "processing";
-
+            String newStatus = selectedStatus[0];
             String replyText = etAdminReply.getText().toString().trim();
-
             updateReviewStatusAndReply(review, newStatus, replyText, tvStatus, cardStatus, layoutAdminReply, tvAdminReplyText, dialog);
         });
 

@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.expressionphotobooth.data.graphics.BitmapEditRenderer;
 import com.example.expressionphotobooth.domain.model.EditState;
 import com.example.expressionphotobooth.domain.model.SessionState;
+import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.domain.repository.SessionRepository;
 import com.example.expressionphotobooth.domain.usecase.RenderEditedBitmapUseCase;
@@ -119,6 +120,8 @@ public class EditPhotoActivity extends AppCompatActivity {
     private Uri currentPhotoUri;
     private int selectedFrameResId = -1;
     private ScaleGestureDetector scaleGestureDetector;
+    private UserRole currentUserRole = UserRole.USER;
+    private long premiumUntil = 0L;
 
     // ── Thumbnail item model ──────────────────────────────────────────────────
 
@@ -328,6 +331,17 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         sessionRepository = ((AppContainer) getApplication()).getSessionRepository();
         sessionState = sessionRepository.getSession();
+        
+        ((AppContainer) getApplication()).getAuthRepository().fetchCurrentUserInfo(new AuthRepository.UserInfoCallback() {
+            @Override
+            public void onSuccess(UserRole role, long until) {
+                currentUserRole = role;
+                premiumUntil = until;
+            }
+            @Override
+            public void onError(String message) {}
+        });
+
         renderEditedBitmapUseCase = new RenderEditedBitmapUseCase(new BitmapEditRenderer());
         portraitProcessor = new com.example.expressionphotobooth.domain.usecase.PortraitProcessor();
         renderEditedBitmapUseCase.setPortraitProcessor(portraitProcessor);
@@ -512,6 +526,22 @@ public class EditPhotoActivity extends AppCompatActivity {
     }
 
     private void showPanel(int index) {
+        if (index == 1) {
+            AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
+            if (authRepo.isGuest()) {
+                String languageTag = com.example.expressionphotobooth.utils.LocaleManager.getCurrentLanguage(this);
+                com.example.expressionphotobooth.HelpDialogUtils.showHistoryGuestRegisterCta(
+                        this,
+                        com.example.expressionphotobooth.utils.LocaleManager.getString(this, R.string.home_background_user_only_title, languageTag),
+                        com.example.expressionphotobooth.utils.LocaleManager.getString(this, R.string.home_background_user_only_message, languageTag),
+                        this::openRegisterFromGuest
+                );
+                // Switch back to Filters
+                TabLayout.Tab tab = editTabLayout.getTabAt(0);
+                if (tab != null) tab.select();
+                return;
+            }
+        }
         panelFilters.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         panelBackgrounds.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         panelFrames.setVisibility(View.GONE);
@@ -571,7 +601,26 @@ public class EditPhotoActivity extends AppCompatActivity {
 
         backgroundsAdapter = new ThumbAdapter(backgroundItems, item -> {
             if ("ADD_BG".equals(item.value)) {
-                openBackgroundPicker();
+                AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
+                if (authRepo.isGuest()) {
+                    com.example.expressionphotobooth.HelpDialogUtils.showCenteredNotice(
+                            this,
+                            getString(R.string.main_ai_login_required_title),
+                            getString(R.string.main_ai_login_required_message),
+                            false
+                    );
+                    return;
+                }
+
+                boolean isPremium = (currentUserRole == UserRole.PREMIUM && premiumUntil > System.currentTimeMillis());
+                if (currentUserRole != UserRole.ADMIN && !isPremium) {
+                    String paymentUrl = "https://img.vietqr.io/image/MB-56111166662004-compact.png" +
+                            "?amount=50000&addInfo=Premium%20Sub%20" + authRepo.getCurrentEmail() +
+                            "&accountName=PHOTO%20BOOTH";
+                    com.example.expressionphotobooth.HelpDialogUtils.showSubscriptionQR(this, paymentUrl);
+                } else {
+                    openBackgroundPicker();
+                }
             } else {
                 updateBackground((EditState.BackgroundStyle) item.value);
             }
@@ -1798,6 +1847,16 @@ public class EditPhotoActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Delete failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private void openRegisterFromGuest() {
+        AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        authRepository.signOut();
+        Intent intent = new Intent(this, com.example.expressionphotobooth.LoginActivity.class);
+        intent.putExtra(com.example.expressionphotobooth.IntentKeys.EXTRA_OPEN_REGISTER, true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }
 

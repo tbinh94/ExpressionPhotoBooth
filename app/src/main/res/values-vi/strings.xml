@@ -86,6 +86,10 @@
     <string name="home_history_user_only_message">Lịch sử chỉ dành cho tài khoản đã đăng ký. Hãy đăng ký để lưu và xem lại phiên chụp.</string>
     <string name="home_gallery_user_only_title">Chỉ dành cho thành viên</string>
     <string name="home_gallery_user_only_message">Mở khóa Thư viện cá nhân bằng cách tạo tài khoản ngay. Đăng ký để lưu, quản lý và xem lại mọi khoảnh khắc của bạn bất cứ lúc nào.</string>
+    <string name="home_background_user_only_title">Mở khóa AI Background</string>
+    <string name="home_background_user_only_message">Tính năng thay thế hình nền AI chỉ dành cho thành viên. Đăng ký ngay để trải nghiệm các mẫu nền độc đáo!</string>
+    <string name="home_share_user_only_title">Chỉ dành cho thành viên</string>
+    <string name="home_share_user_only_message">Tính năng chia sẻ ảnh và xuất video chỉ dành cho thành viên chính thức. Hãy tạo tài khoản để chia sẻ kỷ niệm cùng bạn bè nhé!</string>
     <string name="home_guest_register_now">Đăng ký ngay</string>
     <string name="home_banner_dialog_title">Đổi ảnh bìa</string>
     <string name="home_banner_option_picker">Chọn từ máy</string>

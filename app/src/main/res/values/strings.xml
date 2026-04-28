@@ -93,6 +93,10 @@
     <string name="home_history_user_only_message">History is available for registered users. Please sign up to save and view your sessions.</string>
     <string name="home_gallery_user_only_title">Members only</string>
     <string name="home_gallery_user_only_message">Unlock your personal Gallery by creating an account. Sign up now to save, manage, and revisit your memories anytime.</string>
+    <string name="home_background_user_only_title">Unlock Background AI</string>
+    <string name="home_background_user_only_message">Background replacement features are available for members. Join now to try premium designs!</string>
+    <string name="home_share_user_only_title">Members only</string>
+    <string name="home_share_user_only_message">Sharing and downloading videos are exclusive member features. Create an account to share your memories with friends!</string>
     <string name="home_guest_register_now">Register now</string>
     <string name="result_title">Your Result</string>
     <string name="result_subtitle">Save your memories</string>

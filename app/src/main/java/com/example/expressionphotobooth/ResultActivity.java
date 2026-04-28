@@ -865,19 +865,14 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void exportTimelapseVideo() {
-        // Guest Check: Guests cannot export video, prompt to login
+        // Guest Check: Guests cannot export video
         if (isGuestSession) {
-            HelpDialogUtils.showHistoryGuestRegisterCta(
+            String languageTag = com.example.expressionphotobooth.utils.LocaleManager.getCurrentLanguage(this);
+            com.example.expressionphotobooth.HelpDialogUtils.showHistoryGuestRegisterCta(
                     this,
-                    getString(R.string.home_history_user_only_title),
-                    getString(R.string.home_history_user_only_message),
-                    () -> {
-                        // Redirect to Login
-                        Intent intent = new Intent(ResultActivity.this, LoginActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    },
-                    null // If they cancel, do nothing
+                    com.example.expressionphotobooth.utils.LocaleManager.getString(this, R.string.home_share_user_only_title, languageTag),
+                    com.example.expressionphotobooth.utils.LocaleManager.getString(this, R.string.home_share_user_only_message, languageTag),
+                    this::openRegisterFromGuest
             );
             return;
         }
@@ -992,8 +987,19 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void shareResult() {
-        // RBAC Check: Verify user can share own session result (Guests are allowed to share for rewards)
-        if (!isGuestSession && rbacService != null && !rbacService.canAccessSession(currentUid)) {
+        if (isGuestSession) {
+            String languageTag = com.example.expressionphotobooth.utils.LocaleManager.getCurrentLanguage(this);
+            com.example.expressionphotobooth.HelpDialogUtils.showHistoryGuestRegisterCta(
+                    this,
+                    com.example.expressionphotobooth.utils.LocaleManager.getString(this, R.string.home_share_user_only_title, languageTag),
+                    com.example.expressionphotobooth.utils.LocaleManager.getString(this, R.string.home_share_user_only_message, languageTag),
+                    this::openRegisterFromGuest
+            );
+            return;
+        }
+
+        // RBAC Check: Verify user can share own session result
+        if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
             Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1145,15 +1151,6 @@ public class ResultActivity extends AppCompatActivity {
 
     private void persistHistoryBaseRecord() {
         if (isGuestSession) {
-            if (!hasShownGuestHistoryNotice && !isFinishing()) {
-                hasShownGuestHistoryNotice = true;
-                HelpDialogUtils.showHistoryGuestRegisterCta(
-                        this,
-                        getString(R.string.home_history_user_only_title),
-                        getString(R.string.home_history_user_only_message),
-                        this::openRegisterFromGuest
-                );
-            }
             return;
         }
         if (historyRepository == null || currentUid == null || resultUri == null) {

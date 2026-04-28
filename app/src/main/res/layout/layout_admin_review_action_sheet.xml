@@ -46,38 +46,62 @@
         android:textStyle="bold"
         android:layout_marginBottom="8dp" />
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupStatus"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        app:singleSelection="true"
-        app:selectionRequired="true">
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipPending"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStatusPending"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
             android:text="Pending"
+            android:textSize="12sp"
             android:textColor="#F59E0B"
-            app:chipBackgroundColor="#33F59E0B"
-            app:checkedIconVisible="true" />
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipProcessing"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            app:strokeColor="#F59E0B"
+            app:cornerRadius="18dp"
+            android:layout_marginEnd="6dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStatusProcessing"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1.2"
             android:text="Processing"
+            android:textSize="12sp"
             android:textColor="#3B82F6"
-            app:chipBackgroundColor="#333B82F6"
-            app:checkedIconVisible="true" />
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipCompleted"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            app:strokeColor="#3B82F6"
+            app:cornerRadius="18dp"
+            android:layout_marginEnd="6dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStatusCompleted"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1.2"
             android:text="Completed"
+            android:textSize="12sp"
             android:textColor="#10B981"
-            app:chipBackgroundColor="#3310B981"
-            app:checkedIconVisible="true" />
-    </com.google.android.material.chip.ChipGroup>
+            android:textAllCaps="false"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            app:strokeColor="#10B981"
+            app:cornerRadius="18dp"/>
+    </LinearLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
@@ -109,16 +133,15 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnReplyViaEmail"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:text="Gửi Email trực tiếp cho người dùng"
-            android:textColor="@color/app_blue"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#3B82F6"
             app:icon="@drawable/ic_email_24"
-            app:iconTint="@color/app_blue"
+            app:iconTint="#FFFFFF"
             app:iconGravity="textStart"
             app:cornerRadius="26dp"
-            app:strokeColor="@color/app_blue"
             android:layout_marginBottom="12dp" />
 
         <LinearLayout
