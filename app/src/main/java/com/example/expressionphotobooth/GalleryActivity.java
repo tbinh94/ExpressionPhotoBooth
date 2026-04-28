@@ -162,14 +162,7 @@ public class GalleryActivity extends AppCompatActivity {
         historyRepository = appContainer.getHistoryRepository();
 
         if (authRepository != null && authRepository.isGuest()) {
-            String languageTag = LocaleManager.getCurrentLanguage(this);
-            HelpDialogUtils.showHistoryGuestRegisterCta(
-                    this,
-                    LocaleManager.getString(this, R.string.home_gallery_user_only_title, languageTag),
-                    LocaleManager.getString(this, R.string.home_gallery_user_only_message, languageTag),
-                    this::openRegisterFromGuest,
-                    this::returnHomeWhenGuestBlocked
-            );
+            finish();
             return;
         }
         
@@ -517,6 +510,12 @@ public class GalleryActivity extends AppCompatActivity {
 
     private void performCarouselAction(String action) {
         if (galleryFiles.isEmpty()) return;
+
+        if (authRepository != null && authRepository.isGuest() && !"save_photo".equals(action)) {
+            Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         File currentFile = galleryFiles.get(vpCarousel.getCurrentItem());
         
         String uid = authRepository.getCurrentUid();
@@ -1299,6 +1298,11 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     private void deleteFile(File file, int position, boolean isCarousel) {
+        if (authRepository != null && authRepository.isGuest()) {
+            Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // RBAC Check: Verify user can delete this file
         String uid = authRepository.getCurrentUid();
         if (rbacService != null && !rbacService.canDeleteImage(uid)) {
