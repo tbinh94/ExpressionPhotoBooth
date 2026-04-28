@@ -992,25 +992,8 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void shareResult() {
-        // Guest Check: Guests cannot share, prompt to login
-        if (isGuestSession) {
-            HelpDialogUtils.showHistoryGuestRegisterCta(
-                    this,
-                    getString(R.string.home_history_user_only_title),
-                    getString(R.string.home_history_user_only_message),
-                    () -> {
-                        // Redirect to Login
-                        Intent intent = new Intent(ResultActivity.this, LoginActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    },
-                    null
-            );
-            return;
-        }
-
-        // RBAC Check: Verify user can share own session result
-        if (rbacService != null && !rbacService.canAccessSession(currentUid)) {
+        // RBAC Check: Verify user can share own session result (Guests are allowed to share for rewards)
+        if (!isGuestSession && rbacService != null && !rbacService.canAccessSession(currentUid)) {
             Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
             return;
         }

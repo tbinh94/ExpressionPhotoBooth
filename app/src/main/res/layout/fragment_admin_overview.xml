@@ -313,8 +313,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="16dp">
 
+                <!-- Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -327,39 +328,33 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/admin_ai_insights_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
+                        android:textColor="@color/app_blue"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAiAnalyze"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="34dp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:minWidth="0dp"
-                        android:text="@string/admin_ai_insights_analyze_cta"
-                        android:textAllCaps="false"
-                        android:textSize="11sp" />
-
-                    <ProgressBar
-                        android:id="@+id/progressAiInsights"
-                        style="?android:attr/progressBarStyleSmall"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginStart="8dp"
-                        android:visibility="gone" />
+                    <!-- Optional small action button or status icon -->
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_sparkle"
+                        app:tint="@color/app_blue" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvAiInsightsSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="2dp"
                     android:text="@string/admin_ai_insights_tap_to_analyze"
                     android:textColor="@color/admin_subtitle_color"
-                    android:textSize="11sp" />
+                    android:textSize="12sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/admin_card_stroke" />
 
                 <!-- Empty State Container -->
                 <LinearLayout
@@ -368,14 +363,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="10dp">
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp">
                     
                     <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:id="@+id/ivAiEmptySparkle"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:src="@drawable/ic_sparkle"
-                        android:alpha="0.2"
+                        android:alpha="0.4"
                         app:tint="@color/text_secondary" />
                         
                     <TextView
@@ -385,17 +381,65 @@
                         android:layout_marginTop="12dp"
                         android:text="@string/admin_ai_insights_empty_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
                         
                     <TextView
                         android:id="@+id/tvAiEmptyDesc"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="16dp"
                         android:gravity="center"
                         android:text="@string/admin_ai_insights_empty_desc"
                         android:textColor="@color/admin_subtitle_color"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAiAnalyze"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:text="@string/admin_ai_insights_analyze_cta"
+                        android:textColor="#FFFFFF"
+                        app:backgroundTint="@color/app_blue"
+                        app:cornerRadius="24dp"
+                        app:icon="@drawable/ic_sparkle"
+                        app:iconTint="#FFFFFF" />
+                </LinearLayout>
+
+                <!-- Loading State Container (Initially Hidden) -->
+                <LinearLayout
+                    android:id="@+id/layoutAiLoadingState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp">
+                    
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:indeterminate="true"
+                        app:indicatorColor="@color/app_blue" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="AI đang phân tích dữ liệu..."
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                        
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Việc này có thể mất vài giây"
+                        android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -411,101 +455,147 @@
                         android:id="@+id/tvAiSummary"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
                         android:textStyle="bold" />
 
-                    <LinearLayout
+                    <!-- Insight Rows wrapped in subtle cards -->
+                    <com.google.android.material.card.MaterialCardView
                         android:id="@+id/layoutAiInsightRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="16dp">
-                        <ImageView
-                            android:layout_width="6dp"
-                            android:layout_height="6dp"
-                            android:src="@drawable/shape_circle_dot"
-                            app:tint="@color/text_secondary"
-                            android:layout_marginTop="6dp"
-                            android:layout_marginEnd="8dp"/>
-                        <TextView
-                            android:id="@+id/tvAiInsightLine1"
+                        android:layout_marginTop="12dp"
+                        app:cardBackgroundColor="#0A8B5CF6"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp">
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:lineSpacingExtra="6dp"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="13sp" />
-                    </LinearLayout>
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_check_24"
+                                app:tint="#8B5CF6"
+                                android:layout_marginEnd="8dp"/>
+                            <TextView
+                                android:id="@+id/tvAiInsightLine1"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:lineSpacingExtra="4dp"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
-                    <LinearLayout
+                    <com.google.android.material.card.MaterialCardView
                         android:id="@+id/layoutAiInsightRow2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="10dp">
-                        <ImageView
-                            android:layout_width="6dp"
-                            android:layout_height="6dp"
-                            android:src="@drawable/shape_circle_dot"
-                            app:tint="@color/text_secondary"
-                            android:layout_marginTop="6dp"
-                            android:layout_marginEnd="8dp"/>
-                        <TextView
-                            android:id="@+id/tvAiInsightLine2"
+                        android:layout_marginTop="8dp"
+                        app:cardBackgroundColor="#0A8B5CF6"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp">
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:lineSpacingExtra="6dp"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="13sp" />
-                    </LinearLayout>
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_check_24"
+                                app:tint="#8B5CF6"
+                                android:layout_marginEnd="8dp"/>
+                            <TextView
+                                android:id="@+id/tvAiInsightLine2"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:lineSpacingExtra="4dp"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
-                    <LinearLayout
+                    <com.google.android.material.card.MaterialCardView
                         android:id="@+id/layoutAiInsightRow3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="10dp">
-                        <ImageView
-                            android:layout_width="6dp"
-                            android:layout_height="6dp"
-                            android:src="@drawable/shape_circle_dot"
-                            app:tint="@color/text_secondary"
-                            android:layout_marginTop="6dp"
-                            android:layout_marginEnd="8dp"/>
-                        <TextView
-                            android:id="@+id/tvAiInsightLine3"
+                        android:layout_marginTop="8dp"
+                        app:cardBackgroundColor="#0A8B5CF6"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp">
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:lineSpacingExtra="6dp"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="13sp" />
-                    </LinearLayout>
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_check_24"
+                                app:tint="#8B5CF6"
+                                android:layout_marginEnd="8dp"/>
+                            <TextView
+                                android:id="@+id/tvAiInsightLine3"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:lineSpacingExtra="4dp"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
-                    <LinearLayout
+                    <com.google.android.material.card.MaterialCardView
                         android:id="@+id/layoutAiRecommendationRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="20dp"
-                        android:background="@drawable/bg_ai_recommendation"
-                        android:padding="12dp">
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_sparkle"
-                            app:tint="@color/app_blue"
-                            android:layout_marginEnd="8dp"/>
-                        <TextView
-                            android:id="@+id/tvAiRecommendation"
+                        android:layout_marginTop="16dp"
+                        app:cardBackgroundColor="#0D3B82F6"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#333B82F6"
+                        app:strokeWidth="1dp">
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/app_blue"
-                            android:textSize="13sp"
-                            android:lineSpacingExtra="4dp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_sparkle"
+                                app:tint="@color/app_blue"
+                                android:layout_marginEnd="8dp"/>
+                            <TextView
+                                android:id="@+id/tvAiRecommendation"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/app_blue"
+                                android:textSize="13sp"
+                                android:lineSpacingExtra="4dp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                    
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAiReAnalyze"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="12dp"
+                        android:text="Cập nhật phân tích mới"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        app:icon="@drawable/ic_refresh_24"
+                        app:iconTint="@color/text_secondary"
+                        app:iconSize="16dp"/>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

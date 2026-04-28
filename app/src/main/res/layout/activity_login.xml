@@ -119,6 +119,7 @@
                         android:orientation="vertical"
                         android:visibility="gone">
 
+                        <!-- Full Name -->
                         <com.google.android.material.textfield.TextInputLayout
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
@@ -146,6 +147,7 @@
                                 android:textSize="15sp" />
                         </com.google.android.material.textfield.TextInputLayout>
 
+                        <!-- Date of Birth -->
                         <com.google.android.material.textfield.TextInputLayout
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
@@ -175,6 +177,7 @@
                                 android:textColorHint="@color/text_secondary"
                                 android:textSize="15sp" />
                         </com.google.android.material.textfield.TextInputLayout>
+
                     </LinearLayout>
 
                     <!-- Email -->
@@ -207,6 +210,7 @@
 
                     <!-- Password -->
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilPassword"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -225,6 +229,103 @@
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"
+                            android:maxLines="1"
+                            android:textColor="@color/text_primary"
+                            android:textColorHint="@color/text_secondary"
+                            android:textSize="15sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Phase 3: Password Strength Indicator — visible only in register mode -->
+                    <LinearLayout
+                        android:id="@+id/layoutPasswordStrength"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <!-- 4 animated segment bars -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="4">
+
+                            <View
+                                android:id="@+id/pwdSeg1"
+                                android:layout_width="0dp"
+                                android:layout_height="5dp"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="3dp"
+                                android:background="#E4EAF6"
+                                android:layerType="software" />
+
+                            <View
+                                android:id="@+id/pwdSeg2"
+                                android:layout_width="0dp"
+                                android:layout_height="5dp"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="3dp"
+                                android:background="#E4EAF6"
+                                android:layerType="software" />
+
+                            <View
+                                android:id="@+id/pwdSeg3"
+                                android:layout_width="0dp"
+                                android:layout_height="5dp"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="3dp"
+                                android:background="#E4EAF6"
+                                android:layerType="software" />
+
+                            <View
+                                android:id="@+id/pwdSeg4"
+                                android:layout_width="0dp"
+                                android:layout_height="5dp"
+                                android:layout_weight="1"
+                                android:background="#E4EAF6"
+                                android:layerType="software" />
+
+                        </LinearLayout>
+
+                        <!-- Strength label -->
+                        <TextView
+                            android:id="@+id/tvPasswordStrength"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text=""
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.02" />
+
+                    </LinearLayout>
+
+                    <!-- Phase 3: Confirm Password — visible only in register mode -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilConfirmPassword"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/auth_confirm_password"
+                        android:visibility="gone"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxStrokeColor="@color/color_input_stroke"
+                        app:boxStrokeWidth="1.5dp"
+                        app:hintTextColor="@color/camera_mode_primary"
+                        app:startIconDrawable="@drawable/ic_lock_24"
+                        app:startIconTint="@color/camera_mode_primary"
+                        app:endIconMode="password_toggle">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etConfirmPassword"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"

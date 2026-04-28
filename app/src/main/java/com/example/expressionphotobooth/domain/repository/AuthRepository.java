@@ -55,6 +55,12 @@ public interface AuthRepository {
 
     void updateProfilePhoto(String photoUrl, SimpleCallback callback);
 
+    /** Phase 3: Check if the current Firebase user has verified their email. */
+    boolean isEmailVerified();
+
+    /** Phase 3: Send (or resend) an email verification link to the current user. */
+    void resendVerificationEmail(SimpleCallback callback);
+
     void signOut();
 }
 // Trigger re-index

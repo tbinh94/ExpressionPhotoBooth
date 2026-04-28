@@ -43,6 +43,12 @@
 
     <!-- Auth / Input -->
     <color name="color_input_stroke">#E0E8F4</color>
+    <!-- Password strength indicator -->
+    <color name="pwd_strength_weak">#EF4444</color>
+    <color name="pwd_strength_fair">#F97316</color>
+    <color name="pwd_strength_good">#EAB308</color>
+    <color name="pwd_strength_strong">#22C55E</color>
+    <color name="pwd_strength_track">#E4EAF6</color>
 
     <!-- Dashboard Colors -->
     <color name="admin_dashboard_bg">#1B2A5C</color>

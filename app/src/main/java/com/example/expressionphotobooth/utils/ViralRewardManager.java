@@ -39,17 +39,25 @@ public class ViralRewardManager {
         db.collection("app_config").document("viral_campaign")
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    Boolean isActive = documentSnapshot.getBoolean("isActive");
-                    if (isActive != null && isActive) {
+                    boolean isActive = false;
+                    if (documentSnapshot.exists()) {
+                        Boolean active = documentSnapshot.getBoolean("isActive");
+                        isActive = (active != null && active);
+                    } else {
+                        // Nếu chưa có config thì mặc định cho phép để tính năng hoạt động
+                        isActive = true; 
+                    }
+
+                    if (isActive) {
                         showPopup(photoUri);
                     } else {
-                        // Fallback về share mặc định nếu chiến dịch không hoạt động
+                        // Fallback về share mặc định nếu chiến dịch bị tắt chủ động
                         startDefaultShare(photoUri);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Fallback nếu lỗi network
-                    startDefaultShare(photoUri);
+                    // Fallback nếu lỗi network - cho hiện popup luôn để giữ trải nghiệm người dùng
+                    showPopup(photoUri);
                 });
     }
 
@@ -106,10 +114,17 @@ public class ViralRewardManager {
         String uid = authRepository.getCurrentUid();
         
         if (uid != null) {
+            java.util.Map<String, Object> rewardData = new java.util.HashMap<>();
+            rewardData.put("viralRewardUnlocked", true);
+            rewardData.put("rewardClaimedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
             db.collection("users").document(uid)
-                    .update("viralRewardUnlocked", true)
+                    .set(rewardData, com.google.firebase.firestore.SetOptions.merge())
                     .addOnSuccessListener(aVoid -> {
                         AuditLogger.logAction("USER_REWARD_CLAIMED", "User " + uid + " unlocked viral stickers");
+                    })
+                    .addOnFailureListener(e -> {
+                        android.util.Log.e("ViralRewardManager", "Failed to grant reward: " + e.getMessage());
                     });
         }
 

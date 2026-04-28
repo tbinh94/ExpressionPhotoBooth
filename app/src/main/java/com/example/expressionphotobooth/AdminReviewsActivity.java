@@ -154,7 +154,8 @@ public class AdminReviewsActivity extends AppCompatActivity {
                         doc.getString("feedback"),
                         doc.getLong("timestamp"),
                         doc.getString("date"),
-                        doc.getString("status")
+                        doc.getString("status"),
+                        doc.getString("adminReply")
                     );
                     allReviews.add(data);
 
@@ -277,9 +278,18 @@ public class AdminReviewsActivity extends AppCompatActivity {
 
         updateStatusUi(tvStatus, cardStatus, review.status);
 
+        View layoutAdminReply = itemView.findViewById(R.id.layoutAdminReply);
+        TextView tvAdminReply = itemView.findViewById(R.id.tvAdminReply);
+
+        if (!TextUtils.isEmpty(review.adminReply)) {
+            layoutAdminReply.setVisibility(View.VISIBLE);
+            tvAdminReply.setText(review.adminReply);
+        } else {
+            layoutAdminReply.setVisibility(View.GONE);
+        }
+
         btnChangeStatus.setOnClickListener(v -> {
-            String nextStatus = getNextStatus(review.status);
-            updateReviewStatus(review, nextStatus, tvStatus, cardStatus);
+            showReviewActionSheet(review, tvStatus, cardStatus, layoutAdminReply, tvAdminReply);
         });
 
         // Set avatar letter
@@ -317,17 +327,89 @@ public class AdminReviewsActivity extends AppCompatActivity {
         return "processing";
     }
 
-    private void updateReviewStatus(ReviewData review, String newStatus, TextView tvStatus, View cardStatus) {
+    private void showReviewActionSheet(ReviewData review, TextView tvStatus, View cardStatus, View layoutAdminReply, TextView tvAdminReplyText) {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.TransparentBottomSheetDialog);
+        View view = getLayoutInflater().inflate(R.layout.layout_admin_review_action_sheet, null);
+
+        TextView tvSheetUserEmail = view.findViewById(R.id.tvSheetUserEmail);
+        TextView tvSheetFeedback = view.findViewById(R.id.tvSheetFeedback);
+        com.google.android.material.chip.ChipGroup chipGroupStatus = view.findViewById(R.id.chipGroupStatus);
+        EditText etAdminReply = view.findViewById(R.id.etAdminReply);
+        View btnReplyViaEmail = view.findViewById(R.id.btnReplyViaEmail);
+        View btnCancel = view.findViewById(R.id.btnCancel);
+        View btnSave = view.findViewById(R.id.btnSave);
+
+        tvSheetUserEmail.setText(review.email);
+        tvSheetFeedback.setText(TextUtils.isEmpty(review.feedback) ? "(No content)" : review.feedback);
+        if (!TextUtils.isEmpty(review.adminReply)) {
+            etAdminReply.setText(review.adminReply);
+        }
+
+        // Set initial chip
+        if ("completed".equalsIgnoreCase(review.status)) {
+            chipGroupStatus.check(R.id.chipCompleted);
+        } else if ("processing".equalsIgnoreCase(review.status)) {
+            chipGroupStatus.check(R.id.chipProcessing);
+        } else {
+            chipGroupStatus.check(R.id.chipPending);
+        }
+
+        btnReplyViaEmail.setOnClickListener(v -> {
+            android.content.Intent emailIntent = new android.content.Intent(android.content.Intent.ACTION_SENDTO);
+            emailIntent.setData(android.net.Uri.parse("mailto:" + review.email));
+            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Phản hồi đánh giá - Our Memories Photobooth");
+            emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Chào bạn,\nCảm ơn bạn đã đóng góp ý kiến:\n\"" + review.feedback + "\"\n\n");
+            try {
+                startActivity(emailIntent);
+            } catch (android.content.ActivityNotFoundException e) {
+                Toast.makeText(this, "Không tìm thấy ứng dụng Email", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnSave.setOnClickListener(v -> {
+            String newStatus = "pending";
+            int checkedId = chipGroupStatus.getCheckedChipId();
+            if (checkedId == R.id.chipCompleted) newStatus = "completed";
+            else if (checkedId == R.id.chipProcessing) newStatus = "processing";
+
+            String replyText = etAdminReply.getText().toString().trim();
+
+            updateReviewStatusAndReply(review, newStatus, replyText, tvStatus, cardStatus, layoutAdminReply, tvAdminReplyText, dialog);
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+    private void updateReviewStatusAndReply(ReviewData review, String newStatus, String replyText, TextView tvStatus, View cardStatus, View layoutAdminReply, TextView tvAdminReplyText, com.google.android.material.bottomsheet.BottomSheetDialog dialog) {
         if (review.id == null) return;
+        
+        java.util.Map<String, Object> updates = new java.util.HashMap<>();
+        updates.put("status", newStatus);
+        updates.put("adminReply", replyText);
+        
         FirebaseFirestore.getInstance().collection("reviews").document(review.id)
-                .update("status", newStatus)
+                .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    AuditLogger.logAction("UPDATE_REVIEW_STATUS", review.id, "New status: " + newStatus);
+                    AuditLogger.logAction("UPDATE_REVIEW_STATUS", review.id, "New status: " + newStatus + ", Reply: " + replyText);
                     review.status = newStatus;
+                    review.adminReply = replyText;
+                    
                     updateStatusUi(tvStatus, cardStatus, newStatus);
-                    Toast.makeText(this, "Status updated", Toast.LENGTH_SHORT).show();
+                    if (!TextUtils.isEmpty(replyText)) {
+                        layoutAdminReply.setVisibility(View.VISIBLE);
+                        tvAdminReplyText.setText(replyText);
+                    } else {
+                        layoutAdminReply.setVisibility(View.GONE);
+                    }
+                    
+                    Toast.makeText(this, "Đã cập nhật đánh giá", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi cập nhật: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private static class ReviewData {
@@ -338,8 +420,9 @@ public class AdminReviewsActivity extends AppCompatActivity {
         Long timestamp;
         String date;
         String status;
+        String adminReply;
 
-        ReviewData(String id, String email, Double rating, String feedback, Long timestamp, String date, String status) {
+        ReviewData(String id, String email, Double rating, String feedback, Long timestamp, String date, String status, String adminReply) {
             this.id = id;
             this.email = email != null ? email : "";
             this.rating = rating != null ? rating : 0.0;
@@ -347,6 +430,7 @@ public class AdminReviewsActivity extends AppCompatActivity {
             this.timestamp = timestamp;
             this.date = date;
             this.status = status != null ? status : "pending";
+            this.adminReply = adminReply != null ? adminReply : "";
         }
     }
 }
