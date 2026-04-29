@@ -95,6 +95,8 @@
             android:layout_weight="1"
             android:background="@drawable/shape_chat_input_bg"
             android:hint="@string/admin_ai_chat_input_hint"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
             android:maxLines="3"
             android:paddingHorizontal="16dp"
             android:paddingVertical="10dp"

@@ -12,10 +12,10 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 import com.example.expressionphotobooth.utils.AuditLogger;
 import com.google.firebase.firestore.FirebaseFirestore;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -120,9 +120,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private TextView tvAiEmptyDesc;
 
     private com.google.android.material.progressindicator.LinearProgressIndicator progressQuotaGemini;
-    private com.google.android.material.progressindicator.LinearProgressIndicator progressQuotaStorage;
     private TextView tvQuotaGemini;
-    private TextView tvQuotaStorage;
 
     private AdminStatsRepository adminStatsRepository;
     private AdminAiInsightsRepository adminAiInsightsRepository;
@@ -185,15 +183,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
             });
         }
 
-        MaterialButton btnTestPopup = view.findViewById(R.id.btnTestViralPopup);
-        if (btnTestPopup != null) {
-            btnTestPopup.setOnClickListener(v -> {
-                // Tạo một bản sao manager để test nhanh giao diện
-                com.example.expressionphotobooth.utils.ViralRewardManager testManager = 
-                    new com.example.expressionphotobooth.utils.ViralRewardManager(requireActivity());
-                testManager.checkAndShowRewardPopup(null); // Truyền null để test nhanh
-            });
-        }
+
         tvRangeTitle = view.findViewById(R.id.tvRangeTitle);
         tvUsersChartTitle = view.findViewById(R.id.tvUsersChartTitle);
         tvUsersChartSubtitle = view.findViewById(R.id.tvUsersChartSubtitle);
@@ -242,9 +232,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         tvAiEmptyDesc = view.findViewById(R.id.tvAiEmptyDesc);
 
         progressQuotaGemini = view.findViewById(R.id.progressQuotaGemini);
-        progressQuotaStorage = view.findViewById(R.id.progressQuotaStorage);
         tvQuotaGemini = view.findViewById(R.id.tvQuotaGemini);
-        tvQuotaStorage = view.findViewById(R.id.tvQuotaStorage);
 
         updateSystemQuotas();
 
@@ -1031,12 +1019,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
             tvQuotaGemini.setTextColor(Color.parseColor("#27A869"));
         }
 
-        if (progressQuotaStorage != null) {
-            progressQuotaStorage.setProgress(42);
-        }
-        if (tvQuotaStorage != null) {
-            tvQuotaStorage.setText("42.5 GB / 100 GB");
-            tvQuotaStorage.setTextColor(Color.GRAY);
-        }
+
     }
 }
+

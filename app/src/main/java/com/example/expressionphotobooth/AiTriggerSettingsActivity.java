@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -164,3 +164,4 @@ public class AiTriggerSettingsActivity extends AppCompatActivity {
         finish();
     }
 }
+

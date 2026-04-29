@@ -51,7 +51,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String PREF_HOME = "home_preferences";
@@ -1232,3 +1232,4 @@ public class HomeActivity extends AppCompatActivity {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 }
+
