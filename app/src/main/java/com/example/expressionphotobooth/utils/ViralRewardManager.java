@@ -10,7 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.core.content.FileProvider;
 
@@ -143,3 +143,4 @@ public class ViralRewardManager {
         successDialog.show();
     }
 }
+

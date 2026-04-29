@@ -11,7 +11,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -160,3 +160,4 @@ public class FullImageActivity extends AppCompatActivity {
         startActivity(Intent.createChooser(shareIntent, getString(R.string.result_share)));
     }
 }
+

@@ -5,7 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -114,3 +114,4 @@ public class AdminUsersActivity extends AppCompatActivity {
                 });
     }
 }
+

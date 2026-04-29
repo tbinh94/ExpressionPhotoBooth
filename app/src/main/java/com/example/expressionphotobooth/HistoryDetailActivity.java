@@ -9,7 +9,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -155,4 +155,5 @@ public class HistoryDetailActivity extends AppCompatActivity {
         return getString(R.string.history_not_available);
     }
 }
+
 

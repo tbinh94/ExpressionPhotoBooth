@@ -970,41 +970,7 @@
                         app:trackCornerRadius="4dp" />
                 </LinearLayout>
 
-                <!-- Firebase Storage -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="16dp">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Firebase Storage"
-                            android:textSize="12sp"
-                            android:textColor="@color/text_primary" />
-                        <TextView
-                            android:id="@+id/tvQuotaStorage"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="68%"
-                            android:textSize="11sp"
-                            android:textColor="@color/text_secondary" />
-                    </LinearLayout>
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:id="@+id/progressQuotaStorage"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:progress="68"
-                        app:indicatorColor="#EDAA66"
-                        app:trackColor="#F1F5F9"
-                        app:trackCornerRadius="4dp" />
-                </LinearLayout>
+
 
                 <!-- API Latency -->
                 <LinearLayout
@@ -1064,18 +1030,7 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnTestViralPopup"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Xem thử Popup (Test Preview)"
-                    android:textAllCaps="false"
-                    android:textSize="12sp"
-                    app:icon="@drawable/ic_visibility_24"
-                    app:strokeColor="@color/app_blue"
-                    android:textColor="@color/app_blue" />
+
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

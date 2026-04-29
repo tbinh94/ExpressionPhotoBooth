@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -374,4 +374,5 @@ public class HistoryActivity extends AppCompatActivity {
         finish();
     }
 }
+
 

@@ -490,10 +490,10 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                             btnUpdate.setEnabled(true);
                             if (updateTask.isSuccessful()) {
                                 dialog.dismiss();
-                                android.widget.Toast.makeText(this, "Mật khẩu đã được thay đổi an toàn.", android.widget.Toast.LENGTH_SHORT).show();
+                                com.example.expressionphotobooth.Toast.makeText(this, "Mật khẩu đã được thay đổi an toàn.", com.example.expressionphotobooth.Toast.LENGTH_SHORT).show();
                             } else {
                                 String err = updateTask.getException() != null ? updateTask.getException().getMessage() : "Lỗi không xác định";
-                                android.widget.Toast.makeText(this, "Lỗi: " + err, android.widget.Toast.LENGTH_SHORT).show();
+                                com.example.expressionphotobooth.Toast.makeText(this, "Lỗi: " + err, com.example.expressionphotobooth.Toast.LENGTH_SHORT).show();
                             }
                         });
                     } else {
@@ -529,7 +529,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                                 @Override public void onSuccess() {}
                                 @Override public void onError(String message) {}
                             });
-                            android.widget.Toast.makeText(this, "Cập nhật ảnh đại diện thành công", android.widget.Toast.LENGTH_SHORT).show();
+                            com.example.expressionphotobooth.Toast.makeText(this, "Cập nhật ảnh đại diện thành công", com.example.expressionphotobooth.Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -695,3 +695,4 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         overridePendingTransition(0, 0);
     }
 }
+

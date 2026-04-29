@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RatingBar;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -1218,3 +1218,4 @@ public class ResultActivity extends AppCompatActivity {
         finish();
     }
 }
+

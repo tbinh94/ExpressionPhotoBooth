@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -201,3 +201,4 @@ public class AdminAiChatBottomSheet extends BottomSheetDialogFragment {
         }
     }
 }
+

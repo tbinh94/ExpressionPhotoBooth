@@ -20,7 +20,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation;
@@ -1859,6 +1859,7 @@ public class EditPhotoActivity extends AppCompatActivity {
         finish();
     }
 }
+
 
 
 

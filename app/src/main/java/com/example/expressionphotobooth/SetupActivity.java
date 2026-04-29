@@ -2,7 +2,7 @@ package com.example.expressionphotobooth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
+import com.example.expressionphotobooth.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -228,3 +228,4 @@ public class SetupActivity extends AppCompatActivity {
         );
     }
 }
+
