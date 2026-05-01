@@ -291,13 +291,6 @@ public class MainActivity extends AppCompatActivity {
 
         aiSubSelector.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
-                if (checkedId == R.id.btnAiVoice && !hasAudioPermission()) {
-                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_CODE);
-                    group.check(R.id.btnAiFace);
-                    Log.w(TAG, "Microphone permission is required for Voice mode.");
-                    return;
-                }
-
                 // Logic: Registered users (non-premium) can only use Voice
                 boolean isPremium = (currentUserRole == UserRole.PREMIUM && premiumUntil > System.currentTimeMillis());
                 if (currentUserRole != UserRole.ADMIN && !isPremium) {
@@ -310,6 +303,11 @@ public class MainActivity extends AppCompatActivity {
                         HelpDialogUtils.showSubscriptionQR(this, paymentUrl);
                         return;
                     }
+                }
+
+                if (checkedId == R.id.btnAiVoice && !hasAudioPermission()) {
+                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_CODE);
+                    Log.w(TAG, "Microphone permission is required for Voice mode.");
                 }
 
                 isHandGestureMode = (checkedId == R.id.btnAiHand);
@@ -339,11 +337,11 @@ public class MainActivity extends AppCompatActivity {
         try {
             gestureAnalyzer = new GestureAnalyzer(this);
             isHandAnalyzerAvailable = true;
-        } catch (UnsatisfiedLinkError e) {
+        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
             gestureAnalyzer = null;
             isHandAnalyzerAvailable = false;
             Log.w(TAG, "Gesture analyzer native lib missing: " + e.getMessage());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             gestureAnalyzer = null;
             isHandAnalyzerAvailable = false;
             Log.w(TAG, "GestureAnalyzer not yet ready: " + e.getMessage());
@@ -599,28 +597,38 @@ public class MainActivity extends AppCompatActivity {
             lastAiAnalysisAtMs = now;
 
             if (isCapturingSequence && isExpressionMode) {
-                if (isHandGestureMode && gestureAnalyzer != null) {
-                    gestureAnalyzer.analyze(image, targetExpression, result -> {
-                        if (isWaitingForExpression && result.isMatched()) {
-                            isWaitingForExpression = false;
-                            runOnUiThread(this::triggerImmediateCapture);
-                        }
-                        if (aiOverlayView != null) {
-                            runOnUiThread(() -> aiOverlayView.setDetection(result.getBoundingBox(), result.getLabel()));
-                        }
-                    });
-                } else if (!isVoiceTriggerMode) {
-                    // Face Expression Analysis
-                    expressionAnalyzer.analyze(image, targetExpression, result -> {
-                        if (isWaitingForExpression && result.isMatched()) {
-                            isWaitingForExpression = false;
-                            runOnUiThread(this::triggerImmediateCapture);
-                        }
-                        if (aiOverlayView != null) {
-                            runOnUiThread(() -> aiOverlayView.setDetection(result.getBoundingBox(), result.getLabel()));
-                        }
-                    });
-                } else {
+                try {
+                    if (isHandGestureMode && gestureAnalyzer != null) {
+                        gestureAnalyzer.analyze(image, targetExpression, result -> {
+                            if (isWaitingForExpression && result.isMatched()) {
+                                isWaitingForExpression = false;
+                                runOnUiThread(this::triggerImmediateCapture);
+                            }
+                            if (aiOverlayView != null) {
+                                runOnUiThread(() -> aiOverlayView.setDetection(result.getBoundingBox(), result.getLabel()));
+                            }
+                        });
+                    } else if (!isVoiceTriggerMode) {
+                        // Face Expression Analysis
+                        expressionAnalyzer.analyze(image, targetExpression, result -> {
+                            if (isWaitingForExpression && result.isMatched()) {
+                                isWaitingForExpression = false;
+                                runOnUiThread(this::triggerImmediateCapture);
+                            }
+                            if (aiOverlayView != null) {
+                                runOnUiThread(() -> aiOverlayView.setDetection(result.getBoundingBox(), result.getLabel()));
+                            }
+                        });
+                    } else {
+                        image.close();
+                    }
+                } catch (NoClassDefFoundError | UnsatisfiedLinkError e) {
+                    Log.e(TAG, "Native library crashed during analysis: " + e.getMessage());
+                    isHandAnalyzerAvailable = false;
+                    gestureAnalyzer = null;
+                    image.close();
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception during analysis: " + e.getMessage());
                     image.close();
                 }
             } else {

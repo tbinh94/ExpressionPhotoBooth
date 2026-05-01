@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -51,7 +53,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import com.example.expressionphotobooth.Toast;
+import android.widget.Toast;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String PREF_HOME = "home_preferences";
@@ -758,6 +760,29 @@ public class HomeActivity extends AppCompatActivity {
         com.google.android.material.button.MaterialButton btnUpdate = view.findViewById(R.id.btnUpdatePassword);
         com.google.android.material.progressindicator.LinearProgressIndicator progress = view.findViewById(R.id.progressUpdate);
 
+        // Strength UI
+        LinearLayout layoutStrength = view.findViewById(R.id.layoutStrength);
+        com.google.android.material.progressindicator.LinearProgressIndicator strengthProgress = view.findViewById(R.id.strengthProgress);
+        TextView tvStrengthLabel = view.findViewById(R.id.tvStrengthLabel);
+
+        etNew.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String pass = s.toString();
+                if (pass.isEmpty()) {
+                    layoutStrength.setVisibility(View.GONE);
+                } else {
+                    layoutStrength.setVisibility(View.VISIBLE);
+                    HelpDialogUtils.PasswordStrength strength = HelpDialogUtils.getPasswordStrength(pass);
+                    strengthProgress.setProgress(strength.score);
+                    strengthProgress.setIndicatorColor(strength.color);
+                    tvStrengthLabel.setText(strength.label);
+                    tvStrengthLabel.setTextColor(strength.color);
+                }
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+
         btnUpdate.setOnClickListener(v -> {
             String currentPass = etCurrent.getText().toString().trim();
             String newPass = etNew.getText().toString().trim();
@@ -789,7 +814,7 @@ public class HomeActivity extends AppCompatActivity {
             com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
             if (user != null && user.getEmail() != null) {
                 // Step 1: Re-authenticate
-                AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPass);
+                com.google.firebase.auth.AuthCredential credential = com.google.firebase.auth.EmailAuthProvider.getCredential(user.getEmail(), currentPass);
                 user.reauthenticate(credential).addOnCompleteListener(reAuthTask -> {
                     if (reAuthTask.isSuccessful()) {
                         // Step 2: Update Password

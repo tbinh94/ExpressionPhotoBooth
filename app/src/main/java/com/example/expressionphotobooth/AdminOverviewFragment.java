@@ -12,10 +12,9 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.example.expressionphotobooth.Toast;
+import android.widget.Toast;
 import com.example.expressionphotobooth.utils.AuditLogger;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.example.expressionphotobooth.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

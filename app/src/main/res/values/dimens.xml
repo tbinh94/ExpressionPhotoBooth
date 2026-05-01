@@ -88,8 +88,8 @@
     <dimen name="home_admin_text_size">18sp</dimen>
     <dimen name="home_admin_corner_radius">20dp</dimen>
     <dimen name="home_drawer_padding_horizontal">20dp</dimen>
-    <dimen name="home_drawer_padding_top">28dp</dimen>
-    <dimen name="home_drawer_padding_bottom">24dp</dimen>
+    <dimen name="home_drawer_padding_top">20dp</dimen>
+    <dimen name="home_drawer_padding_bottom">12dp</dimen>
     <dimen name="home_drawer_title_text_size">30sp</dimen>
     <dimen name="home_drawer_subtitle_top_margin">1dp</dimen>
     <dimen name="home_drawer_divider_top_margin">14dp</dimen>

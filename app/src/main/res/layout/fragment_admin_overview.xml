@@ -235,21 +235,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:gravity="start"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvRangeTitle"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginBottom="8dp"
                 android:text="@string/admin_overview_range_title"
                 android:textColor="@color/admin_subtitle_color"
                 android:textSize="12sp"
-                android:textStyle="bold"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:singleLine="true" />
+                android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/toggleRange"
@@ -654,8 +651,6 @@
                         android:id="@+id/tvAiRatioMiniTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
                         android:text="@string/admin_ai_pie_title"
                         android:textColor="@color/text_primary"
                         android:textSize="@dimen/admin_ai_mini_title_text"
@@ -666,8 +661,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
                         android:text="@string/admin_ai_registered_with_count"
                         android:textColor="@color/admin_subtitle_color"
                         android:textSize="@dimen/admin_ai_mini_meta_text" />
