@@ -2,7 +2,7 @@
 
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
 [![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=white)](https://firebase.google.com/)
-[![Gemini](https://img.shields.io/badge/AI-Gemini%202.0%20Flash-4285F4?logo=google-gemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![Gemini](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-4285F4?logo=google-gemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
 
 An advanced, AI-powered photo booth application for Android that redefines the photography experience. **Our Memories** combines real-time computer vision, generative AI, and professional post-processing to create stunning, interactive memories.
 
@@ -24,7 +24,7 @@ Forget manual timers. Our Memories uses low-latency AI analysis to capture the p
 *   **Video Timelapse**: Automatically generates a timelapse video of your photo session.
 
 ### 📊 Smart Admin Ecosystem
-A comprehensive dashboard powered by **Gemini 2.0 Flash**:
+A comprehensive dashboard powered by **Gemini 2.5 Flash**:
 *   **AI Data Insights**: Automatically analyzes user reviews and download trends to provide actionable business recommendations.
 *   **Analysis Chatbot**: An interactive AI assistant to query app statistics and performance data.
 *   **RBAC Management**: Role-based access control to manage regular, premium, and admin users.
@@ -39,7 +39,7 @@ A comprehensive dashboard powered by **Gemini 2.0 Flash**:
 | **Mobile** | Java, Android SDK, CameraX |
 | **Backend** | Firebase Auth (Google Sign-In), Firestore, Cloud Storage |
 | **Core AI/ML** | ML Kit (Face/Gesture), MediaPipe, Portrait Processor |
-| **Generative AI** | Google Gemini 2.0 Flash (via Cloud Functions) |
+| **Generative AI** | Google Gemini 2.5 Flash (via Cloud Functions) |
 | **Image Loading** | Glide |
 | **Architecture** | Clean Architecture (Data, Domain, UI layers) |
 
