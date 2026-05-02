@@ -176,7 +176,6 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 FirebaseFirestore.getInstance().collection("app_config").document("viral_campaign")
                         .update("isActive", isChecked)
                         .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(getContext(), "Campaign: " + (isChecked ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
                             AuditLogger.logAction("CAMPAIGN_TOGGLE", "Admin changed viral campaign status to " + isChecked);
                         });
             });
