@@ -59,7 +59,10 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDialogSecondary"
                     android:layout_width="130dp"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="44dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/bg_history_pill_pink"
                     android:text="@string/history_popup_cancel"
@@ -72,7 +75,10 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDialogPrimary"
                     android:layout_width="130dp"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="44dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:layout_marginStart="8dp"
                     android:background="@drawable/bg_history_pill_blue"
                     android:text="@string/history_popup_ok"

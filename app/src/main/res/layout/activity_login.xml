@@ -98,7 +98,8 @@
             <!-- FORM -->
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="480dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:overScrollMode="ifContentScrolls"
                 android:fillViewport="false">
 
@@ -416,9 +417,11 @@
                         app:strokeColor="#E0E0E0"
                         app:strokeWidth="1dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:gravity="center"
                             android:paddingStart="16dp"
                             android:paddingEnd="16dp">
 
@@ -426,8 +429,6 @@
                                 android:id="@+id/ivGoogleIcon"
                                 android:layout_width="22dp"
                                 android:layout_height="22dp"
-                                android:layout_alignParentStart="true"
-                                android:layout_centerVertical="true"
                                 android:src="@drawable/ic_google_logo"
                                 android:scaleType="fitCenter" />
 
@@ -435,7 +436,7 @@
                                 android:id="@+id/tvGoogleSignInLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
+                                android:layout_marginStart="12dp"
                                 android:text="@string/auth_google_sign_in"
                                 android:textColor="#3C4043"
                                 android:textSize="15sp"
@@ -443,7 +444,7 @@
                                 android:fontFamily="sans-serif-medium"
                                 android:letterSpacing="0.01" />
 
-                        </RelativeLayout>
+                        </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
                     <!-- Secondary Button (Go to Register or Back to Login) -->

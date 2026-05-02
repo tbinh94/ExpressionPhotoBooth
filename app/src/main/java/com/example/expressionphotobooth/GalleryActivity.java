@@ -146,6 +146,10 @@ public class GalleryActivity extends AppCompatActivity {
     private static final String PREF_BOOK_PHOTOS = "book_pinned_photos";
     private static final String PREF_CAROUSEL_INFO_AUTO_SHOWN = "carousel_info_auto_shown";
     private boolean hasCarouselInfoAutoShown;
+    private boolean isSelectionMode = false;
+    private Set<File> selectedFiles = new HashSet<>();
+    private View selectionHeader;
+    private TextView tvSelectionCount;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -297,7 +301,9 @@ public class GalleryActivity extends AppCompatActivity {
 
 
         findViewById(R.id.btnBack).setOnClickListener(v -> {
-            if (!isStamp && currentActiveBook != null) {
+            if (isSelectionMode) {
+                exitSelectionMode();
+            } else if (!isStamp && currentActiveBook != null) {
                 renderBookList();
             } else {
                 finish();
@@ -313,6 +319,16 @@ public class GalleryActivity extends AppCompatActivity {
         }
 
         setupTabs();
+        initSelectionViews();
+    }
+
+    private void initSelectionViews() {
+        selectionHeader = findViewById(R.id.selectionHeader);
+        tvSelectionCount = findViewById(R.id.tvSelectionCount);
+        
+        findViewById(R.id.btnCancelSelection).setOnClickListener(v -> exitSelectionMode());
+        findViewById(R.id.btnSelectAll).setOnClickListener(v -> selectAll());
+        findViewById(R.id.btnDeleteSelected).setOnClickListener(v -> deleteSelected());
     }
 
     private void setupTabs() {
@@ -1254,7 +1270,6 @@ public class GalleryActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(holder.ivPhoto);
                 
-            // If it's a video, show a play overlay or hint
             View playIcon = holder.itemView.findViewById(R.id.ivPlayIcon);
             if (playIcon != null) {
                 playIcon.setVisibility(isVideo ? View.VISIBLE : View.GONE);
@@ -1262,20 +1277,37 @@ public class GalleryActivity extends AppCompatActivity {
             
             holder.tvDate.setText(dateFormat.format(new Date(file.lastModified())));
 
-            // Show X button
-            holder.btnDelete.setVisibility(View.VISIBLE);
+            // Selection state
+            boolean isSelected = selectedFiles.contains(file);
+            holder.selectionOverlay.setVisibility((isSelectionMode && isSelected) ? View.VISIBLE : View.GONE);
+            holder.ivSelectionCheck.setVisibility((isSelectionMode && isSelected) ? View.VISIBLE : View.GONE);
+
+            // Hide X button in selection mode
+            holder.btnDelete.setVisibility(isSelectionMode ? View.GONE : View.VISIBLE);
             holder.btnDelete.setOnClickListener(v -> {
                 int pos = holder.getBindingAdapterPosition();
-
                 if (pos != RecyclerView.NO_POSITION) {
                     deleteFile(galleryFiles.get(pos), pos, false);
                 }
             });
             
             holder.itemView.setOnClickListener(v -> {
-                Intent intent = new Intent(GalleryActivity.this, FullImageActivity.class);
-                intent.putExtra("IMAGE_PATH", file.getAbsolutePath());
-                startActivity(intent);
+                if (isSelectionMode) {
+                    toggleSelection(file, holder.getBindingAdapterPosition());
+                } else {
+                    Intent intent = new Intent(GalleryActivity.this, FullImageActivity.class);
+                    intent.putExtra("IMAGE_PATH", file.getAbsolutePath());
+                    startActivity(intent);
+                }
+            });
+
+            holder.itemView.setOnLongClickListener(v -> {
+                if (!isSelectionMode) {
+                    enterSelectionMode();
+                    toggleSelection(file, holder.getBindingAdapterPosition());
+                    return true;
+                }
+                return false;
             });
         }
 
@@ -1288,13 +1320,103 @@ public class GalleryActivity extends AppCompatActivity {
             ImageView ivPhoto;
             TextView tvDate;
             ImageButton btnDelete;
+            View selectionOverlay;
+            ImageView ivSelectionCheck;
+
             ViewHolder(View itemView) {
                 super(itemView);
                 ivPhoto = itemView.findViewById(R.id.ivGalleryPhoto);
                 tvDate = itemView.findViewById(R.id.tvDate);
                 btnDelete = itemView.findViewById(R.id.btnDeletePhoto);
+                selectionOverlay = itemView.findViewById(R.id.selectionOverlay);
+                ivSelectionCheck = itemView.findViewById(R.id.ivSelectionCheck);
             }
         }
+    }
+
+    private void enterSelectionMode() {
+        isSelectionMode = true;
+        selectedFiles.clear();
+        selectionHeader.setVisibility(View.VISIBLE);
+        updateSelectionCount();
+        if (adapter != null) adapter.notifyDataSetChanged();
+    }
+
+    private void exitSelectionMode() {
+        isSelectionMode = false;
+        selectedFiles.clear();
+        selectionHeader.setVisibility(View.GONE);
+        if (adapter != null) adapter.notifyDataSetChanged();
+    }
+
+    private void toggleSelection(File file, int position) {
+        if (selectedFiles.contains(file)) {
+            selectedFiles.remove(file);
+        } else {
+            selectedFiles.add(file);
+        }
+        updateSelectionCount();
+        if (adapter != null) adapter.notifyItemChanged(position);
+        
+        if (selectedFiles.isEmpty()) {
+            exitSelectionMode();
+        }
+    }
+
+    private void updateSelectionCount() {
+        if (tvSelectionCount != null) {
+            tvSelectionCount.setText(getString(R.string.gallery_selection_count, selectedFiles.size()));
+        }
+    }
+
+    private void selectAll() {
+        if (selectedFiles.size() == galleryFiles.size()) {
+            selectedFiles.clear();
+            exitSelectionMode();
+        } else {
+            selectedFiles.clear();
+            selectedFiles.addAll(galleryFiles);
+            updateSelectionCount();
+            if (adapter != null) adapter.notifyDataSetChanged();
+        }
+    }
+
+    private void deleteSelected() {
+        if (selectedFiles.isEmpty()) return;
+
+        HelpDialogUtils.showHistoryStyledConfirm(
+            this,
+            R.drawable.ic_help_24,
+            getString(R.string.gallery_delete_title),
+            getString(R.string.gallery_delete_multiple_message, selectedFiles.size()),
+            getString(R.string.history_delete),
+            getString(R.string.history_popup_cancel),
+            () -> {
+                List<File> toDelete = new ArrayList<>(selectedFiles);
+                int deletedCount = 0;
+                for (File f : toDelete) {
+                    if (f.delete()) {
+                        galleryFiles.remove(f);
+                        deletedCount++;
+                        if (secureImageStorageService != null) {
+                            try {
+                                secureImageStorageService.deleteSecureImage(f.getAbsolutePath());
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                }
+                
+                Toast.makeText(this, getString(R.string.gallery_delete_multiple_success, deletedCount), Toast.LENGTH_SHORT).show();
+                exitSelectionMode();
+                if (galleryFiles.isEmpty()) {
+                    emptyState.setVisibility(View.VISIBLE);
+                    rvGallery.setVisibility(View.GONE);
+                    isGridView = true;
+                    updateViewModeUi();
+                }
+            },
+            null
+        );
     }
 
     private void deleteFile(File file, int position, boolean isCarousel) {

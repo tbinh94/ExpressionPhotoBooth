@@ -588,4 +588,7 @@ that you have taken before</string>
     <string name="home_guest_profile_title">Unlock Profile Features</string>
     <string name="home_guest_profile_message">Personalizing your profile and changing security settings are only available for registered members. Join our community to unlock these features!</string>
     <string name="home_guest_profile_cta">Sign Up Now</string>
+    <string name="gallery_selection_count">%1$d selected</string>
+    <string name="gallery_delete_multiple_message">Bạn có chắc chắn muốn xóa %1$d ảnh đã chọn không?</string>
+    <string name="gallery_delete_multiple_success">Đã xóa %1$d ảnh thành công!</string>
 </resources>

@@ -10,6 +10,8 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -118,13 +120,10 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             btnCloseDrawer.setOnClickListener(v -> drawerLayout.closeDrawer(GravityCompat.START));
         }
 
-        TextView tvNavAvatarInitials = headerView.findViewById(R.id.tvNavAvatarInitials);
-        if (tvNavAvatarInitials != null) {
-            tvNavAvatarInitials.setText(resolveAvatarInitial(email));
-        }
-
+        updateNavHeaderProfile();
+        
         String uid = authRepository.getCurrentUid();
-        if (!TextUtils.isEmpty(uid) && tvNavAvatarInitials != null) {
+        if (!TextUtils.isEmpty(uid)) {
             FirebaseFirestore.getInstance()
                     .collection("users")
                     .document(uid)
@@ -135,7 +134,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                             String displayName = snapshot.getString("displayName");
                             if (!TextUtils.isEmpty(displayName)) {
                                 currentAdminName = displayName;
-                                tvNavAvatarInitials.setText(resolveAvatarInitial(displayName));
+                                updateNavHeaderProfile();
                             }
                         }
                     });
@@ -455,6 +454,29 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         com.google.android.material.button.MaterialButton btnUpdate = view.findViewById(R.id.btnUpdatePassword);
         com.google.android.material.progressindicator.LinearProgressIndicator progress = view.findViewById(R.id.progressUpdate);
 
+        // Strength UI
+        LinearLayout layoutStrength = view.findViewById(R.id.layoutStrength);
+        com.google.android.material.progressindicator.LinearProgressIndicator strengthProgress = view.findViewById(R.id.strengthProgress);
+        TextView tvStrengthLabel = view.findViewById(R.id.tvStrengthLabel);
+
+        etNew.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String pass = s.toString();
+                if (pass.isEmpty()) {
+                    layoutStrength.setVisibility(View.GONE);
+                } else {
+                    layoutStrength.setVisibility(View.VISIBLE);
+                    HelpDialogUtils.PasswordStrength strength = HelpDialogUtils.getPasswordStrength(pass);
+                    strengthProgress.setProgress(strength.score);
+                    strengthProgress.setIndicatorColor(strength.color);
+                    tvStrengthLabel.setText(strength.label);
+                    tvStrengthLabel.setTextColor(strength.color);
+                }
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+
         btnUpdate.setOnClickListener(v -> {
             String currentPass = etCurrent.getText().toString().trim();
             String newPass = etNew.getText().toString().trim();
@@ -490,10 +512,10 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                             btnUpdate.setEnabled(true);
                             if (updateTask.isSuccessful()) {
                                 dialog.dismiss();
-                                com.example.expressionphotobooth.Toast.makeText(this, "Mật khẩu đã được thay đổi an toàn.", com.example.expressionphotobooth.Toast.LENGTH_SHORT).show();
+                                HelpDialogUtils.showCenteredNotice(this, "Thành công", "Mật khẩu của bạn đã được thay đổi an toàn.", true);
                             } else {
                                 String err = updateTask.getException() != null ? updateTask.getException().getMessage() : "Lỗi không xác định";
-                                com.example.expressionphotobooth.Toast.makeText(this, "Lỗi: " + err, com.example.expressionphotobooth.Toast.LENGTH_SHORT).show();
+                                HelpDialogUtils.showCenteredNotice(this, "Lỗi cập nhật", err, false);
                             }
                         });
                     } else {
@@ -529,6 +551,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                                 @Override public void onSuccess() {}
                                 @Override public void onError(String message) {}
                             });
+                            updateNavHeaderProfile();
                             com.example.expressionphotobooth.Toast.makeText(this, "Cập nhật ảnh đại diện thành công", com.example.expressionphotobooth.Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -687,6 +710,33 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         }
 
         return source.substring(0, 1).toUpperCase(Locale.getDefault());
+    }
+
+    private void updateNavHeaderProfile() {
+        if (navigationView == null) return;
+        View headerView = navigationView.getHeaderView(0);
+        if (headerView == null) return;
+
+        TextView tvNavAvatarInitials = headerView.findViewById(R.id.tvNavAvatarInitials);
+        TextView tvNavAdminName = headerView.findViewById(R.id.tvNavAdminName);
+        com.google.android.material.imageview.ShapeableImageView ivNavAvatar = headerView.findViewById(R.id.ivNavAvatar);
+
+        if (tvNavAdminName != null) {
+            tvNavAdminName.setText(currentAdminName);
+        }
+
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getPhotoUrl() != null && ivNavAvatar != null) {
+            ivNavAvatar.setVisibility(View.VISIBLE);
+            if (tvNavAvatarInitials != null) tvNavAvatarInitials.setVisibility(View.GONE);
+            com.bumptech.glide.Glide.with(this).load(user.getPhotoUrl()).centerCrop().into(ivNavAvatar);
+        } else {
+            if (ivNavAvatar != null) ivNavAvatar.setVisibility(View.GONE);
+            if (tvNavAvatarInitials != null) {
+                tvNavAvatarInitials.setVisibility(View.VISIBLE);
+                tvNavAvatarInitials.setText(resolveAvatarInitial(currentAdminName));
+            }
+        }
     }
 
     @Override

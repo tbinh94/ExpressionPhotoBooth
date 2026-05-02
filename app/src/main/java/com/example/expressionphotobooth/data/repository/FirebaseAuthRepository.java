@@ -245,16 +245,21 @@ public class FirebaseAuthRepository implements AuthRepository {
                                 // Phase 3: Send verification email, then sign out to force verification
                                 user.sendEmailVerification()
                                         .addOnCompleteListener(task -> {
-                                            // Sign out regardless — user must verify before logging in
                                             firebaseAuth.signOut();
                                             clearRoleCache();
-                                            // Notify caller with a special marker so the UI shows the right dialog
-                                            callback.onSuccess(new AuthSession(
-                                                    "VERIFY_EMAIL:" + user.getEmail(),
-                                                    user.getEmail(),
-                                                    UserRole.USER,
-                                                    false
-                                            ));
+                                            
+                                            if (task.isSuccessful()) {
+                                                // Notify caller with a special marker so the UI shows the right dialog
+                                                callback.onSuccess(new AuthSession(
+                                                        "VERIFY_EMAIL:" + user.getEmail(),
+                                                        user.getEmail(),
+                                                        UserRole.USER,
+                                                        false
+                                                ));
+                                            } else {
+                                                String errMsg = task.getException() != null ? task.getException().getMessage() : "Lỗi không xác định khi gửi email.";
+                                                callback.onError("Đăng ký thành công nhưng không thể gửi email xác thực: " + errMsg);
+                                            }
                                         });
                             })
                             .addOnFailureListener(e -> callback.onError(safeMessage(e, "Tạo hồ sơ người dùng thất bại.")));

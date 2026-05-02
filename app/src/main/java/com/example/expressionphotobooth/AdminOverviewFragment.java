@@ -12,10 +12,9 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.example.expressionphotobooth.Toast;
+import android.widget.Toast;
 import com.example.expressionphotobooth.utils.AuditLogger;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.example.expressionphotobooth.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -177,7 +176,6 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
                 FirebaseFirestore.getInstance().collection("app_config").document("viral_campaign")
                         .update("isActive", isChecked)
                         .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(getContext(), "Campaign: " + (isChecked ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
                             AuditLogger.logAction("CAMPAIGN_TOGGLE", "Admin changed viral campaign status to " + isChecked);
                         });
             });

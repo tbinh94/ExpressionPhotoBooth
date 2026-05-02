@@ -341,7 +341,6 @@
         app:itemShapeAppearanceOverlay="@style/NavItemShape"
         app:itemTextAppearance="@style/TextAppearance.AdminNavItem"
         app:itemIconSize="@dimen/admin_nav_icon_size"
-        app:itemMaxLines="1"
         app:itemIconPadding="@dimen/admin_nav_item_icon_padding"
         app:itemHorizontalPadding="@dimen/admin_nav_item_horizontal_padding"
         app:itemVerticalPadding="@dimen/admin_nav_item_vertical_padding"

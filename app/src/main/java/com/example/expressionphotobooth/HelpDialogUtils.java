@@ -24,8 +24,54 @@ import java.util.Locale;
 
 import android.widget.ProgressBar;
 import android.widget.LinearLayout;
+import java.util.regex.Pattern;
 
 public final class HelpDialogUtils {
+
+    public static class PasswordStrength {
+        public int score; // 0 to 4
+        public String label;
+        public int color;
+
+        public PasswordStrength(int score, String label, String colorHex) {
+            this.score = score;
+            this.label = label;
+            this.color = Color.parseColor(colorHex);
+        }
+    }
+
+    public static PasswordStrength getPasswordStrength(String password) {
+        if (password == null || password.isEmpty()) {
+            return new PasswordStrength(0, "Chưa nhập", "#94A3B8");
+        }
+
+        int score = 0;
+        if (password.length() >= 6) score++;
+        if (password.length() >= 10) score++;
+        if (Pattern.compile("[0-9]").matcher(password).find()) score++;
+        if (Pattern.compile("[A-Z]").matcher(password).find()) score++;
+        if (Pattern.compile("[^a-zA-Z0-9]").matcher(password).find()) score++;
+
+        // Cap score at 4 for UI simplicity (or use 5 segments)
+        // Let's use 4 segments: Weak, Fair, Good, Strong
+        if (password.length() < 6) {
+            return new PasswordStrength(1, "Rất yếu (Tối thiểu 6 ký tự)", "#EF4444");
+        }
+        
+        int finalScore = 0;
+        if (password.length() >= 6) finalScore = 1;
+        if (password.length() >= 8 && Pattern.compile("[0-9]").matcher(password).find() && Pattern.compile("[a-z]").matcher(password).find()) finalScore = 2;
+        if (password.length() >= 10 && Pattern.compile("[A-Z]").matcher(password).find()) finalScore = 3;
+        if (finalScore == 3 && Pattern.compile("[^a-zA-Z0-9]").matcher(password).find()) finalScore = 4;
+
+        switch (finalScore) {
+            case 1: return new PasswordStrength(25, "Yếu", "#EF4444");
+            case 2: return new PasswordStrength(50, "Trung bình", "#F59E0B");
+            case 3: return new PasswordStrength(75, "Mạnh", "#10B981");
+            case 4: return new PasswordStrength(100, "Rất mạnh", "#059669");
+            default: return new PasswordStrength(10, "Rất yếu", "#EF4444");
+        }
+    }
 
     private static AlertDialog loadingDialog;
 
