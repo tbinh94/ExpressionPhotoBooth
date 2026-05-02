@@ -422,6 +422,10 @@ public class FirebaseAuthRepository implements AuthRepository {
                         if (dbName != null && !dbName.isEmpty()) {
                             displayName = dbName;
                         }
+                        String dbPhotoUrl = snapshot.getString("photoUrl");
+                        if (dbPhotoUrl != null && !dbPhotoUrl.isEmpty()) {
+                            photoUrl = dbPhotoUrl;
+                        }
                         role = UserRole.from(snapshot.getString("role"));
                         cacheRole(role);
                     }
