@@ -24,6 +24,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.expressionphotobooth.domain.model.UserRole;
 import com.example.expressionphotobooth.domain.repository.AuthRepository;
 import com.example.expressionphotobooth.utils.LocaleManager;
 import com.google.android.material.navigation.NavigationView;
@@ -120,29 +121,15 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
             btnCloseDrawer.setOnClickListener(v -> drawerLayout.closeDrawer(GravityCompat.START));
         }
 
-        updateNavHeaderProfile();
-        
-        String uid = authRepository.getCurrentUid();
-        if (!TextUtils.isEmpty(uid)) {
-            FirebaseFirestore.getInstance()
-                    .collection("users")
-                    .document(uid)
-                    .get()
-                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot snapshot) {
-                            String displayName = snapshot.getString("displayName");
-                            if (!TextUtils.isEmpty(displayName)) {
-                                currentAdminName = displayName;
-                                updateNavHeaderProfile();
-                            }
-                        }
-                    });
-        }
+        // Initial load from cache/Auth
+        updateNavHeaderProfile(null, null);
+
+        // Comprehensive fetch (Firestore + Auth)
+        refreshProfile();
 
         View cardNavUserProfile = headerView.findViewById(R.id.cardNavUserProfile);
         if (cardNavUserProfile != null) {
-            cardNavUserProfile.setOnClickListener(v -> showAdminProfilePopup(email));
+            cardNavUserProfile.setOnClickListener(v -> showAdminProfilePopup());
         }
 
         findViewById(R.id.btnThemeToggle).setOnClickListener(v -> {
@@ -165,6 +152,28 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         // Delay binding until after first layout pass so CollapsingToolbarLayout
         // has fully attached the stat cards and touch dispatch is stable
         getWindow().getDecorView().post(this::bindStatCardClicks);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshProfile();
+    }
+
+    private void refreshProfile() {
+        AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        authRepository.fetchProfile(new AuthRepository.ProfileCallback() {
+            @Override
+            public void onSuccess(String displayName, String email, String photoUrl, UserRole role) {
+                currentAdminName = displayName;
+                updateNavHeaderProfile(displayName, photoUrl);
+            }
+
+            @Override
+            public void onError(String message) {
+                updateNavHeaderProfile(null, null);
+            }
+        });
     }
 
     // ── Stat card click handlers ────────────────────────────────────────────
@@ -384,7 +393,9 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         }
     }
 
-    private void showAdminProfilePopup(String email) {
+    private void showAdminProfilePopup() {
+        AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
+        String email = authRepository.getCurrentEmail();
         String displayEmail = TextUtils.isEmpty(email) ? "admin@expressionphotobooth.com" : email;
         
         com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
@@ -401,17 +412,24 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         
         tvProfileName.setText(currentAdminName);
         tvProfileEmail.setText(displayEmail);
-        
-        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null && user.getPhotoUrl() != null) {
-            ivProfileAvatar.setVisibility(View.VISIBLE);
-            tvProfileAvatar.setVisibility(View.GONE);
-            com.bumptech.glide.Glide.with(this).load(user.getPhotoUrl()).circleCrop().into(ivProfileAvatar);
-        } else {
-            ivProfileAvatar.setVisibility(View.GONE);
-            tvProfileAvatar.setVisibility(View.VISIBLE);
-            tvProfileAvatar.setText(resolveAvatarInitial(currentAdminName));
-        }
+
+        authRepository.fetchProfile(new AuthRepository.ProfileCallback() {
+            @Override
+            public void onSuccess(String displayName, String email, String photoUrl, UserRole role) {
+                tvProfileName.setText(displayName);
+                if (photoUrl != null && !photoUrl.isEmpty()) {
+                    ivProfileAvatar.setVisibility(View.VISIBLE);
+                    tvProfileAvatar.setVisibility(View.GONE);
+                    com.bumptech.glide.Glide.with(AdminDashboardActivity.this).load(photoUrl).circleCrop().into(ivProfileAvatar);
+                } else {
+                    ivProfileAvatar.setVisibility(View.GONE);
+                    tvProfileAvatar.setVisibility(View.VISIBLE);
+                    tvProfileAvatar.setText(resolveAvatarInitial(displayName));
+                }
+            }
+
+            @Override public void onError(String message) {}
+        });
         
         btnCloseProfile.setOnClickListener(v -> dialog.dismiss());
         
@@ -544,16 +562,20 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
                             .setPhotoUri(uri)
                             .build();
 
+                    // Immediate conversion to Base64 to preserve URI permission
+                    String base64Data = HelpDialogUtils.uriToBase64(this, uri, 300);
+                    
                     user.updateProfile(profileUpdates).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            AuthRepository authRepository = ((AppContainer) getApplication()).getAuthRepository();
-                            authRepository.updateProfilePhoto(uri.toString(), new AuthRepository.SimpleCallback() {
-                                @Override public void onSuccess() {}
-                                @Override public void onError(String message) {}
-                            });
-                            updateNavHeaderProfile();
-                            com.example.expressionphotobooth.Toast.makeText(this, "Cập nhật ảnh đại diện thành công", com.example.expressionphotobooth.Toast.LENGTH_SHORT).show();
-                        }
+                        AuthRepository authRepo = ((AppContainer) getApplication()).getAuthRepository();
+                        String finalData = (base64Data != null) ? base64Data : uri.toString();
+                        
+                        authRepo.updateProfilePhoto(finalData, new AuthRepository.SimpleCallback() {
+                            @Override public void onSuccess() {
+                                refreshProfile();
+                            }
+                            @Override public void onError(String message) {}
+                        });
+                        com.example.expressionphotobooth.Toast.makeText(this, "Cập nhật ảnh đại diện thành công", com.example.expressionphotobooth.Toast.LENGTH_SHORT).show();
                     });
                 }
             }
@@ -712,7 +734,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         return source.substring(0, 1).toUpperCase(Locale.getDefault());
     }
 
-    private void updateNavHeaderProfile() {
+    private void updateNavHeaderProfile(String displayName, String photoUrl) {
         if (navigationView == null) return;
         View headerView = navigationView.getHeaderView(0);
         if (headerView == null) return;
@@ -721,21 +743,14 @@ public class AdminDashboardActivity extends AppCompatActivity implements Navigat
         TextView tvNavAdminName = headerView.findViewById(R.id.tvNavAdminName);
         com.google.android.material.imageview.ShapeableImageView ivNavAvatar = headerView.findViewById(R.id.ivNavAvatar);
 
+        String nameToShow = displayName != null ? displayName : currentAdminName;
         if (tvNavAdminName != null) {
-            tvNavAdminName.setText(currentAdminName);
+            tvNavAdminName.setText(nameToShow);
         }
 
-        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null && user.getPhotoUrl() != null && ivNavAvatar != null) {
-            ivNavAvatar.setVisibility(View.VISIBLE);
-            if (tvNavAvatarInitials != null) tvNavAvatarInitials.setVisibility(View.GONE);
-            com.bumptech.glide.Glide.with(this).load(user.getPhotoUrl()).centerCrop().into(ivNavAvatar);
-        } else {
-            if (ivNavAvatar != null) ivNavAvatar.setVisibility(View.GONE);
-            if (tvNavAvatarInitials != null) {
-                tvNavAvatarInitials.setVisibility(View.VISIBLE);
-                tvNavAvatarInitials.setText(resolveAvatarInitial(currentAdminName));
-            }
+        HelpDialogUtils.loadAvatar(this, photoUrl, ivNavAvatar, tvNavAvatarInitials);
+        if (tvNavAvatarInitials != null && tvNavAvatarInitials.getVisibility() == View.VISIBLE) {
+            tvNavAvatarInitials.setText(resolveAvatarInitial(nameToShow));
         }
     }
 

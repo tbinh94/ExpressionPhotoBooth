@@ -610,6 +610,81 @@ public final class HelpDialogUtils {
         }
     }
 
+    public static void loadAvatar(android.content.Context context, String photoUrl, android.widget.ImageView iv, android.widget.TextView tvInitials) {
+        if (iv == null) return;
+
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            iv.setVisibility(android.view.View.VISIBLE);
+            if (tvInitials != null) tvInitials.setVisibility(android.view.View.GONE);
+
+            if (photoUrl.startsWith("data:image")) {
+                try {
+                    String base64Data = photoUrl.substring(photoUrl.indexOf(",") + 1);
+                    byte[] bytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT);
+                    com.bumptech.glide.Glide.with(context)
+                            .load(bytes)
+                            .circleCrop()
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                            .into(iv);
+                } catch (Exception e) {
+                    android.util.Log.e("HelpDialogUtils", "Error loading base64 avatar", e);
+                    iv.setVisibility(android.view.View.GONE);
+                    if (tvInitials != null) tvInitials.setVisibility(android.view.View.VISIBLE);
+                }
+            } else {
+                com.bumptech.glide.Glide.with(context)
+                        .load(photoUrl)
+                        .circleCrop()
+                        .placeholder(R.drawable.shape_nav_avatar)
+                        .error(R.drawable.shape_nav_avatar)
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                        .into(iv);
+            }
+        } else {
+            // Check Firebase Auth fallback
+            com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null && user.getPhotoUrl() != null) {
+                iv.setVisibility(android.view.View.VISIBLE);
+                if (tvInitials != null) tvInitials.setVisibility(android.view.View.GONE);
+                com.bumptech.glide.Glide.with(context)
+                        .load(user.getPhotoUrl())
+                        .circleCrop()
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                        .into(iv);
+            } else {
+                iv.setVisibility(android.view.View.GONE);
+                if (tvInitials != null) tvInitials.setVisibility(android.view.View.VISIBLE);
+            }
+        }
+    }
+
+    public static String uriToBase64(android.content.Context context, android.net.Uri uri, int maxSize) {
+        try {
+            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uri));
+            if (bitmap == null) return null;
+
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            if (w > maxSize || h > maxSize) {
+                float ratio = (float) w / h;
+                int nw = ratio > 1 ? maxSize : (int) (maxSize * ratio);
+                int nh = ratio > 1 ? (int) (maxSize / ratio) : maxSize;
+                bitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, nw, nh, true);
+            }
+
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, baos);
+            byte[] bytes = baos.toByteArray();
+            return "data:image/jpeg;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+        } catch (Exception e) {
+            android.util.Log.e("HelpDialogUtils", "Error converting uri to base64", e);
+            return null;
+        }
+    }
+
     public static void showHelpDialog(Context context) {
         String title = context.getString(R.string.help_title);
         String subtitle = context.getString(R.string.help_subtitle);

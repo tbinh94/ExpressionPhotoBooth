@@ -601,6 +601,7 @@ public class HomeActivity extends AppCompatActivity {
         if (mediaPlayer != null && !mediaPlayer.isPlaying() && !isMuted) {
             mediaPlayer.start();
         }
+        updateUserNavProfile();
     }
 
     private void updateUserNavProfile() {
@@ -633,21 +634,14 @@ public class HomeActivity extends AppCompatActivity {
                 }
 
                 // Avatar
-                if (ivNavAvatar != null && tvNavAvatarInitials != null) {
-                    if (photoUrl != null && !photoUrl.isEmpty()) {
-                        ivNavAvatar.setVisibility(View.VISIBLE);
-                        tvNavAvatarInitials.setVisibility(View.GONE);
-                        Glide.with(HomeActivity.this).load(photoUrl).circleCrop().into(ivNavAvatar);
-                    } else {
-                        ivNavAvatar.setVisibility(View.GONE);
-                        tvNavAvatarInitials.setVisibility(View.VISIBLE);
-                        String initials = "U";
-                        if (displayName != null && !displayName.isEmpty()) {
-                            String[] parts = displayName.trim().split("\\s+");
-                            initials = parts.length >= 2 ? (parts[0].substring(0, 1) + parts[parts.length-1].substring(0, 1)) : parts[0].substring(0, 1);
-                        }
-                        tvNavAvatarInitials.setText(initials.toUpperCase());
+                HelpDialogUtils.loadAvatar(HomeActivity.this, photoUrl, ivNavAvatar, tvNavAvatarInitials);
+                if (tvNavAvatarInitials != null && tvNavAvatarInitials.getVisibility() == View.VISIBLE) {
+                    String initials = "U";
+                    if (displayName != null && !displayName.isEmpty()) {
+                        String[] parts = displayName.trim().split("\\s+");
+                        initials = parts.length >= 2 ? (parts[0].substring(0, 1) + parts[parts.length-1].substring(0, 1)) : parts[0].substring(0, 1);
                     }
+                    tvNavAvatarInitials.setText(initials.toUpperCase());
                 }
 
                 if (tvDrawerAdminDashboard != null) {
@@ -857,23 +851,24 @@ public class HomeActivity extends AppCompatActivity {
                             .setPhotoUri(uri)
                             .build();
 
+                    // Immediate conversion to Base64 to preserve URI permission
+                    String base64Data = HelpDialogUtils.uriToBase64(this, uri, 300);
+                    
                     user.updateProfile(profileUpdates)
                             .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    Log.d(TAG, "User profile updated.");
-                                    authRepository.updateProfilePhoto(uri.toString(), new AuthRepository.SimpleCallback() {
-                                        @Override
-                                        public void onSuccess() {
-                                            Log.d(TAG, "User profile photo synced to DB.");
-                                        }
+                                String finalData = (base64Data != null) ? base64Data : uri.toString();
+                                authRepository.updateProfilePhoto(finalData, new AuthRepository.SimpleCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "User profile photo synced to DB.");
+                                        updateUserNavProfile();
+                                    }
 
-                                        @Override
-                                        public void onError(String message) {
-                                            Log.e(TAG, "Failed to sync profile photo to DB: " + message);
-                                        }
-                                    });
-                                    updateUserNavProfile();
-                                }
+                                    @Override
+                                    public void onError(String message) {
+                                        Log.e(TAG, "Failed to sync profile photo to DB: " + message);
+                                    }
+                                });
                             });
                 }
             }
