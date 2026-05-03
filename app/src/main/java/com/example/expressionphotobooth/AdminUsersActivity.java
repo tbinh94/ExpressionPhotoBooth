@@ -72,9 +72,10 @@ public class AdminUsersActivity extends AppCompatActivity {
                         String email = doc.getString("email");
                         String name = doc.getString("displayName");
                         String roleStr = doc.getString("role");
-                        UserRole role = UserRole.from(roleStr);
                         Long premiumUntil = doc.getLong("premiumUntil");
-                        userList.add(new User(uid, email, name, role, premiumUntil != null ? premiumUntil : 0L));
+                        long pUntil = premiumUntil != null ? premiumUntil : 0L;
+                        UserRole role = UserRole.from(roleStr, pUntil);
+                        userList.add(new User(uid, email, name, role, pUntil));
                     }
                     adapter.notifyDataSetChanged();
                     tvEmpty.setVisibility(userList.isEmpty() ? View.VISIBLE : View.GONE);

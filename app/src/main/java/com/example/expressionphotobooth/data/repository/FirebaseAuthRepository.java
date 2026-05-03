@@ -119,9 +119,9 @@ public class FirebaseAuthRepository implements AuthRepository {
                             .document(user.getUid())
                             .get()
                             .addOnSuccessListener(snapshot -> {
-                                UserRole role = snapshot.exists()
-                                        ? UserRole.from(snapshot.getString("role"))
-                                        : UserRole.USER;
+                                String roleStr = snapshot.getString("role");
+                                Long premiumUntil = snapshot.getLong("premiumUntil");
+                                UserRole role = UserRole.from(roleStr, premiumUntil != null ? premiumUntil : 0L);
                                 cacheRole(role);
                                 handleVerificationAndSuccess(user, role, callback);
                             })
@@ -162,7 +162,9 @@ public class FirebaseAuthRepository implements AuthRepository {
         firestore.collection(USERS_COLLECTION).document(uid).get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {
-                        cacheRole(UserRole.from(snapshot.getString("role")));
+                        String roleStr = snapshot.getString("role");
+                        Long premiumUntil = snapshot.getLong("premiumUntil");
+                        cacheRole(UserRole.from(roleStr, premiumUntil != null ? premiumUntil : 0L));
                     }
                 });
     }
@@ -187,7 +189,9 @@ public class FirebaseAuthRepository implements AuthRepository {
                             .get()
                             .addOnSuccessListener(snapshot -> {
                                 if (snapshot.exists()) {
-                                    UserRole role = UserRole.from(snapshot.getString("role"));
+                                    String roleStr = snapshot.getString("role");
+                                    Long premiumUntil = snapshot.getLong("premiumUntil");
+                                    UserRole role = UserRole.from(roleStr, premiumUntil != null ? premiumUntil : 0L);
                                     cacheRole(role);
                                     callback.onSuccess(new AuthSession(user.getUid(), user.getEmail(), role, false));
                                 } else {
@@ -323,7 +327,9 @@ public class FirebaseAuthRepository implements AuthRepository {
                 .get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {
-                        UserRole role = UserRole.from(snapshot.getString("role"));
+                        String roleStr = snapshot.getString("role");
+                        Long premiumUntil = snapshot.getLong("premiumUntil");
+                        UserRole role = UserRole.from(roleStr, premiumUntil != null ? premiumUntil : 0L);
                         cacheRole(role);
                         callback.onSuccess(role);
                         return;
@@ -426,7 +432,9 @@ public class FirebaseAuthRepository implements AuthRepository {
                         if (dbPhotoUrl != null && !dbPhotoUrl.isEmpty()) {
                             photoUrl = dbPhotoUrl;
                         }
-                        role = UserRole.from(snapshot.getString("role"));
+                        String roleStr = snapshot.getString("role");
+                        Long pUntil = snapshot.getLong("premiumUntil");
+                        role = UserRole.from(roleStr, pUntil != null ? pUntil : 0L);
                         cacheRole(role);
                     }
                     callback.onSuccess(displayName, email, photoUrl, role);
