@@ -14,6 +14,14 @@ public enum UserRole {
         return USER;
     }
 
+    public static UserRole from(String rawValue, long premiumUntil) {
+        UserRole role = from(rawValue);
+        if (role == PREMIUM && premiumUntil > 0 && premiumUntil < System.currentTimeMillis()) {
+            return USER;
+        }
+        return role;
+    }
+
     public String toFirestoreValue() {
         if (this == ADMIN) return "admin";
         if (this == PREMIUM) return "premium";

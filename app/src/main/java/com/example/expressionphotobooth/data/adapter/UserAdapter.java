@@ -66,6 +66,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 String dateStr = sdf.format(new Date(user.getPremiumUntil()));
                 holder.tvExpiration.setText(holder.itemView.getContext().getString(R.string.admin_users_expires_on_format, dateStr));
                 holder.tvExpiration.setVisibility(View.VISIBLE);
+                holder.tvExpiration.setTextColor(Color.parseColor("#43A047")); // Green for active
             } else {
                 holder.tvExpiration.setVisibility(View.GONE);
             }
@@ -73,7 +74,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             holder.roleIndicator.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#9E9E9E")));
             holder.btnApprove.setText(holder.itemView.getContext().getString(R.string.admin_users_approve));
             holder.btnApprove.setVisibility(View.VISIBLE);
-            holder.tvExpiration.setVisibility(View.GONE);
+            
+            if (user.getPremiumUntil() > 0 && user.getPremiumUntil() < System.currentTimeMillis()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                String dateStr = sdf.format(new Date(user.getPremiumUntil()));
+                holder.tvExpiration.setText(holder.itemView.getContext().getString(R.string.admin_users_expires_on_format, dateStr));
+                holder.tvExpiration.setVisibility(View.VISIBLE);
+                holder.tvExpiration.setTextColor(Color.parseColor("#E53935")); // Red for expired
+            } else {
+                holder.tvExpiration.setVisibility(View.GONE);
+            }
         }
 
         holder.btnApprove.setOnClickListener(v -> listener.onApprove(user));
