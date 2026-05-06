@@ -3,7 +3,7 @@
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
 [![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=white)](https://firebase.google.com/)
 [![Gemini](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-4285F4?logo=google-gemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
-
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/tbinh94/ExpressionPhotoBooth)
 An advanced, AI-powered photo booth application for Android that redefines the photography experience. **Our Memories** combines real-time computer vision, generative AI, and professional post-processing to create stunning, interactive memories.
 
 ---
