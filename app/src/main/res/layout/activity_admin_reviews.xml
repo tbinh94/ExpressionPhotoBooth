@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
+    android:background="@color/screen_bg"
     android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -18,12 +18,12 @@
             android:id="@+id/toolbarReviews"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#1B2A5C"
+            android:background="@color/admin_dashboard_bg"
             app:navigationIcon="@drawable/ic_arrow_back_24"
-            app:navigationIconTint="@color/surface_card"
+            app:navigationIconTint="@color/white"
             app:title="@string/admin_reviews_title"
             app:titleCentered="true"
-            app:titleTextColor="@color/surface_card" />
+            app:titleTextColor="@color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
@@ -39,15 +39,15 @@
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:visibility="gone"
-            app:indicatorColor="#3D68E8"
-            app:trackColor="#E2E8F0" />
+            app:indicatorColor="@color/app_blue"
+            app:trackColor="@color/screen_divider" />
 
         <!-- Top Section: Stats & Search -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#1B2A5C"
+            android:background="@color/admin_dashboard_bg"
             android:paddingBottom="24dp">
 
             <!-- Summary Card -->
@@ -97,7 +97,7 @@
                         android:layout_width="1dp"
                         android:layout_height="48dp"
                         android:layout_marginHorizontal="20dp"
-                        android:background="#F1F5F9" />
+                        android:background="@color/screen_divider" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -138,7 +138,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="#22C55E"
+                                android:textColor="@color/app_green"
                                 android:textSize="18sp"
                                 android:textStyle="bold" />
                             <TextView
@@ -160,7 +160,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="#EF4444"
+                                android:textColor="@color/app_red"
                                 android:textSize="18sp"
                                 android:textStyle="bold" />
                             <TextView
@@ -238,7 +238,7 @@
                                     android:layout_width="10dp"
                                     android:layout_height="10dp"
                                     android:background="@drawable/bg_avatar_circle"
-                                    android:backgroundTint="#3D68E8" />
+                                    android:backgroundTint="@color/app_blue" />
 
                                 <TextView
                                     android:id="@+id/tvAiRegisteredLegend"
@@ -261,7 +261,7 @@
                                     android:layout_width="10dp"
                                     android:layout_height="10dp"
                                     android:background="@drawable/bg_avatar_circle"
-                                    android:backgroundTint="#E2E8F0" />
+                                    android:backgroundTint="@color/screen_divider" />
 
                                 <TextView
                                     android:id="@+id/tvAiNotRegisteredLegend"
@@ -285,7 +285,7 @@
                 android:layout_marginTop="16dp"
                 app:cardCornerRadius="@dimen/admin_card_corner_radius_item"
                 app:cardElevation="@dimen/admin_card_elevation"
-                app:cardBackgroundColor="#2E4280">
+                app:cardBackgroundColor="@color/home_top_action_bg">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -297,7 +297,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_menu_24"
-                        app:tint="#B0BED4" />
+                        app:tint="@color/admin_subtitle_color" />
 
                     <EditText
                         android:id="@+id/etSearchReview"
@@ -308,7 +308,7 @@
                         android:background="@android:color/transparent"
                         android:hint="@string/admin_reviews_search_hint"
                         android:textColorHint="@color/admin_subtitle_color"
-                        android:textColor="@color/surface_card"
+                        android:textColor="@color/white"
                         android:textSize="14sp"
                         android:inputType="textEmailAddress"
                         android:imeOptions="actionSearch" />
@@ -322,7 +322,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingVertical="12dp"
-            android:background="#F8FAFC">
+            android:background="@color/screen_bg">
 
             <HorizontalScrollView
                 android:layout_width="match_parent"
@@ -345,7 +345,7 @@
                         android:text="@string/admin_reviews_filter_all"
                         android:checked="true"
                         android:textColor="@color/app_blue"
-                        app:chipBackgroundColor="#E2E8F4"
+                        app:chipBackgroundColor="@color/primary_alpha_10"
                         app:chipStrokeWidth="0dp" />
 
                     <com.google.android.material.chip.Chip
@@ -356,7 +356,7 @@
                         android:text="@string/admin_reviews_filter_five_star"
                         android:textColor="@color/text_secondary"
                         app:chipBackgroundColor="@color/surface_card"
-                        app:chipStrokeColor="#E2E8F0"
+                        app:chipStrokeColor="@color/screen_divider"
                         app:chipStrokeWidth="1dp" />
 
                     <com.google.android.material.chip.Chip
@@ -367,7 +367,7 @@
                         android:text="@string/admin_reviews_filter_four_star"
                         android:textColor="@color/text_secondary"
                         app:chipBackgroundColor="@color/surface_card"
-                        app:chipStrokeColor="#E2E8F0"
+                        app:chipStrokeColor="@color/screen_divider"
                         app:chipStrokeWidth="1dp" />
 
                     <com.google.android.material.chip.Chip
@@ -378,7 +378,7 @@
                         android:text="@string/admin_reviews_filter_three_star"
                         android:textColor="@color/text_secondary"
                         app:chipBackgroundColor="@color/surface_card"
-                        app:chipStrokeColor="#E2E8F0"
+                        app:chipStrokeColor="@color/screen_divider"
                         app:chipStrokeWidth="1dp" />
 
                     <com.google.android.material.chip.Chip
@@ -423,7 +423,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/admin_reviews_empty"
-                    android:textColor="#64748B"
+                    android:textColor="@color/text_secondary"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:gravity="center" />

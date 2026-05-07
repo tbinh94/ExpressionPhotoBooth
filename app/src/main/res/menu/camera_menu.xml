@@ -4,13 +4,13 @@
     <item
         android:id="@+id/action_ai_settings"
         android:icon="@drawable/ic_settings_24"
-        android:title="AI Settings"
+        android:title="@string/menu_ai_settings"
         app:iconTint="@color/screen_title"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_help"
         android:icon="@drawable/ic_help_24"
-        android:title="Help"
+        android:title="@string/menu_help"
         app:iconTint="@color/screen_title"
         app:showAsAction="ifRoom" />
 </menu>

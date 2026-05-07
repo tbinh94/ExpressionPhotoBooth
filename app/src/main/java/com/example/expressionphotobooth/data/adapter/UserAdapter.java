@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.expressionphotobooth.HelpDialogUtils;
 import com.example.expressionphotobooth.R;
 import com.example.expressionphotobooth.domain.model.User;
 import com.example.expressionphotobooth.domain.model.UserRole;
@@ -49,15 +50,22 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
         holder.tvName.setText(displayName);
         holder.tvEmail.setText(user.getEmail());
-        holder.tvRole.setText(user.getRole().toFirestoreValue().toUpperCase());
-        holder.tvAvatar.setText(resolveInitial(user));
+        holder.tvRole.setText(holder.itemView.getContext().getString(user.getRole().getDisplayNameRes()).toUpperCase(Locale.getDefault()));
+        
+        holder.tvAvatarInitials.setText(resolveInitial(user));
+        HelpDialogUtils.loadUserAvatar(
+            holder.itemView.getContext(),
+            user.getPhotoUrl(),
+            holder.ivAvatar,
+            holder.tvAvatarInitials
+        );
 
         if (user.getRole() == UserRole.ADMIN) {
-            holder.roleIndicator.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#E91E63")));
+            holder.roleIndicator.setBackgroundTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(holder.itemView.getContext(), R.color.app_pink)));
             holder.btnApprove.setVisibility(View.GONE);
             holder.tvExpiration.setVisibility(View.GONE);
         } else if (user.getRole() == UserRole.PREMIUM) {
-            holder.roleIndicator.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#00E676")));
+            holder.roleIndicator.setBackgroundTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(holder.itemView.getContext(), R.color.app_green)));
             holder.btnApprove.setText(holder.itemView.getContext().getString(R.string.admin_users_revoke));
             holder.btnApprove.setVisibility(View.VISIBLE);
 
@@ -66,12 +74,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 String dateStr = sdf.format(new Date(user.getPremiumUntil()));
                 holder.tvExpiration.setText(holder.itemView.getContext().getString(R.string.admin_users_expires_on_format, dateStr));
                 holder.tvExpiration.setVisibility(View.VISIBLE);
-                holder.tvExpiration.setTextColor(Color.parseColor("#43A047")); // Green for active
+                holder.tvExpiration.setTextColor(androidx.core.content.ContextCompat.getColor(holder.itemView.getContext(), R.color.app_green)); // Green for active
             } else {
                 holder.tvExpiration.setVisibility(View.GONE);
             }
         } else {
-            holder.roleIndicator.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#9E9E9E")));
+            holder.roleIndicator.setBackgroundTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(holder.itemView.getContext(), R.color.text_disabled)));
             holder.btnApprove.setText(holder.itemView.getContext().getString(R.string.admin_users_approve));
             holder.btnApprove.setVisibility(View.VISIBLE);
             
@@ -80,7 +88,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 String dateStr = sdf.format(new Date(user.getPremiumUntil()));
                 holder.tvExpiration.setText(holder.itemView.getContext().getString(R.string.admin_users_expires_on_format, dateStr));
                 holder.tvExpiration.setVisibility(View.VISIBLE);
-                holder.tvExpiration.setTextColor(Color.parseColor("#E53935")); // Red for expired
+                holder.tvExpiration.setTextColor(androidx.core.content.ContextCompat.getColor(holder.itemView.getContext(), R.color.app_red)); // Red for expired
             } else {
                 holder.tvExpiration.setVisibility(View.GONE);
             }
@@ -106,13 +114,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView tvAvatar, tvName, tvEmail, tvRole, tvExpiration;
+        TextView tvAvatarInitials, tvName, tvEmail, tvRole, tvExpiration;
+        android.widget.ImageView ivAvatar;
         View roleIndicator;
         MaterialButton btnApprove;
 
         UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvAvatar = itemView.findViewById(R.id.tvUserAvatar);
+            tvAvatarInitials = itemView.findViewById(R.id.tvUserAvatar);
+            ivAvatar = itemView.findViewById(R.id.ivUserAvatar);
             tvName = itemView.findViewById(R.id.tvUserName);
             tvEmail = itemView.findViewById(R.id.tvUserEmail);
             tvRole = itemView.findViewById(R.id.tvUserRole);

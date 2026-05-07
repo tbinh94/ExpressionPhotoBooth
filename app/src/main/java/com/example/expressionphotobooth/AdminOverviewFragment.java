@@ -105,6 +105,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     private TextView tvAiInsightLine3;
     private TextView tvAiRecommendation;
     private MaterialButton btnAiAnalyze;
+    private MaterialButton btnAiReAnalyze;
     private View cardAiChatSearch;
     private TextView tvAiChatPrompt;
 
@@ -218,7 +219,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         tvAiInsightLine3 = view.findViewById(R.id.tvAiInsightLine3);
         tvAiRecommendation = view.findViewById(R.id.tvAiRecommendation);
         btnAiAnalyze = view.findViewById(R.id.btnAiAnalyze);
-        View btnAiReAnalyze = view.findViewById(R.id.btnAiReAnalyze);
+        btnAiReAnalyze = view.findViewById(R.id.btnAiReAnalyze);
         layoutAiEmptyState = view.findViewById(R.id.layoutAiEmptyState);
         layoutAiLoadingState = view.findViewById(R.id.layoutAiLoadingState);
         layoutAiResultState = view.findViewById(R.id.layoutAiResultState);
@@ -363,6 +364,7 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         selectedRangeMonths = months;
         String languageTag = LocaleManager.getCurrentLanguage(requireContext());
         if (latestStats != null) {
+            latestAiInsights = null; // Clear old insights when range changes
             renderStats(latestStats, true, languageTag);
             resetAiInsightsState(languageTag);
         }
@@ -410,10 +412,14 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
     }
 
     private void resetAiInsightsState(String languageTag) {
+        Context localized = LocaleManager.createLocalizedContext(requireContext(), languageTag);
         if (latestAiInsights == null) {
             if (layoutAiEmptyState != null) layoutAiEmptyState.setVisibility(View.VISIBLE);
             if (layoutAiResultState != null) layoutAiResultState.setVisibility(View.GONE);
             if (layoutAiLoadingState != null) layoutAiLoadingState.setVisibility(View.GONE);
+            if (tvAiInsightsSubtitle != null) {
+                tvAiInsightsSubtitle.setText(localized.getString(R.string.admin_ai_insights_tap_to_analyze));
+            }
         }
         setAiInsightsLoading(false, languageTag);
         refreshAnalyzeButtonState(languageTag);
@@ -1001,10 +1007,15 @@ public class AdminOverviewFragment extends Fragment implements RuntimeLanguageUp
         if (tvAiChatPrompt != null) tvAiChatPrompt.setText(localized.getString(R.string.admin_ai_chat_search_hint));
         if (tvAiEmptyTitle != null) tvAiEmptyTitle.setText(localized.getString(R.string.admin_ai_insights_empty_title));
         if (tvAiEmptyDesc != null) tvAiEmptyDesc.setText(localized.getString(R.string.admin_ai_insights_empty_desc));
+        if (btnAiReAnalyze != null) btnAiReAnalyze.setText(localized.getString(R.string.admin_ai_insights_re_analyze));
 
         if (latestStats != null) {
             renderStats(latestStats, false, languageTag);
-            resetAiInsightsState(languageTag);
+            if (latestAiInsights != null) {
+                renderAiInsights(latestAiInsights, languageTag);
+            } else {
+                resetAiInsightsState(languageTag);
+            }
         }
     }
 

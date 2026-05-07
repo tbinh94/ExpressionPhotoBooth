@@ -344,6 +344,9 @@
     <string name="admin_ai_insights_source_ai_en">AI analysis</string>
     <string name="admin_ai_insights_empty_title">Sẵn sàng phân tích</string>
     <string name="admin_ai_insights_empty_desc">Nhấn \'Phân tích\' để Sparkle AI giúp bạn tìm ra các xu hướng ẩn trong số liệu.</string>
+    <string name="admin_ai_insights_re_analyze">Cập nhật phân tích mới</string>
+    <string name="admin_ai_insights_analyzing">AI đang phân tích dữ liệu…</string>
+    <string name="admin_ai_insights_wait_seconds">Việc này có thể mất vài giây</string>
     <string name="admin_ai_insights_source_rule_vi">Chế độ dự phòng</string>
     <string name="admin_ai_insights_source_rule_en">Fallback mode</string>
     <string name="admin_reviews_filter_all">Tất cả</string>
@@ -392,6 +395,7 @@
     <string name="admin_users_empty">Không tìm thấy người dùng</string>
     <string name="admin_users_save_success">Đã cập nhật quyền thành công!</string>
     <string name="admin_users_save_error">Lỗi khi cập nhật quyền</string>
+    <string name="admin_users_load_error">Lỗi khi tải danh sách người dùng</string>
     <string name="auth_forgot_password_email_required">Vui lòng nhập địa chỉ email để đặt lại mật khẩu.</string>
     <string name="auth_forgot_password_sending">Đang gửi liên kết thiết lập lại…</string>
     <string name="auth_forgot_password_success_title">Đã gửi Email</string>
@@ -472,10 +476,16 @@ những ảnh đã chụp trước đó</string>
 
     <!-- Portrait Mode -->
     <string name="main_portrait_mode">Chân dung</string>
-    <string name="main_portrait_on">Chế độ chân dung BẬT — hậu cảnh sẽ được làm mờ</string>
+    <string name="main_portrait_on">Chế độ chân dung BẬT — nền sẽ được làm mờ</string>
     <string name="main_portrait_off">Chế độ chân dung TẮT</string>
+    <string name="main_ai_sub_face">😊 KHUÔN MẶT</string>
+    <string name="main_ai_sub_gesture">✋ CỬ CHỈ</string>
+    <string name="main_ai_sub_voice">🎤 GIỌNG NÓI</string>
     <string name="main_portrait_processing">Đang áp dụng hiệu ứng chân dung…</string>
     <string name="main_portrait_failed">Hiệu ứng chân dung thất bại, đã lưu ảnh gốc</string>
+    <string name="main_ai_capture_status_with_countdown">%1$s (%2$ds)</string>
+    <string name="menu_ai_settings">Cài đặt AI</string>
+    <string name="menu_help">Trợ giúp</string>
 
     <string name="edit_sticker_star">Ngôi sao</string>
     <string name="edit_sticker_flash">Flash</string>
@@ -550,4 +560,7 @@ những ảnh đã chụp trước đó</string>
     <string name="home_guest_profile_title">Mở khóa tính năng hồ sơ</string>
     <string name="home_guest_profile_message">Cá nhân hóa hồ sơ và thay đổi cài đặt bảo mật chỉ dành cho thành viên chính thức. Hãy tham gia cộng đồng của chúng mình để mở khóa các tính năng này!</string>
     <string name="home_guest_profile_cta">Đăng ký ngay</string>
+    <string name="gallery_selection_count">Đã chọn %1$d</string>
+    <string name="gallery_delete_multiple_message">Bạn có chắc chắn muốn xóa %1$d ảnh đã chọn không?</string>
+    <string name="gallery_delete_multiple_success">Đã xóa %1$d ảnh thành công!</string>
 </resources>

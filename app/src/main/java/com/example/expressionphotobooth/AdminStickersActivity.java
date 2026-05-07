@@ -62,6 +62,10 @@ public class AdminStickersActivity extends AppCompatActivity {
     private SubjectSegmenter segmenter;
 
     private ActivityResultLauncher<Intent> pickImageLauncher;
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(com.example.expressionphotobooth.utils.LocaleManager.wrapContext(newBase));
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

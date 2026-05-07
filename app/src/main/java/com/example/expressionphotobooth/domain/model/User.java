@@ -4,13 +4,15 @@ public class User {
     private String uid;
     private String email;
     private String displayName;
+    private String photoUrl;
     private UserRole role;
     private long premiumUntil;
 
-    public User(String uid, String email, String displayName, UserRole role, long premiumUntil) {
+    public User(String uid, String email, String displayName, String photoUrl, UserRole role, long premiumUntil) {
         this.uid = uid;
         this.email = email;
         this.displayName = displayName;
+        this.photoUrl = photoUrl;
         this.role = role;
         this.premiumUntil = premiumUntil;
     }
@@ -25,6 +27,10 @@ public class User {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
     public UserRole getRole() {

@@ -59,6 +59,8 @@
         <activity android:name=".EditPhotoActivity" android:exported="false" />
         <activity android:name=".ResultActivity" android:exported="false" />
         <activity android:name=".GalleryActivity" android:exported="false" />
+        <activity android:name=".HistoryActivity" android:exported="false" />
+        <activity android:name=".HistoryDetailActivity" android:exported="false" />
         <activity android:name=".FullImageActivity" android:exported="false" />
         <activity android:name=".AiTriggerSettingsActivity" android:exported="false" />
 

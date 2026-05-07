@@ -426,7 +426,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="AI đang phân tích dữ liệu..."
+                        android:text="@string/admin_ai_insights_analyzing"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -435,7 +435,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Việc này có thể mất vài giây"
+                        android:text="@string/admin_ai_insights_wait_seconds"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -587,7 +587,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="12dp"
-                        android:text="Cập nhật phân tích mới"
+                        android:text="@string/admin_ai_insights_re_analyze"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         app:icon="@drawable/ic_refresh_24"
