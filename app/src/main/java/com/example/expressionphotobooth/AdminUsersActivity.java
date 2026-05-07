@@ -39,9 +39,6 @@ public class AdminUsersActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Force Light Theme for Admin management
-        getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        
         super.onCreate(savedInstanceState);
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         EdgeToEdge.enable(this);
@@ -75,11 +72,12 @@ public class AdminUsersActivity extends AppCompatActivity {
                         String uid = doc.getId();
                         String email = doc.getString("email");
                         String name = doc.getString("displayName");
+                        String photoUrl = doc.getString("photoUrl");
                         String roleStr = doc.getString("role");
                         Long premiumUntil = doc.getLong("premiumUntil");
                         long pUntil = premiumUntil != null ? premiumUntil : 0L;
                         UserRole role = UserRole.from(roleStr, pUntil);
-                        userList.add(new User(uid, email, name, role, pUntil));
+                        userList.add(new User(uid, email, name, photoUrl, role, pUntil));
                     }
                     adapter.notifyDataSetChanged();
                     tvEmpty.setVisibility(userList.isEmpty() ? View.VISIBLE : View.GONE);

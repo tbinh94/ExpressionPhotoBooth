@@ -69,8 +69,8 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="#FFFBEA"
-                app:strokeColor="#FFE066"
+                app:cardBackgroundColor="@color/primary_alpha_10"
+                app:strokeColor="@color/flash_active"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -87,7 +87,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/admin_review_star_symbol"
-                        android:textColor="#FFBB00"
+                        android:textColor="@color/flash_active"
                         android:textSize="12sp" />
 
                     <TextView
@@ -96,7 +96,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="2dp"
                         android:text="@string/admin_review_rating_placeholder"
-                        android:textColor="#B8860B"
+                        android:textColor="@color/text_primary"
                         android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -118,7 +118,7 @@
             android:layout_height="1dp"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"
-            android:background="#F1F5F9" />
+            android:background="@color/screen_divider" />
 
         <!-- Hiển thị phản hồi từ Admin nếu có -->
         <LinearLayout
@@ -134,7 +134,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Phản hồi / Ghi chú:"
-                android:textColor="#3B82F6"
+                android:textColor="@color/app_blue"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
@@ -142,7 +142,7 @@
                 android:id="@+id/tvAdminReply"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/text_primary"
                 android:textSize="13sp" />
         </LinearLayout>
 
@@ -158,7 +158,7 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="6dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="#F1F5F9">
+                app:cardBackgroundColor="@color/screen_surface_alt">
                 <TextView
                     android:id="@+id/tvStatus"
                     android:layout_width="wrap_content"
@@ -169,7 +169,7 @@
                     android:paddingBottom="3dp"
                     android:text="Pending"
                     android:textAllCaps="true"
-                    android:textColor="#64748B"
+                    android:textColor="@color/text_secondary"
                     android:textSize="9sp"
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>

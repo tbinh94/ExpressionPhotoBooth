@@ -610,6 +610,43 @@ public final class HelpDialogUtils {
         }
     }
 
+    public static void loadUserAvatar(android.content.Context context, String photoUrl, android.widget.ImageView iv, android.widget.TextView tvInitials) {
+        if (iv == null) return;
+
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            iv.setVisibility(android.view.View.VISIBLE);
+            if (tvInitials != null) tvInitials.setVisibility(android.view.View.GONE);
+
+            if (photoUrl.startsWith("data:image")) {
+                try {
+                    String base64Data = photoUrl.substring(photoUrl.indexOf(",") + 1);
+                    byte[] bytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT);
+                    com.bumptech.glide.Glide.with(context)
+                            .load(bytes)
+                            .circleCrop()
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                            .into(iv);
+                } catch (Exception e) {
+                    iv.setVisibility(android.view.View.GONE);
+                    if (tvInitials != null) tvInitials.setVisibility(android.view.View.VISIBLE);
+                }
+            } else {
+                com.bumptech.glide.Glide.with(context)
+                        .load(photoUrl)
+                        .circleCrop()
+                        .placeholder(R.drawable.shape_nav_avatar)
+                        .error(R.drawable.shape_nav_avatar)
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                        .into(iv);
+            }
+        } else {
+            iv.setVisibility(android.view.View.GONE);
+            if (tvInitials != null) tvInitials.setVisibility(android.view.View.VISIBLE);
+        }
+    }
+
     public static void loadAvatar(android.content.Context context, String photoUrl, android.widget.ImageView iv, android.widget.TextView tvInitials) {
         if (iv == null) return;
 
