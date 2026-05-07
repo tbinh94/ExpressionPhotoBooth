@@ -505,6 +505,25 @@ that you have taken before</string>
     <string name="gallery_add_action">Add gallery item</string>
 
     <string name="history_ratio_value">Ratio: %1$s</string>
+    <string name="nav_history">History</string>
+    <string name="history_empty">No history found</string>
+    <string name="history_date_value">Date: %1$s</string>
+    <string name="history_frame_value">Frame: %1$s</string>
+    <string name="history_has_video">Timelapse available</string>
+    <string name="history_no_video">No video</string>
+    <string name="history_save_photo">Save Photo</string>
+    <string name="history_save_video">Save Video</string>
+    <string name="history_reload">Reload</string>
+    <string name="history_view_feedback">View Feedback</string>
+    <string name="history_delete">Delete</string>
+    <string name="history_delete_title">Delete History</string>
+    <string name="history_delete_message">Are you sure you want to delete this session?</string>
+    <string name="history_popup_cancel">Cancel</string>
+    <string name="history_popup_ok">OK</string>
+    <string name="history_feedback_title">Your Feedback</string>
+    <string name="history_feedback_format">Rating: %1$s\nFeedback: %2$s</string>
+    <string name="history_not_available">N/A</string>
+    <string name="history_no_video_to_save">No video available to save</string>
     <string name="common_back">Back</string>
     <string name="admin_role_label">Administrator</string>
 
