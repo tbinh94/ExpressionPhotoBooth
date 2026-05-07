@@ -49,7 +49,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
         holder.tvName.setText(displayName);
         holder.tvEmail.setText(user.getEmail());
-        holder.tvRole.setText(user.getRole().toFirestoreValue().toUpperCase());
+        holder.tvRole.setText(holder.itemView.getContext().getString(user.getRole().getDisplayNameRes()).toUpperCase(Locale.getDefault()));
         holder.tvAvatar.setText(resolveInitial(user));
 
         if (user.getRole() == UserRole.ADMIN) {

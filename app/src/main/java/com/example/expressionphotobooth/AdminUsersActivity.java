@@ -32,6 +32,10 @@ public class AdminUsersActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private View tvEmpty;
     private FirebaseFirestore firestore;
+    @Override
+    protected void attachBaseContext(android.content.Context newBase) {
+        super.attachBaseContext(com.example.expressionphotobooth.utils.LocaleManager.wrapContext(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +86,7 @@ public class AdminUsersActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(this, "Failed to load users: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.admin_users_load_error) + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

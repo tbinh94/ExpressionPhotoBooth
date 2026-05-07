@@ -748,8 +748,7 @@ public class MainActivity extends AppCompatActivity {
                     fallbackCountDownTimer = new android.os.CountDownTimer(10000, 1000) {
                         public void onTick(long millisUntilFinished) {
                             if (isCapturingSequence && (isWaitingForExpression || isWaitingForVoice)) {
-                                String countdownMsg = String.format(getString(R.string.fallback_countdown_msg), millisUntilFinished / 1000);
-                                tvCaptureStatus.setText(currentAiPrompt + " (" + (millisUntilFinished / 1000) + "s)");
+                            updateCaptureStatus(getString(R.string.main_ai_capture_status_with_countdown, currentAiPrompt, millisUntilFinished / 1000));
                             }
                         }
                         public void onFinish() {

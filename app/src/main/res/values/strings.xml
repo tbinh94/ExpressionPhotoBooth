@@ -209,7 +209,7 @@
     <string name="edit_summary_default">Filter: None  •  Frame: None  •  Sticker: None</string>
     <string name="edit_filter_applied_all">Filter applied to all photos</string>
 
-    <string name="common_ok">Đã hiểu</string>
+    <string name="common_ok">OK</string>
 
     <string name="auth_title">Welcome Back</string>
     <string name="auth_subtitle">Please sign in to continue</string>
@@ -291,7 +291,7 @@
     <string name="main_capture_prompt_hand_ok">Shot %1$d: Give an OK sign!</string>
     <string name="main_capture_prompt_face_smile">Shot %1$d: Smile for us!</string>
     <string name="main_capture_prompt_face_wink">Shot %1$d: Give a wink!</string>
-    <string name="main_capture_prompt_face_mouth_open">Shot %1$d: Open your mouth! (Hả miệng)</string>
+    <string name="main_capture_prompt_face_mouth_open">Shot %1$d: Open your mouth!</string>
     <string name="main_capture_prompt_face_tilt">Shot %1$d: Tilt your head!</string>
     <string name="main_capture_prompt_face_center">Shot %1$d: Face the center!</string>
     <string name="main_sound_on">Sound enabled</string>
@@ -412,6 +412,9 @@
     <string name="admin_ai_insights_source_ai_en">AI analysis</string>
     <string name="admin_ai_insights_empty_title">Ready to analyze</string>
     <string name="admin_ai_insights_empty_desc">Tap \'Analyze\' to discover hidden trends in your data with Sparkle AI.</string>
+    <string name="admin_ai_insights_re_analyze">Update new analysis</string>
+    <string name="admin_ai_insights_analyzing">AI is analyzing data…</string>
+    <string name="admin_ai_insights_wait_seconds">This might take a few seconds</string>
     <string name="admin_ai_insights_source_rule_vi">Chế độ dự phòng</string>
     <string name="admin_ai_insights_source_rule_en">Fallback mode</string>
     <string name="admin_reviews_filter_all">All</string>
@@ -461,6 +464,7 @@
     <string name="admin_users_empty">No users found</string>
     <string name="admin_users_save_success">Role updated successfully!</string>
     <string name="admin_users_save_error">Failed to update role</string>
+    <string name="admin_users_load_error">Failed to load users</string>
     <string name="auth_forgot_password_email_required">Please enter your email address to reset password.</string>
     <string name="auth_forgot_password_sending">Sending reset link…</string>
     <string name="auth_forgot_password_success_title">Email Sent</string>
@@ -500,31 +504,12 @@ that you have taken before</string>
     <string name="gallery_toggle_view_mode">Toggle gallery view mode</string>
     <string name="gallery_add_action">Add gallery item</string>
 
-    <string name="nav_history">Lịch sử</string>
-    <string name="history_empty">Chưa có lịch sử nào</string>
-    <string name="history_date_value">Ngày: %1$s</string>
-    <string name="history_frame_value">Khung: %1$s</string>
-    <string name="history_has_video">Có video timelapse</string>
-    <string name="history_no_video">Không có video</string>
-    <string name="history_save_photo">Lưu ảnh</string>
-    <string name="history_save_video">Lưu video</string>
-    <string name="history_reload">Tải lại</string>
-    <string name="history_view_feedback">Xem feedback</string>
-    <string name="history_delete">Xóa</string>
-    <string name="history_delete_title">Xóa lịch sử</string>
-    <string name="history_delete_message">Bạn có chắc chắn muốn xóa phiên chụp này không?</string>
-    <string name="history_popup_cancel">Hủy</string>
-    <string name="history_popup_ok">Đồng ý</string>
-    <string name="history_feedback_title">Đánh giá của bạn</string>
-    <string name="history_feedback_format">Rating: %1$s\nFeedback: %2$s</string>
-    <string name="history_not_available">N/A</string>
-    <string name="history_no_video_to_save">Không có video để lưu</string>
-    <string name="history_ratio_value">Tỷ lệ: %1$s</string>
+    <string name="history_ratio_value">Ratio: %1$s</string>
     <string name="common_back">Back</string>
     <string name="admin_role_label">Administrator</string>
 
     <!-- Security & RBAC -->
-    <string name="permission_denied">Bạn không có quyền thực hiện hành động này</string>
+    <string name="permission_denied">You do not have permission to perform this action</string>
 
     <string name="flash_strong_on">Screen flash: Strong</string>
     <string name="flash_strong_off">Screen flash: Normal</string>
@@ -539,11 +524,17 @@ that you have taken before</string>
     <string name="main_capture_prompt_voice_v2">🎙️ Shout \"Cheese\" loudly to capture!</string>
     <string name="main_mic_error_format">🎤 Mic error: %1$s</string>
     <string name="main_mic_active_toast">Mic active: Say Cheese!</string>
+    <string name="main_ai_capture_status_with_countdown">%1$s (%2$ds)</string>
+    <string name="menu_ai_settings">AI Settings</string>
+    <string name="menu_help">Help</string>
 
     <!-- Portrait Mode -->
     <string name="main_portrait_mode">Portrait</string>
     <string name="main_portrait_on">Portrait mode ON — background will be blurred</string>
     <string name="main_portrait_off">Portrait mode OFF</string>
+    <string name="main_ai_sub_face">😊 FACE</string>
+    <string name="main_ai_sub_gesture">✋ GESTURE</string>
+    <string name="main_ai_sub_voice">🎤 VOICE</string>
     <string name="main_portrait_processing">Applying portrait effect…</string>
     <string name="main_portrait_failed">Portrait effect failed, saved original</string>
     <string name="failed_save_image">Failed to save image to gallery</string>
